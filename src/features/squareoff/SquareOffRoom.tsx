@@ -17,7 +17,7 @@ export function SquareOffRoom({
   roomId: number; code: string; status: RoomStatus; categories: string[] | null;
   players: RoomPlayer[]; userId: string; isHost: boolean;
 }) {
-  const t = useTttRoom(roomId, userId, players, categories);
+  const t = useTttRoom(roomId, userId, categories);
   const [card, setCard] = useState<{ sig: string; url: string } | null>(null);
   const [chosen, setChosen] = useState<string | null>(null);
   const [now, setNow] = useState(Date.now());

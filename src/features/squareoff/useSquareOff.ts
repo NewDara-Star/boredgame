@@ -29,6 +29,11 @@ export function useSquareOff() {
   const [left, setLeft] = useState(ASK_MS);
   const [results, setResults] = useState<RoundResult[]>([]);
   const [outcome, setOutcome] = useState<RoundOutcome | null>(null);
+  // A session across games, the same as a room keeps. Playing the bot five times
+  // and having each result vanish is the reason solo felt like a lesser mode.
+  const [wins, setWins] = useState({ x: 0, o: 0 });
+  const [ended, setEnded] = useState(false);
+  const counted = useRef(false);
   const seen = useRef<Set<string>>(new Set());
   const askedAt = useRef(Date.now());
 
@@ -115,6 +120,15 @@ export function useSquareOff() {
     return () => clearTimeout(t);
   }, [game, commit]);
 
+  useEffect(() => {
+    if (game.phase !== "over" || counted.current) return;
+    counted.current = true;
+    if (game.winner === "x" || game.winner === "o") {
+      const won = game.winner;
+      setWins((w) => ({ ...w, [won]: w[won] + 1 }));
+    }
+  }, [game.phase, game.winner]);
+
   // Questions answered here are questions answered: they feed the streak, the
   // rank and the leaderboard exactly like a normal round.
   const saved = useRef(false);
@@ -126,16 +140,31 @@ export function useSquareOff() {
   }, [game.phase, results, user?.id]);
 
   const restart = useCallback(() => {
+    saved.current = false;
+    counted.current = false;
+    setResults([]); setOutcome(null); setItem(null); setChosen(null);
+    // Loser starts the next one, same rule the room uses. `seen` deliberately
+    // survives, so a rematch does not re-ask the questions you just had.
+    setGame((g) => newGame(g.winner === "x" ? "o" : "x"));
+  }, []);
+
+  /** Ends the run of games and produces a result, exactly as Quit match does. */
+  const endSession = useCallback(() => setEnded(true), []);
+
+  const newSession = useCallback(() => {
     seen.current = new Set();
     saved.current = false;
+    counted.current = false;
     setResults([]); setOutcome(null); setItem(null); setChosen(null);
+    setWins({ x: 0, o: 0 }); setEnded(false);
     setGame(newGame("x"));
   }, []);
 
   const names: Record<Mark, string> = { x: "You", o: "The bot" };
 
   return {
-    game, item, options, chosen, results, outcome, names,
+    game, item, options, chosen, results, outcome, names, wins, ended,
+    endSession, newSession,
     loading: pool.length === 0,
     fraction: left / ASK_MS,
     myTurnToPick: game.phase === "picking" && game.turn === "x",

@@ -70,7 +70,14 @@ export function useRoom(code: string | undefined, userId: string | undefined) {
       ? pool.filter((i) => room.categories!.includes(i.category))
       : pool;
     const pick = shuffle(scoped).find((i) => /^\d+$/.test(i.id));
-    if (!pick) { setError("Multiplayer needs puzzles stored in the database, not bundled ones."); return; }
+    if (!pick) {
+      // Two very different causes, and telling someone their database is empty
+      // when they simply picked Music and Places is not a useful thing to say.
+      setError(room.categories?.length
+        ? `Nothing live in ${room.categories.join(" or ")} — make a room with a wider pool.`
+        : "Multiplayer needs puzzles stored in the database, not bundled ones.");
+      return;
+    }
     await supabase.from("rooms").update({ status: "playing" }).eq("id", room.id);
     await supabase.from("room_rounds").insert({
       room_id: room.id, puzzle_id: Number(pick.id), round_no: used + 1,

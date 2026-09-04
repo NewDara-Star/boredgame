@@ -252,6 +252,21 @@ login form assumes the app is not for them yet.
 The header shows a Sign up button when signed out rather than a rank badge, and
 Home offers an account only once there is progress worth keeping.
 
+## A session is a run of games, everywhere
+
+Both Square Off modes keep a tally across games, and both can be ended to
+produce a result card. Solo used to just say "Play again" and drop every result
+on the floor, which is what made it feel like the lesser mode.
+
+Room scores are incremented by `bump_room_score()` in the database, NOT
+read-modify-written from the winning client's copy of the players list. Across a
+rematch that copy can lag behind realtime, and the next win then writes
+(stale + 1) straight over the real score.
+
+Race mode has a finished state now. Past `best_of`, `startNextRound` returns
+early — so without one the screen sat on the last question with a Next round
+button that silently did nothing.
+
 ## Rooms keep a session tally
 
 `room_players.score` counts games won in that room across rematches. The client

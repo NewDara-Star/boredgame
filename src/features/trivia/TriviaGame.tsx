@@ -44,6 +44,8 @@ export function TriviaGame() {
 
   if (r.phase === "done") {
     return (
+      <>
+      {filterBar}
       <Summary score={r.score} results={r.results} outcome={r.outcome} onAgain={r.restart}>
         <div className="grid gap-2.5">
           {r.results.map((res, i) => (
@@ -62,6 +64,7 @@ export function TriviaGame() {
           ))}
         </div>
       </Summary>
+      </>
     );
   }
 

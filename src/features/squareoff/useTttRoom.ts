@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/shared/lib/supabase";
-import type { RoomPlayer } from "@/shared/types/db";
 import { loadContent, shuffle } from "@/features/play/content";
 import type { PlayItem } from "@/features/play/types";
 import { newGame, pick, answer, advance, type Game, type Mark } from "./rules";
@@ -16,7 +15,7 @@ import { decode, encode, type TttRow } from "./wire";
  * Any other arrangement has both clients racing to write the same transition.
  */
 export function useTttRoom(
-  roomId: number | null, userId: string | undefined, players: RoomPlayer[] = [],
+  roomId: number | null, userId: string | undefined,
   categories: string[] | null = null,
 ) {
   const [row, setRow] = useState<TttRow | null>(null);
@@ -95,13 +94,13 @@ export function useTttRoom(
       // is incremented exactly once no matter how many browsers are watching.
       if (next.phase !== "over" || !next.winner || next.winner === "draw" || !row) return;
       const seat = next.winner === "x" ? row.x_player : row.o_player;
-      const me = players.find((p) => p.user_id === seat);
       if (!supabase || !seat || !roomId) return;
-      await supabase.from("room_players")
-        .update({ score: (me?.score ?? 0) + 1 })
-        .eq("room_id", roomId).eq("user_id", seat);
+      // Incremented in the database, not read-modify-written from this client's
+      // copy of the players list — across a rematch that copy can lag behind
+      // realtime, and the next win then writes (stale + 1) over the real score.
+      await supabase.rpc("bump_room_score", { p_room: roomId, p_user: seat });
     })();
-  }, [game, myMark, write, row, players, roomId]);
+  }, [game, myMark, write, row, roomId]);
 
   /** Ends the session rather than the game. Rematch keeps the tally; this stops it. */
   const quit = useCallback(async () => {
@@ -119,8 +118,11 @@ export function useTttRoom(
 
   const rematch = useCallback(async () => {
     if (!supabase || !roomId || !row) return;
-    // Loser goes first next time, which is the only fair way to alternate it.
-    const first: Mark = row.winner === "x" ? "o" : "x";
+    // Loser starts the next one. After a draw, alternate off whoever started
+    // last rather than defaulting to x every time.
+    const first: Mark = row.winner === "x" ? "o"
+      : row.winner === "o" ? "x"
+      : row.turn === "x" ? "o" : "x";
     await supabase.from("ttt_games")
       .update({ ...encode(newGame(first)), puzzle_id: null }).eq("room_id", roomId);
   }, [roomId, row]);

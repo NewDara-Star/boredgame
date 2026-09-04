@@ -211,7 +211,30 @@ export function RoomsPage() {
       {room.mode !== "squareoff" && iAmIn && !round && !isHost &&
         <p className="text-sm text-soft">Waiting for the host to start…</p>}
 
-      {room.mode !== "squareoff" && round && currentPuzzle && (
+      {/* Race mode used to have no finished state at all: after the last round it
+          kept showing the final question with a Next round button that silently
+          did nothing, because startNextRound returns early past best_of. */}
+      {room.mode !== "squareoff" && room.status === "finished" && (() => {
+        const ranked = [...players].sort((a, b) => b.score - a.score);
+        const drawn = ranked.length > 1 && ranked[0].score === ranked[1].score;
+        return (
+          <div className={`piece p-6 text-center ${drawn ? "bg-sand" : "bg-good text-surface"}`}>
+            <p className="text-[10px] font-black uppercase tracking-widest opacity-70">Match over</p>
+            <p className="font-display text-3xl font-semibold mt-1">
+              {drawn ? "All square" : `${ranked[0]?.username ?? "Nobody"} takes it`}
+            </p>
+            <p className="font-display text-5xl font-semibold tabular-nums mt-3">
+              {ranked.map((p) => p.score).join(" — ")}
+            </p>
+            <button onClick={() => nav("/rooms")}
+              className="piece press w-full mt-5 py-3.5 font-display text-lg font-semibold bg-surface text-ink">
+              New room
+            </button>
+          </div>
+        );
+      })()}
+
+      {room.mode !== "squareoff" && room.status !== "finished" && round && currentPuzzle && (
         <>
           <p className="text-[10px] uppercase tracking-widest text-soft">Round {round.round_no} of {room.best_of}</p>
           <Card className="aspect-square max-h-[44vh] mx-auto w-full grid place-items-center p-6 text-ink">
@@ -244,7 +267,11 @@ export function RoomsPage() {
                 {won === user.id ? "You took it" : `${players.find((p) => p.user_id === won)?.username ?? "They"} took it`}
               </p>
               <p className="text-lg font-semibold mt-1">{currentPuzzle.answer}</p>
-              {isHost && <Button className="mt-4 w-full" onClick={() => void startNextRound()}>Next round</Button>}
+              {isHost && (
+                <Button className="mt-4 w-full" onClick={() => void startNextRound()}>
+                  {round.round_no >= room.best_of ? "See the result" : "Next round"}
+                </Button>
+              )}
               {currentPuzzle.explanation && (
                 <p className="text-sm text-soft font-semibold mt-3 text-left">{currentPuzzle.explanation}</p>
               )}

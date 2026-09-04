@@ -74,7 +74,7 @@ function fitSize(c: CanvasRenderingContext2D, text: string, max: number, start: 
 
 export interface Side { name: string; score: number; mark: "x" | "o" }
 
-export async function drawMatchCard(code: string, a: Side, b: Side): Promise<string> {
+export async function drawMatchCard(code: string | null, a: Side, b: Side): Promise<string> {
   // Without this the first render falls back to a system font mid-draw.
   if (document.fonts?.ready) { try { await document.fonts.ready; } catch { /* older browsers */ } }
 
@@ -121,7 +121,7 @@ export async function drawMatchCard(code: string, a: Side, b: Side): Promise<str
   piece(c, left, 772, panelW * 2 + gap, 118, 40, "#FFFFFF");
   c.fillStyle = INK;
   c.font = "800 27px Nunito, system-ui, sans-serif";
-  c.fillText(`ROOM ${code}`, SIZE / 2, 812);
+  c.fillText(code ? `ROOM ${code}` : "SOLO v THE BOT", SIZE / 2, 812);
   c.fillStyle = "#6A6155";
   c.font = "700 24px Nunito, system-ui, sans-serif";
   c.fillText(new Date().toLocaleDateString(undefined,
@@ -132,10 +132,10 @@ export async function drawMatchCard(code: string, a: Side, b: Side): Promise<str
 }
 
 /** Hands the browser a file. Only place in the app that does. */
-export function downloadCard(dataUrl: string, code: string) {
+export function downloadCard(dataUrl: string, code: string | null) {
   const a = document.createElement("a");
   a.href = dataUrl;
-  a.download = `square-off-${code.toLowerCase()}.png`;
+  a.download = `square-off-${(code ?? "solo").toLowerCase()}.png`;
   document.body.appendChild(a);
   a.click();
   a.remove();
