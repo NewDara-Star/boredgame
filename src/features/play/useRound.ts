@@ -24,8 +24,9 @@ export function useRound(game: GameKey, size: number, userId?: string) {
     setPhase("loading");
     const all = await loadContent(game);
     if (all.length === 0) { setPhase("empty"); return; }
-    // Prefer things this browser hasn't seen; fall back to everything once exhausted.
-    const seen = new Set(readLocal().seen);
+    // Scoped to the account, not the browser: an unscoped seen-list meant one
+    // account's history quietly suppressed questions for another on the same machine.
+    const seen = new Set(readLocal(userId).seen);
     const fresh = all.filter((i) => !seen.has(i.id));
     const pool = fresh.length >= size ? fresh : all;
     setItems(shuffle(pool).slice(0, Math.min(size, pool.length)));
@@ -33,7 +34,7 @@ export function useRound(game: GameKey, size: number, userId?: string) {
     setResults([]); setLast(null); setHintsUsed(0);
     startedAt.current = Date.now();
     setPhase("playing");
-  }, [game, size]);
+  }, [game, size, userId]);
 
   useEffect(() => { void build(); }, [build]);
 
