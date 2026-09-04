@@ -293,6 +293,22 @@ Anonymous play keeps its own streak in the same per-user localStorage key as the
 rest of local progress. `useProgress` shows a streak of 0 once the run is dead
 rather than the number you used to have.
 
+## Git in an agent shell leaves locks
+
+Every git write here creates `.git/index.lock` or `.git/HEAD.lock` and then
+fails to remove it, because this shell has no delete permission in the folder —
+so the NEXT git command dies on a stale lock. `rm` cannot clear them, but `mv`
+can: rename needs write permission on the directory, not delete permission.
+
+Clean before every git command, not after:
+
+```
+unlock() { for f in HEAD index; do [ -e ".git/$f.lock" ] && \
+  mv ".git/$f.lock" "_to_delete/gitlocks/$f.$(date +%s%N)"; done; return 0; }
+unlock; git add -A
+unlock; git commit -F msg.txt
+```
+
 ## Commands
 
 ```
