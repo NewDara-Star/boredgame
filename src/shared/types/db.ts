@@ -42,8 +42,9 @@ export interface Puzzle {
   prompt: string | null;
   choices: string[] | null;
   answer: string;
-  alt_hint: string;
-  char_hint: string;
+  alt_hint: string | null;
+  char_hint: string | null;
+  explanation: string | null;
   difficulty: Difficulty;
   category_id: number | null;
   status: PubStatus;

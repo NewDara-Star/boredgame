@@ -93,7 +93,8 @@ export function PictoGame() {
         </>
       ) : (
         <Reveal correct={r.last!.correct} near={r.last!.near} answer={item.answer}
-          gained={r.last!.gained} onNext={r.next} isLast={r.index + 1 >= r.items.length} />
+          gained={r.last!.gained} onNext={r.next} isLast={r.index + 1 >= r.items.length}
+          explanation={item.explanation} />
       )}
     </div>
   );

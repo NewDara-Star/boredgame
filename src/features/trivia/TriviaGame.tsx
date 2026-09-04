@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useAuth } from "@/app/providers/AuthProvider";
 import { useRound } from "@/features/play/useRound";
 import { shuffle } from "@/features/play/content";
-import { Hud, HintBar, Reveal, Summary, Burst } from "@/features/play/RoundChrome";
+import { Hud, Reveal, Summary, Burst } from "@/features/play/RoundChrome";
 import { SPRING, stagger, riseIn } from "@/shared/ui/motion";
 
 const SHAPES = ["▲", "◆", "●", "■"];
@@ -18,6 +18,17 @@ export function TriviaGame() {
     () => (r.current?.choices ? shuffle(r.current.choices) : []),
     [r.current?.id] // eslint-disable-line react-hooks/exhaustive-deps
   );
+
+  /**
+   * 50/50 rather than a written hint. On four options a letter count usually
+   * identifies the answer outright, so an authored hint is either useless or a
+   * giveaway; burning two wrong options is a real cost/benefit choice instead.
+   */
+  const burned = useMemo(() => {
+    if (!r.current || r.hintsUsed === 0) return new Set<string>();
+    const wrong = options.filter((o) => o !== r.current!.answer);
+    return new Set(shuffle(wrong).slice(0, 2));
+  }, [r.current?.id, r.hintsUsed]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (r.phase === "loading") return <p className="text-soft font-bold">Loading questions…</p>;
   if (r.phase === "empty") return <p className="text-soft font-bold">No trivia is live yet.</p>;
@@ -70,14 +81,16 @@ export function TriviaGame() {
           <motion.div variants={stagger(0.055, 0.1)} initial="hidden" animate="show"
             className="mt-5 grid gap-2.5">
             {options.map((opt, i) => {
+              const isBurned = burned.has(opt);
               const isAnswer = opt === item.answer;
               const isMine = revealed && r.last?.given === opt;
-              const bg = !revealed ? "bg-surface"
+              const bg = isBurned && !revealed ? "bg-surface opacity-25 line-through"
+                : !revealed ? "bg-surface"
                 : isAnswer ? "bg-good text-surface"
                 : isMine ? "bg-bad text-surface" : "bg-surface opacity-45";
               return (
                 <motion.button key={opt} variants={riseIn}
-                  disabled={revealed} onClick={() => r.submit(opt)}
+                  disabled={revealed || isBurned} onClick={() => r.submit(opt)}
                   whileTap={revealed ? undefined : { scale: 0.97 }}
                   className={`piece ${revealed ? "" : "press"} flex items-center gap-3 text-left px-4 py-4 ${bg}`}>
                   <span aria-hidden className="text-base shrink-0"
@@ -92,10 +105,18 @@ export function TriviaGame() {
         </motion.div>
       </AnimatePresence>
 
-      {r.phase === "playing"
-        ? <HintBar item={item} used={r.hintsUsed} onUse={r.useHint} />
-        : <Reveal correct={r.last!.correct} near={false} answer={item.answer}
-            gained={r.last!.gained} onNext={r.next} isLast={r.index + 1 >= r.items.length} />}
+      {r.phase === "playing" ? (
+        r.hintsUsed === 0 && (
+          <button onClick={r.useHint}
+            className="piece press mt-4 text-xs font-black uppercase tracking-wider px-3 py-2 rounded-xl bg-pop">
+            50 / 50 — burn two wrong answers · −100
+          </button>
+        )
+      ) : (
+        <Reveal correct={r.last!.correct} near={false} answer={item.answer}
+          gained={r.last!.gained} onNext={r.next} isLast={r.index + 1 >= r.items.length}
+          explanation={item.explanation} />
+      )}
     </div>
   );
 }

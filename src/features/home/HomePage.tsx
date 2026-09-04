@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { PICTO_SEED } from "@/shared/data/picto";
-import { TRIVIA_SEED } from "@/shared/data/trivia";
+import { useCounts } from "@/features/play/counts";
 import { PictoRenderer } from "@/features/picto/PictoRenderer";
 import { readLocal } from "@/features/play/progress";
 import { rankFor } from "@/features/play/rank";
@@ -9,6 +9,7 @@ import { stagger, riseIn, popIn } from "@/shared/ui/motion";
 
 export function HomePage() {
   const p = readLocal();
+  const counts = useCounts();
   const { current, next, progress } = rankFor(p.answered);
   const teaser = PICTO_SEED[Math.floor(Math.random() * PICTO_SEED.length)];
 
@@ -32,7 +33,7 @@ export function HomePage() {
               bg-picto text-surface rounded-full px-2.5 py-1">Word puzzle</span>
             <h2 className="text-2xl font-semibold mt-2">Picto Phrase</h2>
             <p className="text-sm text-soft mt-1 font-semibold">Read the picture, name the phrase.</p>
-            <p className="text-xs text-soft/70 mt-3 font-bold">{PICTO_SEED.length} puzzles</p>
+            <p className="text-xs text-soft/70 mt-3 font-bold">{counts.picto} puzzles</p>
           </Link>
         </motion.div>
 
@@ -49,7 +50,7 @@ export function HomePage() {
               bg-trivia text-surface rounded-full px-2.5 py-1">Quiz</span>
             <h2 className="text-2xl font-semibold mt-2">Star Trivia</h2>
             <p className="text-sm text-soft mt-1 font-semibold">Four options, one right, ten questions.</p>
-            <p className="text-xs text-soft/70 mt-3 font-bold">{TRIVIA_SEED.length} questions</p>
+            <p className="text-xs text-soft/70 mt-3 font-bold">{counts.trivia} questions</p>
           </Link>
         </motion.div>
       </div>

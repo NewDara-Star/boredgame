@@ -10,8 +10,12 @@ export interface PlayItem {
   prompt?: string;
   choices?: string[];
   answer: string;
-  altHint: string;
-  charHint: string;
+  /** Picto only. Trivia uses a runtime 50/50 instead — a letter count on four
+      options usually identifies the answer outright. */
+  altHint?: string;
+  charHint?: string;
+  /** Shown AFTER answering. The reason to play twice is finding out why. */
+  explanation?: string;
   difficulty: Difficulty;
   category: string;
 }

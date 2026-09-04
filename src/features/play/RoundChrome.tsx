@@ -33,7 +33,8 @@ export function Hud({ index, total, score, streak, accent }:
 
 export function HintBar({ item, used, onUse }:
   { item: PlayItem; used: number; onUse: () => void }) {
-  const hints = [item.altHint, item.charHint];
+  // Nothing to offer means no button at all, rather than a dead one.
+  const hints = [item.altHint, item.charHint].filter((h): h is string => !!h);
   return (
     <div className="mt-4">
       <AnimatePresence initial={false}>
@@ -91,8 +92,9 @@ export function Burst({ show }: { show: boolean }) {
   );
 }
 
-export function Reveal({ correct, near, answer, gained, onNext, isLast }:
-  { correct: boolean; near: boolean; answer: string; gained: number; onNext: () => void; isLast: boolean }) {
+export function Reveal({ correct, near, answer, gained, onNext, isLast, explanation }:
+  { correct: boolean; near: boolean; answer: string; gained: number; onNext: () => void;
+    isLast: boolean; explanation?: string }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 26 }} animate={{ opacity: 1, y: 0 }} transition={SPRING}
@@ -107,6 +109,12 @@ export function Reveal({ correct, near, answer, gained, onNext, isLast }:
           </p>
         )}
       </div>
+      {explanation && (
+        <div className="piece p-4 mt-2.5">
+          <p className="text-[10px] font-black uppercase tracking-widest text-soft">Why</p>
+          <p className="text-[15px] font-semibold mt-1 leading-snug">{explanation}</p>
+        </div>
+      )}
       <button onClick={onNext} autoFocus
         className="piece press w-full mt-3 py-4 font-display text-lg font-semibold bg-ink text-paper">
         {isLast ? "See the round" : "Next"}

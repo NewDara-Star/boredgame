@@ -46,8 +46,9 @@ function fromRow(row: PuzzleRow): PlayItem {
     prompt: row.prompt ?? undefined,
     choices: row.choices ?? undefined,
     answer: row.answer,
-    altHint: row.alt_hint,
-    charHint: row.char_hint,
+    altHint: row.alt_hint ?? undefined,
+    charHint: row.char_hint ?? undefined,
+    explanation: row.explanation ?? undefined,
     difficulty: row.difficulty,
     // Joined, not blank: without this every database-backed puzzle loses its
     // category label while bundled ones keep theirs — which is exactly how you
