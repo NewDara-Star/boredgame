@@ -5,6 +5,7 @@ import { useCounts } from "@/features/play/counts";
 import { PictoRenderer } from "@/features/picto/PictoRenderer";
 import { readLocal } from "@/features/play/progress";
 import { rankFor } from "@/features/play/rank";
+import { RankBadge } from "@/features/play/RankBadge";
 import { stagger, riseIn, popIn } from "@/shared/ui/motion";
 
 export function HomePage() {
@@ -60,7 +61,10 @@ export function HomePage() {
           <span className="text-[10px] font-black uppercase tracking-widest text-soft">Your rank</span>
           <span className="text-xs font-bold text-soft tabular-nums">{p.answered} answered</span>
         </div>
-        <p className="font-display text-3xl font-semibold mt-1">{current.name}</p>
+        <div className="flex items-center gap-4 mt-2">
+          <RankBadge rank={current.key} size={56} animate />
+          <p className="font-display text-3xl font-semibold">{current.name}</p>
+        </div>
         <div className="h-4 bg-sand rounded-full mt-3 overflow-hidden border-2 border-ink">
           <motion.div className="h-full bg-pop"
             initial={{ width: 0 }}

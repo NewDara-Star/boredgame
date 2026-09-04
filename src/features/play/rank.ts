@@ -1,14 +1,30 @@
-export interface Rank { name: string; min: number; }
+import badges from "@/shared/data/rank-badges.json";
 
-/** Deliberately steep at the top so "Advanced" isn't reached in one sitting. */
+export type BadgeKey = keyof typeof badges;
+
+export interface Rank {
+  key: BadgeKey;
+  name: string;
+  min: number;
+  color: string;
+}
+
+/**
+ * Ten tiers, matched to the badge set. The curve steepens deliberately: the
+ * first four are reachable in a sitting so progress is visible early, and the
+ * last three are long hauls so the elaborate badges stay worth something.
+ */
 export const RANKS: Rank[] = [
-  { name: "Rookie",   min: 0 },
-  { name: "Novice",   min: 25 },
-  { name: "Regular",  min: 75 },
-  { name: "Sharp",    min: 175 },
-  { name: "Advanced", min: 350 },
-  { name: "Veteran",  min: 650 },
-  { name: "Master",   min: 1200 },
+  { key: "novice",       name: "Novice",       min: 0,    color: badges.novice.color },
+  { key: "apprentice",   name: "Apprentice",   min: 20,   color: badges.apprentice.color },
+  { key: "developing",   name: "Developing",   min: 50,   color: badges.developing.color },
+  { key: "emerging",     name: "Emerging",     min: 100,  color: badges.emerging.color },
+  { key: "skilled",      name: "Skilled",      min: 180,  color: badges.skilled.color },
+  { key: "accomplished", name: "Accomplished", min: 300,  color: badges.accomplished.color },
+  { key: "advanced",     name: "Advanced",     min: 500,  color: badges.advanced.color },
+  { key: "elite",        name: "Elite",        min: 800,  color: badges.elite.color },
+  { key: "prodigy",      name: "Prodigy",      min: 1250, color: badges.prodigy.color },
+  { key: "legend",       name: "Legend",       min: 2000, color: badges.legend.color },
 ];
 
 export function rankFor(answered: number) {

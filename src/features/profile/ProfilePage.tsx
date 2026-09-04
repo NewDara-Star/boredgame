@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/app/providers/AuthProvider";
 import { readLocal } from "@/features/play/progress";
 import { rankFor, RANKS } from "@/features/play/rank";
+import { RankBadge } from "@/features/play/RankBadge";
 import { Button } from "@/shared/ui/Button";
 import { Field, Input } from "@/shared/ui/Field";
 
@@ -39,10 +40,16 @@ export function ProfilePage() {
   return (
     <div className="space-y-6">
       <section>
-        <p className="text-[10px] uppercase tracking-widest text-soft">Rank</p>
-        <h1 className="text-3xl font-bold mt-1">{current.name}</h1>
+        <p className="text-[10px] font-black uppercase tracking-widest text-soft">Rank</p>
+        <div className="flex items-center gap-5 mt-2">
+          <RankBadge rank={current.key} size={88} animate />
+          <div>
+            <h1 className="font-display text-3xl font-semibold">{current.name}</h1>
+            <p className="text-xs text-soft font-bold mt-0.5 tabular-nums">{answered} answered</p>
+          </div>
+        </div>
         <div className="h-1.5 bg-surface rounded-full mt-3 overflow-hidden">
-          <div className="h-full bg-picto rounded-full" style={{ width: `${Math.round(progress * 100)}%` }} />
+          <div className="h-full rounded-full transition-all" style={{ width: `${Math.round(progress * 100)}%`, background: current.color }} />
         </div>
         <p className="text-xs text-soft mt-2">
           {next ? `${next.min - answered} more answers to ${next.name}` : "Top rank"}
@@ -62,14 +69,20 @@ export function ProfilePage() {
 
       <section>
         <p className="text-[10px] uppercase tracking-widest text-soft mb-2">All ranks</p>
-        <div className="flex flex-wrap gap-2">
-          {RANKS.map((rk) => (
-            <span key={rk.name}
-              className={`text-xs px-3 py-1.5 rounded-full border ${
-                rk.name === current.name ? "bg-picto text-surface border-ink font-semibold" : "border-ink text-soft"}`}>
-              {rk.name} · {rk.min}
-            </span>
-          ))}
+        <div className="grid grid-cols-5 gap-x-1.5 gap-y-4">
+          {RANKS.map((rk) => {
+            const locked = answered < rk.min;
+            return (
+              <div key={rk.key} className="text-center">
+                <div className="h-11 grid place-items-center"><RankBadge rank={rk.key} size={40} locked={locked} /></div>
+                {/* No tracking and a hard break: "Accomplished" next to "Advanced"
+                    collided at phone width with letter-spacing applied. */}
+                <p className={`text-[7.5px] font-black uppercase mt-1.5 leading-[1.15] break-words
+                  ${locked ? "text-soft/50" : "text-ink"}`}>{rk.name}</p>
+                <p className="text-[8px] font-bold text-soft/60 tabular-nums leading-tight">{rk.min}</p>
+              </div>
+            );
+          })}
         </div>
       </section>
 
