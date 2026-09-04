@@ -3,7 +3,7 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { SPRING } from "@/shared/ui/motion";
 import { RankBadge } from "./RankBadge";
-import { rankFor, type Rank } from "./rank";
+import { rankFor, RANKS, type Rank } from "./rank";
 import { milestoneAt } from "./streak";
 import type { RoundOutcome } from "./progress";
 
@@ -18,9 +18,14 @@ export type Unlock =
  */
 export function unlockFrom(o: RoundOutcome | null): Unlock | null {
   if (!o) return null;
-  const before = rankFor(o.answeredBefore).current;
-  const after = rankFor(o.answeredAfter).current;
-  if (before.key !== after.key) return { kind: "rank", rank: after };
+  // The totals can go backwards or arrive missing — a failed RPC, a profile row
+  // that is not there yet — and comparing keys alone then fired "NEW RANK:
+  // Novice, 0 questions answered" at someone who had just played eight rounds.
+  // Only ever celebrate a move UP, and only when the count actually went up.
+  if (!(o.answeredAfter > o.answeredBefore)) return null;
+  const beforeIdx = RANKS.findIndex((r) => r.key === rankFor(o.answeredBefore).current.key);
+  const afterIdx = RANKS.findIndex((r) => r.key === rankFor(o.answeredAfter).current.key);
+  if (afterIdx > beforeIdx) return { kind: "rank", rank: RANKS[afterIdx] };
   if (o.streak > o.streakBefore) {
     const m = milestoneAt(o.streak);
     if (m) return { kind: "streak", days: m.days, name: m.name };

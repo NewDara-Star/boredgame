@@ -8,6 +8,7 @@ import { Card } from "@/shared/ui/Card";
 import { Field, Input } from "@/shared/ui/Field";
 import { isCorrect } from "@/shared/lib/normalise";
 import { SquareOffRoom } from "@/features/squareoff/SquareOffRoom";
+import { InviteCard } from "./InviteCard";
 import { supabase } from "@/shared/lib/supabase";
 
 /** Names only. The room screen does not have a loaded pool to count against, and
@@ -154,8 +155,16 @@ export function RoomsPage() {
     <div className="space-y-5">
       <div className="flex items-baseline justify-between">
         <div>
-          <p className="text-[10px] uppercase tracking-widest text-soft">Room code</p>
-          <p className="text-3xl font-bold tracking-[0.3em]">{room.code}</p>
+          {/* The invite card carries the code while you are waiting; showing it
+              twice on one screen just makes both look less like the thing to use. */}
+          {players.length < 2 && room.status !== "finished" ? (
+            <p className="font-display text-2xl font-semibold">Your room</p>
+          ) : (
+            <>
+              <p className="text-[10px] uppercase tracking-widest text-soft">Room code</p>
+              <p className="text-3xl font-bold tracking-[0.3em]">{room.code}</p>
+            </>
+          )}
         </div>
         <div className="text-right">
           <p className="text-xs text-soft uppercase tracking-widest">{room.status}</p>
@@ -180,9 +189,21 @@ export function RoomsPage() {
         <Button onClick={() => void join(user.email?.split("@")[0] ?? "player")}>Join this room</Button>
       )}
 
+      {iAmIn && players.length < 2 && room.status !== "finished" && (
+        <InviteCard code={room.code} waiting />
+      )}
+
       {iAmIn && room.mode === "squareoff" && (
         <SquareOffRoom roomId={room.id} code={room.code} status={room.status}
           categories={room.categories} players={players} userId={user.id} isHost={isHost} />
+      )}
+
+      {iAmIn && (
+        <button onClick={() => nav("/rooms")}
+          className="block mx-auto text-[11px] font-black uppercase tracking-wider
+            text-soft underline underline-offset-4 pt-2">
+          Leave this room
+        </button>
       )}
 
       {room.mode !== "squareoff" && iAmIn && !round && isHost &&

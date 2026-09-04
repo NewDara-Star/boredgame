@@ -1,0 +1,41 @@
+import { Component, type ReactNode } from "react";
+
+/**
+ * Without this, one bad row anywhere unmounts the entire tree — the leaderboard
+ * crashed on a profile with no username and took the header and the nav with it,
+ * so there was not even a way to navigate off the broken screen.
+ */
+export class ErrorBoundary extends Component<
+  { children: ReactNode; onReset?: () => void },
+  { error: Error | null }
+> {
+  state = { error: null as Error | null };
+
+  static getDerivedStateFromError(error: Error) { return { error }; }
+
+  componentDidCatch(error: Error) {
+    // Deliberately console, not a toast: this is for whoever is debugging it.
+    console.error("[BoredGame] screen crashed:", error);
+  }
+
+  render() {
+    if (!this.state.error) return this.props.children;
+    return (
+      <div className="piece p-6">
+        <h1 className="font-display text-2xl font-semibold">This screen fell over</h1>
+        <p className="text-sm text-soft font-semibold mt-2">
+          Something on this page hit a value it did not expect. The rest of the app is fine —
+          the tabs at the bottom still work.
+        </p>
+        <p className="text-[11px] font-bold text-soft/70 mt-3 break-words">
+          {this.state.error.message}
+        </p>
+        <button
+          onClick={() => { this.setState({ error: null }); this.props.onReset?.(); }}
+          className="piece press w-full mt-5 py-3.5 font-display text-lg font-semibold bg-pop">
+          Try again
+        </button>
+      </div>
+    );
+  }
+}

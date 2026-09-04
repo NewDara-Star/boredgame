@@ -64,7 +64,10 @@ export function useLeaderboard(userId?: string, limit = 50): Board {
         .from("profiles")
         .select("id, username, total_answered, total_correct, streak")
         .eq("id", userId).single();
-      if (cancelled || !me) { setLoading(false); return; }
+      // A signed-in user with no profile row is a real state — the trigger can
+      // fail, or the row can be deleted — and it used to produce a Standing of
+      // undefineds that crashed the whole screen.
+      if (cancelled || !me || typeof me.total_answered !== "number") { setLoading(false); return; }
       const { count } = await supabase
         .from("profiles").select("id", { count: "exact", head: true })
         .gt("total_answered", me.total_answered);
