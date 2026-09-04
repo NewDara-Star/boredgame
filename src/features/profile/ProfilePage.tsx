@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/app/providers/AuthProvider";
 import { readLocal } from "@/features/play/progress";
 import { rankFor, RANKS } from "@/features/play/rank";
@@ -10,6 +10,22 @@ export function ProfilePage() {
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [authError, setAuthError] = useState<string | null>(null);
+
+  // Supabase reports failed magic links by redirecting back with the reason in
+  // the URL fragment. Without reading it the page just renders the sign-in form
+  // again, so a broken link looks identical to never having clicked one.
+  useEffect(() => {
+    const hash = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+    const code = hash.get("error_code");
+    if (!code && !hash.get("error")) return;
+    setAuthError(
+      code === "otp_expired"
+        ? "That sign-in link had already been used or expired. Mail providers sometimes open links to scan them, which spends the one-time code before you get there. Request a fresh one."
+        : hash.get("error_description")?.replace(/\+/g, " ") ?? "Sign-in failed."
+    );
+    history.replaceState(null, "", window.location.pathname);
+  }, []);
 
   const local = readLocal();
   const answered = profile?.total_answered ?? local.answered;
@@ -54,6 +70,12 @@ export function ProfilePage() {
       </section>
 
       <section className="border-t border-ink pt-6">
+        {authError && (
+          <div className="piece bg-bad text-surface p-4 mb-4">
+            <p className="font-display font-semibold">Sign-in didn't complete</p>
+            <p className="text-sm mt-1 font-semibold">{authError}</p>
+          </div>
+        )}
         {offline ? (
           <p className="text-sm text-soft">
             Progress is saved in this browser only. Connect Supabase to sync across devices and unlock head-to-head.
