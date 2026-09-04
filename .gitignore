@@ -10,3 +10,8 @@ _to_delete/
 # vite writes these while building and an agent shell cannot delete them
 vite.config.ts.timestamp-*.mjs
 _to_delete/
+
+# slopo — index, report and exported agent configs are all regenerable
+slopo.db
+slopo-report/
+slopo-agent-configs/

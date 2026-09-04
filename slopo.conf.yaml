@@ -1,0 +1,24 @@
+# Non-exact duplication detection: https://github.com/rafal-qa/slopo
+#
+#   uv tool install slopo
+#   export SLOPO_EMBEDDING_API_KEY=...      # voyageai.com, free tier covers this
+#   slopo index && slopo embed && slopo analyze
+#
+# The whole codebase is roughly 74,000 tokens, so an embed run costs a rounding
+# error against Voyage's 200M free allowance, and `embed` only re-sends units
+# whose body hash changed.
+
+source_dir: src
+
+source_dir_exclude:
+  # Seed data, not logic. picto.ts alone is 29 kB of puzzle literals, and the
+  # entries genuinely do resemble each other — that is what a seed file is.
+  - "shared/data/**"
+  - "**/*.d.ts"
+
+# voyage-code-3 still works but is legacy and gets no free allowance;
+# voyage-code-4 is the current code model and comes with 200M free tokens.
+embedding_model: voyage/voyage-code-4
+embedding_dimensions: 1024
+
+# Key goes in the environment or .env, never here — this file is committed.
