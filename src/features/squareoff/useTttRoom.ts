@@ -21,6 +21,11 @@ export function useTttRoom(
   categories: string[] | null = null,
 ) {
   const [row, setRow] = useState<TttRow | null>(null);
+  // Mirrors `row` so `write` can revert a failed move without taking `row` as a
+  // dependency — `write` has to keep a stable identity or the reveal timer,
+  // which depends on it, restarts every time the row changes.
+  const rowRef = useRef<TttRow | null>(null);
+  const remember = useCallback((next: TttRow | null) => { rowRef.current = next; setRow(next); }, []);
   const [pool, setPool] = useState<PlayItem[]>([]);
   const seen = useRef<Set<string>>(new Set());
   const lastServed = useRef<string | null>(null);
@@ -39,16 +44,16 @@ export function useTttRoom(
     (async () => {
       const { data } = await supabase!.from("ttt_games").select("*").eq("room_id", roomId).maybeSingle();
       if (cancelled) return;
-      setRow((data as TttRow | null) ?? null);
+      remember((data as TttRow | null) ?? null);
       channel = supabase!
         .channel(`ttt:${roomId}`)
         .on("postgres_changes",
           { event: "*", schema: "public", table: "ttt_games", filter: `room_id=eq.${roomId}` },
-          (p) => setRow(p.new as TttRow))
+          (p) => remember(p.new as TttRow))
         .subscribe();
     })();
     return () => { cancelled = true; if (channel) void supabase!.removeChannel(channel); };
-  }, [roomId]);
+  }, [roomId, remember]);
 
   const game: Game | null = row ? decode(row) : null;
   const myMark: Mark | null =
@@ -81,9 +86,20 @@ export function useTttRoom(
     if (!supabase || !roomId) return;
     const patch: Record<string, unknown> = { ...encode(next), updated_at: new Date().toISOString() };
     if (withPuzzle) patch.puzzle_id = nextPuzzleId();
-    setWriteError(await attempt("That move",
-      supabase.from("ttt_games").update(patch).eq("room_id", roomId)));
-  }, [roomId, nextPuzzleId]);
+
+    // Apply it here first. Waiting for the write AND the realtime echo before
+    // showing your own move meant every tap cost a round trip plus a push before
+    // anything on your screen moved — and if realtime hiccupped, nothing moved
+    // at all. Realtime is the confirmation now, not the trigger.
+    const before = rowRef.current;
+    if (before) remember({ ...before, ...patch } as TttRow);
+
+    const msg = await attempt("That move",
+      supabase.from("ttt_games").update(patch).eq("room_id", roomId));
+    setWriteError(msg);
+    // A refused move must not leave a board on screen that no one else can see.
+    if (msg && before) remember(before);
+  }, [roomId, nextPuzzleId, remember]);
 
   const choose = useCallback((square: number) => {
     if (!game || myMark !== game.turn || game.phase !== "picking") return;
@@ -108,6 +124,16 @@ export function useTttRoom(
     })();
   }, [game, myMark, write, row, roomId]);
 
+  /** Move on now rather than sitting out the pause. The timer stays as the
+      fallback so an idle player cannot stall the board, but a pause you can
+      skip is the difference between a game that feels quick and one that
+      does not — a shorter fixed timer is not the same thing. */
+  const advanceNow = useCallback(() => {
+    if (!game || game.phase !== "revealed" || !game.last || game.last.by !== myMark) return;
+    const next = advance(game);
+    void write(next, next.phase === "asking");
+  }, [game, myMark, write]);
+
   /** Writes the miss for a question nobody answered — including when the person
       who owed it has closed the tab. Callers must check timeoutWriter() first. */
   const forceTimeout = useCallback(() => {
@@ -126,9 +152,12 @@ export function useTttRoom(
   useEffect(() => {
     if (!game || game.phase !== "revealed" || !game.last || game.last.by !== myMark) return;
     const next = advance(game);
-    const t = setTimeout(() => void write(next, next.phase === "asking"), 2300);
+    // A correct answer has nothing to read; a miss has the right answer and
+    // sometimes an explanation. One fixed pause served neither.
+    const pause = game.last.correct ? 1300 : item?.explanation ? 2900 : 2200;
+    const t = setTimeout(() => void write(next, next.phase === "asking"), pause);
     return () => clearTimeout(t);
-  }, [game, myMark, write]);
+  }, [game, myMark, write, item?.explanation]);
 
   const rematch = useCallback(async () => {
     if (!supabase || !roomId || !row) return;
@@ -143,7 +172,7 @@ export function useTttRoom(
   }, [roomId, row]);
 
   return {
-    game, myMark, item, choose, submit, rematch, quit, forceTimeout,
+    game, myMark, item, choose, submit, rematch, quit, forceTimeout, advanceNow,
     error: poolError ?? writeError,
     ready: pool.length > 0,
     /** when the current question went up, so both clients run the same clock */

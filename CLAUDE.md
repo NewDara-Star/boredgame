@@ -378,6 +378,25 @@ to nothing. The lobby clears the selection when the bank changes, and
 it holds whichever client is asking — the chips visibly un-select rather than
 the filter silently doing nothing.
 
+## Why a turn feels slow, and what actually fixes it
+
+Two separate things, and it is worth not confusing them.
+
+**The pause was the real cost.** A fixed 2300ms sat between answering and the
+next pick, and a turn with a steal has two of them — nearly five seconds of
+deliberate waiting per turn. The fix is not a shorter timer, it is a **skippable**
+one: whoever owes the advance gets a Next button, and the timer stays only as
+the fallback so an idle player cannot stall the board. Agency, not milliseconds.
+The remaining pause is adaptive — a correct answer has nothing to read.
+
+**Nothing was applied locally.** Every move wrote to the database and then waited
+for the realtime echo before the *acting* player's own screen moved. In practice
+realtime is fast, so this was not what made turns feel long — but it means a
+realtime hiccup froze the board completely for the person who had just tapped.
+Writes are optimistic now: apply, then confirm, and revert if the write is
+refused. Measured with realtime absent entirely: 50ms to render the next state,
+against never.
+
 ## Starting, and leaving
 
 **Who starts is decided in the database.** `claim_room_start()` moves a room out

@@ -227,6 +227,15 @@ export function SquareOffRoom({
             item={t.item} options={t.item.choices ?? []} chosen={chosen}
             revealed={revealed} locked={!mine || revealed}
             onAnswer={(opt) => { setChosen(opt); t.submit(opt === t.item!.answer); }} />
+
+          {/* The pause is skippable. A shorter fixed timer is not the same thing
+              as being able to move on when you have finished reading. */}
+          {g.phase === "revealed" && g.last?.by === t.myMark && (
+            <button onClick={t.advanceNow}
+              className="piece press w-full py-3.5 font-display text-lg font-semibold bg-ink text-paper">
+              {g.last.correct || g.last.steal ? "Next" : "Let them try it"}
+            </button>
+          )}
         </div>
       ) : null}
     </div>
