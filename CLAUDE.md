@@ -277,6 +277,13 @@ Greeting with the date · daily challenge with the faces of who has played · th
 week strip · a swipeable stat carousel · then games and rooms behind section
 headers. Games is the catalogue; Home is you.
 
+A 148px stat card at 34px display type fits about five characters. "Skilled"
+was already clipping and "Accomplished" is twice that, so a card whose subject
+is a word rather than a number carries `art` and a headline instead of
+pretending the word is a figure — the rank card shows its badge. The remaining
+figures scale down by length as a guard, so a number that grows unexpectedly
+shrinks rather than running off the card.
+
 Both the stats and the games rows are `Carousel` — the negative margin plus
 matching padding is the whole trick, letting cards run off the screen edge
 rather than stopping at the page gutter, which is what reads as "there is more

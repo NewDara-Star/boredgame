@@ -1,35 +1,69 @@
+import type { ReactNode } from "react";
 import { motion } from "framer-motion";
 import { riseIn, stagger } from "@/shared/ui/motion";
 import { Carousel } from "@/shared/ui/Carousel";
 
 export interface Stat {
   label: string;
-  value: string | number;
+  /** the big figure. Kept short — anything wordy belongs in `art` instead. */
+  value?: string | number;
+  /** for cards whose subject is not a number: a badge, an icon, a mark. */
+  art?: ReactNode;
+  /** the line under it, in place of the figure when `art` is used */
+  headline?: string;
   note?: string;
   bg: string;
   fg?: string;
 }
 
-/** Swipeable rather than a grid: it holds as many as we add without pushing
-    everything below it further down the page. */
+/**
+ * A 148px card at 34px display type fits about five characters. "Skilled" was
+ * already clipping and "Accomplished" is nearly twice that, so a card whose
+ * subject is a word rather than a number uses `art` and a headline instead of
+ * pretending the word is a number. The scale below is a guard for the rest:
+ * a figure that grows unexpectedly shrinks rather than running off the card.
+ */
+const sizeFor = (v: string | number) => {
+  const n = String(v).length;
+  if (n <= 4) return "text-[34px]";
+  if (n === 5) return "text-[28px]";
+  if (n === 6) return "text-[24px]";
+  return "text-[20px]";
+};
+
 export function StatCarousel({ stats }: { stats: Stat[] }) {
   return (
     <motion.div variants={stagger(0.05)}>
       <Carousel>
-      {stats.map((s) => (
-        <motion.div key={s.label} variants={riseIn}
-          className={`piece snap-start shrink-0 w-[148px] p-4 ${s.bg} ${s.fg ?? ""}`}>
-          <span className="block text-[9.5px] font-black uppercase tracking-widest opacity-70">
-            {s.label}
-          </span>
-          <b className="block font-display text-[34px] leading-none font-semibold tabular-nums mt-2">
-            {s.value}
-          </b>
-          {s.note && (
-            <span className="block text-[11px] font-bold opacity-70 mt-1.5">{s.note}</span>
-          )}
-        </motion.div>
-      ))}
+        {stats.map((s) => (
+          <motion.div key={s.label} variants={riseIn}
+            className={`piece snap-start shrink-0 w-[148px] p-4 flex flex-col ${s.bg} ${s.fg ?? ""}`}>
+            <span className="block text-[9.5px] font-black uppercase tracking-widest opacity-70">
+              {s.label}
+            </span>
+
+            {s.art ? (
+              <>
+                <span className="block mt-2">{s.art}</span>
+                <b className="block text-[15px] font-black leading-tight mt-1.5 break-words">
+                  {s.headline}
+                </b>
+              </>
+            ) : (
+              <b className={`block font-display leading-none font-semibold tabular-nums mt-2
+                ${sizeFor(s.value ?? "")}`}>
+                {s.value}
+              </b>
+            )}
+
+            <span className="flex-1" />
+            {s.note && (
+              <span className="block text-[11px] font-bold opacity-70 mt-1.5 leading-snug">
+                {s.note}
+              </span>
+            )}
+          </motion.div>
+        ))}
       </Carousel>
     </motion.div>
   );

@@ -47,8 +47,9 @@ export function HomePage() {
       note: next ? `${next.min - p.answered} to ${next.name}` : "top rank" },
     { label: "Accuracy", value: p.answered ? `${Math.round((p.correct / p.answered) * 100)}%` : "—",
       bg: "bg-acid", note: `${p.correct} right` },
-    { label: "Rank", value: current.name, bg: "bg-trivia text-surface",
-      note: `${p.bestStreak}-day best run` },
+    // The badge is the point of a rank, and it cannot overflow.
+    { label: "Rank", art: <RankBadge rank={current.key} size={34} />, headline: current.name,
+      bg: "bg-trivia text-surface", note: `${p.bestStreak}-day best run` },
   ];
 
   return (
