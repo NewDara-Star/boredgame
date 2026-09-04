@@ -135,10 +135,21 @@ export function useTttRoom(
   }, [game, myMark, write]);
 
   /** Writes the miss for a question nobody answered — including when the person
-      who owed it has closed the tab. Callers must check timeoutWriter() first. */
+      who owed it has closed the tab. Callers must check stallWriter() first. */
   const forceTimeout = useCallback(() => {
     if (!game || game.phase !== "asking") return;
     void write(answer(game, false), false);
+  }, [game, write]);
+
+  /** Moves on from a reveal its owner never wrote. The pause below is a
+      setTimeout in the answerer's tab, so a locked phone, an app switch or a
+      backgrounded laptop suspends it and the board freezes for both players
+      with nothing else running anywhere. Unguarded on purpose — the caller is
+      whichever client stallWriter() named, which is not always the answerer. */
+  const forceAdvance = useCallback(() => {
+    if (!game || game.phase !== "revealed" || !game.last) return;
+    const next = advance(game);
+    void write(next, next.phase === "asking");
   }, [game, write]);
 
   /** Ends the session rather than the game. Rematch keeps the tally; this stops it. */
@@ -172,7 +183,8 @@ export function useTttRoom(
   }, [roomId, row]);
 
   return {
-    game, myMark, item, choose, submit, rematch, quit, forceTimeout, advanceNow,
+    game, myMark, item, choose, submit, rematch, quit,
+    forceTimeout, forceAdvance, advanceNow,
     error: poolError ?? writeError,
     ready: pool.length > 0,
     /** when the current question went up, so both clients run the same clock */

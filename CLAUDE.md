@@ -443,12 +443,27 @@ but not against one client's effect firing twice — and a second deal upserts a
 fresh board over one already in play. Verified: first claim updates 1 row,
 second updates 0, and `ttt_games`' primary key refuses a duplicate board.
 
-**A question can no longer hang.** The clock used to be enforced only by whoever
-owed the answer, so if they closed the tab the other player sat on a question
-that could never resolve. `timeoutWriter()` names exactly one enforcer at any
-instant — the answerer while the clock runs out, the opponent once a grace
-period is up — and it is unit-checked across the whole timeline, because two
-enforcers means the round jumps two questions at once.
+**A board can no longer hang, in either of the two ways it could.**
+`stallWriter()` names exactly one client at any instant and says what it owes —
+unit-checked across the whole timeline, because two writers means the round
+jumps twice at once.
+
+- *Nobody answered.* The answerer's own clock expires first; after a grace
+  period the opponent writes the miss instead.
+- *Nobody moved on from the reveal.* This one shipped broken and was found in
+  production: two live rooms frozen at `phase: revealed` with one mark on the
+  board. The pause after an answer is a `setTimeout` in the answerer's tab, and
+  a phone that locks or an app switch suspends it — so the board stopped with
+  nothing running anywhere and the opponent not allowed to write. Same shape as
+  above now: the answerer owns it for `REVEAL_MS`, then the opponent takes it,
+  and gets a "Move it on" button rather than sitting out the grace.
+
+`REVEAL_MS` (4500) must stay above the longest reveal pause in `useTttRoom`
+(2900) or the rescue races the timer it exists to back up. The check asserts the
+relationship, not just the behaviour.
+
+A pick has no deadline on purpose: there is no correct square to choose on
+someone else's behalf, so an abandoned pick is quit, not resolved.
 
 **Presence is a heartbeat on a row both players already subscribe to.**
 `touch_presence()` every 20s; the update itself is what tells the other browser

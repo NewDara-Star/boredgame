@@ -1,6 +1,6 @@
 # STATUS — BoredGame
 
-Last updated: 2026-09-04 (brand refresh, match card)
+Last updated: 2026-09-04 (a stuck reveal can be unstuck)
 
 ## Verified working
 
@@ -21,7 +21,9 @@ Each claim below was checked by running it, not by reading the code.
 | Guest sees an account first, not a dashboard | Playwright at 390x844, fresh and with 214 answered |
 | Category filter shows real counts and restarts the round | screenshot: chips with per-category counts |
 | Options are not guessable by position | `npm run check:options` — seeded shuffle spreads answer-first input 25.1/25.5/24.9/24.5 over 2000 ids |
-| Square Off rules hold | `npm run check:squareoff` — 22 assertions, including the steal and turn order |
+| Square Off rules hold | `npm run check:squareoff` — 31 assertions, including the steal and turn order |
+| A frozen reveal resolves without its owner | `check:squareoff`: at REVEAL+GRACE the opponent is named, and `advance()` gives the transition the owner owed |
+| Two production rooms were frozen this way | `3AVSXD` and `GYVACH`, both `phase: revealed`, one mark on the board, stalled 4 and 30 minutes |
 | A full solo Square Off game plays | Playwright drove 60 turns to "The bot wins", no console errors |
 | The steal fires and is narrated correctly | screenshot: "You miss. The bot gets one shot at it." |
 | Board and answers fit one phone screen | board shrinks while a question is up; verified at 390x844 |

@@ -5,14 +5,17 @@ import type { RoomPlayer, RoomStatus } from "@/shared/types/db";
 import { popIn } from "@/shared/ui/motion";
 import { Board } from "./Board";
 import { QuestionPanel, Timer } from "./QuestionPanel";
-import { describe, timeoutWriter, type Mark } from "./rules";
+import { describe, stallWriter, type Mark } from "./rules";
 import { useTttRoom } from "./useTttRoom";
 import { drawMatchCard, downloadCard } from "./matchCard";
 import { ASK_MS } from "./useSquareOff";
 
-/** How long after the clock runs out before the other player takes over. Long
+/** How long after a deadline passes before the other player takes over. Long
     enough that a slow network is not mistaken for someone leaving. */
 const GRACE_MS = 6000;
+/** When a reveal is considered stuck. Must sit above the longest pause in
+    useTttRoom (2900ms) or this races the timer it exists to back up. */
+const REVEAL_MS = 4500;
 /** No heartbeat for this long and we say so on screen. */
 const AWAY_MS = 50_000;
 
@@ -41,18 +44,22 @@ export function SquareOffRoom({
 
   useEffect(() => { setChosen(null); }, [t.item?.id, g?.steal]);
 
-  // The answerer enforces their own clock; if they have gone, the opponent takes
-  // over after a grace period so the game cannot hang on a question forever.
-  // timeoutWriter names exactly one of them at any instant — unit-checked.
+  // Each phase is written by one client, so a player who goes away takes their
+  // half of the game with them unless someone else is allowed to step in.
+  // stallWriter names exactly one mark at any instant — unit-checked. The
+  // reveal case is the one that actually bit: its pause is a setTimeout in the
+  // answerer's tab, which a phone suspends the moment the screen locks.
   const elapsed = now - t.askedAt;
   const left = ASK_MS - elapsed;
-  const writer = g ? timeoutWriter(g, elapsed, ASK_MS, GRACE_MS) : null;
+  const stall = g ? stallWriter(g, elapsed, { ask: ASK_MS, reveal: REVEAL_MS, grace: GRACE_MS }) : null;
   const fired = useRef<number>(-1);
   useEffect(() => {
-    if (!writer || writer !== t.myMark || !t.item || fired.current === t.askedAt) return;
+    if (!stall || stall.mark !== t.myMark || fired.current === t.askedAt) return;
+    if (stall.action === "timeout" && !t.item) return;
     fired.current = t.askedAt;
-    t.forceTimeout();
-  }, [writer, t]);
+    if (stall.action === "timeout") t.forceTimeout();
+    else t.forceAdvance();
+  }, [stall, t]);
 
   const sides = (["x", "o"] as Mark[]).map((m) => ({
     mark: m,
@@ -229,12 +236,22 @@ export function SquareOffRoom({
             onAnswer={(opt) => { setChosen(opt); t.submit(opt === t.item!.answer); }} />
 
           {/* The pause is skippable. A shorter fixed timer is not the same thing
-              as being able to move on when you have finished reading. */}
-          {g.phase === "revealed" && g.last?.by === t.myMark && (
-            <button onClick={t.advanceNow}
-              className="piece press w-full py-3.5 font-display text-lg font-semibold bg-ink text-paper">
-              {g.last.correct || g.last.steal ? "Next" : "Let them try it"}
-            </button>
+              as being able to move on when you have finished reading. Once the
+              reveal is stuck, whoever stallWriter names gets the same button
+              rather than sitting out the grace period — the two conditions can
+              never be true on both screens at once. */}
+          {g.phase === "revealed" && g.last && (
+            g.last.by === t.myMark ? (
+              <button onClick={t.advanceNow}
+                className="piece press w-full py-3.5 font-display text-lg font-semibold bg-ink text-paper">
+                {g.last.correct || g.last.steal ? "Next" : "Let them try it"}
+              </button>
+            ) : stall?.action === "advance" && stall.mark === t.myMark ? (
+              <button onClick={t.forceAdvance}
+                className="piece press w-full py-3.5 font-display text-lg font-semibold bg-ink text-paper">
+                Move it on
+              </button>
+            ) : null
           )}
         </div>
       ) : null}

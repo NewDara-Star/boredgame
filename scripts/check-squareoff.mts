@@ -3,7 +3,7 @@
  * rather than eyeballed. Run: node --experimental-strip-types scripts/check-squareoff.mts
  */
 import {
-  newGame, pick, answer, advance, winnerOf, botSquare, other, timeoutWriter,
+  newGame, pick, answer, advance, winnerOf, botSquare, other, stallWriter,
   type Game, type Mark, type Cell,
 } from "../src/features/squareoff/rules.ts";
 
@@ -93,29 +93,64 @@ console.log("\nthe bot");
 
 console.log("\nabandonment: exactly one writer at any instant");
 {
-  const ASK = 15000, GRACE = 5000;
-  const asking = pick(newGame("x"), 0);              // x owes the answer
-  const stolen = advance(answer(asking, false));      // o owes the steal
+  const ASK = 15000, REVEAL = 4500, GRACE = 5000;
+  const MS = { ask: ASK, reveal: REVEAL, grace: GRACE };
+  const at = (g: Parameters<typeof stallWriter>[0], t: number) => {
+    const w = stallWriter(g, t, MS);
+    return w ? `${w.mark}:${w.action}` : null;
+  };
+
+  const asking = pick(newGame("x"), 0);           // x owes the answer
+  const stolen = advance(answer(asking, false));  // o owes the steal
+  // The board that actually froze in production: x took square 0 and the
+  // reveal was never written on. board "x--------", phase revealed.
+  const claimed = answer(asking, true);
+  const missed = answer(asking, false);           // revealed, a steal owed next
+
   ok("nobody writes while the clock runs",
-     timeoutWriter(asking, 0, ASK, GRACE) === null &&
-     timeoutWriter(asking, ASK - 1, ASK, GRACE) === null);
-  ok("the answerer writes their own timeout",
-     timeoutWriter(asking, ASK, ASK, GRACE) === "x");
+     at(asking, 0) === null && at(asking, ASK - 1) === null);
+  ok("the answerer writes their own timeout", at(asking, ASK) === "x:timeout");
   ok("the opponent takes over once the grace is up",
-     timeoutWriter(asking, ASK + GRACE, ASK, GRACE) === "o");
+     at(asking, ASK + GRACE) === "o:timeout");
   ok("it is the stealer who owes a stolen question",
-     timeoutWriter(stolen, ASK, ASK, GRACE) === "o" &&
-     timeoutWriter(stolen, ASK + GRACE, ASK, GRACE) === "x");
+     at(stolen, ASK) === "o:timeout" && at(stolen, ASK + GRACE) === "x:timeout");
+
+  ok("a reveal is left alone while the pause runs",
+     at(claimed, 0) === null && at(claimed, REVEAL - 1) === null);
+  ok("the answerer owns moving on from their own reveal",
+     at(claimed, REVEAL) === "x:advance");
+  ok("a stuck reveal is handed to the opponent",
+     at(claimed, REVEAL + GRACE) === "o:advance");
+  ok("a missed answer hands the stuck reveal over too",
+     at(missed, REVEAL) === "x:advance" && at(missed, REVEAL + GRACE) === "o:advance");
+  // The rescue calls advance() — the same pure function the owner's own pause
+  // would have called — so the board cannot diverge depending on who wrote it.
+  ok("the rescued transition is the one the owner owed",
+     advance(claimed).phase === "picking" && advance(claimed).turn === "o"
+     && advance(missed).phase === "asking" && advance(missed).steal
+     && advance(missed).answerer === "o");
+  ok("the reveal deadline clears the longest pause in useTttRoom",
+     REVEAL > 2900);
+  ok("a frozen reveal always resolves eventually",
+     at(claimed, 10 * 60_000) !== null);
+
   ok("never two writers at once", (() => {
-    for (let t = 0; t <= ASK + GRACE * 3; t += 137) {
-      const w = timeoutWriter(asking, t, ASK, GRACE);
-      if (w !== null && w !== "x" && w !== "o") return false;
+    for (const g of [asking, stolen, claimed, missed]) {
+      for (let t = 0; t <= ASK + GRACE * 3; t += 137) {
+        const w = stallWriter(g, t, MS);
+        if (w && w.mark !== "x" && w.mark !== "o") return false;
+        if (w && w.action !== "timeout" && w.action !== "advance") return false;
+      }
     }
     return true;
   })());
-  ok("no writer outside a question",
-     timeoutWriter(newGame("x"), 99999, ASK, GRACE) === null &&
-     timeoutWriter(advance(answer(pick(newGame("x"), 0), true)), 99999, ASK, GRACE) === null);
+  // x takes 0, 1, 2 for the line; o answers in between and gets nowhere.
+  const over = play(play(play(play(play(newGame("x"), 0, true), 3, true), 1, true), 4, true), 2, true);
+  ok("a pick has no deadline, and a finished game none either",
+     over.phase === "over" && over.winner === "x"
+     && at(newGame("x"), 99999) === null
+     && at(advance(claimed), 99999) === null
+     && at(over, 99999) === null);
 }
 
 console.log("\nmisc");

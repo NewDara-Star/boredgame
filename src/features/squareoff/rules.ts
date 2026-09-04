@@ -147,21 +147,50 @@ export function describe(g: Game, names: Record<Mark, string>, you: Mark | null 
 
 /* ------------------------------------------------------- abandonment */
 
+/** What a stalled board needs, and which client owes it. */
+export type Stall = { mark: Mark; action: "timeout" | "advance" };
+
 /**
- * Who should write the timeout for a question nobody has answered.
+ * Who should unstick a board that has stopped moving, and how.
  *
- * The clock used to be enforced only by the person who owed the answer, so if
- * they closed the tab the other player sat on a question that could never
- * resolve. After a grace period the opponent takes over — but exactly one of
- * them is the writer at any instant, or they both write and the round jumps.
+ * Every transition is written by exactly one client — the one that owes the
+ * action — because two browsers racing to write the same transition makes the
+ * round jump. The cost of that rule is that a player who goes away takes their
+ * half of the game with them, so each phase needs a deadline after which the
+ * other player is allowed to write it instead.
+ *
+ * Two ways a board stops:
+ *
+ *   asking   — nobody answered. The answerer's own clock expires at askMs;
+ *              after a further grace the opponent writes the miss.
+ *   revealed — nobody moved on. The pause after an answer is a setTimeout in
+ *              the answerer's tab, and a locked phone or an app switch
+ *              suspends it. That froze the board with no way out for either
+ *              side: the opponent is not allowed to advance, and there is
+ *              nothing else running. Same shape as above — the answerer gets
+ *              revealMs, then the opponent takes it.
+ *
+ * revealMs must sit above the longest reveal pause, or this races the timer it
+ * exists to back up. Exactly one mark is named at any instant, either way.
  */
-export function timeoutWriter(
-  g: Pick<Game, "phase" | "answerer">,
-  elapsed: number, askMs: number, graceMs: number,
-): Mark | null {
-  if (g.phase !== "asking" || !g.answerer) return null;
-  if (elapsed >= askMs + graceMs) return other(g.answerer);
-  if (elapsed >= askMs) return g.answerer;
+export function stallWriter(
+  g: Pick<Game, "phase" | "answerer" | "last">,
+  elapsed: number,
+  ms: { ask: number; reveal: number; grace: number },
+): Stall | null {
+  if (g.phase === "asking" && g.answerer) {
+    if (elapsed >= ms.ask + ms.grace) return { mark: other(g.answerer), action: "timeout" };
+    if (elapsed >= ms.ask) return { mark: g.answerer, action: "timeout" };
+    return null;
+  }
+  if (g.phase === "revealed" && g.last) {
+    const owner = g.last.by;
+    if (elapsed >= ms.reveal + ms.grace) return { mark: other(owner), action: "advance" };
+    if (elapsed >= ms.reveal) return { mark: owner, action: "advance" };
+    return null;
+  }
+  // A pick has no deadline: there is no correct square to choose on someone
+  // else's behalf, so an abandoned pick ends the match rather than resolving.
   return null;
 }
 
