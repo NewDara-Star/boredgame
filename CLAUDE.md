@@ -252,6 +252,25 @@ login form assumes the app is not for them yet.
 The header shows a Sign up button when signed out rather than a rank badge, and
 Home offers an account only once there is progress worth keeping.
 
+## Adding a game
+
+`src/features/play/registry.tsx` is the single declaration of a game. Adding one
+is an entry there plus a route and its component — not edits to the nav, the
+home page, the router AND the room lobby, which is what it used to be.
+
+The nav holds **sections, not instances**: Home · Games · Rooms · Ranks. One tab
+per game works at three and falls over at six, so the games live behind `/play`,
+which grows a search box past eight of them and marks any game whose bank is
+empty as unplayable rather than letting you walk into a round with nothing in it.
+
+The lobby's game choices are `ROOM_GAMES` — every registry entry with a `room`
+block — so a new head-to-head game appears there without touching the lobby.
+
+**Art is sized in pixels, never percentages.** A percentage-sized SVG inside a
+centring container has no definite box to resolve against, and the first version
+of the catalogue rendered a 62px emblem at about 700px, squeezing the text to one
+character per line. Every `Art` takes an explicit `size`.
+
 ## The lobby is where a match is agreed
 
 Creating a room decides nothing any more. `createRoom` makes an empty room and

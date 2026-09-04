@@ -3,16 +3,7 @@ import type { Room, RoomPlayer } from "@/shared/types/db";
 import { stagger, riseIn, SPRING } from "@/shared/ui/motion";
 import { Avatar } from "@/shared/ui/Avatar";
 
-interface Choice { mode: "race" | "squareoff"; game: "picto" | "trivia"; label: string; blurb: string }
-
-const CHOICES: Choice[] = [
-  { mode: "squareoff", game: "trivia", label: "Square Off",
-    blurb: "Tic-tac-toe. A square costs a right answer, and missing gives your opponent one shot at it." },
-  { mode: "race", game: "trivia", label: "Trivia race",
-    blurb: "Same question on both screens. First correct answer takes the round." },
-  { mode: "race", game: "picto", label: "Picto race",
-    blurb: "Same rebus on both screens. First correct answer takes the round." },
-];
+import { ROOM_GAMES } from "@/features/play/registry";
 
 /**
  * The settings used to be chosen by the host before the room existed, which
@@ -47,10 +38,11 @@ export function Lobby({
           1 · What are you playing?
         </p>
         <div className="grid gap-2">
-          {CHOICES.map((c) => {
+          {ROOM_GAMES.map((g) => {
+            const c = { mode: g.room.mode, game: g.bank, label: g.name, blurb: g.room.blurb };
             const on = room.mode === c.mode && room.game === c.game;
             return (
-              <button key={c.label} onClick={() => onSetup(c.mode, c.game, picked)}
+              <button key={g.slug} onClick={() => onSetup(c.mode, c.game, picked)}
                 className={`piece press text-left p-3.5 ${on ? "bg-hot text-surface" : "bg-surface"}`}>
                 <span className="flex items-center gap-2">
                   <span className={`grid place-items-center h-5 w-5 rounded-full border-[3px] border-ink shrink-0

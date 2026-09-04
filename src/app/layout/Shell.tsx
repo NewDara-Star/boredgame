@@ -4,15 +4,15 @@ import { useAuth } from "@/app/providers/AuthProvider";
 import { useProgress } from "@/features/play/useProgress";
 import { rankFor } from "@/features/play/rank";
 import { RankBadge } from "@/features/play/RankBadge";
-import { IconHome, IconPicto, IconTrivia, IconRooms, IconRanks, IconBoard, IconFlame } from "./Icons";
+import { IconHome, IconPlay, IconRooms, IconRanks, IconFlame } from "./Icons";
 import { Wordmark } from "@/shared/ui/Wordmark";
 import { ErrorBoundary } from "@/app/ErrorBoundary";
 
+// Sections, not games. One tab per game works at three and falls over at six,
+// and the catalogue behind /play scales to as many as we ever write.
 const TABS = [
   { to: "/", label: "Home", exact: true, Icon: IconHome },
-  { to: "/picto", label: "Picto", Icon: IconPicto },
-  { to: "/trivia", label: "Trivia", Icon: IconTrivia },
-  { to: "/squareoff", label: "Board", Icon: IconBoard },
+  { to: "/play", label: "Games", Icon: IconPlay },
   { to: "/rooms", label: "Rooms", Icon: IconRooms },
   { to: "/ranks", label: "Ranks", Icon: IconRanks },
 ];
@@ -98,7 +98,7 @@ export function Shell() {
 
       <nav className="sm:hidden fixed inset-x-0 bottom-0 z-30 bg-ink
         border-t-[3px] border-ink pb-[env(safe-area-inset-bottom)]">
-        <div className="max-w-3xl mx-auto grid grid-cols-6">
+        <div className="max-w-3xl mx-auto grid grid-cols-4">
           {TABS.map((t) => {
             const active = isActive(pathname, t.to, t.exact);
             return (
@@ -110,7 +110,7 @@ export function Shell() {
                     transition={{ type: "spring", stiffness: 420, damping: 32 }} />
                 )}
                 <span className={`relative ${active ? "text-surface" : "text-paper/55"}`}><t.Icon /></span>
-                <span className={`relative text-[9px] font-black uppercase tracking-tight
+                <span className={`relative text-[10px] font-black uppercase tracking-wide
                   ${active ? "text-surface" : "text-paper/55"}`}>{t.label}</span>
               </NavLink>
             );

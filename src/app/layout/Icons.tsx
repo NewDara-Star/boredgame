@@ -13,6 +13,7 @@ export const IconPicto = () => wrap(<><rect x="3.4" y="3.4" width="7.2" height="
 export const IconTrivia = () => wrap(<path d="M12 3.6l2.6 5.5 5.9.8-4.3 4.2 1.1 6-5.3-2.9-5.3 2.9 1.1-6L3.5 9.9l5.9-.8z" />);
 export const IconRooms = () => wrap(<><circle cx="9" cy="8.4" r="3.2" /><circle cx="16.6" cy="9.6" r="2.4" /><path d="M3.6 19.4c0-3 2.4-5 5.4-5s5.4 2 5.4 5" /><path d="M16.4 14.6c2.4.2 4 2.1 4 4.8" /></>);
 export const IconBoard = () => wrap(<><rect x="3.4" y="3.4" width="17.2" height="17.2" rx="3" /><path d="M9.3 3.6v16.8M14.7 3.6v16.8M3.6 9.3h16.8M3.6 14.7h16.8" /></>);
+export const IconPlay = () => wrap(<><circle cx="12" cy="12" r="8.6" /><path d="M10.2 8.6 L16 12 L10.2 15.4 Z" /></>);
 export const IconRanks = () => wrap(<><path d="M5 20.4V13" /><path d="M12 20.4V6.2" /><path d="M19 20.4v-5.6" /><path d="M3.2 20.4h17.6" /></>);
 
 /** Solid, because a 13px outline flame turns to mush. */

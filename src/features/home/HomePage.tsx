@@ -1,8 +1,7 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { PICTO_SEED } from "@/shared/data/picto";
 import { useCounts } from "@/features/play/counts";
-import { PictoRenderer } from "@/features/picto/PictoRenderer";
+import { GAMES } from "@/features/play/registry";
 import { useProgress } from "@/features/play/useProgress";
 import { useAuth } from "@/app/providers/AuthProvider";
 import { rankFor } from "@/features/play/rank";
@@ -15,7 +14,6 @@ export function HomePage() {
   const p = useProgress();
   const counts = useCounts();
   const { current, next, progress } = rankFor(p.answered);
-  const teaser = PICTO_SEED[Math.floor(Math.random() * PICTO_SEED.length)];
 
   return (
     <motion.div variants={stagger(0.09)} initial="hidden" animate="show">
@@ -23,7 +21,7 @@ export function HomePage() {
         <Starburst size={52} fill="var(--color-hot)"
           className="absolute -top-3 right-1 rotate-12" />
         <h1 className="text-[42px] leading-[0.95] font-semibold relative">
-          Three games.<br />
+          {GAMES.length === 3 ? "Three games." : `${GAMES.length} games.`}<br />
           <span className="text-hot">Pick your poison.</span>
         </h1>
       </motion.div>
@@ -31,61 +29,31 @@ export function HomePage() {
         Short rounds, no ads, no feed. Built to be opened for four minutes and closed again.
       </motion.p>
 
-      <div className="grid gap-4 mt-7 sm:grid-cols-3">
-        <motion.div variants={riseIn}>
-          <Link to="/picto" className="piece press block p-5 h-full">
-            <div className="h-24 text-picto mb-4">
-              <PictoRenderer spec={{ items: teaser.items }} animate seed={teaser.slug} />
-            </div>
-            <span className="sticker inline-block text-[10px] font-black uppercase tracking-widest
-              bg-picto text-surface px-2.5 py-1">Word puzzle</span>
-            <h2 className="text-2xl font-semibold mt-2">Picto Phrase</h2>
-            <p className="text-sm text-soft mt-1 font-semibold">Read the picture, name the phrase.</p>
-            <p className="text-xs text-soft/70 mt-3 font-bold">{counts.picto} puzzles</p>
-          </Link>
-        </motion.div>
+      <motion.div variants={stagger(0.07)} className="grid gap-4 mt-7 sm:grid-cols-3">
+        {GAMES.slice(0, 3).map((g) => (
+          <motion.div key={g.slug} variants={riseIn}>
+            <Link to={g.path} className="piece press block p-5 h-full">
+              <div className="mb-4 flex justify-center"><g.Art size={92} /></div>
+              <span className={`sticker inline-block text-[10px] font-black uppercase
+                tracking-widest px-2.5 py-1 ${g.chip}`}>{g.badge}</span>
+              <h2 className="text-2xl font-semibold mt-2">{g.name}</h2>
+              <p className="text-sm text-soft mt-1 font-semibold">{g.tagline}</p>
+              <p className="text-xs text-soft/70 mt-3 font-bold tabular-nums">
+                {counts[g.bank] ?? 0} in the bank
+              </p>
+            </Link>
+          </motion.div>
+        ))}
+      </motion.div>
 
-        <motion.div variants={riseIn}>
-          <Link to="/trivia" className="piece press block p-5 h-full">
-            <div className="h-24 mb-4 grid place-items-center">
-              <motion.span
-                className="text-6xl leading-none text-trivia"
-                animate={{ rotate: [0, -8, 8, 0], scale: [1, 1.08, 1] }}
-                transition={{ duration: 2.4, repeat: Infinity, repeatDelay: 2.5, ease: "easeInOut" }}
-              >★</motion.span>
-            </div>
-            <span className="sticker sticker-r inline-block text-[10px] font-black uppercase tracking-widest
-              bg-trivia text-surface px-2.5 py-1">Quiz</span>
-            <h2 className="text-2xl font-semibold mt-2">Star Trivia</h2>
-            <p className="text-sm text-soft mt-1 font-semibold">Four options, one right, ten questions.</p>
-            <p className="text-xs text-soft/70 mt-3 font-bold">{counts.trivia} questions</p>
+      {GAMES.length > 3 && (
+        <motion.div variants={riseIn} className="mt-3">
+          <Link to="/play"
+            className="piece press block p-3.5 text-center font-display font-semibold">
+            All {GAMES.length} games →
           </Link>
         </motion.div>
-
-        <motion.div variants={riseIn}>
-          <Link to="/squareoff" className="piece press block p-5 h-full">
-            <div className="h-24 mb-4 grid place-items-center">
-              <motion.svg viewBox="0 0 100 100" className="h-full"
-                animate={{ rotate: [0, 4, -4, 0] }}
-                transition={{ duration: 3.2, repeat: Infinity, repeatDelay: 2, ease: "easeInOut" }}>
-                <g stroke="var(--color-ink)" strokeWidth="4" strokeLinecap="round">
-                  <path d="M36 12 V88 M64 12 V88 M12 36 H88 M12 64 H88" />
-                </g>
-                <g strokeWidth="8" strokeLinecap="round" fill="none">
-                  <path d="M18 18 L30 30 M30 18 L18 30" stroke="var(--color-picto)" />
-                  <circle cx="50" cy="50" r="9" stroke="var(--color-trivia)" />
-                  <path d="M70 70 L82 82 M82 70 L70 82" stroke="var(--color-picto)" />
-                </g>
-              </motion.svg>
-            </div>
-            <span className="sticker inline-block text-[10px] font-black uppercase tracking-widest
-              bg-hot text-surface px-2.5 py-1">Board game</span>
-            <h2 className="text-2xl font-semibold mt-2">Square Off</h2>
-            <p className="text-sm text-soft mt-1 font-semibold">Answer right to claim a square.</p>
-            <p className="text-xs text-soft/70 mt-3 font-bold">Solo or head-to-head</p>
-          </Link>
-        </motion.div>
-      </div>
+      )}
 
       <motion.div variants={riseIn} className="piece mt-4 p-5">
         <div className="flex items-baseline justify-between">
