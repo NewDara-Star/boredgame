@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { useAuth } from "@/app/providers/AuthProvider";
+import { useAuth, isSynthetic } from "@/app/providers/AuthProvider";
 import { useProgress } from "@/features/play/useProgress";
 import { rankFor, RANKS } from "@/features/play/rank";
 import { RankBadge } from "@/features/play/RankBadge";
@@ -118,7 +118,9 @@ function MemberView() {
         <Avatar id={user?.id ?? "anon"} name={name} size={62} />
         <div className="min-w-0">
           <h1 className="font-display text-[26px] leading-tight font-semibold truncate">{name}</h1>
-          <p className="text-xs font-bold text-soft mt-0.5 truncate">{user?.email}</p>
+          <p className="text-xs font-bold text-soft mt-0.5 truncate">
+            {isSynthetic(user?.email) ? "Signed in" : user?.email}
+          </p>
         </div>
         <div className="flex-1" />
         <RankBadge rank={current.key} size={54} animate className="shrink-0" />

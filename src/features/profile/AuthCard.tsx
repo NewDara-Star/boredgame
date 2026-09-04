@@ -11,7 +11,7 @@ import { Field, Input } from "@/shared/ui/Field";
 export function AuthCard({ kept }: { kept?: string }) {
   const { signIn, signUp, signInWithLink } = useAuth();
   const [mode, setMode] = useState<"signup" | "signin">("signup");
-  const [email, setEmail] = useState("");
+  const [id, setId] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [sent, setSent] = useState(false);
@@ -33,7 +33,7 @@ export function AuthCard({ kept }: { kept?: string }) {
       </h2>
       <p className="text-sm text-soft font-semibold mt-1">
         {mode === "signup"
-          ? kept ?? "Keeps your rank, streak and place on the leaderboard across devices."
+          ? kept ?? "A name and a password. Keeps your rank, streak and place on the leaderboard."
           : "Sign in to pick up where you left off."}
       </p>
 
@@ -41,13 +41,19 @@ export function AuthCard({ kept }: { kept?: string }) {
         onSubmit={async (e) => {
           e.preventDefault();
           setError(null); setBusy(true);
-          const { error } = await (mode === "signin" ? signIn : signUp)(email, password);
+          const { error } = await (mode === "signin" ? signIn : signUp)(id, password);
           setBusy(false);
           if (error) setError(error);
         }}>
-        <Field label="Email" error={error}>
-          <Input type="email" required value={email} placeholder="you@example.com"
-            autoComplete="email" onChange={(e) => setEmail(e.target.value)} />
+        {/* No email. Nothing is ever sent to one, so asking for it was a step
+            that bought nothing — and it is the same field either way, since an
+            address still works for the accounts made before names. */}
+        <Field label={mode === "signup" ? "Pick a name" : "Name"}
+          hint={mode === "signup" ? "3–20 letters, numbers or underscores. This is what people see." : undefined}
+          error={error}>
+          <Input required value={id} placeholder="yourname" autoCapitalize="none"
+            autoComplete="username" maxLength={40}
+            onChange={(e) => setId(e.target.value)} />
         </Field>
         <Field label="Password" hint={mode === "signup" ? "At least 6 characters" : undefined}>
           <Input type="password" required minLength={6} value={password} placeholder="••••••••"
@@ -70,17 +76,24 @@ export function AuthCard({ kept }: { kept?: string }) {
         </button>
       </div>
 
-      <button type="button"
-        onClick={async () => {
-          if (!email) { setError("Enter your email first."); return; }
-          setBusy(true);
-          const { error } = await signInWithLink(email);
-          setBusy(false);
-          if (error) setError(error); else setSent(true);
-        }}
-        className="w-full text-xs font-bold text-soft underline underline-offset-4 pt-3">
-        Email me a link instead
-      </button>
+      {/* Only for the accounts that predate names — a link cannot be sent to an
+          address that does not exist. */}
+      {id.includes("@") && (
+        <button type="button"
+          onClick={async () => {
+            setBusy(true);
+            const { error } = await signInWithLink(id);
+            setBusy(false);
+            if (error) setError(error); else setSent(true);
+          }}
+          className="w-full text-xs font-bold text-soft underline underline-offset-4 pt-3">
+          Email me a link instead
+        </button>
+      )}
+
+      <p className="text-[11px] font-bold text-soft/70 text-center pt-3 leading-snug">
+        There is no password reset yet — nothing can be sent to a name. Pick one you'll remember.
+      </p>
     </div>
   );
 }

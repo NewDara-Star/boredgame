@@ -240,6 +240,28 @@ share card and the favicon as well as the DOM. `textLength` pins its width so it
 is the same shape before and after the webfont loads, the same trick the rebus
 renderer uses. `.sticker` in index.css is the reusable version of the treatment.
 
+## Signing up is a name and a password
+
+Nothing is ever sent to an email — confirmation is off and the built-in mailer
+is rate-limited and test-only — so asking for one was a step that bought
+nothing. Sign-up takes a username.
+
+Supabase Auth has no username login, so the name becomes an address on
+`players.boredgame.app`, a domain nothing sends to. That is not a workaround for
+uniqueness, it **is** the uniqueness guarantee: two people cannot hold the same
+address, so the race for a name is settled by auth rather than by checking first
+and hoping. Lower-cased, so `Dara` and `dara` are one person. `handle_new_user`
+reads the wanted name out of `raw_user_meta_data`, so the name you picked is the
+name you get instead of one derived from the synthetic address.
+
+The same field still accepts an email, because four accounts predate this, and
+the magic-link fallback only appears when what you typed contains an `@`.
+
+**There is no password reset, and now there structurally cannot be one.** That
+was already true — the mailer allows about two messages an hour — but a name
+makes it permanent. Custom SMTP plus a recovery email is the unblock, and it is
+a prerequisite for "many people", not a nicety.
+
 ## The signed-out player is a different screen
 
 Profile used to render the full dashboard for guests with the sign-in form
