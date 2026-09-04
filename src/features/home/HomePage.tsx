@@ -8,11 +8,13 @@ import { rankFor } from "@/features/play/rank";
 import { RankBadge } from "@/features/play/RankBadge";
 import { stagger, riseIn, popIn } from "@/shared/ui/motion";
 import { Starburst } from "@/shared/ui/Wordmark";
+import { useDailyStatus } from "@/features/daily/useDaily";
 
 export function HomePage() {
   const { user, offline } = useAuth();
   const p = useProgress();
   const counts = useCounts();
+  const daily = useDailyStatus();
   const { current, next, progress } = rankFor(p.answered);
 
   return (
@@ -28,6 +30,28 @@ export function HomePage() {
       <motion.p variants={riseIn} className="text-soft mt-3 text-[15px] max-w-sm font-semibold">
         Short rounds, no ads, no feed. Built to be opened for four minutes and closed again.
       </motion.p>
+
+      {/* The one thing everyone is doing at the same time, so it goes first. */}
+      {daily.signedIn && (
+        <motion.div variants={popIn} className="mt-6">
+          <Link to="/daily" className={`piece press block p-5 ${daily.played === null ? "bg-hot text-surface" : ""}`}>
+            <div className="flex items-center gap-3">
+              <Starburst size={38} fill={daily.played === null ? "var(--color-pop)" : "var(--color-hot)"} />
+              <div className="min-w-0 flex-1">
+                <p className="font-display text-[22px] leading-tight font-semibold">
+                  {daily.played === null ? "Today's round" : `You got ${daily.played} out of 10 today`}
+                </p>
+                <p className={`text-[13px] font-semibold ${daily.played === null ? "opacity-90" : "text-soft"}`}>
+                  {daily.played === null
+                    ? "Ten questions. The same ten everyone else gets."
+                    : `${daily.players} ${daily.players === 1 ? "person has" : "people have"} played — see the board`}
+                </p>
+              </div>
+              <span className="font-display text-2xl font-semibold shrink-0">→</span>
+            </div>
+          </Link>
+        </motion.div>
+      )}
 
       <motion.div variants={stagger(0.07)} className="grid gap-4 mt-7 sm:grid-cols-3">
         {GAMES.slice(0, 3).map((g) => (

@@ -9,7 +9,11 @@ import type { PlayItem, RoundResult } from "./types";
 
 export type Phase = "loading" | "empty" | "playing" | "revealed" | "done";
 
-export function useRound(game: GameKey, size: number, categories: string[] = []) {
+export function useRound(
+  game: GameKey, size: number, categories: string[] = [],
+  /** an exact list to play, in order — the daily round. Bypasses the pool. */
+  fixed?: PlayItem[] | null,
+) {
   const { user, applyProfile } = useAuth();
   const userId = user?.id;
   const [items, setItems] = useState<PlayItem[]>([]);
@@ -27,6 +31,16 @@ export function useRound(game: GameKey, size: number, categories: string[] = [])
 
   const build = useCallback(async () => {
     setPhase("loading");
+    if (fixed) {
+      // No shuffle, no seen-filter: everyone plays the same list in the same
+      // order or the scores are not comparable.
+      setItems(fixed);
+      setIndex(0); setScore(0); setStreak(0); setBestStreak(0);
+      setResults([]); setLast(null); setHintsUsed(0); setOutcome(null);
+      startedAt.current = Date.now();
+      setPhase(fixed.length ? "playing" : "empty");
+      return;
+    }
     const everything = await loadContent(game);
     // Derived from the pool we already have rather than a second query, so the
     // counts can never disagree with what the round can actually serve.
@@ -49,7 +63,7 @@ export function useRound(game: GameKey, size: number, categories: string[] = [])
     setResults([]); setLast(null); setHintsUsed(0); setOutcome(null);
     startedAt.current = Date.now();
     setPhase("playing");
-  }, [game, size, userId, categories.join("|")]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [game, size, userId, categories.join("|"), fixed?.map((i) => i.id).join(",")]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => { void build(); }, [build]);
 

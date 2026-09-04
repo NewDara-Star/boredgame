@@ -13,6 +13,8 @@ interface AuthValue {
   signUp(email: string, password: string): Promise<{ error: string | null }>;
   signInWithLink(email: string): Promise<{ error: string | null }>;
   setPassword(password: string): Promise<{ error: string | null }>;
+  /** Names are chosen, not generated — everything social shows one. */
+  setUsername(name: string): Promise<{ error: string | null }>;
   signOut(): Promise<void>;
   refreshProfile(): Promise<void>;
   /** Drop in a profile row we already have — touch_streak returns one, and
@@ -88,13 +90,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { error: error?.message ?? null };
   }
 
+  async function setUsername(name: string) {
+    if (!supabase) return { error: "Supabase is not configured yet." };
+    const { data, error } = await supabase.rpc("set_username", { p_name: name });
+    if (error) return { error: error.message };
+    if (data === "taken") return { error: "That name is already taken." };
+    if (data === "invalid") return { error: "3–20 characters, letters, numbers and underscores only." };
+    await refreshProfile();
+    return { error: null };
+  }
+
   async function signOut() {
     await supabase?.auth.signOut();
     setProfile(null);
   }
 
   return (
-    <Ctx.Provider value={{ user, profile, loading, offline: !isConfigured, signIn, signUp, signInWithLink, setPassword, signOut, refreshProfile, applyProfile: setProfile }}>
+    <Ctx.Provider value={{ user, profile, loading, offline: !isConfigured, signIn, signUp, signInWithLink, setPassword, setUsername, signOut, refreshProfile, applyProfile: setProfile }}>
       {children}
     </Ctx.Provider>
   );

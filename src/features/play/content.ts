@@ -80,5 +80,18 @@ export async function loadContent(game: GameKey): Promise<PlayItem[]> {
   return game === "picto" ? fromSeedPicto() : fromSeedTrivia();
 }
 
+/**
+ * Loads specific puzzles, in the order asked for. The daily round is a fixed
+ * list and everyone must see it in the same sequence, so this deliberately does
+ * not shuffle or filter by what you have already seen.
+ */
+export async function loadByIds(ids: number[]): Promise<PlayItem[]> {
+  if (!supabase || ids.length === 0) return [];
+  const { data } = await supabase
+    .from("puzzles").select("*, categories(name)").in("id", ids);
+  const byId = new Map(((data as PuzzleRow[] | null) ?? []).map((r) => [r.id, fromRow(r)]));
+  return ids.map((id) => byId.get(id)).filter((i): i is PlayItem => !!i);
+}
+
 // Re-exported so the many call sites that reach for `shuffle` here keep working.
 export { shuffle, shuffleSeeded } from "@/shared/lib/shuffle";

@@ -271,6 +271,31 @@ centring container has no definite box to resolve against, and the first version
 of the catalogue rendered a 62px emblem at about 700px, squeezing the text to one
 character per line. Every `Art` takes an explicit `size`.
 
+## The daily round
+
+Ten questions, the same ten for everyone, once a day — the thing that makes a
+streak and a leaderboard mean anything.
+
+The set is **pinned in `daily_rounds`, not derived on the fly.** Computed from
+the live bank, publishing a puzzle at noon would hand the afternoon a different
+round from the morning and the scores would not be comparable, which is the
+entire point. Whoever plays first creates the row; a racing second caller takes
+the row that landed rather than their own draft.
+
+**One attempt.** `daily_scores` has no insert or update policy — everything goes
+through `submit_daily()`, which is `on conflict do nothing`. A score you can
+retake after seeing the board is not a score.
+
+**The board ranks on correct answers, with time as the tiebreak — not on score.**
+Score is speed-and-streak weighted, which is right for a solo round and wrong for
+a shared one: a tester clicking instantly scored 1992 on 2 of 10 and beat 920 on
+9 of 10. Where everyone plays the same questions, being right has to be what wins.
+
+Names are chosen, not generated (`set_username()`, unique on `lower(username)`).
+The signup trigger had to be fixed in the same migration — it was producing names
+longer than the new shape rule, which would have turned every new signup into a
+failed insert.
+
 ## Seats, and writes that report themselves
 
 **Rooms have a capacity** (`rooms.capacity`, default 2) and joining goes through

@@ -10,6 +10,7 @@ import { RoomsPage } from "@/features/rooms/RoomsPage";
 import { LeaderboardPage } from "@/features/leaderboard/LeaderboardPage";
 import { SquareOffPage } from "@/features/squareoff/SquareOffPage";
 import { CataloguePage } from "@/features/play/CataloguePage";
+import { DailyPage } from "@/features/daily/DailyPage";
 
 export function App() {
   return (
@@ -21,6 +22,7 @@ export function App() {
             <Route path="/picto" element={<PictoGame />} />
             <Route path="/trivia" element={<TriviaGame />} />
             <Route path="/play" element={<CataloguePage />} />
+            <Route path="/daily" element={<DailyPage />} />
             <Route path="/squareoff" element={<SquareOffPage />} />
             <Route path="/ranks" element={<LeaderboardPage />} />
             <Route path="/profile" element={<ProfilePage />} />

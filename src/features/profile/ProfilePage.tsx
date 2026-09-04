@@ -93,11 +93,19 @@ function GuestView({ authError }: { authError: string | null }) {
 
 /** The dashboard, for someone who actually has an account. */
 function MemberView() {
-  const { user, profile, signOut, setPassword: savePassword } = useAuth();
+  const { user, profile, signOut, setPassword: savePassword, setUsername } = useAuth();
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [pwDone, setPwDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [draft, setDraft] = useState(profile?.username ?? "");
+  const [nameBusy, setNameBusy] = useState(false);
+  const [nameMsg, setNameMsg] = useState<string | null>(null);
+  const [nameErr, setNameErr] = useState<string | null>(null);
+  useEffect(() => { setDraft(profile?.username ?? ""); }, [profile?.username]);
+  // The signup trigger makes prefix_abcd. Anyone still carrying one has never
+  // chosen a name, and is about to appear on a public board under it.
+  const generated = /_[0-9a-f]{4}$/.test(profile?.username ?? "");
 
   const p = useProgress();
   const { current, next, progress } = rankFor(p.answered);
@@ -181,6 +189,32 @@ function MemberView() {
           })}
         </motion.div>
       </section>
+
+      <motion.section variants={riseIn}
+        className={`piece p-4 ${generated ? "bg-pop" : ""}`}>
+        <p className="text-[10px] font-black uppercase tracking-widest text-soft">Your name</p>
+        <p className="text-[13px] font-semibold mt-1">
+          {generated
+            ? "This one was made up for you at signup. Pick something before anyone sees you on the leaderboard."
+            : "How you appear in rooms and on the leaderboard."}
+        </p>
+        <form className="flex gap-2 mt-3"
+          onSubmit={async (e) => {
+            e.preventDefault();
+            setNameErr(null); setNameMsg(null); setNameBusy(true);
+            const { error } = await setUsername(draft);
+            setNameBusy(false);
+            if (error) setNameErr(error); else setNameMsg("Saved");
+          }}>
+          <Input value={draft} onChange={(e) => setDraft(e.target.value)}
+            maxLength={20} placeholder="yourname" autoComplete="off" />
+          <Button type="submit" variant="ghost"
+            disabled={nameBusy || !draft.trim() || draft === profile?.username}>
+            {nameBusy ? "…" : nameMsg ?? "Save"}
+          </Button>
+        </form>
+        {nameErr && <p className="text-[12px] font-bold text-bad mt-2">{nameErr}</p>}
+      </motion.section>
 
       <section className="border-t-2 border-sand pt-6 space-y-4">
         <form className="space-y-3"
