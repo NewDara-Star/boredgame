@@ -1,0 +1,1692 @@
+[
+ {
+  "prompt": "Which desert stretches across most of northern Africa?",
+  "choices": [
+   "Sahara",
+   "Gobi",
+   "Kalahari",
+   "Atacama"
+  ],
+  "answer": "Sahara",
+  "difficulty": "easy",
+  "explanation": "The Sahara covers roughly a third of Africa, an area close to the size of the United States.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which river flows through Cairo before spilling into the Mediterranean?",
+  "choices": [
+   "Nile",
+   "Congo",
+   "Niger",
+   "Zambezi"
+  ],
+  "answer": "Nile",
+  "difficulty": "easy",
+  "explanation": "The Nile drains eleven countries and fans out north of Cairo into a broad delta.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which is the largest of Earth's oceans?",
+  "choices": [
+   "Pacific",
+   "Atlantic",
+   "Indian",
+   "Arctic"
+  ],
+  "answer": "Pacific",
+  "difficulty": "easy",
+  "explanation": "The Pacific covers about a third of the planet's surface, more than all the land put together.",
+  "unsure": false
+ },
+ {
+  "prompt": "The Amazon rainforest lies mainly within which country?",
+  "choices": [
+   "Brazil",
+   "Peru",
+   "Colombia",
+   "Venezuela"
+  ],
+  "answer": "Brazil",
+  "difficulty": "easy",
+  "explanation": "Around 60 per cent of the Amazon basin sits inside Brazilian borders.",
+  "unsure": false
+ },
+ {
+  "prompt": "The ruined citadel of Machu Picchu stands in which country?",
+  "choices": [
+   "Peru",
+   "Chile",
+   "Bolivia",
+   "Ecuador"
+  ],
+  "answer": "Peru",
+  "difficulty": "easy",
+  "explanation": "It perches about 2,430 metres up in Peru's eastern Andes above the Urubamba river.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which mountain range runs down the western side of South America?",
+  "choices": [
+   "Andes",
+   "Rockies",
+   "Atlas",
+   "Urals"
+  ],
+  "answer": "Andes",
+  "difficulty": "easy",
+  "explanation": "The Andes run about 7,000 km through seven countries, the longest range above sea level.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which continent has no permanent human population?",
+  "choices": [
+   "Antarctica",
+   "Australia",
+   "South America",
+   "Europe"
+  ],
+  "answer": "Antarctica",
+  "difficulty": "easy",
+  "explanation": "Only rotating research crews live there, under a treaty that bans military use and mining.",
+  "unsure": false
+ },
+ {
+  "prompt": "The Great Wall was built to guard the northern frontier of which country?",
+  "choices": [
+   "China",
+   "Mongolia",
+   "India",
+   "Japan"
+  ],
+  "answer": "China",
+  "difficulty": "easy",
+  "explanation": "Successive dynasties added to it over some 2,000 years, using rammed earth as well as stone.",
+  "unsure": false
+ },
+ {
+  "prompt": "The Taj Mahal was built in which country?",
+  "choices": [
+   "India",
+   "Pakistan",
+   "Iran",
+   "Bangladesh"
+  ],
+  "answer": "India",
+  "difficulty": "easy",
+  "explanation": "Shah Jahan raised it at Agra as a marble tomb for his wife Mumtaz Mahal.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which country is often called the Land of the Rising Sun?",
+  "choices": [
+   "Japan",
+   "China",
+   "Thailand",
+   "Vietnam"
+  ],
+  "answer": "Japan",
+  "difficulty": "easy",
+  "explanation": "Its own name, Nihon, literally means sun origin, a view of the sunrise seen from China.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which language do most people in Brazil speak?",
+  "choices": [
+   "Portuguese",
+   "Spanish",
+   "French",
+   "Italian"
+  ],
+  "answer": "Portuguese",
+  "difficulty": "easy",
+  "explanation": "Brazil was colonised by Portugal while its neighbours fell to Spain.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which is the world's largest country by area?",
+  "choices": [
+   "Russia",
+   "Canada",
+   "China",
+   "United States"
+  ],
+  "answer": "Russia",
+  "difficulty": "easy",
+  "explanation": "Russia covers over 17 million sq km and stretches across eleven time zones.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which desert sprawls across Mongolia and northern China?",
+  "choices": [
+   "Gobi",
+   "Thar",
+   "Mojave",
+   "Sahara"
+  ],
+  "answer": "Gobi",
+  "difficulty": "easy",
+  "explanation": "The Gobi is a cold desert where winter temperatures can drop below minus 30C.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which canal lets ships pass between the Mediterranean and the Red Sea?",
+  "choices": [
+   "Suez Canal",
+   "Panama Canal",
+   "Kiel Canal",
+   "Corinth Canal"
+  ],
+  "answer": "Suez Canal",
+  "difficulty": "easy",
+  "explanation": "Opened in 1869, it spares shipping the long haul around the Cape of Good Hope.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which canal cuts through Central America to join two oceans?",
+  "choices": [
+   "Panama Canal",
+   "Suez Canal",
+   "Erie Canal",
+   "Grand Canal"
+  ],
+  "answer": "Panama Canal",
+  "difficulty": "easy",
+  "explanation": "Locks lift ships 26 metres over the isthmus and lower them on the far side.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which river flows through London?",
+  "choices": [
+   "Thames",
+   "Seine",
+   "Rhine",
+   "Tiber"
+  ],
+  "answer": "Thames",
+  "difficulty": "easy",
+  "explanation": "It stays tidal as far inland as Teddington, some 90 km from the open sea.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which river flows through Paris?",
+  "choices": [
+   "Seine",
+   "Loire",
+   "Rhone",
+   "Garonne"
+  ],
+  "answer": "Seine",
+  "difficulty": "easy",
+  "explanation": "The Seine rises in Burgundy and reaches the Channel at Le Havre.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which is the world's largest island?",
+  "choices": [
+   "Greenland",
+   "New Guinea",
+   "Borneo",
+   "Madagascar"
+  ],
+  "answer": "Greenland",
+  "difficulty": "easy",
+  "explanation": "It spans about 2.1 million sq km, though an ice sheet buries most of it.",
+  "unsure": false
+ },
+ {
+  "prompt": "The holiday island of Bali belongs to which country?",
+  "choices": [
+   "Indonesia",
+   "Malaysia",
+   "Thailand",
+   "Philippines"
+  ],
+  "answer": "Indonesia",
+  "difficulty": "easy",
+  "explanation": "Bali is one of more than 17,000 islands in the Indonesian archipelago and is mainly Hindu.",
+  "unsure": false
+ },
+ {
+  "prompt": "Mount Fuji rises in which country?",
+  "choices": [
+   "Japan",
+   "China",
+   "Nepal",
+   "South Korea"
+  ],
+  "answer": "Japan",
+  "difficulty": "easy",
+  "explanation": "Fuji is an active volcano whose last eruption, in 1707, dusted Tokyo with ash.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which country shares the southern land border of the United States?",
+  "choices": [
+   "Mexico",
+   "Guatemala",
+   "Cuba",
+   "Belize"
+  ],
+  "answer": "Mexico",
+  "difficulty": "easy",
+  "explanation": "The border runs about 3,145 km, much of it down the middle of the Rio Grande.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which sea separates Saudi Arabia from north-east Africa?",
+  "choices": [
+   "Red Sea",
+   "Black Sea",
+   "Caspian Sea",
+   "Baltic Sea"
+  ],
+  "answer": "Red Sea",
+  "difficulty": "easy",
+  "explanation": "It fills a rift where the African and Arabian plates are slowly pulling apart.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which city is nicknamed the Big Apple?",
+  "choices": [
+   "New York",
+   "Chicago",
+   "Boston",
+   "Los Angeles"
+  ],
+  "answer": "New York",
+  "difficulty": "easy",
+  "explanation": "The name spread from 1920s racing writers and jazz players before tourism ads revived it.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which city is known as the Eternal City?",
+  "choices": [
+   "Rome",
+   "Athens",
+   "Cairo",
+   "Jerusalem"
+  ],
+  "answer": "Rome",
+  "difficulty": "easy",
+  "explanation": "Romans called it Urbs Aeterna, sure it would outlast any empire ruling from it.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which American city is nicknamed the Windy City?",
+  "choices": [
+   "Chicago",
+   "Detroit",
+   "Seattle",
+   "Denver"
+  ],
+  "answer": "Chicago",
+  "difficulty": "easy",
+  "explanation": "The jibe mocked boastful local politicians as much as the gusts off Lake Michigan.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which is the highest mountain in Africa?",
+  "choices": [
+   "Kilimanjaro",
+   "Mount Kenya",
+   "Mount Elgon",
+   "Toubkal"
+  ],
+  "answer": "Kilimanjaro",
+  "difficulty": "easy",
+  "explanation": "The dormant volcano rises about 5,895 metres straight off the Tanzanian plains.",
+  "unsure": false
+ },
+ {
+  "prompt": "The Great Barrier Reef lies off the coast of which country?",
+  "choices": [
+   "Australia",
+   "Indonesia",
+   "Fiji",
+   "New Zealand"
+  ],
+  "answer": "Australia",
+  "difficulty": "easy",
+  "explanation": "It runs some 2,300 km along Queensland and is the largest structure built by living things.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which ocean lies between Africa and Australia?",
+  "choices": [
+   "Indian",
+   "Pacific",
+   "Atlantic",
+   "Arctic"
+  ],
+  "answer": "Indian",
+  "difficulty": "easy",
+  "explanation": "It is the warmest major ocean, and that heat drives the monsoon winds of southern Asia.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which African country has the largest population?",
+  "choices": [
+   "Nigeria",
+   "Egypt",
+   "Ethiopia",
+   "South Africa"
+  ],
+  "answer": "Nigeria",
+  "difficulty": "easy",
+  "explanation": "More than 200 million people live there, over 500 languages between them.",
+  "unsure": false
+ },
+ {
+  "prompt": "The Pyramids of Giza were built by which ancient civilisation?",
+  "choices": [
+   "Egyptians",
+   "Nubians",
+   "Persians",
+   "Phoenicians"
+  ],
+  "answer": "Egyptians",
+  "difficulty": "easy",
+  "explanation": "They were royal tombs of the Old Kingdom, raised around 4,500 years ago.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which is the smallest sovereign state in the world by area?",
+  "choices": [
+   "Vatican City",
+   "Monaco",
+   "Nauru",
+   "San Marino"
+  ],
+  "answer": "Vatican City",
+  "difficulty": "easy",
+  "explanation": "It covers just 0.49 sq km and sits entirely within the city of Rome.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which country is famous for the glacier-carved fjords along its western coast?",
+  "choices": [
+   "Norway",
+   "Portugal",
+   "Greece",
+   "Ireland"
+  ],
+  "answer": "Norway",
+  "difficulty": "easy",
+  "explanation": "Its Sognefjord reaches over 200 km inland and more than 1,300 metres deep.",
+  "unsure": false
+ },
+ {
+  "prompt": "Table Mountain looms over a city in which country?",
+  "choices": [
+   "South Africa",
+   "Kenya",
+   "Australia",
+   "Chile"
+  ],
+  "answer": "South Africa",
+  "difficulty": "easy",
+  "explanation": "The flat sandstone massif stands above Cape Town and its harbour.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which is the largest country in South America?",
+  "choices": [
+   "Brazil",
+   "Argentina",
+   "Peru",
+   "Colombia"
+  ],
+  "answer": "Brazil",
+  "difficulty": "easy",
+  "explanation": "Brazil fills nearly half the continent and borders every South American country but two.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which American state is the largest by area?",
+  "choices": [
+   "Alaska",
+   "Texas",
+   "California",
+   "Montana"
+  ],
+  "answer": "Alaska",
+  "difficulty": "easy",
+  "explanation": "Alaska is more than twice the size of Texas yet holds fewer people than Dublin.",
+  "unsure": false
+ },
+ {
+  "prompt": "Niagara Falls sits on the border between which two countries?",
+  "choices": [
+   "Canada and the USA",
+   "Canada and Mexico",
+   "USA and Mexico",
+   "Canada and Greenland"
+  ],
+  "answer": "Canada and the USA",
+  "difficulty": "easy",
+  "explanation": "The Niagara river carries Lake Erie's water down into Lake Ontario over the falls.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which mountain has the highest summit above sea level?",
+  "choices": [
+   "Everest",
+   "K2",
+   "Denali",
+   "Aconcagua"
+  ],
+  "answer": "Everest",
+  "difficulty": "easy",
+  "explanation": "Its summit reaches about 8,849 metres and is still creeping upward as India pushes north.",
+  "unsure": false
+ },
+ {
+  "prompt": "In which country would you visit the Colosseum?",
+  "choices": [
+   "Italy",
+   "Greece",
+   "Spain",
+   "Turkey"
+  ],
+  "answer": "Italy",
+  "difficulty": "easy",
+  "explanation": "The amphitheatre seated tens of thousands and could be cleared in minutes through 80 arches.",
+  "unsure": false
+ },
+ {
+  "prompt": "The yen is the currency of which country?",
+  "choices": [
+   "Japan",
+   "China",
+   "South Korea",
+   "Thailand"
+  ],
+  "answer": "Japan",
+  "difficulty": "easy",
+  "explanation": "It was introduced in 1871 to replace a tangle of feudal-era coins and notes.",
+  "unsure": false
+ },
+ {
+  "prompt": "The naira is the currency of which country?",
+  "choices": [
+   "Nigeria",
+   "Ghana",
+   "Kenya",
+   "Senegal"
+  ],
+  "answer": "Nigeria",
+  "difficulty": "easy",
+  "explanation": "It replaced the Nigerian pound in 1973 and takes its name from the country itself.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which city is known as the City of Light?",
+  "choices": [
+   "Paris",
+   "Vienna",
+   "Venice",
+   "Prague"
+  ],
+  "answer": "Paris",
+  "difficulty": "easy",
+  "explanation": "The name nods to its early street lighting and its role in the Enlightenment.",
+  "unsure": false
+ },
+ {
+  "prompt": "The Berlin Wall divided a city in which country?",
+  "choices": [
+   "Germany",
+   "Austria",
+   "Poland",
+   "Hungary"
+  ],
+  "answer": "Germany",
+  "difficulty": "easy",
+  "explanation": "It stood from 1961 until 1989, ringing West Berlin rather than merely cutting it in half.",
+  "unsure": false
+ },
+ {
+  "prompt": "The vast region of Siberia lies within which country?",
+  "choices": [
+   "Russia",
+   "China",
+   "Canada",
+   "Mongolia"
+  ],
+  "answer": "Russia",
+  "difficulty": "easy",
+  "explanation": "Siberia is about three quarters of Russia's land but holds a small share of its people.",
+  "unsure": false
+ },
+ {
+  "prompt": "Alberta and Ontario are provinces of which country?",
+  "choices": [
+   "Canada",
+   "Australia",
+   "United States",
+   "South Africa"
+  ],
+  "answer": "Canada",
+  "difficulty": "easy",
+  "explanation": "Canada has ten provinces plus three sparsely peopled northern territories.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which stretch of water separates Britain from France?",
+  "choices": [
+   "English Channel",
+   "North Sea",
+   "Irish Sea",
+   "Baltic Sea"
+  ],
+  "answer": "English Channel",
+  "difficulty": "easy",
+  "explanation": "At the Strait of Dover the gap narrows to about 33 km, and a rail tunnel runs beneath.",
+  "unsure": false
+ },
+ {
+  "prompt": "The port city of Casablanca is in which country?",
+  "choices": [
+   "Morocco",
+   "Algeria",
+   "Tunisia",
+   "Egypt"
+  ],
+  "answer": "Morocco",
+  "difficulty": "easy",
+  "explanation": "It is Morocco's largest city and its main Atlantic port, known locally as Dar el Beida.",
+  "unsure": false
+ },
+ {
+  "prompt": "Egypt lies mostly on which continent?",
+  "choices": [
+   "Africa",
+   "Asia",
+   "Europe",
+   "South America"
+  ],
+  "answer": "Africa",
+  "difficulty": "easy",
+  "explanation": "Only the Sinai Peninsula, east of the Suez Canal, sits on the Asian side.",
+  "unsure": false
+ },
+ {
+  "prompt": "The Day of the Dead is celebrated chiefly in which country?",
+  "choices": [
+   "Mexico",
+   "Spain",
+   "Brazil",
+   "Peru"
+  ],
+  "answer": "Mexico",
+  "difficulty": "easy",
+  "explanation": "Dia de los Muertos blends Indigenous remembrance rites with the Catholic All Souls' Day.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which island city-state sits just off the southern tip of the Malay Peninsula?",
+  "choices": [
+   "Singapore",
+   "Brunei",
+   "Maldives",
+   "Bahrain"
+  ],
+  "answer": "Singapore",
+  "difficulty": "easy",
+  "explanation": "Two causeways link it to Malaysia, and it has grown by reclaiming land from the sea.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which mountain range forms the border between Spain and France?",
+  "choices": [
+   "Pyrenees",
+   "Alps",
+   "Apennines",
+   "Carpathians"
+  ],
+  "answer": "Pyrenees",
+  "difficulty": "easy",
+  "explanation": "They run about 490 km from Atlantic to Mediterranean, with Andorra tucked inside.",
+  "unsure": false
+ },
+ {
+  "prompt": "The Mariana Trench, the deepest point in the sea, lies in which ocean?",
+  "choices": [
+   "Pacific",
+   "Atlantic",
+   "Indian",
+   "Arctic"
+  ],
+  "answer": "Pacific",
+  "difficulty": "easy",
+  "explanation": "It drops nearly 11 km, enough to swallow Everest with two kilometres to spare.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which is the largest continent by area?",
+  "choices": [
+   "Asia",
+   "Africa",
+   "North America",
+   "Antarctica"
+  ],
+  "answer": "Asia",
+  "difficulty": "easy",
+  "explanation": "Asia holds about 30 per cent of the world's land and roughly 60 per cent of its people.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which river forms much of the border between Texas and Mexico?",
+  "choices": [
+   "Rio Grande",
+   "Colorado",
+   "Mississippi",
+   "Pecos"
+  ],
+  "answer": "Rio Grande",
+  "difficulty": "medium",
+  "explanation": "Mexicans call the same river the Rio Bravo del Norte.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which strait separates Spain from Morocco?",
+  "choices": [
+   "Strait of Gibraltar",
+   "Strait of Hormuz",
+   "Bosphorus",
+   "Strait of Malacca"
+  ],
+  "answer": "Strait of Gibraltar",
+  "difficulty": "medium",
+  "explanation": "Only about 14 km wide at its narrowest, it is the sole natural way into the Mediterranean.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which strait separates Russia from Alaska?",
+  "choices": [
+   "Bering Strait",
+   "Davis Strait",
+   "Torres Strait",
+   "Cook Strait"
+  ],
+  "answer": "Bering Strait",
+  "difficulty": "medium",
+  "explanation": "It is about 82 km across, and in the Ice Age a land bridge crossed it.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which is Africa's largest lake by surface area?",
+  "choices": [
+   "Lake Victoria",
+   "Lake Chad",
+   "Lake Malawi",
+   "Lake Turkana"
+  ],
+  "answer": "Lake Victoria",
+  "difficulty": "medium",
+  "explanation": "It is shared by Uganda, Kenya and Tanzania and feeds the White Nile.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which is the deepest lake in the world?",
+  "choices": [
+   "Lake Baikal",
+   "Lake Superior",
+   "Lake Tanganyika",
+   "Caspian Sea"
+  ],
+  "answer": "Lake Baikal",
+  "difficulty": "medium",
+  "explanation": "Baikal is over 1,600 metres deep and holds about a fifth of the world's unfrozen fresh water.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which mountain range is the traditional dividing line between Europe and Asia?",
+  "choices": [
+   "Urals",
+   "Caucasus",
+   "Carpathians",
+   "Altai"
+  ],
+  "answer": "Urals",
+  "difficulty": "medium",
+  "explanation": "The chain runs roughly north to south through Russia, from the Arctic to Kazakhstan.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which country is entirely surrounded by South Africa?",
+  "choices": [
+   "Lesotho",
+   "Eswatini",
+   "Botswana",
+   "Malawi"
+  ],
+  "answer": "Lesotho",
+  "difficulty": "medium",
+  "explanation": "Lesotho is so high that its whole territory lies above 1,400 metres.",
+  "unsure": false
+ },
+ {
+  "prompt": "Mount Everest straddles the border between Nepal and which other country?",
+  "choices": [
+   "China",
+   "India",
+   "Bhutan",
+   "Pakistan"
+  ],
+  "answer": "China",
+  "difficulty": "medium",
+  "explanation": "The northern side lies in Tibet, where the peak is known as Chomolungma.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which South American desert is the driest non-polar place on Earth?",
+  "choices": [
+   "Atacama",
+   "Patagonian",
+   "Sechura",
+   "Monte"
+  ],
+  "answer": "Atacama",
+  "difficulty": "medium",
+  "explanation": "Parts of this Chilean desert have gone decades without measurable rain.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which river flows through Baghdad?",
+  "choices": [
+   "Tigris",
+   "Euphrates",
+   "Jordan",
+   "Indus"
+  ],
+  "answer": "Tigris",
+  "difficulty": "medium",
+  "explanation": "The Euphrates runs roughly parallel to the west before the pair meet in the south.",
+  "unsure": false
+ },
+ {
+  "prompt": "The rand is the currency of which country?",
+  "choices": [
+   "South Africa",
+   "Namibia",
+   "Kenya",
+   "Zimbabwe"
+  ],
+  "answer": "South Africa",
+  "difficulty": "medium",
+  "explanation": "It is named after the Witwatersrand, the gold-bearing ridge on which Johannesburg grew.",
+  "unsure": false
+ },
+ {
+  "prompt": "The rupiah is the currency of which country?",
+  "choices": [
+   "Indonesia",
+   "India",
+   "Malaysia",
+   "Pakistan"
+  ],
+  "answer": "Indonesia",
+  "difficulty": "medium",
+  "explanation": "The name comes from the Sanskrit rupya, meaning wrought silver.",
+  "unsure": false
+ },
+ {
+  "prompt": "The fabled trading city of Timbuktu lies in which country?",
+  "choices": [
+   "Mali",
+   "Niger",
+   "Chad",
+   "Sudan"
+  ],
+  "answer": "Mali",
+  "difficulty": "medium",
+  "explanation": "It grew rich on salt and gold caravans and held libraries of thousands of manuscripts.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which country was known as Ceylon until 1972?",
+  "choices": [
+   "Sri Lanka",
+   "Myanmar",
+   "Bangladesh",
+   "Maldives"
+  ],
+  "answer": "Sri Lanka",
+  "difficulty": "medium",
+  "explanation": "The island still markets its tea under the old Ceylon name.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which country was called Siam until 1939?",
+  "choices": [
+   "Thailand",
+   "Vietnam",
+   "Cambodia",
+   "Laos"
+  ],
+  "answer": "Thailand",
+  "difficulty": "medium",
+  "explanation": "The new name means land of the free, marking that it was never colonised by Europe.",
+  "unsure": false
+ },
+ {
+  "prompt": "Southern Rhodesia became which country on independence in 1980?",
+  "choices": [
+   "Zimbabwe",
+   "Zambia",
+   "Malawi",
+   "Botswana"
+  ],
+  "answer": "Zimbabwe",
+  "difficulty": "medium",
+  "explanation": "The new name came from Great Zimbabwe, the medieval stone city in the country's south.",
+  "unsure": false
+ },
+ {
+  "prompt": "Tenochtitlan, buried under modern Mexico City, was the capital of which empire?",
+  "choices": [
+   "Aztec",
+   "Inca",
+   "Maya",
+   "Olmec"
+  ],
+  "answer": "Aztec",
+  "difficulty": "medium",
+  "explanation": "It was built on an island in Lake Texcoco and fed by floating garden plots called chinampas.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which city was the capital of the Byzantine Empire?",
+  "choices": [
+   "Constantinople",
+   "Athens",
+   "Alexandria",
+   "Damascus"
+  ],
+  "answer": "Constantinople",
+  "difficulty": "medium",
+  "explanation": "It held out behind its triple walls until the Ottoman conquest of 1453.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which sea lies between Australia and New Zealand?",
+  "choices": [
+   "Tasman Sea",
+   "Coral Sea",
+   "Arafura Sea",
+   "Timor Sea"
+  ],
+  "answer": "Tasman Sea",
+  "difficulty": "medium",
+  "explanation": "It is named after Abel Tasman and is about 2,000 km wide, hence the phrase across the ditch.",
+  "unsure": false
+ },
+ {
+  "prompt": "Easter Island, famous for its stone heads, is governed by which country?",
+  "choices": [
+   "Chile",
+   "Peru",
+   "New Zealand",
+   "France"
+  ],
+  "answer": "Chile",
+  "difficulty": "medium",
+  "explanation": "It lies some 3,500 km off the Chilean coast, among the remotest inhabited islands.",
+  "unsure": false
+ },
+ {
+  "prompt": "Greenland is a self-governing territory of which kingdom?",
+  "choices": [
+   "Denmark",
+   "Norway",
+   "Iceland",
+   "Canada"
+  ],
+  "answer": "Denmark",
+  "difficulty": "medium",
+  "explanation": "It left the European Community in 1985, largely in a dispute over fishing rights.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which warm ocean current keeps north-west Europe milder than its latitude suggests?",
+  "choices": [
+   "Gulf Stream",
+   "Humboldt Current",
+   "Benguela Current",
+   "Kuroshio Current"
+  ],
+  "answer": "Gulf Stream",
+  "difficulty": "medium",
+  "explanation": "It carries Caribbean water north-east, which is why Irish ports stay ice-free.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which country is crossed by both the Equator and the Tropic of Capricorn?",
+  "choices": [
+   "Brazil",
+   "Kenya",
+   "Indonesia",
+   "Australia"
+  ],
+  "answer": "Brazil",
+  "difficulty": "medium",
+  "explanation": "Brazil is so large north to south that its climates run from rainforest to temperate.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which country has the largest Muslim population in the world?",
+  "choices": [
+   "Indonesia",
+   "Saudi Arabia",
+   "Egypt",
+   "Iran"
+  ],
+  "answer": "Indonesia",
+  "difficulty": "medium",
+  "explanation": "Islam reached the archipelago mainly through traders rather than conquest.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which country's national flag is the only one that is not a rectangle?",
+  "choices": [
+   "Nepal",
+   "Switzerland",
+   "Bhutan",
+   "Qatar"
+  ],
+  "answer": "Nepal",
+  "difficulty": "medium",
+  "explanation": "Its two stacked pennants stand for the Himalayan peaks and for the sun and moon.",
+  "unsure": false
+ },
+ {
+  "prompt": "Angel Falls, the world's highest uninterrupted waterfall, plunges in which country?",
+  "choices": [
+   "Venezuela",
+   "Brazil",
+   "Guyana",
+   "Colombia"
+  ],
+  "answer": "Venezuela",
+  "difficulty": "medium",
+  "explanation": "It drops so far off a flat-topped tepui that much of the water blows away as mist.",
+  "unsure": false
+ },
+ {
+  "prompt": "The Bosphorus links the Sea of Marmara with which other sea?",
+  "choices": [
+   "Black Sea",
+   "Caspian Sea",
+   "Aegean Sea",
+   "Adriatic Sea"
+  ],
+  "answer": "Black Sea",
+  "difficulty": "medium",
+  "explanation": "The strait splits Istanbul in two and is the only sea route out of the Black Sea.",
+  "unsure": false
+ },
+ {
+  "prompt": "The region of Patagonia is shared by Chile and which other country?",
+  "choices": [
+   "Argentina",
+   "Bolivia",
+   "Peru",
+   "Uruguay"
+  ],
+  "answer": "Argentina",
+  "difficulty": "medium",
+  "explanation": "The Andes split it into a wet Chilean side and dry Argentine steppe in the rain shadow.",
+  "unsure": false
+ },
+ {
+  "prompt": "The exclave of Kaliningrad, wedged between Poland and Lithuania, belongs to which country?",
+  "choices": [
+   "Russia",
+   "Germany",
+   "Belarus",
+   "Latvia"
+  ],
+  "answer": "Russia",
+  "difficulty": "medium",
+  "explanation": "It was the German city of Konigsberg until it was annexed after the Second World War.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which river flows through Vienna, Budapest and Belgrade?",
+  "choices": [
+   "Danube",
+   "Rhine",
+   "Elbe",
+   "Vistula"
+  ],
+  "answer": "Danube",
+  "difficulty": "medium",
+  "explanation": "It passes through or touches ten countries before emptying into the Black Sea.",
+  "unsure": false
+ },
+ {
+  "prompt": "By the driest definition, which is the largest desert on Earth?",
+  "choices": [
+   "Antarctica",
+   "Sahara",
+   "Arabian",
+   "Gobi"
+  ],
+  "answer": "Antarctica",
+  "difficulty": "medium",
+  "explanation": "A desert is defined by scant precipitation, and parts of Antarctica get almost none.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which country is surrounded by Senegal on every side but its Atlantic coast?",
+  "choices": [
+   "The Gambia",
+   "Guinea-Bissau",
+   "Sierra Leone",
+   "Togo"
+  ],
+  "answer": "The Gambia",
+  "difficulty": "medium",
+  "explanation": "Its odd sliver shape follows the Gambia river inland from the sea.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which inland sea between Kazakhstan and Uzbekistan shrank drastically in the 20th century?",
+  "choices": [
+   "Aral Sea",
+   "Caspian Sea",
+   "Dead Sea",
+   "Black Sea"
+  ],
+  "answer": "Aral Sea",
+  "difficulty": "medium",
+  "explanation": "Soviet irrigation schemes diverted its feeder rivers to grow cotton, stranding fishing boats.",
+  "unsure": false
+ },
+ {
+  "prompt": "The 1947 partition of British India created India and which other state?",
+  "choices": [
+   "Pakistan",
+   "Nepal",
+   "Sri Lanka",
+   "Myanmar"
+  ],
+  "answer": "Pakistan",
+  "difficulty": "medium",
+  "explanation": "Pakistan was formed in two wings, and the eastern one became Bangladesh in 1971.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which American city is known as the Big Easy?",
+  "choices": [
+   "New Orleans",
+   "Miami",
+   "Nashville",
+   "Atlanta"
+  ],
+  "answer": "New Orleans",
+  "difficulty": "medium",
+  "explanation": "The nickname fits a city whose unhurried mood grew from French and Creole roots.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which Nigerian city carries the motto Centre of Excellence?",
+  "choices": [
+   "Lagos",
+   "Abuja",
+   "Kano",
+   "Ibadan"
+  ],
+  "answer": "Lagos",
+  "difficulty": "medium",
+  "explanation": "Lagos is Africa's biggest urban economy and grew up around a lagoon and its islands.",
+  "unsure": false
+ },
+ {
+  "prompt": "Victoria Falls lies on which river?",
+  "choices": [
+   "Zambezi",
+   "Limpopo",
+   "Orange",
+   "Congo"
+  ],
+  "answer": "Zambezi",
+  "difficulty": "medium",
+  "explanation": "Locals call the falls Mosi-oa-Tunya, the smoke that thunders.",
+  "unsure": false
+ },
+ {
+  "prompt": "The Serengeti plains, famous for the wildebeest migration, lie mainly in which country?",
+  "choices": [
+   "Tanzania",
+   "Kenya",
+   "Uganda",
+   "Zambia"
+  ],
+  "answer": "Tanzania",
+  "difficulty": "medium",
+  "explanation": "The herds cross north into Kenya's Maasai Mara, which is the same ecosystem under another name.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which continent contains the most countries?",
+  "choices": [
+   "Africa",
+   "Asia",
+   "Europe",
+   "South America"
+  ],
+  "answer": "Africa",
+  "difficulty": "medium",
+  "explanation": "Africa holds 54 states, a map largely drawn by European powers in the 1880s.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which country is nicknamed the Land of a Thousand Hills?",
+  "choices": [
+   "Rwanda",
+   "Nepal",
+   "Laos",
+   "Ecuador"
+  ],
+  "answer": "Rwanda",
+  "difficulty": "medium",
+  "explanation": "Its steep terrain is farmed in terraces, and its capital sits on several ridges.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which country spans five geographical time zones but keeps a single official clock?",
+  "choices": [
+   "China",
+   "India",
+   "Brazil",
+   "Canada"
+  ],
+  "answer": "China",
+  "difficulty": "medium",
+  "explanation": "Everything runs on Beijing time, so the sun can rise near ten in the morning in Xinjiang.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which is the highest mountain in North America?",
+  "choices": [
+   "Denali",
+   "Mount Logan",
+   "Pico de Orizaba",
+   "Mount Whitney"
+  ],
+  "answer": "Denali",
+  "difficulty": "medium",
+  "explanation": "The Alaskan peak reaches about 6,190 metres and its name means the high one.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which is the highest mountain in South America?",
+  "choices": [
+   "Aconcagua",
+   "Chimborazo",
+   "Huascaran",
+   "Ojos del Salado"
+  ],
+  "answer": "Aconcagua",
+  "difficulty": "medium",
+  "explanation": "At about 6,961 metres in Argentina, it is the highest summit outside Asia.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which strait connects the Persian Gulf to the Gulf of Oman?",
+  "choices": [
+   "Strait of Hormuz",
+   "Bab-el-Mandeb",
+   "Strait of Malacca",
+   "Dardanelles"
+  ],
+  "answer": "Strait of Hormuz",
+  "difficulty": "medium",
+  "explanation": "A large share of the world's seaborne oil squeezes through this narrow channel.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which busy shipping strait separates the Malay Peninsula from Sumatra?",
+  "choices": [
+   "Strait of Malacca",
+   "Sunda Strait",
+   "Torres Strait",
+   "Bering Strait"
+  ],
+  "answer": "Strait of Malacca",
+  "difficulty": "medium",
+  "explanation": "It is the shortest sea route between the Indian and Pacific oceans, so tens of thousands of ships use it yearly.",
+  "unsure": false
+ },
+ {
+  "prompt": "Hangul is the writing system of which language?",
+  "choices": [
+   "Korean",
+   "Japanese",
+   "Thai",
+   "Mongolian"
+  ],
+  "answer": "Korean",
+  "difficulty": "medium",
+  "explanation": "It was devised in the 15th century under King Sejong to make literacy easier for commoners.",
+  "unsure": false
+ },
+ {
+  "prompt": "The temple complex of Angkor Wat stands in which country?",
+  "choices": [
+   "Cambodia",
+   "Thailand",
+   "Vietnam",
+   "Myanmar"
+  ],
+  "answer": "Cambodia",
+  "difficulty": "medium",
+  "explanation": "Built by the Khmer Empire as a Hindu temple, it later became a Buddhist site.",
+  "unsure": false
+ },
+ {
+  "prompt": "Salar de Uyuni, the world's largest salt flat, lies in which country?",
+  "choices": [
+   "Bolivia",
+   "Chile",
+   "Argentina",
+   "Peru"
+  ],
+  "answer": "Bolivia",
+  "difficulty": "medium",
+  "explanation": "A thin film of rainwater turns it into a vast mirror, and it holds huge lithium reserves.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which country contains more ancient pyramids than any other?",
+  "choices": [
+   "Sudan",
+   "Egypt",
+   "Mexico",
+   "Peru"
+  ],
+  "answer": "Sudan",
+  "difficulty": "medium",
+  "explanation": "The Nubian kings of Kush raised over 200 steep pyramids at sites such as Meroe.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which country was known as Upper Volta until 1984?",
+  "choices": [
+   "Burkina Faso",
+   "Benin",
+   "Niger",
+   "Guinea"
+  ],
+  "answer": "Burkina Faso",
+  "difficulty": "hard",
+  "explanation": "Thomas Sankara renamed it using two local languages, meaning land of upright people.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which sea is bounded by ocean currents rather than by any coastline?",
+  "choices": [
+   "Sargasso Sea",
+   "Coral Sea",
+   "Weddell Sea",
+   "Andaman Sea"
+  ],
+  "answer": "Sargasso Sea",
+  "difficulty": "hard",
+  "explanation": "It sits inside the North Atlantic gyre and is named for the floating sargassum weed.",
+  "unsure": false
+ },
+ {
+  "prompt": "The Torres Strait separates Australia from which country?",
+  "choices": [
+   "Papua New Guinea",
+   "Indonesia",
+   "Timor-Leste",
+   "Solomon Islands"
+  ],
+  "answer": "Papua New Guinea",
+  "difficulty": "hard",
+  "explanation": "The gap is only about 150 km, and islanders have traded across it for centuries.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which strait divides Sicily from mainland Italy?",
+  "choices": [
+   "Strait of Messina",
+   "Strait of Otranto",
+   "Strait of Sicily",
+   "Strait of Bonifacio"
+  ],
+  "answer": "Strait of Messina",
+  "difficulty": "hard",
+  "explanation": "Its whirlpools inspired the myth of Scylla and Charybdis, and it narrows to about 3 km.",
+  "unsure": false
+ },
+ {
+  "prompt": "The tangle of enclaves at Baarle-Hertog, sitting inside the Netherlands, belongs to which country?",
+  "choices": [
+   "Belgium",
+   "Germany",
+   "Luxembourg",
+   "France"
+  ],
+  "answer": "Belgium",
+  "difficulty": "hard",
+  "explanation": "The borders date from medieval land deals and even cut through some front doors.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which is the largest landlocked country in the world?",
+  "choices": [
+   "Kazakhstan",
+   "Mongolia",
+   "Chad",
+   "Bolivia"
+  ],
+  "answer": "Kazakhstan",
+  "difficulty": "hard",
+  "explanation": "It reaches the Caspian, but that is a lake, so it has no route to the open ocean.",
+  "unsure": false
+ },
+ {
+  "prompt": "Besides Uzbekistan, which country is doubly landlocked, ringed only by landlocked neighbours?",
+  "choices": [
+   "Liechtenstein",
+   "Nepal",
+   "Andorra",
+   "Rwanda"
+  ],
+  "answer": "Liechtenstein",
+  "difficulty": "hard",
+  "explanation": "It sits between Switzerland and Austria, so two borders must be crossed to reach the sea.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which river once fed the southern Aral Sea after flowing down from the Pamirs?",
+  "choices": [
+   "Amu Darya",
+   "Syr Darya",
+   "Irtysh",
+   "Ural"
+  ],
+  "answer": "Amu Darya",
+  "difficulty": "hard",
+  "explanation": "The Greeks knew it as the Oxus, and irrigation canals now drink most of its flow.",
+  "unsure": false
+ },
+ {
+  "prompt": "K2, the world's second highest peak, stands in which mountain range?",
+  "choices": [
+   "Karakoram",
+   "Hindu Kush",
+   "Pamirs",
+   "Tian Shan"
+  ],
+  "answer": "Karakoram",
+  "difficulty": "hard",
+  "explanation": "The range sits north-west of the Himalayas and holds some of the longest glaciers outside the poles.",
+  "unsure": false
+ },
+ {
+  "prompt": "Mansa Musa, whose pilgrimage to Mecca unsettled Egypt's gold price, ruled which empire?",
+  "choices": [
+   "Mali Empire",
+   "Songhai Empire",
+   "Ashanti Empire",
+   "Kingdom of Kongo"
+  ],
+  "answer": "Mali Empire",
+  "difficulty": "hard",
+  "explanation": "He ruled in the 14th century and left scholars and mosques at Timbuktu and Gao.",
+  "unsure": false
+ },
+ {
+  "prompt": "Koumbi Saleh is thought to have been the capital of which early West African empire?",
+  "choices": [
+   "Ghana Empire",
+   "Mali Empire",
+   "Songhai Empire",
+   "Kanem-Bornu"
+  ],
+  "answer": "Ghana Empire",
+  "difficulty": "hard",
+  "explanation": "It lay in what is now Mauritania, and the modern state of Ghana borrowed the name.",
+  "unsure": false
+ },
+ {
+  "prompt": "The stone city of Great Zimbabwe was built by ancestors of which people?",
+  "choices": [
+   "Shona",
+   "Zulu",
+   "Maasai",
+   "Igbo"
+  ],
+  "answer": "Shona",
+  "difficulty": "hard",
+  "explanation": "Its walls were raised without mortar, and the site traded gold as far as the Indian Ocean.",
+  "unsure": false
+ },
+ {
+  "prompt": "Nineveh was a great capital of which ancient empire?",
+  "choices": [
+   "Assyrian",
+   "Babylonian",
+   "Persian",
+   "Hittite"
+  ],
+  "answer": "Assyrian",
+  "difficulty": "hard",
+  "explanation": "Its ruins lie across the Tigris from Mosul, and its library preserved the Gilgamesh epic.",
+  "unsure": false
+ },
+ {
+  "prompt": "The 1494 Treaty of Tordesillas split newly charted lands between Spain and which power?",
+  "choices": [
+   "Portugal",
+   "France",
+   "England",
+   "The Netherlands"
+  ],
+  "answer": "Portugal",
+  "difficulty": "hard",
+  "explanation": "The dividing line handed Portugal the bulge of South America, which became Brazil.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which 1884-85 conference set the ground rules for European powers carving up Africa?",
+  "choices": [
+   "Berlin Conference",
+   "Congress of Vienna",
+   "Yalta Conference",
+   "Congress of Berlin"
+  ],
+  "answer": "Berlin Conference",
+  "difficulty": "hard",
+  "explanation": "Bismarck hosted it, and no African ruler was invited to the table.",
+  "unsure": false
+ },
+ {
+  "prompt": "The Benin Bronzes were looted in 1897 from Benin City, in what is now which country?",
+  "choices": [
+   "Nigeria",
+   "Benin",
+   "Ghana",
+   "Cameroon"
+  ],
+  "answer": "Nigeria",
+  "difficulty": "hard",
+  "explanation": "Benin City is in Edo State, and the neighbouring republic took the kingdom's name much later.",
+  "unsure": false
+ },
+ {
+  "prompt": "Finnish and Hungarian both belong to which language family?",
+  "choices": [
+   "Uralic",
+   "Indo-European",
+   "Turkic",
+   "Semitic"
+  ],
+  "answer": "Uralic",
+  "difficulty": "hard",
+  "explanation": "Estonian is a close relative, which is why these tongues stand apart from their neighbours.",
+  "unsure": false
+ },
+ {
+  "prompt": "Guarani is an official language alongside Spanish in which South American country?",
+  "choices": [
+   "Paraguay",
+   "Uruguay",
+   "Chile",
+   "Ecuador"
+  ],
+  "answer": "Paraguay",
+  "difficulty": "hard",
+  "explanation": "Most Paraguayans speak it, making it a rare Indigenous language used by the whole nation.",
+  "unsure": false
+ },
+ {
+  "prompt": "Romansh is one of the official languages of which country?",
+  "choices": [
+   "Switzerland",
+   "Austria",
+   "Romania",
+   "Belgium"
+  ],
+  "answer": "Switzerland",
+  "difficulty": "hard",
+  "explanation": "It descends from Latin and survives mainly in the eastern canton of Graubunden.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which country do its own people call Sakartvelo?",
+  "choices": [
+   "Georgia",
+   "Armenia",
+   "Albania",
+   "Croatia"
+  ],
+  "answer": "Georgia",
+  "difficulty": "hard",
+  "explanation": "It has its own alphabet, and the English name may come from Persian rather than Saint George.",
+  "unsure": false
+ },
+ {
+  "prompt": "The name Algeria comes from an Arabic word meaning what?",
+  "choices": [
+   "The islands",
+   "The desert",
+   "The mountains",
+   "The river"
+  ],
+  "answer": "The islands",
+  "difficulty": "hard",
+  "explanation": "Al-Jazair described islets off Algiers harbour that were later joined to the shore.",
+  "unsure": false
+ },
+ {
+  "prompt": "The Rub al Khali, or Empty Quarter, lies mostly within which country?",
+  "choices": [
+   "Saudi Arabia",
+   "Oman",
+   "Yemen",
+   "Iraq"
+  ],
+  "answer": "Saudi Arabia",
+  "difficulty": "hard",
+  "explanation": "It is the largest continuous sand desert on Earth, with dunes over 200 metres high.",
+  "unsure": false
+ },
+ {
+  "prompt": "The shipwreck-strewn Skeleton Coast runs along which country?",
+  "choices": [
+   "Namibia",
+   "Angola",
+   "Somalia",
+   "Mauritania"
+  ],
+  "answer": "Namibia",
+  "difficulty": "hard",
+  "explanation": "Cold Benguela water meets desert air there, wrapping the shore in fog that wrecked ships.",
+  "unsure": false
+ },
+ {
+  "prompt": "Lake Ladoga, the largest lake in Europe, lies within which country?",
+  "choices": [
+   "Russia",
+   "Finland",
+   "Sweden",
+   "Estonia"
+  ],
+  "answer": "Russia",
+  "difficulty": "hard",
+  "explanation": "Supplies crossed its ice to besieged Leningrad on the so-called Road of Life.",
+  "unsure": false
+ },
+ {
+  "prompt": "Puncak Jaya, the highest peak in Oceania, rises in which country?",
+  "choices": [
+   "Indonesia",
+   "Papua New Guinea",
+   "Australia",
+   "Fiji"
+  ],
+  "answer": "Indonesia",
+  "difficulty": "hard",
+  "explanation": "It stands on the western half of New Guinea and keeps glaciers almost on the Equator.",
+  "unsure": false
+ },
+ {
+  "prompt": "Lake Chad borders Chad, Cameroon, Nigeria and which other country?",
+  "choices": [
+   "Niger",
+   "Sudan",
+   "Mali",
+   "Libya"
+  ],
+  "answer": "Niger",
+  "difficulty": "hard",
+  "explanation": "The lake has shrunk dramatically since the 1960s as drought and irrigation took their toll.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which European language is the official language of Suriname?",
+  "choices": [
+   "Dutch",
+   "French",
+   "Portuguese",
+   "Spanish"
+  ],
+  "answer": "Dutch",
+  "difficulty": "hard",
+  "explanation": "The territory was Dutch until 1975, and the creole Sranan Tongo serves as its lingua franca.",
+  "unsure": false
+ },
+ {
+  "prompt": "The Danakil Depression, among the hottest places on Earth, lies mainly in which country?",
+  "choices": [
+   "Ethiopia",
+   "Sudan",
+   "Somalia",
+   "Niger"
+  ],
+  "answer": "Ethiopia",
+  "difficulty": "hard",
+  "explanation": "It sits over 100 metres below sea level where three tectonic plates are tearing apart.",
+  "unsure": false
+ },
+ {
+  "prompt": "Jutland is the mainland peninsula of which country?",
+  "choices": [
+   "Denmark",
+   "Norway",
+   "Sweden",
+   "The Netherlands"
+  ],
+  "answer": "Denmark",
+  "difficulty": "hard",
+  "explanation": "The rest of the country is made up of islands, including the one holding Copenhagen.",
+  "unsure": false
+ }
+]

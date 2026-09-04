@@ -36,6 +36,11 @@ Each claim below was checked by running it, not by reading the code.
 | Board and answers fit one phone screen | board shrinks while a question is up; verified at 390x844 |
 | Profiles cannot be self-inflated | `information_schema.column_privileges`: authenticated has UPDATE on `username`, `avatar` only |
 
+| 1,517 new trivia questions loaded as draft | 1,787 trivia rows total: 270 live + 1,517 draft, every category at 197-200 |
+| The load is byte-identical to the source files | order-independent checksum over prompt + all four choices in stored order + answer + difficulty + category + explanation: 3,279,460,029,714 on both sides, 1,517 rows, 1,517 distinct |
+| Every loaded row is structurally sound | SQL over the drafts: 0 rows without exactly 4 choices, 0 rows whose answer is absent from its own choices |
+| The answer is not parked at index 0 | 371 of 1,517 have the answer first — the seeded insert shuffle, matching the generator's own count exactly |
+
 ## Content
 
 **374 puzzles live in Supabase.** Square Off draws on the same trivia bank, so

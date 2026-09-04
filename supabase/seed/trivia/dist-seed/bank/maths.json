@@ -1,0 +1,2316 @@
+[
+ {
+  "prompt": "What is 7 multiplied by 8?",
+  "choices": [
+   "54",
+   "56",
+   "63",
+   "64"
+  ],
+  "answer": "56",
+  "difficulty": "easy",
+  "explanation": "Seven eights make 56, sitting neatly between 7x7=49 and 8x8=64.",
+  "unsure": false
+ },
+ {
+  "prompt": "How many sides does a hexagon have?",
+  "choices": [
+   "Five",
+   "Six",
+   "Seven",
+   "Eight"
+  ],
+  "answer": "Six",
+  "difficulty": "easy",
+  "explanation": "Hex is Greek for six; honeycomb cells tile the plane as hexagons.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is pi to two decimal places?",
+  "choices": [
+   "3.12",
+   "3.14",
+   "3.16",
+   "3.41"
+  ],
+  "answer": "3.14",
+  "difficulty": "easy",
+  "explanation": "Pi runs 3.14159..., which is why Pi Day falls on 14 March.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is 15% of 200?",
+  "choices": [
+   "15",
+   "25",
+   "30",
+   "45"
+  ],
+  "answer": "30",
+  "difficulty": "easy",
+  "explanation": "Ten per cent is 20 and five per cent is 10, which add to 30.",
+  "unsure": false
+ },
+ {
+  "prompt": "The angles inside any triangle add up to how many degrees?",
+  "choices": [
+   "90",
+   "180",
+   "270",
+   "360"
+  ],
+  "answer": "180",
+  "difficulty": "easy",
+  "explanation": "Tear off the three corners and they fit together to form a straight line.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the square root of 81?",
+  "choices": [
+   "8",
+   "9",
+   "18",
+   "27"
+  ],
+  "answer": "9",
+  "difficulty": "easy",
+  "explanation": "Nine nines are 81, so 9 is its positive square root.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is a triangle with all three sides equal called?",
+  "choices": [
+   "Isosceles",
+   "Scalene",
+   "Equilateral",
+   "Right-angled"
+  ],
+  "answer": "Equilateral",
+  "difficulty": "easy",
+  "explanation": "Equilateral means equal sides, and all three of its angles are 60 degrees.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is 100 divided by 4?",
+  "choices": [
+   "20",
+   "25",
+   "40",
+   "50"
+  ],
+  "answer": "25",
+  "difficulty": "easy",
+  "explanation": "Four quarters make a whole, and a quarter of 100 is 25.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the largest single-digit prime number?",
+  "choices": [
+   "3",
+   "5",
+   "7",
+   "9"
+  ],
+  "answer": "7",
+  "difficulty": "easy",
+  "explanation": "Nine is 3x3 and eight is even, leaving 7 as the biggest prime under 10.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which is the next prime number after 7?",
+  "choices": [
+   "8",
+   "9",
+   "10",
+   "11"
+  ],
+  "answer": "11",
+  "difficulty": "easy",
+  "explanation": "Eight and ten are even and nine is 3x3, so the run resumes at 11.",
+  "unsure": false
+ },
+ {
+  "prompt": "How many degrees are there in a right angle?",
+  "choices": [
+   "45",
+   "60",
+   "90",
+   "180"
+  ],
+  "answer": "90",
+  "difficulty": "easy",
+  "explanation": "A right angle is a quarter turn, marked on diagrams with a small square.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is 12 squared?",
+  "choices": [
+   "124",
+   "132",
+   "144",
+   "156"
+  ],
+  "answer": "144",
+  "difficulty": "easy",
+  "explanation": "A dozen dozen is 144, a quantity once traded as a gross.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which shape has four equal sides and four right angles?",
+  "choices": [
+   "Rhombus",
+   "Rectangle",
+   "Square",
+   "Trapezium"
+  ],
+  "answer": "Square",
+  "difficulty": "easy",
+  "explanation": "A rhombus has equal sides without right angles; a rectangle is the reverse.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the perimeter of a square with sides of 5 cm?",
+  "choices": [
+   "10 cm",
+   "15 cm",
+   "20 cm",
+   "25 cm"
+  ],
+  "answer": "20 cm",
+  "difficulty": "easy",
+  "explanation": "Perimeter is four times the side length, while 25 would be the area.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which Greek gave his name to the theorem about right-angled triangles?",
+  "choices": [
+   "Euclid",
+   "Pythagoras",
+   "Archimedes",
+   "Plato"
+  ],
+  "answer": "Pythagoras",
+  "difficulty": "easy",
+  "explanation": "The squares on the two shorter sides add up to the square on the longest side.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is 0.5 written as a fraction?",
+  "choices": [
+   "1/2",
+   "1/4",
+   "1/5",
+   "2/5"
+  ],
+  "answer": "1/2",
+  "difficulty": "easy",
+  "explanation": "Point five is five tenths, which cancels down to one half.",
+  "unsure": false
+ },
+ {
+  "prompt": "How many millimetres are there in one centimetre?",
+  "choices": [
+   "5",
+   "10",
+   "100",
+   "1000"
+  ],
+  "answer": "10",
+  "difficulty": "easy",
+  "explanation": "Milli means a thousandth, and a metre holds 1000 millimetres.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is 9 multiplied by 9?",
+  "choices": [
+   "72",
+   "81",
+   "89",
+   "99"
+  ],
+  "answer": "81",
+  "difficulty": "easy",
+  "explanation": "Nine squared is 81, and like every multiple of nine its digits sum to nine.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which is the only even prime number?",
+  "choices": [
+   "0",
+   "1",
+   "2",
+   "4"
+  ],
+  "answer": "2",
+  "difficulty": "easy",
+  "explanation": "Every other even number divides by 2, so it cannot be prime.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the distance right across a circle through its centre called?",
+  "choices": [
+   "Radius",
+   "Diameter",
+   "Chord",
+   "Arc"
+  ],
+  "answer": "Diameter",
+  "difficulty": "easy",
+  "explanation": "The diameter is twice the radius and the longest chord a circle has.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which Roman numeral stands for 1000?",
+  "choices": [
+   "C",
+   "D",
+   "M",
+   "X"
+  ],
+  "answer": "M",
+  "difficulty": "easy",
+  "explanation": "M comes from mille, the Latin word for a thousand.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is 3 cubed?",
+  "choices": [
+   "9",
+   "12",
+   "27",
+   "81"
+  ],
+  "answer": "27",
+  "difficulty": "easy",
+  "explanation": "Three multiplied by itself three times gives 27, the volume of a 3x3x3 box.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the mean average of 2, 4 and 6?",
+  "choices": [
+   "3",
+   "4",
+   "5",
+   "6"
+  ],
+  "answer": "4",
+  "difficulty": "easy",
+  "explanation": "They total 12, and 12 shared between three values is 4.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is a polygon with eight sides called?",
+  "choices": [
+   "Heptagon",
+   "Octagon",
+   "Nonagon",
+   "Decagon"
+  ],
+  "answer": "Octagon",
+  "difficulty": "easy",
+  "explanation": "Octo means eight, the same root as octopus and October in the old calendar.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is 20% of 50?",
+  "choices": [
+   "5",
+   "10",
+   "15",
+   "20"
+  ],
+  "answer": "10",
+  "difficulty": "easy",
+  "explanation": "Twenty per cent is one fifth, and a fifth of 50 is 10.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is 11 multiplied by 11?",
+  "choices": [
+   "111",
+   "121",
+   "131",
+   "144"
+  ],
+  "answer": "121",
+  "difficulty": "easy",
+  "explanation": "Eleven squared is the palindrome 121; 11 cubed gives 1331.",
+  "unsure": false
+ },
+ {
+  "prompt": "How many centimetres are there in one metre?",
+  "choices": [
+   "10",
+   "12",
+   "100",
+   "1000"
+  ],
+  "answer": "100",
+  "difficulty": "easy",
+  "explanation": "Centi means one hundredth, the same root as century.",
+  "unsure": false
+ },
+ {
+  "prompt": "The angles inside a quadrilateral add up to how many degrees?",
+  "choices": [
+   "180",
+   "270",
+   "360",
+   "540"
+  ],
+  "answer": "360",
+  "difficulty": "easy",
+  "explanation": "A diagonal splits it into two triangles of 180 degrees each.",
+  "unsure": false
+ },
+ {
+  "prompt": "In maths, what does the symbol > mean?",
+  "choices": [
+   "Less than",
+   "Greater than",
+   "Equal to",
+   "Not equal to"
+  ],
+  "answer": "Greater than",
+  "difficulty": "easy",
+  "explanation": "The open end faces the larger quantity and the point faces the smaller.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is half of 96?",
+  "choices": [
+   "42",
+   "46",
+   "48",
+   "52"
+  ],
+  "answer": "48",
+  "difficulty": "easy",
+  "explanation": "Half of 90 is 45 and half of 6 is 3, which together make 48.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is a whole number divisible only by 1 and itself called?",
+  "choices": [
+   "Prime",
+   "Square",
+   "Rational",
+   "Perfect"
+  ],
+  "answer": "Prime",
+  "difficulty": "easy",
+  "explanation": "Primes are the building blocks: every other whole number factorises into them.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is 45 plus 55?",
+  "choices": [
+   "90",
+   "95",
+   "100",
+   "110"
+  ],
+  "answer": "100",
+  "difficulty": "easy",
+  "explanation": "The units 5 and 5 make ten, carrying over to give a round hundred.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which solid has six identical square faces?",
+  "choices": [
+   "Cube",
+   "Prism",
+   "Pyramid",
+   "Cylinder"
+  ],
+  "answer": "Cube",
+  "difficulty": "easy",
+  "explanation": "A cube also has 12 edges and 8 corners, and is one of the Platonic solids.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the longest side of a right-angled triangle called?",
+  "choices": [
+   "Hypotenuse",
+   "Adjacent",
+   "Base",
+   "Radius"
+  ],
+  "answer": "Hypotenuse",
+  "difficulty": "easy",
+  "explanation": "It always lies directly opposite the right angle.",
+  "unsure": false
+ },
+ {
+  "prompt": "How many zeros are there in one million?",
+  "choices": [
+   "Three",
+   "Six",
+   "Nine",
+   "Twelve"
+  ],
+  "answer": "Six",
+  "difficulty": "easy",
+  "explanation": "A million is a thousand thousand, written as 10 to the power 6.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is 2 to the power of 5?",
+  "choices": [
+   "10",
+   "16",
+   "25",
+   "32"
+  ],
+  "answer": "32",
+  "difficulty": "easy",
+  "explanation": "Doubling five times runs 2, 4, 8, 16, 32.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the median of the numbers 1, 3 and 9?",
+  "choices": [
+   "1",
+   "3",
+   "4",
+   "9"
+  ],
+  "answer": "3",
+  "difficulty": "easy",
+  "explanation": "The median is the middle value once sorted; the mean here would be higher.",
+  "unsure": false
+ },
+ {
+  "prompt": "How many degrees are there in a full circle?",
+  "choices": [
+   "180",
+   "270",
+   "360",
+   "400"
+  ],
+  "answer": "360",
+  "difficulty": "easy",
+  "explanation": "The Babylonians chose 360 because it divides so many ways.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is 144 divided by 12?",
+  "choices": [
+   "10",
+   "11",
+   "12",
+   "14"
+  ],
+  "answer": "12",
+  "difficulty": "easy",
+  "explanation": "Twelve twelves are 144, so the division returns 12 exactly.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is a five-sided polygon called?",
+  "choices": [
+   "Pentagon",
+   "Hexagon",
+   "Octagon",
+   "Quadrilateral"
+  ],
+  "answer": "Pentagon",
+  "difficulty": "easy",
+  "explanation": "Penta means five; the US defence headquarters is named for the shape.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is 30% of 300?",
+  "choices": [
+   "30",
+   "60",
+   "90",
+   "120"
+  ],
+  "answer": "90",
+  "difficulty": "easy",
+  "explanation": "Ten per cent of 300 is 30, so three lots of that make 90.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which is larger, two thirds or three fifths?",
+  "choices": [
+   "Two thirds",
+   "Three fifths",
+   "They are equal",
+   "Cannot be compared"
+  ],
+  "answer": "Two thirds",
+  "difficulty": "easy",
+  "explanation": "Two thirds is about 0.667 while three fifths is exactly 0.6.",
+  "unsure": false
+ },
+ {
+  "prompt": "How many metres are there in one kilometre?",
+  "choices": [
+   "100",
+   "500",
+   "1000",
+   "10000"
+  ],
+  "answer": "1000",
+  "difficulty": "easy",
+  "explanation": "Kilo means a thousand, the same prefix as in kilogram.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the result of a subtraction called?",
+  "choices": [
+   "Sum",
+   "Product",
+   "Quotient",
+   "Difference"
+  ],
+  "answer": "Difference",
+  "difficulty": "easy",
+  "explanation": "Sum belongs to addition, product to multiplication and quotient to division.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is 25 multiplied by 4?",
+  "choices": [
+   "75",
+   "90",
+   "100",
+   "125"
+  ],
+  "answer": "100",
+  "difficulty": "easy",
+  "explanation": "Twenty-five is a quarter of a hundred, so four of them rebuild the whole.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is a straight line that touches a circle at exactly one point called?",
+  "choices": [
+   "Chord",
+   "Tangent",
+   "Secant",
+   "Radius"
+  ],
+  "answer": "Tangent",
+  "difficulty": "easy",
+  "explanation": "A tangent meets the radius at that point at a right angle.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which number system uses only the digits 0 and 1?",
+  "choices": [
+   "Binary",
+   "Decimal",
+   "Octal",
+   "Hexadecimal"
+  ],
+  "answer": "Binary",
+  "difficulty": "easy",
+  "explanation": "Binary is base two and is how computers store every number.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is 13 multiplied by 3?",
+  "choices": [
+   "33",
+   "36",
+   "39",
+   "43"
+  ],
+  "answer": "39",
+  "difficulty": "easy",
+  "explanation": "Ten threes are 30 and three more threes are 9.",
+  "unsure": false
+ },
+ {
+  "prompt": "How many faces does a tetrahedron have?",
+  "choices": [
+   "Three",
+   "Four",
+   "Five",
+   "Six"
+  ],
+  "answer": "Four",
+  "difficulty": "easy",
+  "explanation": "It is a pyramid on a triangular base, so all four faces are triangles.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is 5% of 1000?",
+  "choices": [
+   "5",
+   "50",
+   "100",
+   "500"
+  ],
+  "answer": "50",
+  "difficulty": "easy",
+  "explanation": "Ten per cent would be 100, so five per cent is half of that.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the distance all the way around a circle called?",
+  "choices": [
+   "Perimeter",
+   "Circumference",
+   "Diameter",
+   "Arc"
+  ],
+  "answer": "Circumference",
+  "difficulty": "easy",
+  "explanation": "It equals pi multiplied by the diameter.",
+  "unsure": false
+ },
+ {
+  "prompt": "What number comes next in the sequence 2, 4, 8, 16?",
+  "choices": [
+   "18",
+   "20",
+   "24",
+   "32"
+  ],
+  "answer": "32",
+  "difficulty": "easy",
+  "explanation": "Each term doubles the one before, so these are the powers of two.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is one quarter expressed as a percentage?",
+  "choices": [
+   "14%",
+   "20%",
+   "25%",
+   "40%"
+  ],
+  "answer": "25%",
+  "difficulty": "easy",
+  "explanation": "A quarter of one hundred is 25, and per cent means per hundred.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is 17 plus 28?",
+  "choices": [
+   "35",
+   "44",
+   "45",
+   "47"
+  ],
+  "answer": "45",
+  "difficulty": "easy",
+  "explanation": "Seventeen plus twenty is 37, and eight more takes it to 45.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is 10 to the power of 3?",
+  "choices": [
+   "30",
+   "100",
+   "1000",
+   "10000"
+  ],
+  "answer": "1000",
+  "difficulty": "easy",
+  "explanation": "With powers of ten the exponent simply counts the zeros.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which average is the middle value of an ordered set of data?",
+  "choices": [
+   "Mean",
+   "Median",
+   "Mode",
+   "Range"
+  ],
+  "answer": "Median",
+  "difficulty": "easy",
+  "explanation": "The median shrugs off extreme outliers that would drag the mean around.",
+  "unsure": false
+ },
+ {
+  "prompt": "What name is given to the most frequently occurring value in a data set?",
+  "choices": [
+   "Mean",
+   "Median",
+   "Mode",
+   "Range"
+  ],
+  "answer": "Mode",
+  "difficulty": "easy",
+  "explanation": "It borrows the French phrase a la mode, meaning in fashion.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is 6 multiplied by 7?",
+  "choices": [
+   "36",
+   "42",
+   "48",
+   "54"
+  ],
+  "answer": "42",
+  "difficulty": "easy",
+  "explanation": "Six sevens are 42, the number Douglas Adams made the answer to everything.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which solid has a circular base rising to a single point?",
+  "choices": [
+   "Cylinder",
+   "Cone",
+   "Sphere",
+   "Pyramid"
+  ],
+  "answer": "Cone",
+  "difficulty": "easy",
+  "explanation": "A cylinder has two circular ends instead, and a sphere has no flat face.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is 1 minus 0.25?",
+  "choices": [
+   "0.25",
+   "0.5",
+   "0.75",
+   "0.85"
+  ],
+  "answer": "0.75",
+  "difficulty": "easy",
+  "explanation": "Taking a quarter from a whole leaves three quarters.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the area of a rectangle measuring 4 cm by 5 cm?",
+  "choices": [
+   "9 sq cm",
+   "18 sq cm",
+   "20 sq cm",
+   "25 sq cm"
+  ],
+  "answer": "20 sq cm",
+  "difficulty": "easy",
+  "explanation": "Area is length times width, whereas 18 would be its perimeter.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which of these shapes has no corners at all?",
+  "choices": [
+   "Circle",
+   "Triangle",
+   "Square",
+   "Pentagon"
+  ],
+  "answer": "Circle",
+  "difficulty": "easy",
+  "explanation": "Every point on a circle sits the same distance from the centre.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is 8 multiplied by 12?",
+  "choices": [
+   "84",
+   "88",
+   "96",
+   "104"
+  ],
+  "answer": "96",
+  "difficulty": "easy",
+  "explanation": "Eight tens are 80 and eight twos are 16, giving 96.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is a number less than zero called?",
+  "choices": [
+   "Negative",
+   "Prime",
+   "Irrational",
+   "Imaginary"
+  ],
+  "answer": "Negative",
+  "difficulty": "easy",
+  "explanation": "Negative numbers sit to the left of zero on the number line.",
+  "unsure": false
+ },
+ {
+  "prompt": "How many degrees is each angle of an equilateral triangle?",
+  "choices": [
+   "30",
+   "45",
+   "60",
+   "90"
+  ],
+  "answer": "60",
+  "difficulty": "easy",
+  "explanation": "The triangle's 180 degrees divide equally between three identical corners.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is 200 minus 47?",
+  "choices": [
+   "143",
+   "153",
+   "157",
+   "163"
+  ],
+  "answer": "153",
+  "difficulty": "easy",
+  "explanation": "Take away 50 to reach 150, then add back the 3 you overshot by.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which branch of mathematics deals with shapes, angles and space?",
+  "choices": [
+   "Algebra",
+   "Geometry",
+   "Statistics",
+   "Calculus"
+  ],
+  "answer": "Geometry",
+  "difficulty": "easy",
+  "explanation": "The word comes from the Greek for earth measurement.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is one half plus one quarter?",
+  "choices": [
+   "One quarter",
+   "Two sixths",
+   "Three quarters",
+   "One"
+  ],
+  "answer": "Three quarters",
+  "difficulty": "easy",
+  "explanation": "A half is two quarters, so adding one more quarter makes three.",
+  "unsure": false
+ },
+ {
+  "prompt": "How many sides does a decagon have?",
+  "choices": [
+   "Eight",
+   "Nine",
+   "Ten",
+   "Twelve"
+  ],
+  "answer": "Ten",
+  "difficulty": "easy",
+  "explanation": "Deca means ten, the same root as decade and decathlon.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the approximate value of the mathematical constant e?",
+  "choices": [
+   "1.414",
+   "1.618",
+   "2.718",
+   "3.142"
+  ],
+  "answer": "2.718",
+  "difficulty": "medium",
+  "explanation": "Euler's number is the base of natural logarithms and governs continuous growth.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the approximate value of the golden ratio?",
+  "choices": [
+   "1.414",
+   "1.618",
+   "2.718",
+   "3.142"
+  ],
+  "answer": "1.618",
+  "difficulty": "medium",
+  "explanation": "Phi solves x squared equals x plus one and appears in a pentagon's diagonals.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the square root of 2, to three decimal places?",
+  "choices": [
+   "1.212",
+   "1.414",
+   "1.618",
+   "1.732"
+  ],
+  "answer": "1.414",
+  "difficulty": "medium",
+  "explanation": "It is the diagonal of a unit square and the first number proved irrational.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which mathematician wrote the Elements and is called the father of geometry?",
+  "choices": [
+   "Euclid",
+   "Pythagoras",
+   "Archimedes",
+   "Thales"
+  ],
+  "answer": "Euclid",
+  "difficulty": "medium",
+  "explanation": "His Elements stayed the standard geometry textbook for over 2000 years.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which ancient mathematician is said to have shouted Eureka in his bath?",
+  "choices": [
+   "Archimedes",
+   "Euclid",
+   "Pythagoras",
+   "Aristotle"
+  ],
+  "answer": "Archimedes",
+  "difficulty": "medium",
+  "explanation": "He realised displaced water measures volume, letting him test a golden crown.",
+  "unsure": false
+ },
+ {
+  "prompt": "In the Fibonacci sequence 1, 1, 2, 3, 5, 8, what comes next?",
+  "choices": [
+   "11",
+   "12",
+   "13",
+   "16"
+  ],
+  "answer": "13",
+  "difficulty": "medium",
+  "explanation": "Each term is the sum of the two before it, so 5 plus 8 gives 13.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is 5 factorial?",
+  "choices": [
+   "25",
+   "100",
+   "120",
+   "720"
+  ],
+  "answer": "120",
+  "difficulty": "medium",
+  "explanation": "Five factorial multiplies 5x4x3x2x1; six factorial would give 720.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the largest prime factor of 30?",
+  "choices": [
+   "2",
+   "3",
+   "5",
+   "15"
+  ],
+  "answer": "5",
+  "difficulty": "medium",
+  "explanation": "Thirty breaks down as 2 x 3 x 5, and 15 is not prime.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the probability of rolling a six on a fair six-sided die?",
+  "choices": [
+   "1/2",
+   "1/3",
+   "1/6",
+   "1/12"
+  ],
+  "answer": "1/6",
+  "difficulty": "medium",
+  "explanation": "All six faces are equally likely, so each carries the same one in six chance.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the probability of getting two heads when tossing a fair coin twice?",
+  "choices": [
+   "1/2",
+   "1/3",
+   "1/4",
+   "1/8"
+  ],
+  "answer": "1/4",
+  "difficulty": "medium",
+  "explanation": "The four equally likely outcomes are HH, HT, TH and TT.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is each interior angle of a regular pentagon?",
+  "choices": [
+   "100 degrees",
+   "108 degrees",
+   "120 degrees",
+   "135 degrees"
+  ],
+  "answer": "108 degrees",
+  "difficulty": "medium",
+  "explanation": "A pentagon's interior angles total 540 degrees, shared between five corners.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is each interior angle of a regular hexagon?",
+  "choices": [
+   "108 degrees",
+   "120 degrees",
+   "135 degrees",
+   "144 degrees"
+  ],
+  "answer": "120 degrees",
+  "difficulty": "medium",
+  "explanation": "Its exterior angles are 60 degrees, and interior plus exterior makes 180.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which number is the smallest perfect number, equal to the sum of its divisors?",
+  "choices": [
+   "4",
+   "6",
+   "8",
+   "10"
+  ],
+  "answer": "6",
+  "difficulty": "medium",
+  "explanation": "1 plus 2 plus 3 equals 6; the next perfect number is 28.",
+  "unsure": false
+ },
+ {
+  "prompt": "What number is a googol?",
+  "choices": [
+   "10 to the power 10",
+   "10 to the power 100",
+   "A million million",
+   "10 to the power 1000"
+  ],
+  "answer": "10 to the power 100",
+  "difficulty": "medium",
+  "explanation": "The name was coined by the nine-year-old nephew of mathematician Edward Kasner.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which philosopher gave his name to the Cartesian coordinate system?",
+  "choices": [
+   "Rene Descartes",
+   "Blaise Pascal",
+   "Pierre de Fermat",
+   "Isaac Newton"
+  ],
+  "answer": "Rene Descartes",
+  "difficulty": "medium",
+  "explanation": "Cartesian comes from Cartesius, the Latin form of his surname.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which pair independently developed calculus in the seventeenth century?",
+  "choices": [
+   "Newton and Leibniz",
+   "Newton and Halley",
+   "Euler and Gauss",
+   "Descartes and Fermat"
+  ],
+  "answer": "Newton and Leibniz",
+  "difficulty": "medium",
+  "explanation": "Their bitter priority dispute split British and Continental maths for a century.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which formula gives the area of a circle?",
+  "choices": [
+   "pi r squared",
+   "2 pi r",
+   "pi d",
+   "pi r cubed"
+  ],
+  "answer": "pi r squared",
+  "difficulty": "medium",
+  "explanation": "Both 2 pi r and pi d give the circumference rather than the area.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is 3/8 as a decimal?",
+  "choices": [
+   "0.325",
+   "0.375",
+   "0.380",
+   "0.625"
+  ],
+  "answer": "0.375",
+  "difficulty": "medium",
+  "explanation": "One eighth is 0.125, so three eighths is three times that.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the sum of the whole numbers from 1 to 10?",
+  "choices": [
+   "45",
+   "50",
+   "55",
+   "100"
+  ],
+  "answer": "55",
+  "difficulty": "medium",
+  "explanation": "Pair 1 with 10, 2 with 9 and so on for five pairs each totalling 11.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which mathematician reputedly summed 1 to 100 in seconds as a schoolboy?",
+  "choices": [
+   "Carl Friedrich Gauss",
+   "Leonhard Euler",
+   "Bernhard Riemann",
+   "David Hilbert"
+  ],
+  "answer": "Carl Friedrich Gauss",
+  "difficulty": "medium",
+  "explanation": "He paired the numbers into fifty lots of 101, giving 5050 at once.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is a number called if it reads the same forwards and backwards?",
+  "choices": [
+   "Palindromic",
+   "Perfect",
+   "Rational",
+   "Composite"
+  ],
+  "answer": "Palindromic",
+  "difficulty": "medium",
+  "explanation": "1331 and 12321 are palindromic; so is every year like 2002.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is a triangle with exactly two equal sides called?",
+  "choices": [
+   "Scalene",
+   "Isosceles",
+   "Equilateral",
+   "Obtuse"
+  ],
+  "answer": "Isosceles",
+  "difficulty": "medium",
+  "explanation": "Its two base angles are equal as well, while a scalene has none equal.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which Platonic solid has twenty triangular faces?",
+  "choices": [
+   "Dodecahedron",
+   "Icosahedron",
+   "Octahedron",
+   "Tetrahedron"
+  ],
+  "answer": "Icosahedron",
+  "difficulty": "medium",
+  "explanation": "It is the shape of the twenty-sided dice used in tabletop games.",
+  "unsure": false
+ },
+ {
+  "prompt": "How many Platonic solids are there?",
+  "choices": [
+   "Four",
+   "Five",
+   "Six",
+   "Eight"
+  ],
+  "answer": "Five",
+  "difficulty": "medium",
+  "explanation": "Tetrahedron, cube, octahedron, dodecahedron and icosahedron, and no others.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the value of zero factorial?",
+  "choices": [
+   "0",
+   "1",
+   "Undefined",
+   "Infinity"
+  ],
+  "answer": "1",
+  "difficulty": "medium",
+  "explanation": "It is defined as 1 so that formulas for combinations keep working.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the chance of drawing an ace from a shuffled 52-card deck?",
+  "choices": [
+   "1/4",
+   "1/13",
+   "1/26",
+   "4/13"
+  ],
+  "answer": "1/13",
+  "difficulty": "medium",
+  "explanation": "Four aces among 52 cards simplifies to one chance in thirteen.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the gradient of the line y = 3x + 2?",
+  "choices": [
+   "2",
+   "3",
+   "5",
+   "6"
+  ],
+  "answer": "3",
+  "difficulty": "medium",
+  "explanation": "In y = mx + c the m is the gradient and c is where it crosses the y-axis.",
+  "unsure": false
+ },
+ {
+  "prompt": "If 3x = 21, what is x?",
+  "choices": [
+   "3",
+   "7",
+   "18",
+   "24"
+  ],
+  "answer": "7",
+  "difficulty": "medium",
+  "explanation": "Dividing both sides by 3 isolates x.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is 20% of 250?",
+  "choices": [
+   "25",
+   "50",
+   "75",
+   "125"
+  ],
+  "answer": "50",
+  "difficulty": "medium",
+  "explanation": "Ten per cent of 250 is 25, so twenty per cent is double that.",
+  "unsure": false
+ },
+ {
+  "prompt": "In mathematics, what does the letter i represent?",
+  "choices": [
+   "The square root of -1",
+   "Infinity",
+   "Any integer",
+   "Half of pi"
+  ],
+  "answer": "The square root of -1",
+  "difficulty": "medium",
+  "explanation": "This imaginary unit lets every polynomial equation have a solution.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which shape has an area of half the base times the height?",
+  "choices": [
+   "Triangle",
+   "Rectangle",
+   "Circle",
+   "Trapezium"
+  ],
+  "answer": "Triangle",
+  "difficulty": "medium",
+  "explanation": "A triangle fills exactly half the rectangle drawn around it.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is a statement accepted as true without proof called?",
+  "choices": [
+   "Axiom",
+   "Theorem",
+   "Lemma",
+   "Corollary"
+  ],
+  "answer": "Axiom",
+  "difficulty": "medium",
+  "explanation": "Euclid built all of his geometry from just five such postulates.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is a minor result proved mainly as a step towards a bigger theorem?",
+  "choices": [
+   "Axiom",
+   "Lemma",
+   "Corollary",
+   "Conjecture"
+  ],
+  "answer": "Lemma",
+  "difficulty": "medium",
+  "explanation": "A corollary is the opposite: a result that drops out of a theorem already proved.",
+  "unsure": false
+ },
+ {
+  "prompt": "Who first proved that there are infinitely many prime numbers?",
+  "choices": [
+   "Euclid",
+   "Euler",
+   "Fermat",
+   "Gauss"
+  ],
+  "answer": "Euclid",
+  "difficulty": "medium",
+  "explanation": "His proof shows any finite list of primes can always be extended by one more.",
+  "unsure": false
+ },
+ {
+  "prompt": "What does the standard deviation of a data set measure?",
+  "choices": [
+   "Spread of the data",
+   "Average value",
+   "Most common value",
+   "Middle value"
+  ],
+  "answer": "Spread of the data",
+  "difficulty": "medium",
+  "explanation": "It is the square root of the variance, given in the same units as the data.",
+  "unsure": false
+ },
+ {
+  "prompt": "How is the range of a data set calculated?",
+  "choices": [
+   "Highest minus lowest",
+   "The middle value",
+   "The average",
+   "The most common value"
+  ],
+  "answer": "Highest minus lowest",
+  "difficulty": "medium",
+  "explanation": "It is the simplest measure of spread but a single outlier wrecks it.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the symmetric bell-shaped curve in statistics called?",
+  "choices": [
+   "Normal distribution",
+   "Poisson distribution",
+   "Uniform distribution",
+   "Binomial distribution"
+  ],
+  "answer": "Normal distribution",
+  "difficulty": "medium",
+  "explanation": "Also called the Gaussian, it describes heights, errors and many natural measures.",
+  "unsure": false
+ },
+ {
+  "prompt": "In a normal distribution, roughly what share of data lies within one standard deviation?",
+  "choices": [
+   "50%",
+   "68%",
+   "95%",
+   "99%"
+  ],
+  "answer": "68%",
+  "difficulty": "medium",
+  "explanation": "The 68-95-99.7 rule covers one, two and three standard deviations.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which formula gives the volume of a cylinder?",
+  "choices": [
+   "pi r squared h",
+   "2 pi r h",
+   "pi r cubed",
+   "pi r h"
+  ],
+  "answer": "pi r squared h",
+  "difficulty": "medium",
+  "explanation": "It is simply the circular base area multiplied by the height.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is 15 squared?",
+  "choices": [
+   "205",
+   "215",
+   "225",
+   "235"
+  ],
+  "answer": "225",
+  "difficulty": "medium",
+  "explanation": "For numbers ending in 5, take 1x2=2 and append 25.",
+  "unsure": false
+ },
+ {
+  "prompt": "A right-angled triangle has shorter sides of 3 and 4. How long is the hypotenuse?",
+  "choices": [
+   "5",
+   "6",
+   "7",
+   "12"
+  ],
+  "answer": "5",
+  "difficulty": "medium",
+  "explanation": "9 plus 16 is 25, and the 3-4-5 triangle is the smallest Pythagorean triple.",
+  "unsure": false
+ },
+ {
+  "prompt": "A right-angled triangle has shorter sides of 5 and 12. How long is the hypotenuse?",
+  "choices": [
+   "13",
+   "15",
+   "17",
+   "60"
+  ],
+  "answer": "13",
+  "difficulty": "medium",
+  "explanation": "25 plus 144 is 169, whose square root is 13.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the number below the line in a fraction called?",
+  "choices": [
+   "Numerator",
+   "Denominator",
+   "Divisor",
+   "Quotient"
+  ],
+  "answer": "Denominator",
+  "difficulty": "medium",
+  "explanation": "The denominator names the size of the parts; the numerator counts them.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which fraction equals the recurring decimal 0.111...?",
+  "choices": [
+   "1/7",
+   "1/8",
+   "1/9",
+   "1/11"
+  ],
+  "answer": "1/9",
+  "difficulty": "medium",
+  "explanation": "Ninths always recur with a single repeating digit, so 2/9 is 0.222...",
+  "unsure": false
+ },
+ {
+  "prompt": "Whose conjecture says every even number above 2 is the sum of two primes?",
+  "choices": [
+   "Goldbach",
+   "Fermat",
+   "Riemann",
+   "Collatz"
+  ],
+  "answer": "Goldbach",
+  "difficulty": "medium",
+  "explanation": "Christian Goldbach floated it in a 1742 letter to Euler and it is still unproved.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which result did its author claim to have proved in a margin too small to hold it?",
+  "choices": [
+   "Fermat's Last Theorem",
+   "The Riemann Hypothesis",
+   "Goldbach's Conjecture",
+   "The Four Colour Theorem"
+  ],
+  "answer": "Fermat's Last Theorem",
+  "difficulty": "medium",
+  "explanation": "Fermat scribbled the note around 1637 in his copy of Diophantus' Arithmetica.",
+  "unsure": false
+ },
+ {
+  "prompt": "Who finally proved Fermat's Last Theorem in the 1990s?",
+  "choices": [
+   "Andrew Wiles",
+   "Grigori Perelman",
+   "Terence Tao",
+   "Paul Erdos"
+  ],
+  "answer": "Andrew Wiles",
+  "difficulty": "medium",
+  "explanation": "The British mathematician worked largely in secret for seven years.",
+  "unsure": false
+ },
+ {
+  "prompt": "The Collatz conjecture is also known by which name?",
+  "choices": [
+   "The 3n + 1 problem",
+   "The twin prime problem",
+   "The knapsack problem",
+   "The travelling salesman"
+  ],
+  "answer": "The 3n + 1 problem",
+  "difficulty": "medium",
+  "explanation": "Odd numbers triple and add one, even numbers halve, and every start seems to reach 1.",
+  "unsure": false
+ },
+ {
+  "prompt": "Ada Lovelace is celebrated for writing what, back in the 1840s?",
+  "choices": [
+   "The first computer algorithm",
+   "The first proof of pi",
+   "The binary system",
+   "Modern set theory"
+  ],
+  "answer": "The first computer algorithm",
+  "difficulty": "medium",
+  "explanation": "Her notes on Babbage's Analytical Engine described computing Bernoulli numbers.",
+  "unsure": false
+ },
+ {
+  "prompt": "The word algorithm derives from the name of which scholar?",
+  "choices": [
+   "Al-Khwarizmi",
+   "Al-Kindi",
+   "Avicenna",
+   "Omar Khayyam"
+  ],
+  "answer": "Al-Khwarizmi",
+  "difficulty": "medium",
+  "explanation": "The word algebra also comes from his book title, containing al-jabr.",
+  "unsure": false
+ },
+ {
+  "prompt": "How many square centimetres are there in one square metre?",
+  "choices": [
+   "100",
+   "1000",
+   "10000",
+   "100000"
+  ],
+  "answer": "10000",
+  "difficulty": "medium",
+  "explanation": "Both sides scale by 100, so the area scales by 100 times 100.",
+  "unsure": false
+ },
+ {
+  "prompt": "How many cubic centimetres are there in one litre?",
+  "choices": [
+   "100",
+   "1000",
+   "10000",
+   "1000000"
+  ],
+  "answer": "1000",
+  "difficulty": "medium",
+  "explanation": "A litre is a cube 10 cm on each side, so 10 x 10 x 10.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which metric prefix means one billionth?",
+  "choices": [
+   "Micro",
+   "Nano",
+   "Pico",
+   "Milli"
+  ],
+  "answer": "Nano",
+  "difficulty": "medium",
+  "explanation": "Nano is ten to the minus nine; pico is a thousand times smaller again.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which is the longer distance, one mile or one kilometre?",
+  "choices": [
+   "One mile",
+   "One kilometre",
+   "They are equal",
+   "It varies by country"
+  ],
+  "answer": "One mile",
+  "difficulty": "medium",
+  "explanation": "A mile is about 1.61 km, which is why 5k is roughly three miles.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the probability of rolling an even number on a fair six-sided die?",
+  "choices": [
+   "1/2",
+   "1/3",
+   "1/6",
+   "2/3"
+  ],
+  "answer": "1/2",
+  "difficulty": "medium",
+  "explanation": "Three of the six faces, namely 2, 4 and 6, are even.",
+  "unsure": false
+ },
+ {
+  "prompt": "In the Monty Hall problem, what should a contestant do to improve their odds?",
+  "choices": [
+   "Switch doors",
+   "Stick with their door",
+   "It makes no difference",
+   "Pick again at random"
+  ],
+  "answer": "Switch doors",
+  "difficulty": "medium",
+  "explanation": "Switching wins two times in three, because the first pick was only one in three.",
+  "unsure": false
+ },
+ {
+  "prompt": "What are two events called if they cannot both occur?",
+  "choices": [
+   "Mutually exclusive",
+   "Independent",
+   "Complementary",
+   "Conditional"
+  ],
+  "answer": "Mutually exclusive",
+  "difficulty": "medium",
+  "explanation": "Independent events, by contrast, can both happen but do not influence each other.",
+  "unsure": false
+ },
+ {
+  "prompt": "What do the exterior angles of any convex polygon add up to?",
+  "choices": [
+   "180 degrees",
+   "360 degrees",
+   "540 degrees",
+   "It depends on the sides"
+  ],
+  "answer": "360 degrees",
+  "difficulty": "medium",
+  "explanation": "Walking once around the shape turns you through exactly one full circle.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is a solid with two identical parallel polygon ends called?",
+  "choices": [
+   "Prism",
+   "Pyramid",
+   "Frustum",
+   "Cone"
+  ],
+  "answer": "Prism",
+  "difficulty": "medium",
+  "explanation": "A Toblerone box is the classic triangular prism.",
+  "unsure": false
+ },
+ {
+  "prompt": "Whose sieve is the classic method for listing prime numbers?",
+  "choices": [
+   "Eratosthenes",
+   "Euclid",
+   "Archimedes",
+   "Pythagoras"
+  ],
+  "answer": "Eratosthenes",
+  "difficulty": "medium",
+  "explanation": "He also estimated the Earth's circumference by comparing midday shadows.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is 0.1 plus 0.2?",
+  "choices": [
+   "0.3",
+   "0.12",
+   "0.03",
+   "0.21"
+  ],
+  "answer": "0.3",
+  "difficulty": "medium",
+  "explanation": "Exact in decimal, but computers storing it in binary famously return 0.30000000000000004.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is 25 squared?",
+  "choices": [
+   "525",
+   "600",
+   "625",
+   "650"
+  ],
+  "answer": "625",
+  "difficulty": "medium",
+  "explanation": "For numbers ending in 5, take 2x3=6 and append 25.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is 1000 minus 356?",
+  "choices": [
+   "634",
+   "644",
+   "654",
+   "744"
+  ],
+  "answer": "644",
+  "difficulty": "medium",
+  "explanation": "It checks out because 356 plus 644 restores the thousand.",
+  "unsure": false
+ },
+ {
+  "prompt": "The interior angles of a pentagon add up to how many degrees?",
+  "choices": [
+   "360",
+   "450",
+   "540",
+   "720"
+  ],
+  "answer": "540",
+  "difficulty": "medium",
+  "explanation": "A pentagon splits into three triangles, so three lots of 180 degrees.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which Greek letter is the symbol for summation in mathematics?",
+  "choices": [
+   "Sigma",
+   "Pi",
+   "Delta",
+   "Lambda"
+  ],
+  "answer": "Sigma",
+  "difficulty": "medium",
+  "explanation": "Capital pi is used for products, and delta for change in a quantity.",
+  "unsure": false
+ },
+ {
+  "prompt": "What does the phrase per cent literally mean?",
+  "choices": [
+   "Per hundred",
+   "Per thousand",
+   "Per ten",
+   "Per part"
+  ],
+  "answer": "Per hundred",
+  "difficulty": "medium",
+  "explanation": "It comes from the Latin per centum, which is why 50% is half.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is a number called if it cannot be written as a fraction of two integers?",
+  "choices": [
+   "Irrational",
+   "Imaginary",
+   "Prime",
+   "Composite"
+  ],
+  "answer": "Irrational",
+  "difficulty": "medium",
+  "explanation": "Pi and the square root of 2 are irrational; their decimals never settle into a pattern.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the probability of drawing a red card from a full 52-card deck?",
+  "choices": [
+   "1/2",
+   "1/3",
+   "1/4",
+   "2/3"
+  ],
+  "answer": "1/2",
+  "difficulty": "medium",
+  "explanation": "Twenty-six of the cards are hearts or diamonds.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the answer to a division sum called?",
+  "choices": [
+   "Quotient",
+   "Product",
+   "Sum",
+   "Remainder"
+  ],
+  "answer": "Quotient",
+  "difficulty": "medium",
+  "explanation": "The number being divided is the dividend and the one dividing it the divisor.",
+  "unsure": false
+ },
+ {
+  "prompt": "Who proved that no consistent formal system can prove every truth of arithmetic?",
+  "choices": [
+   "Kurt Godel",
+   "David Hilbert",
+   "Bertrand Russell",
+   "Alan Turing"
+  ],
+  "answer": "Kurt Godel",
+  "difficulty": "hard",
+  "explanation": "His 1931 incompleteness theorems ended Hilbert's dream of complete foundations.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which unsolved problem about the zeta function carries a Millennium Prize?",
+  "choices": [
+   "The Riemann Hypothesis",
+   "Goldbach's Conjecture",
+   "The Twin Prime Conjecture",
+   "The Collatz Conjecture"
+  ],
+  "answer": "The Riemann Hypothesis",
+  "difficulty": "hard",
+  "explanation": "It claims the non-trivial zeros all lie on the line with real part one half.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which Millennium Prize Problem has been solved?",
+  "choices": [
+   "The Poincare Conjecture",
+   "P versus NP",
+   "The Hodge Conjecture",
+   "Navier-Stokes existence"
+  ],
+  "answer": "The Poincare Conjecture",
+  "difficulty": "hard",
+  "explanation": "Grigori Perelman posted his proof online in 2002 and 2003 rather than publishing it.",
+  "unsure": false
+ },
+ {
+  "prompt": "Who turned down both the Fields Medal and a million-dollar Millennium Prize?",
+  "choices": [
+   "Grigori Perelman",
+   "Andrew Wiles",
+   "Terence Tao",
+   "Alexander Grothendieck"
+  ],
+  "answer": "Grigori Perelman",
+  "difficulty": "hard",
+  "explanation": "He argued the honours were unfair to Richard Hamilton, whose programme he completed.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which self-taught Indian mathematician posted startling formulas to G. H. Hardy?",
+  "choices": [
+   "Srinivasa Ramanujan",
+   "Aryabhata",
+   "Brahmagupta",
+   "Harish-Chandra"
+  ],
+  "answer": "Srinivasa Ramanujan",
+  "difficulty": "hard",
+  "explanation": "Hardy brought him to Cambridge in 1914, and his notebooks are still mined today.",
+  "unsure": false
+ },
+ {
+  "prompt": "What makes 1729 the famous Hardy-Ramanujan taxicab number?",
+  "choices": [
+   "Sum of two cubes, two ways",
+   "The smallest perfect number",
+   "The largest known prime",
+   "A number with no factors"
+  ],
+  "answer": "Sum of two cubes, two ways",
+  "difficulty": "hard",
+  "explanation": "1729 equals 1 cubed plus 12 cubed, and also 9 cubed plus 10 cubed.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which was the first major theorem proved with substantial help from a computer?",
+  "choices": [
+   "The Four Colour Theorem",
+   "Fermat's Last Theorem",
+   "The Prime Number Theorem",
+   "The Pythagorean Theorem"
+  ],
+  "answer": "The Four Colour Theorem",
+  "difficulty": "hard",
+  "explanation": "Appel and Haken checked over a thousand configurations by machine in 1976.",
+  "unsure": false
+ },
+ {
+  "prompt": "Whose diagonal argument shows the real numbers cannot be counted?",
+  "choices": [
+   "Georg Cantor",
+   "Richard Dedekind",
+   "Kurt Godel",
+   "Henri Poincare"
+  ],
+  "answer": "Georg Cantor",
+  "difficulty": "hard",
+  "explanation": "It proved some infinities are strictly larger than others, scandalising his peers.",
+  "unsure": false
+ },
+ {
+  "prompt": "How many unsolved problems did David Hilbert set out in 1900?",
+  "choices": [
+   "10",
+   "17",
+   "23",
+   "30"
+  ],
+  "answer": "23",
+  "difficulty": "hard",
+  "explanation": "His Paris list shaped the agenda of twentieth-century mathematics.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which mathematician died in a duel at 20, leaving notes that founded group theory?",
+  "choices": [
+   "Evariste Galois",
+   "Niels Abel",
+   "Bernhard Riemann",
+   "Blaise Pascal"
+  ],
+  "answer": "Evariste Galois",
+  "difficulty": "hard",
+  "explanation": "Galois theory explains why no general formula by radicals solves the quintic.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which Norwegian proved the general quintic has no solution in radicals?",
+  "choices": [
+   "Niels Henrik Abel",
+   "Evariste Galois",
+   "Carl Gauss",
+   "Joseph Lagrange"
+  ],
+  "answer": "Niels Henrik Abel",
+  "difficulty": "hard",
+  "explanation": "He died at 26 of tuberculosis; the Abel Prize was founded in his honour in 2002.",
+  "unsure": false
+ },
+ {
+  "prompt": "Euler's identity links e, i, pi and 1 with which other number?",
+  "choices": [
+   "0",
+   "2",
+   "-1",
+   "The golden ratio"
+  ],
+  "answer": "0",
+  "difficulty": "hard",
+  "explanation": "Written e to the i pi plus 1 equals 0, it is often voted the most beautiful equation.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which Greek bounded pi by trapping a circle between inscribed and outer polygons?",
+  "choices": [
+   "Archimedes",
+   "Euclid",
+   "Thales",
+   "Eratosthenes"
+  ],
+  "answer": "Archimedes",
+  "difficulty": "hard",
+  "explanation": "Using 96-sided polygons he pinned pi between 3 and 10/71 and 3 and 1/7.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which paradox says a ball can be cut up and reassembled into two identical balls?",
+  "choices": [
+   "Banach-Tarski paradox",
+   "Zeno's paradox",
+   "Russell's paradox",
+   "Hilbert's hotel"
+  ],
+  "answer": "Banach-Tarski paradox",
+  "difficulty": "hard",
+  "explanation": "It depends on the axiom of choice and pieces with no well-defined volume.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which paradox asks whether the set of all sets that avoid themselves contains itself?",
+  "choices": [
+   "Russell's paradox",
+   "Banach-Tarski paradox",
+   "The liar paradox",
+   "Simpson's paradox"
+  ],
+  "answer": "Russell's paradox",
+  "difficulty": "hard",
+  "explanation": "It wrecked Frege's foundations of arithmetic and forced axiomatic set theory.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which paradox occurs when a trend in separate groups reverses once they are combined?",
+  "choices": [
+   "Simpson's paradox",
+   "The birthday paradox",
+   "The Monty Hall problem",
+   "Benford's law"
+  ],
+  "answer": "Simpson's paradox",
+  "difficulty": "hard",
+  "explanation": "Berkeley's 1973 admissions looked biased overall but not department by department.",
+  "unsure": false
+ },
+ {
+  "prompt": "In a room of 23 people, roughly what is the chance that two share a birthday?",
+  "choices": [
+   "6%",
+   "23%",
+   "50%",
+   "99%"
+  ],
+  "answer": "50%",
+  "difficulty": "hard",
+  "explanation": "The count that matters is pairs of people, and 23 people give 253 pairs.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which law says a leading digit of 1 turns up in about 30% of real-world figures?",
+  "choices": [
+   "Benford's law",
+   "Zipf's law",
+   "Moore's law",
+   "Poisson's law"
+  ],
+  "answer": "Benford's law",
+  "difficulty": "hard",
+  "explanation": "Auditors use it to sniff out fabricated numbers in accounts and expenses.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which famous fractal is defined by iterating z squared plus c in the complex plane?",
+  "choices": [
+   "The Mandelbrot set",
+   "The Cantor set",
+   "The Sierpinski gasket",
+   "The Koch snowflake"
+  ],
+  "answer": "The Mandelbrot set",
+  "difficulty": "hard",
+  "explanation": "Benoit Mandelbrot coined the word fractal in 1975 while at IBM.",
+  "unsure": false
+ },
+ {
+  "prompt": "What does the P versus NP problem essentially ask?",
+  "choices": [
+   "If verifying implies solving",
+   "Whether pi is normal",
+   "Whether primes are infinite",
+   "Whether all sets are countable"
+  ],
+  "answer": "If verifying implies solving",
+  "difficulty": "hard",
+  "explanation": "A fast algorithm for any NP-complete problem would settle it and break modern cryptography.",
+  "unsure": false
+ },
+ {
+  "prompt": "Whose collaboration distance is measured by a number given to co-authors?",
+  "choices": [
+   "Paul Erdos",
+   "Leonhard Euler",
+   "John von Neumann",
+   "G. H. Hardy"
+  ],
+  "answer": "Paul Erdos",
+  "difficulty": "hard",
+  "explanation": "An Erdos number of 1 means writing a paper directly with the itinerant Hungarian.",
+  "unsure": false
+ },
+ {
+  "prompt": "What did Euler prove about walking the seven bridges of Konigsberg?",
+  "choices": [
+   "No such walk exists",
+   "Only one route works",
+   "Exactly two routes work",
+   "Seven routes exist"
+  ],
+  "answer": "No such walk exists",
+  "difficulty": "hard",
+  "explanation": "Too many landmasses had an odd number of bridges; the 1736 proof founded graph theory.",
+  "unsure": false
+ },
+ {
+  "prompt": "In set theory, what does aleph-null measure?",
+  "choices": [
+   "Size of the whole numbers",
+   "The smallest real number",
+   "Infinity squared",
+   "An imaginary unit"
+  ],
+  "answer": "Size of the whole numbers",
+  "difficulty": "hard",
+  "explanation": "The fractions share this smallest infinity, but the real numbers exceed it.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which curve has an infinite perimeter yet encloses a finite area?",
+  "choices": [
+   "The Koch snowflake",
+   "The parabola",
+   "The catenary",
+   "The cycloid"
+  ],
+  "answer": "The Koch snowflake",
+  "difficulty": "hard",
+  "explanation": "Every iteration multiplies its perimeter by four thirds, without bound.",
+  "unsure": false
+ },
+ {
+  "prompt": "What curve does a chain hanging freely between two points form?",
+  "choices": [
+   "Catenary",
+   "Parabola",
+   "Hyperbola",
+   "Ellipse"
+  ],
+  "answer": "Catenary",
+  "difficulty": "hard",
+  "explanation": "It follows a hyperbolic cosine; Gaudi designed arches by inverting hanging chains.",
+  "unsure": false
+ },
+ {
+  "prompt": "Who wrote Liber Abaci, which spread Hindu-Arabic numerals across Europe?",
+  "choices": [
+   "Leonardo of Pisa",
+   "Gerolamo Cardano",
+   "Luca Pacioli",
+   "Nicolas Chuquet"
+  ],
+  "answer": "Leonardo of Pisa",
+  "difficulty": "hard",
+  "explanation": "Better known as Fibonacci, he introduced his rabbit-breeding sequence in 1202.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which Italian published the cubic equation's solution, breaking a promise of secrecy?",
+  "choices": [
+   "Gerolamo Cardano",
+   "Niccolo Tartaglia",
+   "Rafael Bombelli",
+   "Scipione del Ferro"
+  ],
+  "answer": "Gerolamo Cardano",
+  "difficulty": "hard",
+  "explanation": "His Ars Magna of 1545 used Tartaglia's method and triggered a bitter public feud.",
+  "unsure": false
+ },
+ {
+  "prompt": "Pascal's 1654 letters with which mathematician founded probability theory?",
+  "choices": [
+   "Pierre de Fermat",
+   "Rene Descartes",
+   "Christiaan Huygens",
+   "Jacob Bernoulli"
+  ],
+  "answer": "Pierre de Fermat",
+  "difficulty": "hard",
+  "explanation": "They worked out how to divide the stakes of a gambling game cut short.",
+  "unsure": false
+ },
+ {
+  "prompt": "Primes of the form 2 to the power n minus 1 are named after whom?",
+  "choices": [
+   "Marin Mersenne",
+   "Pierre de Fermat",
+   "Sophie Germain",
+   "Leonhard Euler"
+  ],
+  "answer": "Marin Mersenne",
+  "difficulty": "hard",
+  "explanation": "The largest known primes are nearly always Mersenne primes found by the GIMPS project.",
+  "unsure": false
+ },
+ {
+  "prompt": "Who was the first woman to be awarded the Fields Medal?",
+  "choices": [
+   "Maryam Mirzakhani",
+   "Emmy Noether",
+   "Sofia Kovalevskaya",
+   "Karen Uhlenbeck"
+  ],
+  "answer": "Maryam Mirzakhani",
+  "difficulty": "hard",
+  "explanation": "The Iranian geometer won in 2014 for work on the dynamics of Riemann surfaces.",
+  "unsure": false
+ },
+ {
+  "prompt": "Whose theorem links symmetries in physics to conservation laws?",
+  "choices": [
+   "Emmy Noether",
+   "Sofia Kovalevskaya",
+   "Mary Cartwright",
+   "Hypatia"
+  ],
+  "answer": "Emmy Noether",
+  "difficulty": "hard",
+  "explanation": "Symmetry in time gives conservation of energy, and in space conservation of momentum.",
+  "unsure": false
+ },
+ {
+  "prompt": "Who is the earliest woman mathematician whose life is well documented?",
+  "choices": [
+   "Hypatia",
+   "Theano",
+   "Sofia Kovalevskaya",
+   "Emmy Noether"
+  ],
+  "answer": "Hypatia",
+  "difficulty": "hard",
+  "explanation": "She taught in Alexandria and worked on commentaries to Apollonius and Diophantus.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which mathematician's 1936 paper on computable numbers defined the modern algorithm?",
+  "choices": [
+   "Alan Turing",
+   "John von Neumann",
+   "Claude Shannon",
+   "Charles Babbage"
+  ],
+  "answer": "Alan Turing",
+  "difficulty": "hard",
+  "explanation": "He later led the Bletchley Park work that broke the German Enigma cipher.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is a number called if it is not the root of any polynomial with whole coefficients?",
+  "choices": [
+   "Transcendental",
+   "Irrational",
+   "Imaginary",
+   "Algebraic"
+  ],
+  "answer": "Transcendental",
+  "difficulty": "hard",
+  "explanation": "Pi and e are transcendental, while root 2 is irrational but still algebraic.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which ancient construction problem was ruled impossible once pi was shown transcendental?",
+  "choices": [
+   "Squaring the circle",
+   "Trisecting an angle",
+   "Doubling the cube",
+   "Drawing a heptagon"
+  ],
+  "answer": "Squaring the circle",
+  "difficulty": "hard",
+  "explanation": "Lindemann settled it in 1882, ending over two thousand years of attempts.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which theorem states that every non-constant polynomial has a complex root?",
+  "choices": [
+   "Fundamental theorem of algebra",
+   "Fundamental theorem of calculus",
+   "The binomial theorem",
+   "The remainder theorem"
+  ],
+  "answer": "Fundamental theorem of algebra",
+  "difficulty": "hard",
+  "explanation": "Gauss gave a proof of it in his doctoral thesis of 1799 and several more later.",
+  "unsure": false
+ },
+ {
+  "prompt": "What one-sided surface is made by giving a strip a half twist and joining the ends?",
+  "choices": [
+   "Mobius strip",
+   "Klein bottle",
+   "Torus",
+   "Hyperboloid"
+  ],
+  "answer": "Mobius strip",
+  "difficulty": "hard",
+  "explanation": "Cutting it lengthways gives one longer loop rather than two separate rings.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which surface has no inside or outside and cannot be built in three dimensions?",
+  "choices": [
+   "Klein bottle",
+   "Mobius strip",
+   "Torus",
+   "Sphere"
+  ],
+  "answer": "Klein bottle",
+  "difficulty": "hard",
+  "explanation": "Felix Klein's surface needs four dimensions to avoid intersecting itself.",
+  "unsure": false
+ },
+ {
+  "prompt": "Whose formula relates a polyhedron's vertices, edges and faces as V minus E plus F equals 2?",
+  "choices": [
+   "Euler",
+   "Gauss",
+   "Descartes",
+   "Cauchy"
+  ],
+  "answer": "Euler",
+  "difficulty": "hard",
+  "explanation": "A cube checks out: 8 vertices minus 12 edges plus 6 faces gives 2.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which paradox involves a hotel with infinite rooms that is full yet still takes guests?",
+  "choices": [
+   "Hilbert's hotel",
+   "Zeno's paradox",
+   "Simpson's paradox",
+   "The St Petersburg paradox"
+  ],
+  "answer": "Hilbert's hotel",
+  "difficulty": "hard",
+  "explanation": "Shifting every guest along one room frees the first, since infinity plus one is infinity.",
+  "unsure": false
+ }
+]

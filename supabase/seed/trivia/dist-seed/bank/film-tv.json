@@ -1,0 +1,2342 @@
+[
+ {
+  "prompt": "Which 1997 film follows Jack and Rose aboard a doomed ocean liner?",
+  "choices": [
+   "Titanic",
+   "Poseidon",
+   "The Abyss",
+   "Waterworld"
+  ],
+  "answer": "Titanic",
+  "difficulty": "easy",
+  "explanation": "James Cameron cut real footage of the wreck into a story shot on a near full-scale ship built in Mexico.",
+  "unsure": false
+ },
+ {
+  "prompt": "Who directed the 1975 shark thriller Jaws?",
+  "choices": [
+   "Steven Spielberg",
+   "George Lucas",
+   "Ridley Scott",
+   "Brian De Palma"
+  ],
+  "answer": "Steven Spielberg",
+  "difficulty": "easy",
+  "explanation": "The malfunctioning mechanical shark forced Spielberg to suggest the animal with music and point-of-view shots.",
+  "unsure": false
+ },
+ {
+  "prompt": "In the 1939 film The Wizard of Oz, what colour are Dorothy's slippers?",
+  "choices": [
+   "Ruby red",
+   "Silver",
+   "Emerald green",
+   "Gold"
+  ],
+  "answer": "Ruby red",
+  "difficulty": "easy",
+  "explanation": "Baum's novel gave her silver shoes; the film changed them to red to show off Technicolor.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which studio made the 1995 film Toy Story?",
+  "choices": [
+   "Pixar",
+   "DreamWorks",
+   "Illumination",
+   "Aardman"
+  ],
+  "answer": "Pixar",
+  "difficulty": "easy",
+  "explanation": "It was the first feature animated entirely on computers, rendered on a farm of workstations over years.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which superhero team assembles in the 2012 Marvel film directed by Joss Whedon?",
+  "choices": [
+   "The Avengers",
+   "The X-Men",
+   "The Justice League",
+   "The Fantastic Four"
+  ],
+  "answer": "The Avengers",
+  "difficulty": "easy",
+  "explanation": "The film paid off five earlier Marvel pictures that had each planted the same shared-universe threads.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the name of the wizarding school in the Harry Potter films?",
+  "choices": [
+   "Hogwarts",
+   "Beauxbatons",
+   "Durmstrang",
+   "Ilvermorny"
+  ],
+  "answer": "Hogwarts",
+  "difficulty": "easy",
+  "explanation": "Alnwick Castle and Gloucester Cathedral stood in for much of the school's exteriors and corridors.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which sitcom follows six friends in New York, among them Ross and Rachel?",
+  "choices": [
+   "Friends",
+   "Seinfeld",
+   "Cheers",
+   "Frasier"
+  ],
+  "answer": "Friends",
+  "difficulty": "easy",
+  "explanation": "It ran for ten series from 1994 and was filmed in front of a live studio audience in Burbank.",
+  "unsure": false
+ },
+ {
+  "prompt": "In which 1982 Spielberg film does a boy help a stranded alien get home?",
+  "choices": [
+   "E.T. the Extra-Terrestrial",
+   "Close Encounters",
+   "Flight of the Navigator",
+   "Explorers"
+  ],
+  "answer": "E.T. the Extra-Terrestrial",
+  "difficulty": "easy",
+  "explanation": "Spielberg shot much of it at a child's eye level, keeping adult faces out of frame for the first act.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which Disney animated film follows a lion cub named Simba?",
+  "choices": [
+   "The Lion King",
+   "Tarzan",
+   "The Jungle Book",
+   "Bambi"
+  ],
+  "answer": "The Lion King",
+  "difficulty": "easy",
+  "explanation": "Animators studied live lions brought into the studio to get the walk and shoulder movement right.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which British series features a time-travelling Doctor and a ship called the TARDIS?",
+  "choices": [
+   "Doctor Who",
+   "Blake's 7",
+   "Torchwood",
+   "Red Dwarf"
+  ],
+  "answer": "Doctor Who",
+  "difficulty": "easy",
+  "explanation": "Begun in 1963, it explains its changing lead actors with the idea of regeneration.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which actor played Tony Stark in the Marvel Cinematic Universe?",
+  "choices": [
+   "Robert Downey Jr",
+   "Chris Evans",
+   "Mark Ruffalo",
+   "Jeremy Renner"
+  ],
+  "answer": "Robert Downey Jr",
+  "difficulty": "easy",
+  "explanation": "Much of the 2008 film's dialogue was improvised on set, with the script still being rewritten during shooting.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which award is presented each year by the Academy of Motion Picture Arts and Sciences?",
+  "choices": [
+   "The Oscar",
+   "The BAFTA",
+   "The Golden Globe",
+   "The Palme d'Or"
+  ],
+  "answer": "The Oscar",
+  "difficulty": "easy",
+  "explanation": "The statuette's formal name is the Academy Award of Merit; Oscar is a long-standing nickname.",
+  "unsure": false
+ },
+ {
+  "prompt": "In The Sound of Music, which country does the von Trapp family flee?",
+  "choices": [
+   "Austria",
+   "Switzerland",
+   "Germany",
+   "Hungary"
+  ],
+  "answer": "Austria",
+  "difficulty": "easy",
+  "explanation": "The film was shot largely around Salzburg, where the real family had lived before emigrating.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which film franchise features Dominic Toretto, fast cars and heists?",
+  "choices": [
+   "Fast & Furious",
+   "Gone in 60 Seconds",
+   "Drive",
+   "Rush"
+  ],
+  "answer": "Fast & Furious",
+  "difficulty": "easy",
+  "explanation": "It began in 2001 as a small street-racing thriller before turning into a globe-trotting action series.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which DreamWorks film released in 2001 features a green ogre and a talking donkey?",
+  "choices": [
+   "Shrek",
+   "Antz",
+   "Madagascar",
+   "Monsters, Inc."
+  ],
+  "answer": "Shrek",
+  "difficulty": "easy",
+  "explanation": "It won the first Academy Award ever given for Best Animated Feature.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which Japanese studio produced Spirited Away?",
+  "choices": [
+   "Studio Ghibli",
+   "Toei Animation",
+   "Madhouse",
+   "Studio Trigger"
+  ],
+  "answer": "Studio Ghibli",
+  "difficulty": "easy",
+  "explanation": "Ghibli was co-founded by Hayao Miyazaki and Isao Takahata in 1985 after the success of Nausicaa.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which actor played Captain Jack Sparrow in the Pirates of the Caribbean films?",
+  "choices": [
+   "Johnny Depp",
+   "Orlando Bloom",
+   "Geoffrey Rush",
+   "Javier Bardem"
+  ],
+  "answer": "Johnny Depp",
+  "difficulty": "easy",
+  "explanation": "The slurring, swaying performance was reportedly modelled partly on the Rolling Stones' Keith Richards.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which television series is based on George R. R. Martin's A Song of Ice and Fire novels?",
+  "choices": [
+   "Game of Thrones",
+   "The Witcher",
+   "Vikings",
+   "Rome"
+  ],
+  "answer": "Game of Thrones",
+  "difficulty": "easy",
+  "explanation": "Much of it was filmed in Northern Ireland, with Croatia standing in for the city of King's Landing.",
+  "unsure": false
+ },
+ {
+  "prompt": "In which city is the sitcom Only Fools and Horses set?",
+  "choices": [
+   "London",
+   "Manchester",
+   "Liverpool",
+   "Bristol"
+  ],
+  "answer": "London",
+  "difficulty": "easy",
+  "explanation": "The Trotters live in Nelson Mandela House in Peckham, though exteriors were often shot in Bristol.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which 1994 film follows a man from Alabama who keeps stumbling into historic events?",
+  "choices": [
+   "Forrest Gump",
+   "Rain Man",
+   "Big Fish",
+   "The Green Mile"
+  ],
+  "answer": "Forrest Gump",
+  "difficulty": "easy",
+  "explanation": "Early digital compositing dropped the character into real archive footage of American presidents.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which 1993 film brought cloned dinosaurs to life on the island of Isla Nublar?",
+  "choices": [
+   "Jurassic Park",
+   "King Kong",
+   "Godzilla",
+   "The Land That Time Forgot"
+  ],
+  "answer": "Jurassic Park",
+  "difficulty": "easy",
+  "explanation": "It mixed animatronic creatures with computer animation, a blend that changed effects work overnight.",
+  "unsure": false
+ },
+ {
+  "prompt": "In The Matrix, which colour pill does Neo swallow to learn the truth?",
+  "choices": [
+   "Red",
+   "Blue",
+   "Green",
+   "White"
+  ],
+  "answer": "Red",
+  "difficulty": "easy",
+  "explanation": "The blue pill would have returned him to the simulation with no memory of the choice.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which Pixar film follows a clownfish searching the ocean for his son?",
+  "choices": [
+   "Finding Nemo",
+   "Shark Tale",
+   "Moana",
+   "Luca"
+  ],
+  "answer": "Finding Nemo",
+  "difficulty": "easy",
+  "explanation": "Animators took scuba lessons and studied fish tanks to get underwater light and motion right.",
+  "unsure": false
+ },
+ {
+  "prompt": "Nollywood is the nickname for the film industry of which country?",
+  "choices": [
+   "Nigeria",
+   "Ghana",
+   "Kenya",
+   "South Africa"
+  ],
+  "answer": "Nigeria",
+  "difficulty": "easy",
+  "explanation": "It grew out of Lagos in the 1990s on cheap video cassettes sold in markets rather than cinemas.",
+  "unsure": false
+ },
+ {
+  "prompt": "Bollywood, centred on Mumbai, makes its films mainly in which language?",
+  "choices": [
+   "Hindi",
+   "Tamil",
+   "Telugu",
+   "Bengali"
+  ],
+  "answer": "Hindi",
+  "difficulty": "easy",
+  "explanation": "Tamil and Telugu cinema have their own hubs and nicknames, Kollywood and Tollywood.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which film festival awards the Palme d'Or?",
+  "choices": [
+   "Cannes",
+   "Venice",
+   "Berlin",
+   "Sundance"
+  ],
+  "answer": "Cannes",
+  "difficulty": "easy",
+  "explanation": "The prize, shaped as a palm frond, nods to the palm trees along the Croisette in the French resort.",
+  "unsure": false
+ },
+ {
+  "prompt": "In the Aardman films of Nick Park, what sort of animal is Gromit?",
+  "choices": [
+   "A dog",
+   "A cat",
+   "A penguin",
+   "A rabbit"
+  ],
+  "answer": "A dog",
+  "difficulty": "easy",
+  "explanation": "Gromit has no mouth at all, so his whole performance is carried by his brow and eyes.",
+  "unsure": false
+ },
+ {
+  "prompt": "In The Lord of the Rings films, where must the One Ring be destroyed?",
+  "choices": [
+   "Mount Doom",
+   "Rivendell",
+   "Isengard",
+   "Moria"
+  ],
+  "answer": "Mount Doom",
+  "difficulty": "easy",
+  "explanation": "Peter Jackson shot the trilogy back to back in New Zealand over more than a year of principal photography.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which Netflix series is set in the fictional town of Hawkins, Indiana?",
+  "choices": [
+   "Stranger Things",
+   "Dark",
+   "The OA",
+   "Wayward Pines"
+  ],
+  "answer": "Stranger Things",
+  "difficulty": "easy",
+  "explanation": "Its look borrows heavily from early-1980s Spielberg and Stephen King, down to the typeface.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which actor was the first to play James Bond on screen in the 1962 film Dr. No?",
+  "choices": [
+   "Sean Connery",
+   "Roger Moore",
+   "George Lazenby",
+   "Timothy Dalton"
+  ],
+  "answer": "Sean Connery",
+  "difficulty": "easy",
+  "explanation": "Connery, a Scot and former milkman, was not Ian Fleming's first choice for the part.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which South Korean film won the Academy Award for Best Picture in 2020?",
+  "choices": [
+   "Parasite",
+   "Burning",
+   "The Handmaiden",
+   "Train to Busan"
+  ],
+  "answer": "Parasite",
+  "difficulty": "easy",
+  "explanation": "It was the first film not in the English language to take the Academy's top prize.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which Pixar film follows a rat with ambitions of cooking in a Paris restaurant?",
+  "choices": [
+   "Ratatouille",
+   "Flushed Away",
+   "Chicken Run",
+   "Bee Movie"
+  ],
+  "answer": "Ratatouille",
+  "difficulty": "easy",
+  "explanation": "The kitchen scenes were researched with real chefs, including a stint in a Paris restaurant kitchen.",
+  "unsure": false
+ },
+ {
+  "prompt": "In the Batman films, what is the name of Bruce Wayne's butler?",
+  "choices": [
+   "Alfred",
+   "Lucius",
+   "Jarvis",
+   "Gordon"
+  ],
+  "answer": "Alfred",
+  "difficulty": "easy",
+  "explanation": "Michael Caine played the role in Christopher Nolan's trilogy, giving Alfred a working-class London voice.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which 1978 musical film is set at Rydell High and follows Danny and Sandy?",
+  "choices": [
+   "Grease",
+   "Hairspray",
+   "Footloose",
+   "Fame"
+  ],
+  "answer": "Grease",
+  "difficulty": "easy",
+  "explanation": "Olivia Newton-John and John Travolta were both well into their twenties playing American teenagers.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which 1972 crime film centres on the Corleone crime family?",
+  "choices": [
+   "The Godfather",
+   "Goodfellas",
+   "Scarface",
+   "Casino"
+  ],
+  "answer": "The Godfather",
+  "difficulty": "easy",
+  "explanation": "Francis Ford Coppola fought the studio to cast Marlon Brando, who auditioned with cotton wool in his cheeks.",
+  "unsure": false
+ },
+ {
+  "prompt": "The Queen Vic is the pub in which long-running British soap opera?",
+  "choices": [
+   "EastEnders",
+   "Coronation Street",
+   "Emmerdale",
+   "Hollyoaks"
+  ],
+  "answer": "EastEnders",
+  "difficulty": "easy",
+  "explanation": "The BBC serial began in 1985 and is set around Albert Square in the fictional borough of Walford.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which cartoon character is a yellow sea sponge living in Bikini Bottom?",
+  "choices": [
+   "SpongeBob SquarePants",
+   "Patrick Star",
+   "Squidward",
+   "Sandy Cheeks"
+  ],
+  "answer": "SpongeBob SquarePants",
+  "difficulty": "easy",
+  "explanation": "Creator Stephen Hillenburg was a marine biology teacher before he moved into animation.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which director was famous for making brief silent cameo appearances in his own films?",
+  "choices": [
+   "Alfred Hitchcock",
+   "Billy Wilder",
+   "John Ford",
+   "Howard Hawks"
+  ],
+  "answer": "Alfred Hitchcock",
+  "difficulty": "easy",
+  "explanation": "He appeared so often that he moved his cameos early in each film so audiences would stop hunting for him.",
+  "unsure": false
+ },
+ {
+  "prompt": "In the Star Wars films, who is revealed to be Luke Skywalker's father?",
+  "choices": [
+   "Darth Vader",
+   "Obi-Wan Kenobi",
+   "Emperor Palpatine",
+   "Han Solo"
+  ],
+  "answer": "Darth Vader",
+  "difficulty": "easy",
+  "explanation": "The twist was kept from most of the crew, who shot a different line on set to prevent leaks.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which British comedy troupe made the 1979 film Life of Brian?",
+  "choices": [
+   "Monty Python",
+   "The Goodies",
+   "The Two Ronnies",
+   "The Goon Show"
+  ],
+  "answer": "Monty Python",
+  "difficulty": "easy",
+  "explanation": "George Harrison mortgaged property to fund it after the original backers pulled out over the subject.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which film series follows a Philadelphia boxer named Rocky Balboa?",
+  "choices": [
+   "Rocky",
+   "Raging Bull",
+   "The Fighter",
+   "Southpaw"
+  ],
+  "answer": "Rocky",
+  "difficulty": "easy",
+  "explanation": "Sylvester Stallone wrote the script himself and refused to sell it unless he could play the lead.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which Disney princess leaves a glass slipper behind at a royal ball?",
+  "choices": [
+   "Cinderella",
+   "Snow White",
+   "Belle",
+   "Aurora"
+  ],
+  "answer": "Cinderella",
+  "difficulty": "easy",
+  "explanation": "The 1950 film's box office rescued Disney's finances after a run of wartime losses.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which television drama follows chemistry teacher Walter White into the drug trade?",
+  "choices": [
+   "Breaking Bad",
+   "The Shield",
+   "Ozark",
+   "Weeds"
+  ],
+  "answer": "Breaking Bad",
+  "difficulty": "easy",
+  "explanation": "Creator Vince Gilligan pitched it as turning a mild protagonist into an antagonist across five series.",
+  "unsure": false
+ },
+ {
+  "prompt": "In which 2008 Batman film did Heath Ledger play the Joker?",
+  "choices": [
+   "The Dark Knight",
+   "Batman Begins",
+   "Batman Returns",
+   "Joker"
+  ],
+  "answer": "The Dark Knight",
+  "difficulty": "easy",
+  "explanation": "Nolan shot several sequences on IMAX cameras, a first for a major action feature.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which Disney animated film features sisters Anna and Elsa in the kingdom of Arendelle?",
+  "choices": [
+   "Frozen",
+   "Tangled",
+   "Brave",
+   "Encanto"
+  ],
+  "answer": "Frozen",
+  "difficulty": "easy",
+  "explanation": "It began as an adaptation of Hans Christian Andersen's The Snow Queen before the sisters were invented.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which British period drama follows the Crawley family and their servants at a Yorkshire estate?",
+  "choices": [
+   "Downton Abbey",
+   "Upstairs, Downstairs",
+   "Brideshead Revisited",
+   "The Forsyte Saga"
+  ],
+  "answer": "Downton Abbey",
+  "difficulty": "easy",
+  "explanation": "Highclere Castle in Hampshire, not Yorkshire, played the house in every exterior shot.",
+  "unsure": false
+ },
+ {
+  "prompt": "In film-making, what does the abbreviation CGI stand for?",
+  "choices": [
+   "Computer-generated imagery",
+   "Colour grading interface",
+   "Cinematic gauge index",
+   "Continuous gimbal imaging"
+  ],
+  "answer": "Computer-generated imagery",
+  "difficulty": "easy",
+  "explanation": "The technique dates to the 1970s but only became routine once rendering costs collapsed in the 1990s.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which 1939 epic set during the American Civil War starred Vivien Leigh as Scarlett O'Hara?",
+  "choices": [
+   "Gone with the Wind",
+   "Ben-Hur",
+   "Cleopatra",
+   "Doctor Zhivago"
+  ],
+  "answer": "Gone with the Wind",
+  "difficulty": "easy",
+  "explanation": "Hattie McDaniel's supporting win for it made her the first Black performer to receive an Oscar.",
+  "unsure": false
+ },
+ {
+  "prompt": "The order of knights known as the Jedi appears in which film franchise?",
+  "choices": [
+   "Star Wars",
+   "Star Trek",
+   "Dune",
+   "Stargate"
+  ],
+  "answer": "Star Wars",
+  "difficulty": "easy",
+  "explanation": "George Lucas drew on samurai films and Joseph Campbell's writing on myth when building the order.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which actress played Hermione Granger in the Harry Potter films?",
+  "choices": [
+   "Emma Watson",
+   "Bonnie Wright",
+   "Evanna Lynch",
+   "Emma Thompson"
+  ],
+  "answer": "Emma Watson",
+  "difficulty": "easy",
+  "explanation": "She was nine when cast and grew up across eight films shot over roughly a decade.",
+  "unsure": false
+ },
+ {
+  "prompt": "In which Pixar film does an elderly widower lift his house using balloons?",
+  "choices": [
+   "Up",
+   "Wall-E",
+   "Soul",
+   "Coco"
+  ],
+  "answer": "Up",
+  "difficulty": "easy",
+  "explanation": "Its near-wordless opening montage compresses an entire marriage into about four minutes.",
+  "unsure": false
+ },
+ {
+  "prompt": "The characters in the television series Grey's Anatomy work mainly in which profession?",
+  "choices": [
+   "Surgeons",
+   "Lawyers",
+   "Detectives",
+   "Teachers"
+  ],
+  "answer": "Surgeons",
+  "difficulty": "easy",
+  "explanation": "Shonda Rhimes named the show after the Victorian anatomy textbook Gray's Anatomy.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which Studio Ghibli film follows two sisters who meet a large forest spirit in rural Japan?",
+  "choices": [
+   "My Neighbour Totoro",
+   "Ponyo",
+   "Kiki's Delivery Service",
+   "The Cat Returns"
+  ],
+  "answer": "My Neighbour Totoro",
+  "difficulty": "easy",
+  "explanation": "The creature's shape became Ghibli's studio logo and is now on everything the company makes.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which 1984 comedy features a team of New Yorkers who trap ghosts for a living?",
+  "choices": [
+   "Ghostbusters",
+   "Beetlejuice",
+   "The Frighteners",
+   "Men in Black"
+  ],
+  "answer": "Ghostbusters",
+  "difficulty": "easy",
+  "explanation": "Dan Aykroyd wrote the first draft after a lifelong interest in spiritualism and paranormal research.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which actor voices the cowboy Woody in the Toy Story films?",
+  "choices": [
+   "Tom Hanks",
+   "Tim Allen",
+   "Billy Crystal",
+   "John Goodman"
+  ],
+  "answer": "Tom Hanks",
+  "difficulty": "easy",
+  "explanation": "Pixar tested the character's look using audio lifted from one of Hanks's earlier live-action films.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which long-running animated family lives in the town of Springfield?",
+  "choices": [
+   "The Simpsons",
+   "The Griffins",
+   "The Belchers",
+   "The Flintstones"
+  ],
+  "answer": "The Simpsons",
+  "difficulty": "easy",
+  "explanation": "The show began as short filler sketches on The Tracey Ullman Show before getting its own slot in 1989.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which 2021 Spider-Man film brought back villains from earlier film series?",
+  "choices": [
+   "No Way Home",
+   "Homecoming",
+   "Far From Home",
+   "Into the Spider-Verse"
+  ],
+  "answer": "No Way Home",
+  "difficulty": "easy",
+  "explanation": "Its plot used a botched memory spell to open doors between separate film continuities.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which Hitchcock film is set largely at the Bates Motel and features a notorious shower scene?",
+  "choices": [
+   "Psycho",
+   "Vertigo",
+   "The Birds",
+   "Marnie"
+  ],
+  "answer": "Psycho",
+  "difficulty": "easy",
+  "explanation": "The scene runs about forty-five seconds and was assembled from dozens of very short shots.",
+  "unsure": false
+ },
+ {
+  "prompt": "The small yellow Minions first appeared in which animated film franchise?",
+  "choices": [
+   "Despicable Me",
+   "Hotel Transylvania",
+   "Trolls",
+   "The Croods"
+  ],
+  "answer": "Despicable Me",
+  "difficulty": "easy",
+  "explanation": "Their babble is a deliberate mash of Spanish, French, Italian and nonsense so it travels across markets.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which BBC drama follows the Shelby crime family in Birmingham after the First World War?",
+  "choices": [
+   "Peaky Blinders",
+   "Boardwalk Empire",
+   "Ripper Street",
+   "Gangs of London"
+  ],
+  "answer": "Peaky Blinders",
+  "difficulty": "easy",
+  "explanation": "The gang's name refers to the flat caps they wore, said to hide razor blades in the peaks.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which organisation hands out Britain's main annual film and television awards?",
+  "choices": [
+   "BAFTA",
+   "The Academy",
+   "The Golden Globes",
+   "The Palme d'Or"
+  ],
+  "answer": "BAFTA",
+  "difficulty": "easy",
+  "explanation": "Its full name is the British Academy of Film and Television Arts, founded in 1947.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which Disney animated film follows a mermaid named Ariel who longs to live on land?",
+  "choices": [
+   "The Little Mermaid",
+   "Moana",
+   "Atlantis",
+   "Ponyo"
+  ],
+  "answer": "The Little Mermaid",
+  "difficulty": "easy",
+  "explanation": "Its 1989 success began the run of hits now known as the Disney Renaissance.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the name of the fictional African nation ruled by T'Challa in Black Panther?",
+  "choices": [
+   "Wakanda",
+   "Zamunda",
+   "Genosha",
+   "Latveria"
+  ],
+  "answer": "Wakanda",
+  "difficulty": "easy",
+  "explanation": "Its design drew on real African cultures, with costume work influenced by Lesotho and Zulu dress.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which American sitcom is set in a Boston bar run by former baseball player Sam Malone?",
+  "choices": [
+   "Cheers",
+   "Frasier",
+   "Taxi",
+   "Night Court"
+  ],
+  "answer": "Cheers",
+  "difficulty": "easy",
+  "explanation": "It nearly ended after a disastrous first-series audience share before word of mouth rescued it.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which 2016 musical film starred Ryan Gosling and Emma Stone as dreamers in Los Angeles?",
+  "choices": [
+   "La La Land",
+   "The Artist",
+   "Chicago",
+   "Moulin Rouge!"
+  ],
+  "answer": "La La Land",
+  "difficulty": "easy",
+  "explanation": "It was famously announced in error as Best Picture winner before the mistake was corrected on stage.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which actor played the title cyborg in the 1984 film The Terminator?",
+  "choices": [
+   "Arnold Schwarzenegger",
+   "Sylvester Stallone",
+   "Dolph Lundgren",
+   "Jean-Claude Van Damme"
+  ],
+  "answer": "Arnold Schwarzenegger",
+  "difficulty": "easy",
+  "explanation": "He was originally approached to play the human hero Kyle Reese, not the machine.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which 1990 comedy leaves a boy defending his Chicago house from burglars at Christmas?",
+  "choices": [
+   "Home Alone",
+   "Jingle All the Way",
+   "Elf",
+   "The Santa Clause"
+  ],
+  "answer": "Home Alone",
+  "difficulty": "easy",
+  "explanation": "John Hughes wrote the script in a few days after wondering what he might forget on a family holiday.",
+  "unsure": false
+ },
+ {
+  "prompt": "In which 1993 comedy does a weatherman relive the same day in Punxsutawney over and over?",
+  "choices": [
+   "Groundhog Day",
+   "Click",
+   "The Truman Show",
+   "Multiplicity"
+  ],
+  "answer": "Groundhog Day",
+  "difficulty": "easy",
+  "explanation": "The film never says how long the loop lasts, and the writers' own estimates ran to decades.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which British sitcom starred Ricky Gervais as David Brent at a Slough paper company?",
+  "choices": [
+   "The Office",
+   "W1A",
+   "People Just Do Nothing",
+   "Twenty Twelve"
+  ],
+  "answer": "The Office",
+  "difficulty": "easy",
+  "explanation": "Its mock-documentary format was copied for remakes in the United States, France, Germany and beyond.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which film series follows Katniss Everdeen competing in a televised fight to the death?",
+  "choices": [
+   "The Hunger Games",
+   "Divergent",
+   "The Maze Runner",
+   "Battle Royale"
+  ],
+  "answer": "The Hunger Games",
+  "difficulty": "easy",
+  "explanation": "Jennifer Lawrence trained in archery with an Olympic coach before shooting began.",
+  "unsure": false
+ },
+ {
+  "prompt": "In which South Korean series do indebted contestants play deadly children's games for cash?",
+  "choices": [
+   "Squid Game",
+   "Alice in Borderland",
+   "Sweet Home",
+   "Kingdom"
+  ],
+  "answer": "Squid Game",
+  "difficulty": "easy",
+  "explanation": "Writer Hwang Dong-hyuk had shopped the script around for roughly a decade before Netflix took it.",
+  "unsure": false
+ },
+ {
+  "prompt": "Who directed the 1994 crime film Pulp Fiction?",
+  "choices": [
+   "Quentin Tarantino",
+   "Martin Scorsese",
+   "Robert Rodriguez",
+   "Guy Ritchie"
+  ],
+  "answer": "Quentin Tarantino",
+  "difficulty": "medium",
+  "explanation": "Its scrambled chronology means the character who dies partway through is alive in the closing scene.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which 1950 film centres on Norma Desmond, a forgotten star of the silent era?",
+  "choices": [
+   "Sunset Boulevard",
+   "All About Eve",
+   "A Star Is Born",
+   "The Bad and the Beautiful"
+  ],
+  "answer": "Sunset Boulevard",
+  "difficulty": "medium",
+  "explanation": "Billy Wilder cast real silent-era figures, including Gloria Swanson and director Erich von Stroheim.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which Japanese director made Seven Samurai in 1954?",
+  "choices": [
+   "Akira Kurosawa",
+   "Yasujiro Ozu",
+   "Kenji Mizoguchi",
+   "Nagisa Oshima"
+  ],
+  "answer": "Akira Kurosawa",
+  "difficulty": "medium",
+  "explanation": "Hollywood remade it as the western The Magnificent Seven six years later.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which director made Do the Right Thing and Malcolm X?",
+  "choices": [
+   "Spike Lee",
+   "John Singleton",
+   "Charles Burnett",
+   "Antoine Fuqua"
+  ],
+  "answer": "Spike Lee",
+  "difficulty": "medium",
+  "explanation": "Lee's films often use a shot where the actor glides towards camera on a dolly, his signature device.",
+  "unsure": false
+ },
+ {
+  "prompt": "In which 2003 Korean thriller is a man imprisoned for fifteen years without explanation?",
+  "choices": [
+   "Oldboy",
+   "Memories of Murder",
+   "The Chaser",
+   "I Saw the Devil"
+  ],
+  "answer": "Oldboy",
+  "difficulty": "medium",
+  "explanation": "Park Chan-wook staged its corridor fight as a single side-on take, rehearsed for days.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which Italian director made La Dolce Vita and 8 and a Half?",
+  "choices": [
+   "Federico Fellini",
+   "Michelangelo Antonioni",
+   "Luchino Visconti",
+   "Bernardo Bertolucci"
+  ],
+  "answer": "Federico Fellini",
+  "difficulty": "medium",
+  "explanation": "The word paparazzi comes from Paparazzo, a press photographer character in La Dolce Vita.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which Swedish director made The Seventh Seal, in which a knight plays chess with Death?",
+  "choices": [
+   "Ingmar Bergman",
+   "Lasse Hallstrom",
+   "Roy Andersson",
+   "Ruben Ostlund"
+  ],
+  "answer": "Ingmar Bergman",
+  "difficulty": "medium",
+  "explanation": "Bergman took the image from a medieval church painting he had seen as a boy.",
+  "unsure": false
+ },
+ {
+  "prompt": "Godard and Truffaut were leading figures of which late-1950s film movement?",
+  "choices": [
+   "The French New Wave",
+   "Italian Neorealism",
+   "German Expressionism",
+   "Dogme 95"
+  ],
+  "answer": "The French New Wave",
+  "difficulty": "medium",
+  "explanation": "Many of them started as critics at Cahiers du Cinema before picking up cameras themselves.",
+  "unsure": false
+ },
+ {
+  "prompt": "In which 1975 Hindi film are Jai and Veeru hired to capture the bandit Gabbar Singh?",
+  "choices": [
+   "Sholay",
+   "Deewaar",
+   "Zanjeer",
+   "Mother India"
+  ],
+  "answer": "Sholay",
+  "difficulty": "medium",
+  "explanation": "It flopped in its opening weeks before word of mouth turned it into a years-long cinema run.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which Indian actor starred in Deewaar and later hosted Kaun Banega Crorepati?",
+  "choices": [
+   "Amitabh Bachchan",
+   "Shah Rukh Khan",
+   "Dharmendra",
+   "Rajesh Khanna"
+  ],
+  "answer": "Amitabh Bachchan",
+  "difficulty": "medium",
+  "explanation": "His run of 1970s roles as an angry working-class hero reshaped what a Hindi film lead could be.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which 2001 Hindi film pits Indian villagers against British officers in a game of cricket?",
+  "choices": [
+   "Lagaan",
+   "Swades",
+   "Jodhaa Akbar",
+   "Rang De Basanti"
+  ],
+  "answer": "Lagaan",
+  "difficulty": "medium",
+  "explanation": "It was nominated for the foreign-language Oscar and shot in Gujarat with a largely non-cricketing cast.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which 1992 direct-to-video Nigerian film is widely credited with launching Nollywood?",
+  "choices": [
+   "Living in Bondage",
+   "Osuofia in London",
+   "Domitilla",
+   "The Figurine"
+  ],
+  "answer": "Living in Bondage",
+  "difficulty": "medium",
+  "explanation": "Kenneth Nnebue shot it in Igbo and sold it on cassette, proving there was a market for local video films.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which Nigerian director made the 2016 comedy The Wedding Party?",
+  "choices": [
+   "Kemi Adetiba",
+   "Kunle Afolayan",
+   "Tunde Kelani",
+   "Izu Ojukwu"
+  ],
+  "answer": "Kemi Adetiba",
+  "difficulty": "medium",
+  "explanation": "Adetiba came from music videos, and the film became a landmark of Nollywood's cinema-release era.",
+  "unsure": true
+ },
+ {
+  "prompt": "Which Nigerian actor plays the title role in the comedy Osuofia in London?",
+  "choices": [
+   "Nkem Owoh",
+   "Pete Edochie",
+   "Ramsey Nouah",
+   "Richard Mofe-Damijo"
+  ],
+  "answer": "Nkem Owoh",
+  "difficulty": "medium",
+  "explanation": "Owoh, also a singer, built a long career on village-innocent comic roles across Nollywood.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which Genevieve Nnaji film became Netflix's first original feature from Nigeria?",
+  "choices": [
+   "Lionheart",
+   "King of Boys",
+   "Ije",
+   "93 Days"
+  ],
+  "answer": "Lionheart",
+  "difficulty": "medium",
+  "explanation": "Nnaji directed and starred in the 2018 family-business drama set in Enugu.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which animation technique photographs physical models one frame at a time?",
+  "choices": [
+   "Stop motion",
+   "Rotoscoping",
+   "Cel shading",
+   "Motion capture"
+  ],
+  "answer": "Stop motion",
+  "difficulty": "medium",
+  "explanation": "A single second of finished film typically needs twenty-four separate poses of the puppet.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the name for a shot in which the camera moves along with the subject on rails?",
+  "choices": [
+   "Tracking shot",
+   "Zoom",
+   "Pan",
+   "Tilt"
+  ],
+  "answer": "Tracking shot",
+  "difficulty": "medium",
+  "explanation": "Pans and tilts pivot the camera from a fixed point, while tracking physically moves it through space.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which film crew role is also known as the director of photography?",
+  "choices": [
+   "Cinematographer",
+   "Editor",
+   "Production designer",
+   "Script supervisor"
+  ],
+  "answer": "Cinematographer",
+  "difficulty": "medium",
+  "explanation": "They control lighting, lens choice and exposure, translating the director's intent into an image.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the term for a single continuous shot with no cuts inside it?",
+  "choices": [
+   "Long take",
+   "Jump cut",
+   "Montage",
+   "Cutaway"
+  ],
+  "answer": "Long take",
+  "difficulty": "medium",
+  "explanation": "Some films disguise hidden joins to make several long takes look like one unbroken shot.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which editing technique strings short shots together to compress a stretch of time?",
+  "choices": [
+   "Montage",
+   "Match cut",
+   "Wipe",
+   "Iris"
+  ],
+  "answer": "Montage",
+  "difficulty": "medium",
+  "explanation": "Soviet film-makers of the 1920s developed the theory that meaning comes from the collision of shots.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which 1927 film is generally regarded as the first feature-length talking picture?",
+  "choices": [
+   "The Jazz Singer",
+   "Steamboat Willie",
+   "The Broadway Melody",
+   "Wings"
+  ],
+  "answer": "The Jazz Singer",
+  "difficulty": "medium",
+  "explanation": "It was mostly silent with synchronised songs, but its few spoken lines ended the silent era.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which 1941 Orson Welles film follows a newspaper tycoon and a childhood sled?",
+  "choices": [
+   "Citizen Kane",
+   "The Third Man",
+   "Touch of Evil",
+   "The Magnificent Ambersons"
+  ],
+  "answer": "Citizen Kane",
+  "difficulty": "medium",
+  "explanation": "Welles was twenty-five, and the studio gave him unusual freedom over final cut for a first feature.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which Hitchcock film confines its hero to an apartment overlooking a courtyard?",
+  "choices": [
+   "Rear Window",
+   "Rope",
+   "Dial M for Murder",
+   "Notorious"
+  ],
+  "answer": "Rear Window",
+  "difficulty": "medium",
+  "explanation": "The whole courtyard was built as one enormous set on a Paramount sound stage.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which actor played Michael Corleone in The Godfather?",
+  "choices": [
+   "Al Pacino",
+   "Robert De Niro",
+   "James Caan",
+   "John Cazale"
+  ],
+  "answer": "Al Pacino",
+  "difficulty": "medium",
+  "explanation": "The studio wanted a bigger name and nearly replaced him during the first weeks of shooting.",
+  "unsure": false
+ },
+ {
+  "prompt": "In which film does FBI trainee Clarice Starling consult the imprisoned Hannibal Lecter?",
+  "choices": [
+   "The Silence of the Lambs",
+   "Manhunter",
+   "Red Dragon",
+   "Seven"
+  ],
+  "answer": "The Silence of the Lambs",
+  "difficulty": "medium",
+  "explanation": "Anthony Hopkins is on screen for only about sixteen minutes yet won the Best Actor Oscar.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which French director made the 2001 film Amelie?",
+  "choices": [
+   "Jean-Pierre Jeunet",
+   "Luc Besson",
+   "Olivier Assayas",
+   "Claire Denis"
+  ],
+  "answer": "Jean-Pierre Jeunet",
+  "difficulty": "medium",
+  "explanation": "Its saturated green and gold look was created by digitally grading almost every frame.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which Mexican director made Pan's Labyrinth and The Shape of Water?",
+  "choices": [
+   "Guillermo del Toro",
+   "Alejandro Inarritu",
+   "Alfonso Cuaron",
+   "Carlos Reygadas"
+  ],
+  "answer": "Guillermo del Toro",
+  "difficulty": "medium",
+  "explanation": "He keeps a house of props and books he calls Bleak House, used as a working reference library.",
+  "unsure": false
+ },
+ {
+  "prompt": "Alfonso Cuaron won a Best Director Oscar for which 2013 film set in orbit?",
+  "choices": [
+   "Gravity",
+   "Interstellar",
+   "Ad Astra",
+   "The Martian"
+  ],
+  "answer": "Gravity",
+  "difficulty": "medium",
+  "explanation": "Its weightlessness was faked with a light box and robot arms rather than by moving the actors.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which black-and-white 2018 film is set in a middle-class district of Mexico City?",
+  "choices": [
+   "Roma",
+   "Amores Perros",
+   "Y Tu Mama Tambien",
+   "Güeros"
+  ],
+  "answer": "Roma",
+  "difficulty": "medium",
+  "explanation": "Cuaron based it on his own childhood and on the family's live-in housekeeper.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which 2006 German film follows a Stasi officer secretly bugging a playwright's flat?",
+  "choices": [
+   "The Lives of Others",
+   "Downfall",
+   "Good Bye, Lenin!",
+   "The Baader Meinhof Complex"
+  ],
+  "answer": "The Lives of Others",
+  "difficulty": "medium",
+  "explanation": "It won the foreign-language Oscar and was the debut feature of Florian Henckel von Donnersmarck.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which 1998 German film repeats the same twenty minutes three times with different outcomes?",
+  "choices": [
+   "Run Lola Run",
+   "Wings of Desire",
+   "The Edukators",
+   "Head-On"
+  ],
+  "answer": "Run Lola Run",
+  "difficulty": "medium",
+  "explanation": "Tom Tykwer mixed live action, animation and still photographs to mark each of the three runs.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which Danish film movement was launched with a manifesto called the Vow of Chastity?",
+  "choices": [
+   "Dogme 95",
+   "Free Cinema",
+   "New Objectivity",
+   "Cinema Novo"
+  ],
+  "answer": "Dogme 95",
+  "difficulty": "medium",
+  "explanation": "Its rules banned added lighting, props brought to location, and any music not playing in the scene.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which Iranian director made A Separation, about a couple splitting up in Tehran?",
+  "choices": [
+   "Asghar Farhadi",
+   "Abbas Kiarostami",
+   "Jafar Panahi",
+   "Majid Majidi"
+  ],
+  "answer": "Asghar Farhadi",
+  "difficulty": "medium",
+  "explanation": "The film keeps the audience uncertain about which character is telling the truth until very late.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which Chinese director made Raise the Red Lantern and the martial arts film Hero?",
+  "choices": [
+   "Zhang Yimou",
+   "Chen Kaige",
+   "Jia Zhangke",
+   "Wong Kar-wai"
+  ],
+  "answer": "Zhang Yimou",
+  "difficulty": "medium",
+  "explanation": "He began as a cinematographer, which shows in Hero's use of a single dominant colour per chapter.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which martial arts star died in 1973, weeks before Enter the Dragon reached cinemas?",
+  "choices": [
+   "Bruce Lee",
+   "Jackie Chan",
+   "Jet Li",
+   "Sammo Hung"
+  ],
+  "answer": "Bruce Lee",
+  "difficulty": "medium",
+  "explanation": "Born in San Francisco and raised in Hong Kong, he founded his own martial art, Jeet Kune Do.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which 2000 Ang Lee film features sword fights in the treetops of a bamboo forest?",
+  "choices": [
+   "Crouching Tiger, Hidden Dragon",
+   "House of Flying Daggers",
+   "Hero",
+   "The Grandmaster"
+  ],
+  "answer": "Crouching Tiger, Hidden Dragon",
+  "difficulty": "medium",
+  "explanation": "The fighters were suspended on wires operated by teams of crew hidden below the frame.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which South Korean director made Memories of Murder and Parasite?",
+  "choices": [
+   "Bong Joon-ho",
+   "Park Chan-wook",
+   "Lee Chang-dong",
+   "Kim Jee-woon"
+  ],
+  "answer": "Bong Joon-ho",
+  "difficulty": "medium",
+  "explanation": "He storyboards his films almost shot for shot before shooting, leaving little coverage unused.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which Makoto Shinkai anime follows two teenagers who wake up in each other's bodies?",
+  "choices": [
+   "Your Name",
+   "Weathering with You",
+   "A Silent Voice",
+   "5 Centimetres per Second"
+  ],
+  "answer": "Your Name",
+  "difficulty": "medium",
+  "explanation": "Shinkai's backgrounds are painted from photographs of real Tokyo and rural Gifu locations.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which Ghibli film features a floating castle kept aloft by a glowing crystal?",
+  "choices": [
+   "Castle in the Sky",
+   "Howl's Moving Castle",
+   "Princess Mononoke",
+   "Nausicaa"
+  ],
+  "answer": "Castle in the Sky",
+  "difficulty": "medium",
+  "explanation": "Miyazaki drew on Welsh mining villages he visited during a miners' strike for its opening town.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which 1988 anime directed by Katsuhiro Otomo is set in a rebuilt Neo-Tokyo?",
+  "choices": [
+   "Akira",
+   "Ghost in the Shell",
+   "Patlabor",
+   "Perfect Blue"
+  ],
+  "answer": "Akira",
+  "difficulty": "medium",
+  "explanation": "Its animators recorded dialogue before drawing, so mouth movements match the words unusually closely.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which Japanese film monster first stomped across cinema screens in 1954?",
+  "choices": [
+   "Godzilla",
+   "Mothra",
+   "Rodan",
+   "Gamera"
+  ],
+  "answer": "Godzilla",
+  "difficulty": "medium",
+  "explanation": "The original was a sombre response to nuclear testing, not the family monster of later sequels.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which Aardman stop-motion film follows hens plotting to escape a Yorkshire farm?",
+  "choices": [
+   "Chicken Run",
+   "Fantastic Mr Fox",
+   "Early Man",
+   "Flushed Away"
+  ],
+  "answer": "Chicken Run",
+  "difficulty": "medium",
+  "explanation": "The crew openly modelled its structure on prisoner-of-war escape films such as The Great Escape.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which animation studio made Coraline and Kubo and the Two Strings?",
+  "choices": [
+   "Laika",
+   "Aardman",
+   "Cartoon Saloon",
+   "Blue Sky"
+  ],
+  "answer": "Laika",
+  "difficulty": "medium",
+  "explanation": "Laika 3D-prints thousands of interchangeable puppet faces to build each character's expressions.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which film was Walt Disney's first full-length animated feature?",
+  "choices": [
+   "Snow White and the Seven Dwarfs",
+   "Pinocchio",
+   "Fantasia",
+   "Dumbo"
+  ],
+  "answer": "Snow White and the Seven Dwarfs",
+  "difficulty": "medium",
+  "explanation": "The industry nicknamed the 1937 project Disney's Folly, convinced nobody would sit through a cartoon feature.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which 2016 Disney film follows a Polynesian girl voyaging with the demigod Maui?",
+  "choices": [
+   "Moana",
+   "Encanto",
+   "Raya and the Last Dragon",
+   "Brother Bear"
+  ],
+  "answer": "Moana",
+  "difficulty": "medium",
+  "explanation": "Disney assembled a group of Pacific artists and scholars to advise on the film's cultures.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which Pixar film takes place largely inside the mind of an eleven-year-old girl?",
+  "choices": [
+   "Inside Out",
+   "Soul",
+   "Coco",
+   "Turning Red"
+  ],
+  "answer": "Inside Out",
+  "difficulty": "medium",
+  "explanation": "Pixar consulted psychologists on which emotions to personify before settling on five.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which 2018 animated film introduced Miles Morales as a big-screen Spider-Man?",
+  "choices": [
+   "Into the Spider-Verse",
+   "No Way Home",
+   "Homecoming",
+   "Spider-Man 2"
+  ],
+  "answer": "Into the Spider-Verse",
+  "difficulty": "medium",
+  "explanation": "Its animators deliberately broke the smooth frame rate and added print dots to mimic comic pages.",
+  "unsure": false
+ },
+ {
+  "prompt": "The Golden Bear is the top prize at which film festival?",
+  "choices": [
+   "Berlin",
+   "Venice",
+   "Cannes",
+   "Toronto"
+  ],
+  "answer": "Berlin",
+  "difficulty": "medium",
+  "explanation": "The bear is the emblem on Berlin's city coat of arms, which is why the trophy takes that shape.",
+  "unsure": false
+ },
+ {
+  "prompt": "The Golden Lion is awarded at the film festival held in which city?",
+  "choices": [
+   "Venice",
+   "Rome",
+   "Locarno",
+   "San Sebastian"
+  ],
+  "answer": "Venice",
+  "difficulty": "medium",
+  "explanation": "Founded in 1932, Venice is the oldest film festival still running, and the lion is the city's symbol.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which Stanley Kubrick film is set at the snowbound Overlook Hotel?",
+  "choices": [
+   "The Shining",
+   "Barry Lyndon",
+   "Eyes Wide Shut",
+   "A Clockwork Orange"
+  ],
+  "answer": "The Shining",
+  "difficulty": "medium",
+  "explanation": "Its gliding corridor shots were among the earliest showcases for the newly invented Steadicam.",
+  "unsure": false
+ },
+ {
+  "prompt": "Who became the first Black woman to win the Academy Award for Best Actress?",
+  "choices": [
+   "Halle Berry",
+   "Whoopi Goldberg",
+   "Angela Bassett",
+   "Viola Davis"
+  ],
+  "answer": "Halle Berry",
+  "difficulty": "medium",
+  "explanation": "She won in 2002 for Monster's Ball, having earlier played Dorothy Dandridge, the category's first Black nominee.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which director was the first woman to win the Academy Award for Best Director?",
+  "choices": [
+   "Kathryn Bigelow",
+   "Sofia Coppola",
+   "Jane Campion",
+   "Greta Gerwig"
+  ],
+  "answer": "Kathryn Bigelow",
+  "difficulty": "medium",
+  "explanation": "She won in 2010 for The Hurt Locker, a bomb-disposal drama shot handheld in Jordan.",
+  "unsure": false
+ },
+ {
+  "prompt": "Chloe Zhao won a Best Director Oscar for which film about American van dwellers?",
+  "choices": [
+   "Nomadland",
+   "The Rider",
+   "Minari",
+   "First Cow"
+  ],
+  "answer": "Nomadland",
+  "difficulty": "medium",
+  "explanation": "Many of its supporting roles were played by real nomads living the life the film depicts.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which 1976 Scorsese film stars Robert De Niro as an insomniac New York taxi driver?",
+  "choices": [
+   "Taxi Driver",
+   "Mean Streets",
+   "Raging Bull",
+   "The King of Comedy"
+  ],
+  "answer": "Taxi Driver",
+  "difficulty": "medium",
+  "explanation": "Bernard Herrmann finished its jazz-tinged score days before his death and the film is dedicated to him.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which television drama follows advertising executive Don Draper in 1960s New York?",
+  "choices": [
+   "Mad Men",
+   "The Hour",
+   "Halt and Catch Fire",
+   "Pan Am"
+  ],
+  "answer": "Mad Men",
+  "difficulty": "medium",
+  "explanation": "Creator Matthew Weiner wrote the pilot years earlier as a writing sample to get hired on The Sopranos.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which series follows the Roy family fighting over control of a media empire?",
+  "choices": [
+   "Succession",
+   "Billions",
+   "Empire",
+   "Dynasty"
+  ],
+  "answer": "Succession",
+  "difficulty": "medium",
+  "explanation": "It was shot with roving handheld cameras and long lenses to give scenes a documentary looseness.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which 2006 BBC natural history series narrated by David Attenborough shares its name with our world?",
+  "choices": [
+   "Planet Earth",
+   "Blue Planet",
+   "Life on Earth",
+   "Frozen Planet"
+  ],
+  "answer": "Planet Earth",
+  "difficulty": "medium",
+  "explanation": "It was the BBC's first natural history series filmed throughout in high definition.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which British sitcom features a rude hotelier running an establishment in Torquay?",
+  "choices": [
+   "Fawlty Towers",
+   "Hi-de-Hi!",
+   "Are You Being Served?",
+   "Dad's Army"
+  ],
+  "answer": "Fawlty Towers",
+  "difficulty": "medium",
+  "explanation": "John Cleese based it on a real Torquay hotelier who had been spectacularly rude to the Python team.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which modern-day detective series stars Benedict Cumberbatch as a London consulting detective?",
+  "choices": [
+   "Sherlock",
+   "Luther",
+   "Endeavour",
+   "Whitechapel"
+  ],
+  "answer": "Sherlock",
+  "difficulty": "medium",
+  "explanation": "It put text messages on screen as floating captions rather than cutting to phone screens.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which sitcom follows three Catholic priests living on the fictional Craggy Island?",
+  "choices": [
+   "Father Ted",
+   "Black Books",
+   "The IT Crowd",
+   "Moone Boy"
+  ],
+  "answer": "Father Ted",
+  "difficulty": "medium",
+  "explanation": "Written by Graham Linehan and Arthur Mathews, it was made by Channel 4 rather than an Irish broadcaster.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which comedy series follows a group of schoolgirls in 1990s Derry?",
+  "choices": [
+   "Derry Girls",
+   "Bad Sisters",
+   "Normal People",
+   "The Young Offenders"
+  ],
+  "answer": "Derry Girls",
+  "difficulty": "medium",
+  "explanation": "Lisa McGee set it against the last years of the Troubles and the run-up to the peace process.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which drama series follows police, dealers and dockers across the city of Baltimore?",
+  "choices": [
+   "The Wire",
+   "Homicide",
+   "The Shield",
+   "Southland"
+  ],
+  "answer": "The Wire",
+  "difficulty": "medium",
+  "explanation": "Creator David Simon covered crime for the Baltimore Sun, and each series shifts to a new institution.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which series follows a New Jersey mob boss who begins seeing a psychiatrist?",
+  "choices": [
+   "The Sopranos",
+   "Boardwalk Empire",
+   "Ray Donovan",
+   "Goodfellas"
+  ],
+  "answer": "The Sopranos",
+  "difficulty": "medium",
+  "explanation": "Its 1999 debut is widely treated as the start of television's prestige drama era.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which anthology series created by Charlie Brooker satirises technology and media?",
+  "choices": [
+   "Black Mirror",
+   "Inside No. 9",
+   "Electric Dreams",
+   "Years and Years"
+  ],
+  "answer": "Black Mirror",
+  "difficulty": "medium",
+  "explanation": "The title refers to the blank screen of a switched-off phone, television or monitor.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which 1966 Sergio Leone western stars Clint Eastwood alongside Eli Wallach as Tuco?",
+  "choices": [
+   "The Good, the Bad and the Ugly",
+   "A Fistful of Dollars",
+   "Once Upon a Time in the West",
+   "For a Few Dollars More"
+  ],
+  "answer": "The Good, the Bad and the Ugly",
+  "difficulty": "medium",
+  "explanation": "Leone shot in Spain, using the Almeria desert and Spanish army extras for its Civil War battle.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which Italian composer wrote the scores for Sergio Leone's westerns?",
+  "choices": [
+   "Ennio Morricone",
+   "Nino Rota",
+   "Riz Ortolani",
+   "Giorgio Moroder"
+  ],
+  "answer": "Ennio Morricone",
+  "difficulty": "medium",
+  "explanation": "He often wrote the music before shooting so Leone could play it on set and cut scenes to it.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which composer wrote the scores for Star Wars, Jaws and Schindler's List?",
+  "choices": [
+   "John Williams",
+   "Hans Zimmer",
+   "Jerry Goldsmith",
+   "Danny Elfman"
+  ],
+  "answer": "John Williams",
+  "difficulty": "medium",
+  "explanation": "His Jaws theme uses only two alternating notes, which is why it works at almost any tempo.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which 1979 science-fiction horror film introduced the character Ellen Ripley?",
+  "choices": [
+   "Alien",
+   "Blade Runner",
+   "The Thing",
+   "Event Horizon"
+  ],
+  "answer": "Alien",
+  "difficulty": "medium",
+  "explanation": "The script described the crew as unisex, so every part was written to be playable by a man or a woman.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which 1982 Ridley Scott film is set in a rainy, neon-lit future Los Angeles?",
+  "choices": [
+   "Blade Runner",
+   "Total Recall",
+   "Minority Report",
+   "Dark City"
+  ],
+  "answer": "Blade Runner",
+  "difficulty": "medium",
+  "explanation": "It was adapted from Philip K. Dick's novel about androids, and flopped before finding its audience.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which 1968 Kubrick film features a spacecraft computer called HAL 9000?",
+  "choices": [
+   "2001: A Space Odyssey",
+   "Solaris",
+   "Silent Running",
+   "Alphaville"
+  ],
+  "answer": "2001: A Space Odyssey",
+  "difficulty": "medium",
+  "explanation": "Its rotating sets let actors appear to walk up walls without any optical trickery.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which 1925 Soviet film contains the famous massacre sequence on the Odessa Steps?",
+  "choices": [
+   "Battleship Potemkin",
+   "Strike",
+   "Man with a Movie Camera",
+   "October"
+  ],
+  "answer": "Battleship Potemkin",
+  "difficulty": "hard",
+  "explanation": "Sergei Eisenstein used the sequence to demonstrate his theory that meaning is built by colliding shots.",
+  "unsure": false
+ },
+ {
+  "prompt": "Who directed the 1927 German science-fiction epic Metropolis?",
+  "choices": [
+   "Fritz Lang",
+   "F. W. Murnau",
+   "G. W. Pabst",
+   "Robert Wiene"
+  ],
+  "answer": "Fritz Lang",
+  "difficulty": "hard",
+  "explanation": "Long-lost footage found in Buenos Aires in 2008 restored the film close to its premiere length.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which 1948 Italian neorealist film follows a father and son hunting a stolen bicycle?",
+  "choices": [
+   "Bicycle Thieves",
+   "Rome, Open City",
+   "La Strada",
+   "Umberto D."
+  ],
+  "answer": "Bicycle Thieves",
+  "difficulty": "hard",
+  "explanation": "Vittorio De Sica cast non-professionals, including a factory worker as the father.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which 1966 Ousmane Sembene film is often called the first sub-Saharan African feature?",
+  "choices": [
+   "Black Girl",
+   "Touki Bouki",
+   "Yeelen",
+   "Xala"
+  ],
+  "answer": "Black Girl",
+  "difficulty": "hard",
+  "explanation": "The Senegalese novelist turned to film because he wanted to reach audiences who did not read French.",
+  "unsure": false
+ },
+ {
+  "prompt": "The FESPACO film festival, the largest on the African continent, is held in which city?",
+  "choices": [
+   "Ouagadougou",
+   "Lagos",
+   "Nairobi",
+   "Dakar"
+  ],
+  "answer": "Ouagadougou",
+  "difficulty": "hard",
+  "explanation": "Held in Burkina Faso since 1969, it awards a top prize named the Etalon de Yennenga.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which cinematographer shot Citizen Kane, pioneering its deep-focus images?",
+  "choices": [
+   "Gregg Toland",
+   "James Wong Howe",
+   "Karl Freund",
+   "Leon Shamroy"
+  ],
+  "answer": "Gregg Toland",
+  "difficulty": "hard",
+  "explanation": "Toland shared a title card with Welles, an unusual credit for a cinematographer at the time.",
+  "unsure": false
+ },
+ {
+  "prompt": "In film sound, what does the term diegetic describe?",
+  "choices": [
+   "Sound within the story world",
+   "Sound added in post",
+   "Music over the credits",
+   "Dialogue looped later"
+  ],
+  "answer": "Sound within the story world",
+  "difficulty": "hard",
+  "explanation": "A radio playing in a room is diegetic; an orchestral score the characters cannot hear is not.",
+  "unsure": false
+ },
+ {
+  "prompt": "In post-production, what does ADR involve?",
+  "choices": [
+   "Re-recording dialogue",
+   "Adding digital effects",
+   "Colour grading footage",
+   "Adjusting frame rate"
+  ],
+  "answer": "Re-recording dialogue",
+  "difficulty": "hard",
+  "explanation": "Standing for automated dialogue replacement, it lets actors re-voice lines to picture in a clean studio.",
+  "unsure": false
+ },
+ {
+  "prompt": "In screenwriting, what is a MacGuffin?",
+  "choices": [
+   "An object driving the plot",
+   "A comic supporting role",
+   "A false ending",
+   "A recurring musical motif"
+  ],
+  "answer": "An object driving the plot",
+  "difficulty": "hard",
+  "explanation": "Hitchcock popularised the term, arguing the object's actual nature matters little to the audience.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which camera effect, made famous in Vertigo, warps the background while the subject stays fixed?",
+  "choices": [
+   "Dolly zoom",
+   "Whip pan",
+   "Rack focus",
+   "Crash zoom"
+  ],
+  "answer": "Dolly zoom",
+  "difficulty": "hard",
+  "explanation": "It works by tracking the camera one way while zooming the lens the other, changing perspective mid-shot.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which frame rate became the standard for cinema once sound film arrived?",
+  "choices": [
+   "24 frames per second",
+   "30 frames per second",
+   "16 frames per second",
+   "48 frames per second"
+  ],
+  "answer": "24 frames per second",
+  "difficulty": "hard",
+  "explanation": "It was chosen as the slowest speed that still gave acceptable optical sound quality on the film strip.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which colour process ran three strips of film at once and dominated 1940s Hollywood musicals?",
+  "choices": [
+   "Technicolor",
+   "Eastmancolor",
+   "Agfacolor",
+   "Cinecolor"
+  ],
+  "answer": "Technicolor",
+  "difficulty": "hard",
+  "explanation": "Its bulky cameras came with company colour consultants who advised studios on sets and costumes.",
+  "unsure": false
+ },
+ {
+  "prompt": "The 1948 Paramount ruling by the US Supreme Court forced the major studios to sell what?",
+  "choices": [
+   "Their cinema chains",
+   "Their music catalogues",
+   "Their film libraries",
+   "Their overseas offices"
+  ],
+  "answer": "Their cinema chains",
+  "difficulty": "hard",
+  "explanation": "Breaking studio ownership of exhibition helped end the old contract-bound studio system.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which set of content rules governed Hollywood films from 1934 until the 1960s?",
+  "choices": [
+   "The Hays Code",
+   "The Blue Book",
+   "The Eady Levy",
+   "The Fairness Doctrine"
+  ],
+  "answer": "The Hays Code",
+  "difficulty": "hard",
+  "explanation": "Named after administrator Will Hays, it was eventually replaced by the age-based ratings system.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which Danish political drama follows a prime minister named Birgitte Nyborg?",
+  "choices": [
+   "Borgen",
+   "The Killing",
+   "The Bridge",
+   "Follow the Money"
+  ],
+  "answer": "Borgen",
+  "difficulty": "hard",
+  "explanation": "The title is a nickname for Christiansborg Palace, which houses the Danish parliament.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which film was the first sequel ever to win the Academy Award for Best Picture?",
+  "choices": [
+   "The Godfather Part II",
+   "Aliens",
+   "The Empire Strikes Back",
+   "Toy Story 2"
+  ],
+  "answer": "The Godfather Part II",
+  "difficulty": "hard",
+  "explanation": "It also made Coppola and his father Carmine the first parent and child to win Oscars for the same film.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which 1959 epic starring Charlton Heston won eleven Academy Awards?",
+  "choices": [
+   "Ben-Hur",
+   "Spartacus",
+   "The Ten Commandments",
+   "El Cid"
+  ],
+  "answer": "Ben-Hur",
+  "difficulty": "hard",
+  "explanation": "Its chariot race took months to shoot on a huge purpose-built arena outside Rome.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which Hirokazu Kore-eda film about an improvised family won the Palme d'Or in 2018?",
+  "choices": [
+   "Shoplifters",
+   "Nobody Knows",
+   "Like Father, Like Son",
+   "Still Walking"
+  ],
+  "answer": "Shoplifters",
+  "difficulty": "hard",
+  "explanation": "Kore-eda often works with children using spoken cues rather than a memorised script.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which Indian film-maker directed the Apu Trilogy?",
+  "choices": [
+   "Satyajit Ray",
+   "Ritwik Ghatak",
+   "Mrinal Sen",
+   "Guru Dutt"
+  ],
+  "answer": "Satyajit Ray",
+  "difficulty": "hard",
+  "explanation": "Ray worked as a commercial artist and funded early shooting himself, pawning belongings to continue.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which 1955 Bengali film opens Satyajit Ray's Apu Trilogy?",
+  "choices": [
+   "Pather Panchali",
+   "Aparajito",
+   "Apur Sansar",
+   "Charulata"
+  ],
+  "answer": "Pather Panchali",
+  "difficulty": "hard",
+  "explanation": "Ravi Shankar composed its sitar score in a single long overnight session.",
+  "unsure": false
+ },
+ {
+  "prompt": "The Oscar-winning song Naatu Naatu comes from which Indian film?",
+  "choices": [
+   "RRR",
+   "Baahubali",
+   "Pushpa",
+   "Gully Boy"
+  ],
+  "answer": "RRR",
+  "difficulty": "hard",
+  "explanation": "S. S. Rajamouli's Telugu epic took the 2023 award for Best Original Song, beating four English-language entries.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which 1950 Japanese film retells one crime through flatly contradictory eyewitness accounts?",
+  "choices": [
+   "Rashomon",
+   "Ikiru",
+   "Ugetsu",
+   "Harakiri"
+  ],
+  "answer": "Rashomon",
+  "difficulty": "hard",
+  "explanation": "Its Venice prize opened Western cinemas to Japanese film, and its title became a byword for clashing accounts.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which Japanese director made Tokyo Story, known for placing the camera near floor level?",
+  "choices": [
+   "Yasujiro Ozu",
+   "Akira Kurosawa",
+   "Kon Ichikawa",
+   "Mikio Naruse"
+  ],
+  "answer": "Yasujiro Ozu",
+  "difficulty": "hard",
+  "explanation": "The low angle matches the eye line of someone seated on a tatami mat, the film's usual vantage point.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which Ghibli co-founder directed the wartime film Grave of the Fireflies?",
+  "choices": [
+   "Isao Takahata",
+   "Hayao Miyazaki",
+   "Goro Miyazaki",
+   "Yoshifumi Kondo"
+  ],
+  "answer": "Isao Takahata",
+  "difficulty": "hard",
+  "explanation": "Takahata could not draw well himself and worked instead as a director and organiser of animators.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which anime director made Perfect Blue and Paprika?",
+  "choices": [
+   "Satoshi Kon",
+   "Mamoru Oshii",
+   "Hideaki Anno",
+   "Mamoru Hosoda"
+  ],
+  "answer": "Satoshi Kon",
+  "difficulty": "hard",
+  "explanation": "His match cuts between dream and waking life were widely borrowed by live-action directors.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which Hong Kong director made In the Mood for Love and Chungking Express?",
+  "choices": [
+   "Wong Kar-wai",
+   "John Woo",
+   "Johnnie To",
+   "Tsui Hark"
+  ],
+  "answer": "Wong Kar-wai",
+  "difficulty": "hard",
+  "explanation": "He often shoots without a finished script, building the story during long stretches of filming.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which Park Chan-wook film transplants Sarah Waters's novel Fingersmith to colonial Korea?",
+  "choices": [
+   "The Handmaiden",
+   "Thirst",
+   "Decision to Leave",
+   "Lady Vengeance"
+  ],
+  "answer": "The Handmaiden",
+  "difficulty": "hard",
+  "explanation": "It splits into three parts, each retelling events from a different character's knowledge.",
+  "unsure": false
+ },
+ {
+  "prompt": "Nigeria's Oscar entry Lionheart was disqualified for containing too much of what?",
+  "choices": [
+   "English dialogue",
+   "Product placement",
+   "Archive footage",
+   "Stock music"
+  ],
+  "answer": "English dialogue",
+  "difficulty": "hard",
+  "explanation": "Academy rules then required mostly non-English dialogue in the international feature category.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which Nigerian director made the 2009 mystery The Figurine?",
+  "choices": [
+   "Kunle Afolayan",
+   "Tunde Kelani",
+   "Jeta Amata",
+   "Niyi Akinmolayan"
+  ],
+  "answer": "Kunle Afolayan",
+  "difficulty": "hard",
+  "explanation": "Its cinema release and polished look marked Nollywood's shift away from straight-to-video production.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which director adapted Chimamanda Ngozi Adichie's Half of a Yellow Sun for the screen?",
+  "choices": [
+   "Biyi Bandele",
+   "Kunle Afolayan",
+   "Amma Asante",
+   "Steve McQueen"
+  ],
+  "answer": "Biyi Bandele",
+  "difficulty": "hard",
+  "explanation": "Bandele, a novelist and playwright, cast Chiwetel Ejiofor and Thandiwe Newton in the Biafran war drama.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which British director made Hunger, Shame and 12 Years a Slave?",
+  "choices": [
+   "Steve McQueen",
+   "Andrea Arnold",
+   "Shane Meadows",
+   "Danny Boyle"
+  ],
+  "answer": "Steve McQueen",
+  "difficulty": "hard",
+  "explanation": "He was a Turner Prize-winning video artist before moving into feature films.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which Polish director made the Three Colours trilogy of Blue, White and Red?",
+  "choices": [
+   "Krzysztof Kieslowski",
+   "Andrzej Wajda",
+   "Roman Polanski",
+   "Agnieszka Holland"
+  ],
+  "answer": "Krzysztof Kieslowski",
+  "difficulty": "hard",
+  "explanation": "The three titles and their colours follow the French flag and its ideals of liberty, equality and fraternity.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which Greek director made The Lobster and Poor Things?",
+  "choices": [
+   "Yorgos Lanthimos",
+   "Costa-Gavras",
+   "Theo Angelopoulos",
+   "Athina Tsangari"
+  ],
+  "answer": "Yorgos Lanthimos",
+  "difficulty": "hard",
+  "explanation": "He favours very wide lenses that bend the edges of the frame, giving interiors a fishbowl look.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which Russian director made Stalker and the 1972 version of Solaris?",
+  "choices": [
+   "Andrei Tarkovsky",
+   "Sergei Bondarchuk",
+   "Aleksei German",
+   "Andrey Zvyagintsev"
+  ],
+  "answer": "Andrei Tarkovsky",
+  "difficulty": "hard",
+  "explanation": "Stalker was shot twice after the first batch of negative was ruined in processing.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which 1985 documentary about the Holocaust runs for more than nine hours?",
+  "choices": [
+   "Shoah",
+   "Night and Fog",
+   "The Sorrow and the Pity",
+   "Hotel Terminus"
+  ],
+  "answer": "Shoah",
+  "difficulty": "hard",
+  "explanation": "Claude Lanzmann used no archive footage at all, relying entirely on interviews and present-day locations.",
+  "unsure": false
+ },
+ {
+  "prompt": "Whose 1878 photographs of a galloping horse settled whether all four hooves leave the ground?",
+  "choices": [
+   "Eadweard Muybridge",
+   "Louis Daguerre",
+   "Etienne-Jules Marey",
+   "Thomas Edison"
+  ],
+  "answer": "Eadweard Muybridge",
+  "difficulty": "hard",
+  "explanation": "He tripped a row of cameras with wires as the horse ran past, and all four hooves do leave the ground.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which 1902 French film sends a rocket into the eye of the man in the moon?",
+  "choices": [
+   "A Trip to the Moon",
+   "The Great Train Robbery",
+   "Arrival of a Train",
+   "The Cabinet of Dr Caligari"
+  ],
+  "answer": "A Trip to the Moon",
+  "difficulty": "hard",
+  "explanation": "Georges Melies was a stage magician, and he hand-tinted prints of the film frame by frame.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which 1920 German film features painted, crooked sets and a sinister fairground showman?",
+  "choices": [
+   "The Cabinet of Dr Caligari",
+   "Nosferatu",
+   "Metropolis",
+   "The Golem"
+  ],
+  "answer": "The Cabinet of Dr Caligari",
+  "difficulty": "hard",
+  "explanation": "Its distorted painted backdrops gave German Expressionist cinema its defining visual signature.",
+  "unsure": false
+ },
+ {
+  "prompt": "In film-making, the Wilhelm scream is an example of what?",
+  "choices": [
+   "A stock sound effect",
+   "A lighting setup",
+   "A cutting technique",
+   "A lens filter"
+  ],
+  "answer": "A stock sound effect",
+  "difficulty": "hard",
+  "explanation": "Recorded in 1951, the same yelp has been slipped into hundreds of films by sound editors as an in-joke.",
+  "unsure": false
+ }
+]

@@ -1,0 +1,2303 @@
+[
+ {
+  "prompt": "Which bone in the human body is the longest?",
+  "choices": [
+   "Femur",
+   "Tibia",
+   "Humerus",
+   "Fibula"
+  ],
+  "answer": "Femur",
+  "difficulty": "easy",
+  "explanation": "The femur runs from hip to knee and can carry many times an adult's body weight.",
+  "unsure": false
+ },
+ {
+  "prompt": "A full set of adult human teeth contains how many?",
+  "choices": [
+   "32",
+   "24",
+   "40",
+   "30"
+  ],
+  "answer": "32",
+  "difficulty": "easy",
+  "explanation": "That total includes the four wisdom teeth, which often arrive late or not at all.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the medical name for the kneecap?",
+  "choices": [
+   "Patella",
+   "Sternum",
+   "Scapula",
+   "Clavicle"
+  ],
+  "answer": "Patella",
+  "difficulty": "easy",
+  "explanation": "The patella grows inside a tendon rather than joining two bones end to end.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the fear of enclosed spaces called?",
+  "choices": [
+   "Claustrophobia",
+   "Agoraphobia",
+   "Acrophobia",
+   "Nyctophobia"
+  ],
+  "answer": "Claustrophobia",
+  "difficulty": "easy",
+  "explanation": "It comes from the Latin claustrum, a bolt or enclosed place; agoraphobia is the opposite.",
+  "unsure": false
+ },
+ {
+  "prompt": "The study of birds is known as what?",
+  "choices": [
+   "Ornithology",
+   "Entomology",
+   "Ichthyology",
+   "Herpetology"
+  ],
+  "answer": "Ornithology",
+  "difficulty": "easy",
+  "explanation": "Entomology covers insects, ichthyology fish and herpetology reptiles and amphibians.",
+  "unsure": false
+ },
+ {
+  "prompt": "How many items make up a baker's dozen?",
+  "choices": [
+   "13",
+   "12",
+   "14",
+   "10"
+  ],
+  "answer": "13",
+  "difficulty": "easy",
+  "explanation": "Bakers threw in a spare loaf to avoid heavy fines for selling underweight bread.",
+  "unsure": false
+ },
+ {
+  "prompt": "How many squares are there on a standard chessboard?",
+  "choices": [
+   "64",
+   "81",
+   "100",
+   "49"
+  ],
+  "answer": "64",
+  "difficulty": "easy",
+  "explanation": "It is eight rows by eight columns of alternating light and dark squares.",
+  "unsure": false
+ },
+ {
+  "prompt": "Excluding jokers, how many cards are in a standard deck?",
+  "choices": [
+   "52",
+   "54",
+   "48",
+   "60"
+  ],
+  "answer": "52",
+  "difficulty": "easy",
+  "explanation": "Four suits of thirteen; the jokers were a later American addition for trump games.",
+  "unsure": false
+ },
+ {
+  "prompt": "How many keys does a standard full-size piano have?",
+  "choices": [
+   "88",
+   "76",
+   "61",
+   "96"
+  ],
+  "answer": "88",
+  "difficulty": "easy",
+  "explanation": "Fifty-two white and thirty-six black keys cover a little over seven octaves.",
+  "unsure": false
+ },
+ {
+  "prompt": "How many pounds are there in a stone?",
+  "choices": [
+   "14",
+   "12",
+   "16",
+   "10"
+  ],
+  "answer": "14",
+  "difficulty": "easy",
+  "explanation": "The stone was fixed at 14 pounds for the medieval English wool trade.",
+  "unsure": false
+ },
+ {
+  "prompt": "How many days are there in a leap year?",
+  "choices": [
+   "366",
+   "365",
+   "364",
+   "367"
+  ],
+  "answer": "366",
+  "difficulty": "easy",
+  "explanation": "The extra day keeps the calendar in step with the roughly 365.24-day solar year.",
+  "unsure": false
+ },
+ {
+  "prompt": "In Greek mythology, who was the messenger of the gods?",
+  "choices": [
+   "Hermes",
+   "Apollo",
+   "Hades",
+   "Ares"
+  ],
+  "answer": "Hermes",
+  "difficulty": "easy",
+  "explanation": "He wore winged sandals and also escorted the souls of the dead to the underworld.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which Roman god corresponds to the Greek god Ares?",
+  "choices": [
+   "Mars",
+   "Jupiter",
+   "Neptune",
+   "Mercury"
+  ],
+  "answer": "Mars",
+  "difficulty": "easy",
+  "explanation": "Romans respected Mars far more than Greeks did Ares, even naming a month for him.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the name of Thor's hammer in Norse mythology?",
+  "choices": [
+   "Mjolnir",
+   "Gungnir",
+   "Excalibur",
+   "Andvaranaut"
+  ],
+  "answer": "Mjolnir",
+  "difficulty": "easy",
+  "explanation": "Dwarves forged it with a famously short handle after a bet went wrong.",
+  "unsure": false
+ },
+ {
+  "prompt": "In Greek myth, who fell after flying too close to the sun?",
+  "choices": [
+   "Icarus",
+   "Perseus",
+   "Orpheus",
+   "Jason"
+  ],
+  "answer": "Icarus",
+  "difficulty": "easy",
+  "explanation": "His father Daedalus built the wax-and-feather wings that came apart in the heat.",
+  "unsure": false
+ },
+ {
+  "prompt": "In Greek myth, everything King Midas touched turned to what?",
+  "choices": [
+   "Gold",
+   "Stone",
+   "Silver",
+   "Ice"
+  ],
+  "answer": "Gold",
+  "difficulty": "easy",
+  "explanation": "The gift turned to horror once his food and his own daughter hardened at a touch.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which mythical creature has a human head on a lion's body?",
+  "choices": [
+   "Sphinx",
+   "Centaur",
+   "Griffin",
+   "Minotaur"
+  ],
+  "answer": "Sphinx",
+  "difficulty": "easy",
+  "explanation": "The Greek sphinx strangled travellers who could not answer her riddle.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which sportswear brand takes its name from a Greek goddess of victory?",
+  "choices": [
+   "Nike",
+   "Puma",
+   "Reebok",
+   "Asics"
+  ],
+  "answer": "Nike",
+  "difficulty": "easy",
+  "explanation": "The goddess was usually shown winged, and the firm's tick is called the Swoosh.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which fashion house uses two interlocking Cs as its emblem?",
+  "choices": [
+   "Chanel",
+   "Gucci",
+   "Fendi",
+   "Dior"
+  ],
+  "answer": "Chanel",
+  "difficulty": "easy",
+  "explanation": "The Cs stand for Coco Chanel, the nickname of founder Gabrielle Chanel.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which fast-food chain is known for its Golden Arches?",
+  "choices": [
+   "McDonald's",
+   "Burger King",
+   "Wendy's",
+   "Subway"
+  ],
+  "answer": "McDonald's",
+  "difficulty": "easy",
+  "explanation": "The arches started life as an architectural feature of the 1950s restaurant buildings.",
+  "unsure": false
+ },
+ {
+  "prompt": "A philatelist collects what?",
+  "choices": [
+   "Stamps",
+   "Coins",
+   "Books",
+   "Shells"
+  ],
+  "answer": "Stamps",
+  "difficulty": "easy",
+  "explanation": "The word was coined in 1864 from Greek roots meaning a fondness for things untaxed.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is a young goat called?",
+  "choices": [
+   "Kid",
+   "Calf",
+   "Colt",
+   "Cub"
+  ],
+  "answer": "Kid",
+  "difficulty": "easy",
+  "explanation": "The slang use of kid for a child only caught on in the 19th century.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is a baby swan called?",
+  "choices": [
+   "Cygnet",
+   "Gosling",
+   "Poult",
+   "Eyas"
+  ],
+  "answer": "Cygnet",
+  "difficulty": "easy",
+  "explanation": "It comes from the Latin cygnus; an eyas is a young hawk and a poult a young turkey.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is a female fox called?",
+  "choices": [
+   "Vixen",
+   "Doe",
+   "Jill",
+   "Sow"
+  ],
+  "answer": "Vixen",
+  "difficulty": "easy",
+  "explanation": "The male is a dog fox, and their young are known as kits or cubs.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which of these mammals lays eggs?",
+  "choices": [
+   "Platypus",
+   "Otter",
+   "Beaver",
+   "Armadillo"
+  ],
+  "answer": "Platypus",
+  "difficulty": "easy",
+  "explanation": "The platypus and the echidna are the only egg-laying mammals still alive.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which animal is the fastest over a short sprint on land?",
+  "choices": [
+   "Cheetah",
+   "Lion",
+   "Greyhound",
+   "Horse"
+  ],
+  "answer": "Cheetah",
+  "difficulty": "easy",
+  "explanation": "A cheetah nears 100 km/h but overheats and gives up within about half a minute.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which is the tallest living animal?",
+  "choices": [
+   "Giraffe",
+   "Elephant",
+   "Camel",
+   "Ostrich"
+  ],
+  "answer": "Giraffe",
+  "difficulty": "easy",
+  "explanation": "A giraffe's neck contains just seven vertebrae, the same number as a human neck.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which bird is able to fly backwards?",
+  "choices": [
+   "Hummingbird",
+   "Swallow",
+   "Kingfisher",
+   "Wren"
+  ],
+  "answer": "Hummingbird",
+  "difficulty": "easy",
+  "explanation": "Its wings trace a figure of eight, letting it hover and reverse in mid-air.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which sealed food is famous for effectively never spoiling?",
+  "choices": [
+   "Honey",
+   "Rice",
+   "Butter",
+   "Bread"
+  ],
+  "answer": "Honey",
+  "difficulty": "easy",
+  "explanation": "Low water content and high acidity block bacteria; edible pots turned up in old tombs.",
+  "unsure": false
+ },
+ {
+  "prompt": "Marzipan is made mainly from which nut?",
+  "choices": [
+   "Almonds",
+   "Hazelnuts",
+   "Walnuts",
+   "Cashews"
+  ],
+  "answer": "Almonds",
+  "difficulty": "easy",
+  "explanation": "Ground almonds are worked together with sugar and egg white or syrup into a paste.",
+  "unsure": false
+ },
+ {
+  "prompt": "A Granny Smith is a variety of which fruit?",
+  "choices": [
+   "Apple",
+   "Pear",
+   "Plum",
+   "Grape"
+  ],
+  "answer": "Apple",
+  "difficulty": "easy",
+  "explanation": "It grew as a chance seedling in Maria Ann Smith's Australian garden in the 1860s.",
+  "unsure": false
+ },
+ {
+  "prompt": "In Western tradition, what colour is a bride's wedding dress?",
+  "choices": [
+   "White",
+   "Red",
+   "Green",
+   "Blue"
+  ],
+  "answer": "White",
+  "difficulty": "easy",
+  "explanation": "Queen Victoria's white gown in 1840 set the fashion; brides had worn any colour before.",
+  "unsure": false
+ },
+ {
+  "prompt": "On a vertical traffic light, which colour sits at the top?",
+  "choices": [
+   "Red",
+   "Green",
+   "Amber",
+   "White"
+  ],
+  "answer": "Red",
+  "difficulty": "easy",
+  "explanation": "Stop is placed highest so it stays visible if snow settles or a lorry blocks the view.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which number does the Roman numeral D stand for?",
+  "choices": [
+   "500",
+   "100",
+   "1,000",
+   "50"
+  ],
+  "answer": "500",
+  "difficulty": "easy",
+  "explanation": "C is 100, L is 50 and M is 1,000; D began as half of an older sign for a thousand.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which material traditionally marks a 25th wedding anniversary?",
+  "choices": [
+   "Silver",
+   "Gold",
+   "Ruby",
+   "Pearl"
+  ],
+  "answer": "Silver",
+  "difficulty": "easy",
+  "explanation": "Gold marks the 50th, ruby the 40th and diamond the 60th in the traditional list.",
+  "unsure": false
+ },
+ {
+  "prompt": "How many sides does a road stop sign have?",
+  "choices": [
+   "8",
+   "6",
+   "4",
+   "10"
+  ],
+  "answer": "8",
+  "difficulty": "easy",
+  "explanation": "The octagon was picked so drivers recognise it even from behind or in fog.",
+  "unsure": false
+ },
+ {
+  "prompt": "St Patrick's Day falls on which date?",
+  "choices": [
+   "17 March",
+   "1 March",
+   "23 April",
+   "17 May"
+  ],
+  "answer": "17 March",
+  "difficulty": "easy",
+  "explanation": "The date marks his traditional death day; 23 April belongs to St George.",
+  "unsure": false
+ },
+ {
+  "prompt": "Bonfire Night is marked in Britain on which date?",
+  "choices": [
+   "5 November",
+   "31 October",
+   "11 November",
+   "1 November"
+  ],
+  "answer": "5 November",
+  "difficulty": "easy",
+  "explanation": "It recalls the failure of the 1605 plot to blow up the House of Lords.",
+  "unsure": false
+ },
+ {
+  "prompt": "In dates, what does BC stand for?",
+  "choices": [
+   "Before Christ",
+   "Before Century",
+   "British Calendar",
+   "Base Chronology"
+  ],
+  "answer": "Before Christ",
+  "difficulty": "easy",
+  "explanation": "The neutral alternative, BCE, means Before the Common Era and counts the same years.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the & symbol called?",
+  "choices": [
+   "Ampersand",
+   "Asterisk",
+   "Octothorpe",
+   "Obelus"
+  ],
+  "answer": "Ampersand",
+  "difficulty": "easy",
+  "explanation": "The name is a slurring of 'and per se and', once chanted at the end of the alphabet.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which figure appears on the United States one-dollar bill?",
+  "choices": [
+   "George Washington",
+   "Abraham Lincoln",
+   "Thomas Jefferson",
+   "Alexander Hamilton"
+  ],
+  "answer": "George Washington",
+  "difficulty": "easy",
+  "explanation": "Lincoln is on the five and Jefferson on the two; Hamilton, on the ten, was never president.",
+  "unsure": false
+ },
+ {
+  "prompt": "How many strings does a standard violin have?",
+  "choices": [
+   "4",
+   "6",
+   "5",
+   "3"
+  ],
+  "answer": "4",
+  "difficulty": "easy",
+  "explanation": "They are tuned in fifths: G, D, A and E from the lowest string upwards.",
+  "unsure": false
+ },
+ {
+  "prompt": "Alfred Nobel, who endowed the Nobel Prizes, invented what?",
+  "choices": [
+   "Dynamite",
+   "The telephone",
+   "Penicillin",
+   "The light bulb"
+  ],
+  "answer": "Dynamite",
+  "difficulty": "easy",
+  "explanation": "An obituary branding him a merchant of death is said to have prompted the prizes.",
+  "unsure": false
+ },
+ {
+  "prompt": "The raised-dot reading system used by blind people is named after whom?",
+  "choices": [
+   "Louis Braille",
+   "Thomas Edison",
+   "John Dalton",
+   "Joseph Lister"
+  ],
+  "answer": "Louis Braille",
+  "difficulty": "easy",
+  "explanation": "Blinded as a child, he adapted a French army code meant for reading orders at night.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which city opened the world's first underground railway?",
+  "choices": [
+   "London",
+   "Paris",
+   "New York",
+   "Berlin"
+  ],
+  "answer": "London",
+  "difficulty": "easy",
+  "explanation": "The Metropolitan Railway carried passengers from 1863 behind smoky steam engines.",
+  "unsure": false
+ },
+ {
+  "prompt": "In Ireland and the UK, traffic drives on which side of the road?",
+  "choices": [
+   "The left",
+   "The right",
+   "The centre",
+   "It alternates"
+  ],
+  "answer": "The left",
+  "difficulty": "easy",
+  "explanation": "Roughly a third of the world drives on the left, mostly former British territories.",
+  "unsure": false
+ },
+ {
+  "prompt": "How many pairs of ribs does a typical adult human have?",
+  "choices": [
+   "12",
+   "10",
+   "14",
+   "8"
+  ],
+  "answer": "12",
+  "difficulty": "easy",
+  "explanation": "The lowest two pairs are called floating ribs because they attach only to the spine.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the hardest substance in the human body?",
+  "choices": [
+   "Tooth enamel",
+   "Bone",
+   "Cartilage",
+   "Fingernail"
+  ],
+  "answer": "Tooth enamel",
+  "difficulty": "easy",
+  "explanation": "Enamel is almost entirely mineral and, unlike bone, cannot repair itself once lost.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which weekday is widely nicknamed hump day?",
+  "choices": [
+   "Wednesday",
+   "Friday",
+   "Monday",
+   "Thursday"
+  ],
+  "answer": "Wednesday",
+  "difficulty": "easy",
+  "explanation": "It sits at the midpoint of the working week, the hump you climb over.",
+  "unsure": false
+ },
+ {
+  "prompt": "The furniture retailer IKEA was founded in which country?",
+  "choices": [
+   "Sweden",
+   "Denmark",
+   "Norway",
+   "Netherlands"
+  ],
+  "answer": "Sweden",
+  "difficulty": "easy",
+  "explanation": "The name mixes the founder's initials with those of his farm and home village.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is a baby kangaroo called?",
+  "choices": [
+   "Joey",
+   "Cub",
+   "Pup",
+   "Calf"
+  ],
+  "answer": "Joey",
+  "difficulty": "easy",
+  "explanation": "A newborn is about the size of a jellybean and crawls unaided into the pouch.",
+  "unsure": false
+ },
+ {
+  "prompt": "In Ireland and the UK, a wedding ring is traditionally worn on which hand?",
+  "choices": [
+   "The left hand",
+   "The right hand",
+   "The left thumb",
+   "The right thumb"
+  ],
+  "answer": "The left hand",
+  "difficulty": "easy",
+  "explanation": "Romans believed a vein ran from that finger directly to the heart.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which animal is proverbially said to have nine lives?",
+  "choices": [
+   "Cat",
+   "Dog",
+   "Owl",
+   "Snake"
+  ],
+  "answer": "Cat",
+  "difficulty": "easy",
+  "explanation": "In some countries the saying gives the cat seven lives instead of nine.",
+  "unsure": false
+ },
+ {
+  "prompt": "What colour are traditional London taxis?",
+  "choices": [
+   "Black",
+   "Yellow",
+   "White",
+   "Green"
+  ],
+  "answer": "Black",
+  "difficulty": "easy",
+  "explanation": "Black was simply the standard no-cost paint option on the post-war Austin cabs.",
+  "unsure": false
+ },
+ {
+  "prompt": "What colour are traditional postboxes in Britain and Ireland?",
+  "choices": [
+   "Red",
+   "Blue",
+   "Yellow",
+   "Black"
+  ],
+  "answer": "Red",
+  "difficulty": "easy",
+  "explanation": "Early boxes were green, but people kept walking into them, so red was adopted.",
+  "unsure": false
+ },
+ {
+  "prompt": "At which festival are pumpkins traditionally carved into lanterns?",
+  "choices": [
+   "Halloween",
+   "Easter",
+   "Diwali",
+   "Midsummer"
+  ],
+  "answer": "Halloween",
+  "difficulty": "easy",
+  "explanation": "Irish emigrants brought the custom to America, where turnips gave way to pumpkins.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which hand tool has a claw opposite its striking face?",
+  "choices": [
+   "Hammer",
+   "Chisel",
+   "Spanner",
+   "Plane"
+  ],
+  "answer": "Hammer",
+  "difficulty": "easy",
+  "explanation": "The claw is designed for levering nails back out rather than driving them in.",
+  "unsure": false
+ },
+ {
+  "prompt": "A raisin is a dried version of which fruit?",
+  "choices": [
+   "Grape",
+   "Plum",
+   "Fig",
+   "Apricot"
+  ],
+  "answer": "Grape",
+  "difficulty": "easy",
+  "explanation": "A dried plum is a prune, and dried apricots keep their own name.",
+  "unsure": false
+ },
+ {
+  "prompt": "Cider is traditionally made from which fruit?",
+  "choices": [
+   "Apples",
+   "Pears",
+   "Grapes",
+   "Cherries"
+  ],
+  "answer": "Apples",
+  "difficulty": "easy",
+  "explanation": "Fermented pear juice makes perry, sometimes sold as pear cider.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is a shelter built from blocks of snow called?",
+  "choices": [
+   "Igloo",
+   "Yurt",
+   "Teepee",
+   "Chalet"
+  ],
+  "answer": "Igloo",
+  "difficulty": "easy",
+  "explanation": "Body heat and trapped air can lift the inside far above the outdoor temperature.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which bird is traditionally said to deliver babies?",
+  "choices": [
+   "Stork",
+   "Swan",
+   "Dove",
+   "Robin"
+  ],
+  "answer": "Stork",
+  "difficulty": "easy",
+  "explanation": "The tale spread from northern Europe, where storks nested on chimneys each spring.",
+  "unsure": false
+ },
+ {
+  "prompt": "The shamrock, an Irish emblem, has how many leaves?",
+  "choices": [
+   "Three",
+   "Four",
+   "Five",
+   "Two"
+  ],
+  "answer": "Three",
+  "difficulty": "easy",
+  "explanation": "St Patrick is said to have used its three leaves to explain the Trinity.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which is the largest living land animal?",
+  "choices": [
+   "African elephant",
+   "White rhinoceros",
+   "Hippopotamus",
+   "Giraffe"
+  ],
+  "answer": "African elephant",
+  "difficulty": "easy",
+  "explanation": "A bull can pass six tonnes, and its ears work as radiators to shed heat.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which spice is the most expensive in the world by weight?",
+  "choices": [
+   "Saffron",
+   "Vanilla",
+   "Cardamom",
+   "Cloves"
+  ],
+  "answer": "Saffron",
+  "difficulty": "medium",
+  "explanation": "Each crocus flower yields only three stigmas, and all of them are picked by hand.",
+  "unsure": false
+ },
+ {
+  "prompt": "What colour is an aircraft flight recorder, despite its nickname?",
+  "choices": [
+   "Bright orange",
+   "Black",
+   "Silver",
+   "Dark green"
+  ],
+  "answer": "Bright orange",
+  "difficulty": "medium",
+  "explanation": "It is painted orange with reflective strips so searchers can pick it out of wreckage.",
+  "unsure": false
+ },
+ {
+  "prompt": "The abbreviation RSVP is short for a French phrase meaning what?",
+  "choices": [
+   "Please reply",
+   "Save the date",
+   "With thanks",
+   "Kindly attend"
+  ],
+  "answer": "Please reply",
+  "difficulty": "medium",
+  "explanation": "Repondez s'il vous plait has appeared on invitations since the 18th century.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the plastic or metal tip on the end of a shoelace called?",
+  "choices": [
+   "Aglet",
+   "Grommet",
+   "Cleat",
+   "Bodkin"
+  ],
+  "answer": "Aglet",
+  "difficulty": "medium",
+  "explanation": "It stops the lace fraying and stiffens it enough to thread through the eyelets.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the vertical groove between the nose and the upper lip called?",
+  "choices": [
+   "Philtrum",
+   "Frenulum",
+   "Nasion",
+   "Vermilion"
+  ],
+  "answer": "Philtrum",
+  "difficulty": "medium",
+  "explanation": "It marks where sections of the face fuse before birth; the Greek root means love charm.",
+  "unsure": false
+ },
+ {
+  "prompt": "How many eyes do most spiders have?",
+  "choices": [
+   "Eight",
+   "Two",
+   "Four",
+   "Six"
+  ],
+  "answer": "Eight",
+  "difficulty": "medium",
+  "explanation": "They usually sit in two rows of four, though some cave species have none at all.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is a group of flamingos called?",
+  "choices": [
+   "A flamboyance",
+   "A dazzle",
+   "A charm",
+   "A parade"
+  ],
+  "answer": "A flamboyance",
+  "difficulty": "medium",
+  "explanation": "A dazzle describes zebras and a charm describes goldfinches.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which animal leaves fingerprints almost indistinguishable from a human's?",
+  "choices": [
+   "Koala",
+   "Chimpanzee",
+   "Gorilla",
+   "Raccoon"
+  ],
+  "answer": "Koala",
+  "difficulty": "medium",
+  "explanation": "The ridges evolved separately from ours and have genuinely confused forensic experts.",
+  "unsure": false
+ },
+ {
+  "prompt": "Roughly how long is an elephant's pregnancy?",
+  "choices": [
+   "22 months",
+   "9 months",
+   "14 months",
+   "30 months"
+  ],
+  "answer": "22 months",
+  "difficulty": "medium",
+  "explanation": "It is the longest gestation of any land animal and ends with a calf of about 100 kg.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is a group of kangaroos called?",
+  "choices": [
+   "A mob",
+   "A raft",
+   "A clutch",
+   "A leap"
+  ],
+  "answer": "A mob",
+  "difficulty": "medium",
+  "explanation": "Mobs are usually led by a dominant male, which Australians call a boomer.",
+  "unsure": false
+ },
+ {
+  "prompt": "Botanically, which of these is a true berry?",
+  "choices": [
+   "Banana",
+   "Strawberry",
+   "Raspberry",
+   "Blackberry"
+  ],
+  "answer": "Banana",
+  "difficulty": "medium",
+  "explanation": "A berry grows from a single ovary with seeds inside; a strawberry is a swollen stem end.",
+  "unsure": false
+ },
+ {
+  "prompt": "Wasabi served outside Japan is usually made from what?",
+  "choices": [
+   "Horseradish",
+   "Mustard seed",
+   "Green chilli",
+   "Watercress"
+  ],
+  "answer": "Horseradish",
+  "difficulty": "medium",
+  "explanation": "Genuine wasabi rhizome is fussy to grow and loses its heat minutes after grating.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which soft drink was named after a digestive complaint?",
+  "choices": [
+   "Pepsi-Cola",
+   "Fanta",
+   "Sprite",
+   "7 Up"
+  ],
+  "answer": "Pepsi-Cola",
+  "difficulty": "medium",
+  "explanation": "Its pharmacist inventor sold it as a tonic that would settle dyspepsia.",
+  "unsure": true
+ },
+ {
+  "prompt": "The car maker Volvo takes its name from a Latin word meaning what?",
+  "choices": [
+   "I roll",
+   "I lead",
+   "I carry",
+   "I endure"
+  ],
+  "answer": "I roll",
+  "difficulty": "medium",
+  "explanation": "The name was first registered for a line of ball bearings before any car used it.",
+  "unsure": false
+ },
+ {
+  "prompt": "Where does the name Adidas come from?",
+  "choices": [
+   "Its founder's name",
+   "A Greek word",
+   "An acronym",
+   "A Latin motto"
+  ],
+  "answer": "Its founder's name",
+  "difficulty": "medium",
+  "explanation": "Adolf Dassler was known as Adi; his brother Rudolf went on to found rival Puma.",
+  "unsure": false
+ },
+ {
+  "prompt": "Velcro was inspired by what?",
+  "choices": [
+   "Burrs stuck to fur",
+   "Spider silk",
+   "Fish scales",
+   "Bird feathers"
+  ],
+  "answer": "Burrs stuck to fur",
+  "difficulty": "medium",
+  "explanation": "A Swiss engineer put burdock burrs under a microscope after walking his dog.",
+  "unsure": false
+ },
+ {
+  "prompt": "Bubble wrap was first invented and sold as what?",
+  "choices": [
+   "Wallpaper",
+   "Insulation",
+   "A pool toy",
+   "A mattress"
+  ],
+  "answer": "Wallpaper",
+  "difficulty": "medium",
+  "explanation": "The textured plastic flopped as decor before shippers found a use for it around 1960.",
+  "unsure": false
+ },
+ {
+  "prompt": "Play-Doh was originally sold as a product for doing what?",
+  "choices": [
+   "Cleaning wallpaper",
+   "Sealing windows",
+   "Casting moulds",
+   "Filling cracks"
+  ],
+  "answer": "Cleaning wallpaper",
+  "difficulty": "medium",
+  "explanation": "It lifted coal soot off walls until homes switched to gas heating and sales collapsed.",
+  "unsure": false
+ },
+ {
+  "prompt": "Post-it notes grew out of a failed attempt to invent what?",
+  "choices": [
+   "A very strong glue",
+   "A new paper",
+   "A dry ink",
+   "A cleaning spray"
+  ],
+  "answer": "A very strong glue",
+  "difficulty": "medium",
+  "explanation": "The weak adhesive sat unused for years until a colleague wanted bookmarks that stayed put.",
+  "unsure": false
+ },
+ {
+  "prompt": "Monopoly was adapted from an earlier board game called what?",
+  "choices": [
+   "The Landlord's Game",
+   "Rent Day",
+   "Boom Town",
+   "Fortune"
+  ],
+  "answer": "The Landlord's Game",
+  "difficulty": "medium",
+  "explanation": "Elizabeth Magie designed it to show players the damage done by land monopolies.",
+  "unsure": false
+ },
+ {
+  "prompt": "In the standard UK Monopoly set, how much money does each player start with?",
+  "choices": [
+   "1,500 pounds",
+   "1,000 pounds",
+   "2,000 pounds",
+   "500 pounds"
+  ],
+  "answer": "1,500 pounds",
+  "difficulty": "medium",
+  "explanation": "It arrives as a fixed mix of notes, including two 500s and two 100s.",
+  "unsure": false
+ },
+ {
+  "prompt": "In Scrabble, which two letters are worth ten points each?",
+  "choices": [
+   "Q and Z",
+   "X and J",
+   "Z and X",
+   "Q and J"
+  ],
+  "answer": "Q and Z",
+  "difficulty": "medium",
+  "explanation": "X and J score eight apiece; the values were set by counting letters in a newspaper.",
+  "unsure": false
+ },
+ {
+  "prompt": "In a standard deck of cards, which king is drawn without a moustache?",
+  "choices": [
+   "Hearts",
+   "Spades",
+   "Clubs",
+   "Diamonds"
+  ],
+  "answer": "Hearts",
+  "difficulty": "medium",
+  "explanation": "He also appears to drive a sword behind his head, earning the nickname suicide king.",
+  "unsure": false
+ },
+ {
+  "prompt": "In Morse code, which letter is a single dot?",
+  "choices": [
+   "E",
+   "T",
+   "A",
+   "I"
+  ],
+  "answer": "E",
+  "difficulty": "medium",
+  "explanation": "T is a single dash; the commonest letters were deliberately given the shortest signals.",
+  "unsure": false
+ },
+ {
+  "prompt": "In the NATO phonetic alphabet, which word stands for the letter K?",
+  "choices": [
+   "Kilo",
+   "Kite",
+   "King",
+   "Karl"
+  ],
+  "answer": "Kilo",
+  "difficulty": "medium",
+  "explanation": "The words were tested in the 1950s to stay clear over bad radio links and strong accents.",
+  "unsure": false
+ },
+ {
+  "prompt": "What does the distress signal SOS officially stand for?",
+  "choices": [
+   "Nothing at all",
+   "Save Our Souls",
+   "Save Our Ship",
+   "Send Out Support"
+  ],
+  "answer": "Nothing at all",
+  "difficulty": "medium",
+  "explanation": "It was chosen because three dots, three dashes and three dots are unmistakable in Morse.",
+  "unsure": false
+ },
+ {
+  "prompt": "London taxi drivers must pass a demanding test known as what?",
+  "choices": [
+   "The Knowledge",
+   "The Circuit",
+   "The Compass",
+   "The Ledger"
+  ],
+  "answer": "The Knowledge",
+  "difficulty": "medium",
+  "explanation": "Memorising hundreds of routes and thousands of landmarks usually takes three years or more.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which number works as an emergency line anywhere in the European Union?",
+  "choices": [
+   "112",
+   "911",
+   "000",
+   "119"
+  ],
+  "answer": "112",
+  "difficulty": "medium",
+  "explanation": "It connects from any mobile in the EU, even with no credit or no SIM card fitted.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which country issued the world's first adhesive postage stamp?",
+  "choices": [
+   "Britain",
+   "France",
+   "United States",
+   "Austria"
+  ],
+  "answer": "Britain",
+  "difficulty": "medium",
+  "explanation": "The Penny Black of 1840 showed Queen Victoria, so British stamps still omit a country name.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which British coin was redesigned in 2017 with twelve sides?",
+  "choices": [
+   "One pound",
+   "Two pounds",
+   "Fifty pence",
+   "Twenty pence"
+  ],
+  "answer": "One pound",
+  "difficulty": "medium",
+  "explanation": "The shape and hidden security features were introduced to defeat widespread forgeries.",
+  "unsure": false
+ },
+ {
+  "prompt": "The pound sign derives from the initial of which Latin word?",
+  "choices": [
+   "Libra",
+   "Pondus",
+   "Lira",
+   "Denarius"
+  ],
+  "answer": "Libra",
+  "difficulty": "medium",
+  "explanation": "Libra meant a pound in weight, which is also why pounds are abbreviated as lb.",
+  "unsure": false
+ },
+ {
+  "prompt": "How many feet are there in a fathom?",
+  "choices": [
+   "Six",
+   "Three",
+   "Ten",
+   "Twelve"
+  ],
+  "answer": "Six",
+  "difficulty": "medium",
+  "explanation": "It came from the span of a sailor's outstretched arms while hauling in a sounding line.",
+  "unsure": false
+ },
+ {
+  "prompt": "A horse's height is given in hands; how long is one hand?",
+  "choices": [
+   "Four inches",
+   "Six inches",
+   "Three inches",
+   "Eight inches"
+  ],
+  "answer": "Four inches",
+  "difficulty": "medium",
+  "explanation": "The unit was standardised from the width of an average adult palm across the knuckles.",
+  "unsure": false
+ },
+ {
+  "prompt": "A knot is a unit of what?",
+  "choices": [
+   "Speed",
+   "Distance",
+   "Depth",
+   "Wind force"
+  ],
+  "answer": "Speed",
+  "difficulty": "medium",
+  "explanation": "It means one nautical mile per hour, once measured by knots on a rope paid out astern.",
+  "unsure": false
+ },
+ {
+  "prompt": "How many items are there in a gross?",
+  "choices": [
+   "144",
+   "100",
+   "120",
+   "1,000"
+  ],
+  "answer": "144",
+  "difficulty": "medium",
+  "explanation": "A gross is a dozen dozen, and a great gross is twelve gross, or 1,728.",
+  "unsure": false
+ },
+ {
+  "prompt": "A furlong is what fraction of a mile?",
+  "choices": [
+   "One eighth",
+   "One quarter",
+   "One tenth",
+   "One half"
+  ],
+  "answer": "One eighth",
+  "difficulty": "medium",
+  "explanation": "It began as the length of furrow a team of oxen could plough without stopping to rest.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which calendar reform of 1582 produced the system in general use today?",
+  "choices": [
+   "Gregorian",
+   "Julian",
+   "Byzantine",
+   "Coptic"
+  ],
+  "answer": "Gregorian",
+  "difficulty": "medium",
+  "explanation": "It dropped leap years at most century marks to correct a drift of about ten days.",
+  "unsure": false
+ },
+ {
+  "prompt": "Why is September the ninth month when its name means seventh?",
+  "choices": [
+   "The Roman year began in March",
+   "A translation error",
+   "A papal decree",
+   "A leap year fix"
+  ],
+  "answer": "The Roman year began in March",
+  "difficulty": "medium",
+  "explanation": "January and February were added later, shunting the numbered months two places along.",
+  "unsure": false
+ },
+ {
+  "prompt": "At the Palace of Westminster, Big Ben is properly the name of what?",
+  "choices": [
+   "The great bell",
+   "The clock tower",
+   "The clock face",
+   "The whole palace"
+  ],
+  "answer": "The great bell",
+  "difficulty": "medium",
+  "explanation": "The tower itself was renamed the Elizabeth Tower in 2012.",
+  "unsure": false
+ },
+ {
+  "prompt": "The small extra pocket on a pair of jeans was originally designed to hold what?",
+  "choices": [
+   "A pocket watch",
+   "Coins",
+   "Matches",
+   "A key"
+  ],
+  "answer": "A pocket watch",
+  "difficulty": "medium",
+  "explanation": "Levi's added it in the 1870s, when working men carried watches on a chain.",
+  "unsure": false
+ },
+ {
+  "prompt": "In Japan, which fast food has become a Christmas Eve tradition?",
+  "choices": [
+   "Fried chicken",
+   "Pizza",
+   "Burgers",
+   "Noodles"
+  ],
+  "answer": "Fried chicken",
+  "difficulty": "medium",
+  "explanation": "A 1974 advertising campaign made KFC buckets a festive booking placed weeks ahead.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is a pangram?",
+  "choices": [
+   "A sentence using every letter",
+   "A word read backwards",
+   "A rhyming couplet",
+   "A three-line poem"
+  ],
+  "answer": "A sentence using every letter",
+  "difficulty": "medium",
+  "explanation": "The quick brown fox sentence is the best known and was long used to test typewriters.",
+  "unsure": false
+ },
+ {
+  "prompt": "In music, what does the instruction forte mean?",
+  "choices": [
+   "Loud",
+   "Fast",
+   "Smooth",
+   "Quiet"
+  ],
+  "answer": "Loud",
+  "difficulty": "medium",
+  "explanation": "Piano means soft, which is why the instrument was originally called the pianoforte.",
+  "unsure": false
+ },
+ {
+  "prompt": "The euro symbol is based on which Greek letter?",
+  "choices": [
+   "Epsilon",
+   "Sigma",
+   "Theta",
+   "Omega"
+  ],
+  "answer": "Epsilon",
+  "difficulty": "medium",
+  "explanation": "Epsilon nods to Europe, and the two crossing bars are meant to signal stability.",
+  "unsure": false
+ },
+ {
+  "prompt": "In Greek myth, which hero killed the Minotaur?",
+  "choices": [
+   "Theseus",
+   "Perseus",
+   "Heracles",
+   "Achilles"
+  ],
+  "answer": "Theseus",
+  "difficulty": "medium",
+  "explanation": "He found his way back out of the labyrinth using thread supplied by Ariadne.",
+  "unsure": false
+ },
+ {
+  "prompt": "Why do cabin crew dim the lights before a night landing?",
+  "choices": [
+   "To help eyes adjust",
+   "To save fuel",
+   "To help people sleep",
+   "To cut glare outside"
+  ],
+  "answer": "To help eyes adjust",
+  "difficulty": "medium",
+  "explanation": "If an evacuation is needed, passengers' eyes are already adapted to the darkness outside.",
+  "unsure": false
+ },
+ {
+  "prompt": "The large numbers painted at the end of a runway indicate what?",
+  "choices": [
+   "Its compass heading",
+   "Its length",
+   "Its width",
+   "Its age"
+  ],
+  "answer": "Its compass heading",
+  "difficulty": "medium",
+  "explanation": "A runway marked 09 points roughly east, at about 90 degrees, with 27 at the other end.",
+  "unsure": false
+ },
+ {
+  "prompt": "Why are aircraft cabin windows rounded rather than square?",
+  "choices": [
+   "Corners concentrate stress",
+   "To improve the view",
+   "To save weight",
+   "To fit the frame"
+  ],
+  "answer": "Corners concentrate stress",
+  "difficulty": "medium",
+  "explanation": "Square windows caused fatal Comet break-ups in the 1950s when fuselages tore at the corners.",
+  "unsure": false
+ },
+ {
+  "prompt": "What does the 40 in WD-40 refer to?",
+  "choices": [
+   "The 40th attempt",
+   "40 uses",
+   "40 ingredients",
+   "The year 1940"
+  ],
+  "answer": "The 40th attempt",
+  "difficulty": "medium",
+  "explanation": "The name stands for water displacement, perfected on the fortieth formulation in 1953.",
+  "unsure": false
+ },
+ {
+  "prompt": "Josephine Cochrane is credited with inventing which household appliance?",
+  "choices": [
+   "The dishwasher",
+   "The washing machine",
+   "The fridge",
+   "The toaster"
+  ],
+  "answer": "The dishwasher",
+  "difficulty": "medium",
+  "explanation": "She wanted her heirloom china cleaned without servants chipping it by hand.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which flower is worn in Britain and Ireland for Remembrance Day?",
+  "choices": [
+   "Poppy",
+   "Rose",
+   "Thistle",
+   "Daffodil"
+  ],
+  "answer": "Poppy",
+  "difficulty": "medium",
+  "explanation": "Poppies were among the first plants to grow back on the churned battlefields of Flanders.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is a group of rhinoceroses called?",
+  "choices": [
+   "A crash",
+   "A bloat",
+   "A muster",
+   "A skulk"
+  ],
+  "answer": "A crash",
+  "difficulty": "medium",
+  "explanation": "A bloat describes hippos and a skulk describes foxes.",
+  "unsure": false
+ },
+ {
+  "prompt": "The prongs of a fork are properly called what?",
+  "choices": [
+   "Tines",
+   "Spurs",
+   "Barbs",
+   "Picks"
+  ],
+  "answer": "Tines",
+  "difficulty": "medium",
+  "explanation": "Early European forks had only two tines and were used for serving rather than eating.",
+  "unsure": false
+ },
+ {
+  "prompt": "Earl Tupper's airtight containers with a burping seal are known as what?",
+  "choices": [
+   "Tupperware",
+   "Thermos",
+   "Pyrex",
+   "Kilner jars"
+  ],
+  "answer": "Tupperware",
+  "difficulty": "medium",
+  "explanation": "Shops could not sell them until home parties showed people how to seal the lid.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the fear of the number thirteen called?",
+  "choices": [
+   "Triskaidekaphobia",
+   "Tetraphobia",
+   "Nyctophobia",
+   "Xenophobia"
+  ],
+  "answer": "Triskaidekaphobia",
+  "difficulty": "medium",
+  "explanation": "Many hotels skip a thirteenth floor and some airlines leave out row thirteen entirely.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which animal begins the twelve-year cycle of the Chinese zodiac?",
+  "choices": [
+   "Rat",
+   "Ox",
+   "Dragon",
+   "Tiger"
+  ],
+  "answer": "Rat",
+  "difficulty": "medium",
+  "explanation": "Legend says the rat rode across the river on the ox and jumped ahead at the finish.",
+  "unsure": false
+ },
+ {
+  "prompt": "Before the 17th century, carrots were most commonly which colour?",
+  "choices": [
+   "Purple",
+   "Blue",
+   "Red",
+   "Green"
+  ],
+  "answer": "Purple",
+  "difficulty": "medium",
+  "explanation": "Dutch growers are credited with popularising the orange varieties eaten today.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which everyday nut is botanically a legume rather than a nut?",
+  "choices": [
+   "Peanut",
+   "Almond",
+   "Hazelnut",
+   "Chestnut"
+  ],
+  "answer": "Peanut",
+  "difficulty": "medium",
+  "explanation": "Peanuts ripen in pods underground and are close relatives of peas and beans.",
+  "unsure": false
+ },
+ {
+  "prompt": "Vanilla is harvested from which type of plant?",
+  "choices": [
+   "An orchid",
+   "A fern",
+   "A cactus",
+   "A palm"
+  ],
+  "answer": "An orchid",
+  "difficulty": "medium",
+  "explanation": "Outside Mexico the vines must be pollinated by hand, since their native bee is missing.",
+  "unsure": false
+ },
+ {
+  "prompt": "Cinnamon comes from which part of a tree?",
+  "choices": [
+   "The bark",
+   "The root",
+   "The seeds",
+   "The leaves"
+  ],
+  "answer": "The bark",
+  "difficulty": "medium",
+  "explanation": "Inner bark is peeled off and left to dry until it curls into the familiar quills.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the highest number on a roulette wheel?",
+  "choices": [
+   "36",
+   "38",
+   "35",
+   "40"
+  ],
+  "answer": "36",
+  "difficulty": "medium",
+  "explanation": "A European wheel has 37 pockets: the numbers one to 36 plus a single zero.",
+  "unsure": false
+ },
+ {
+  "prompt": "A collector of coins and banknotes is known as what?",
+  "choices": [
+   "Numismatist",
+   "Bibliophile",
+   "Cartophile",
+   "Deltiologist"
+  ],
+  "answer": "Numismatist",
+  "difficulty": "medium",
+  "explanation": "The word comes from the Greek nomisma, meaning current coin; deltiology is postcards.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which fruit was once known in England as the love apple?",
+  "choices": [
+   "Tomato",
+   "Peach",
+   "Pomegranate",
+   "Quince"
+  ],
+  "answer": "Tomato",
+  "difficulty": "medium",
+  "explanation": "It was grown as an ornamental for decades because people suspected it was poisonous.",
+  "unsure": false
+ },
+ {
+  "prompt": "Superstition says breaking a mirror brings how many years of bad luck?",
+  "choices": [
+   "Seven",
+   "Three",
+   "Ten",
+   "Twelve"
+  ],
+  "answer": "Seven",
+  "difficulty": "medium",
+  "explanation": "Romans thought the body renewed itself every seven years and that mirrors held part of it.",
+  "unsure": false
+ },
+ {
+  "prompt": "Lego is a contraction of a Danish phrase meaning what?",
+  "choices": [
+   "Play well",
+   "Build high",
+   "Small brick",
+   "Good toy"
+  ],
+  "answer": "Play well",
+  "difficulty": "medium",
+  "explanation": "By coincidence the same letters mean 'I put together' in Latin.",
+  "unsure": false
+ },
+ {
+  "prompt": "Goosebumps are produced by what?",
+  "choices": [
+   "Tiny muscles pulling hairs",
+   "Blood vessels closing",
+   "Sweat glands opening",
+   "Nerve damage"
+  ],
+  "answer": "Tiny muscles pulling hairs",
+  "difficulty": "medium",
+  "explanation": "The reflex once fluffed up fur for warmth or bulk, and does very little on bare skin.",
+  "unsure": false
+ },
+ {
+  "prompt": "In the UK, what does the annual MOT test assess?",
+  "choices": [
+   "Vehicle roadworthiness",
+   "Driver eyesight",
+   "Fuel quality",
+   "Insurance cover"
+  ],
+  "answer": "Vehicle roadworthiness",
+  "difficulty": "medium",
+  "explanation": "It is named after the old Ministry of Transport, which brought the test in during 1960.",
+  "unsure": false
+ },
+ {
+  "prompt": "How many sheets of paper are in a standard ream?",
+  "choices": [
+   "500",
+   "250",
+   "1,000",
+   "100"
+  ],
+  "answer": "500",
+  "difficulty": "medium",
+  "explanation": "The word reached English from an Arabic term for a bundle, by way of Old French.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the study of handwriting called?",
+  "choices": [
+   "Graphology",
+   "Calligraphy",
+   "Philology",
+   "Cartography"
+  ],
+  "answer": "Graphology",
+  "difficulty": "medium",
+  "explanation": "Calligraphy is the art of writing beautifully; graphology claims to read character from it.",
+  "unsure": false
+ },
+ {
+  "prompt": "Boxing Day takes its name from what?",
+  "choices": [
+   "Gift boxes for servants",
+   "A boxing contest",
+   "Packing decorations",
+   "Boxed leftovers"
+  ],
+  "answer": "Gift boxes for servants",
+  "difficulty": "medium",
+  "explanation": "Households handed out boxes to staff and tradesmen who had worked on Christmas Day.",
+  "unsure": false
+ },
+ {
+  "prompt": "On European roads, a sign shaped as a red-bordered triangle means what?",
+  "choices": [
+   "A warning",
+   "A prohibition",
+   "An order",
+   "Information"
+  ],
+  "answer": "A warning",
+  "difficulty": "medium",
+  "explanation": "Circles carry orders or bans, while rectangles are reserved for information.",
+  "unsure": false
+ },
+ {
+  "prompt": "On a ship, which side is port?",
+  "choices": [
+   "Left facing forward",
+   "Right facing forward",
+   "The stern",
+   "The bow"
+  ],
+  "answer": "Left facing forward",
+  "difficulty": "medium",
+  "explanation": "It replaced larboard, which sounded too much like starboard when shouted in a gale.",
+  "unsure": false
+ },
+ {
+  "prompt": "An orchestra traditionally tunes to which note?",
+  "choices": [
+   "A",
+   "C",
+   "G",
+   "D"
+  ],
+  "answer": "A",
+  "difficulty": "medium",
+  "explanation": "The oboe gives it, because its reed holds pitch more stubbornly than the strings.",
+  "unsure": false
+ },
+ {
+  "prompt": "Food labels in Ireland and the UK give energy in kilojoules and what else?",
+  "choices": [
+   "Kilocalories",
+   "Watts",
+   "Newtons",
+   "Grams of fat"
+  ],
+  "answer": "Kilocalories",
+  "difficulty": "medium",
+  "explanation": "One kilocalorie, the 'calorie' of everyday speech, is about 4.2 kilojoules.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the name of the Michelin Man?",
+  "choices": [
+   "Bibendum",
+   "Monsieur Pneu",
+   "Rondo",
+   "Gaston"
+  ],
+  "answer": "Bibendum",
+  "difficulty": "hard",
+  "explanation": "It comes from a Latin toast, nunc est bibendum, used in the tyre firm's early adverts.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which of these is a genuine formal name for the # symbol?",
+  "choices": [
+   "Octothorpe",
+   "Pilcrow",
+   "Obelus",
+   "Solidus"
+  ],
+  "answer": "Octothorpe",
+  "difficulty": "hard",
+  "explanation": "The others name the paragraph mark, the division sign and the slash.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the paragraph mark, written as a reversed P, called?",
+  "choices": [
+   "Pilcrow",
+   "Dagger",
+   "Caret",
+   "Ligature"
+  ],
+  "answer": "Pilcrow",
+  "difficulty": "hard",
+  "explanation": "Scribes inked it in red to open a new section, long before indented paragraphs existed.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the dot above a lower-case i or j called?",
+  "choices": [
+   "Tittle",
+   "Serif",
+   "Ascender",
+   "Kern"
+  ],
+  "answer": "Tittle",
+  "difficulty": "hard",
+  "explanation": "It survives in the phrase every jot and tittle, meaning the very smallest detail.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the wire cage over a champagne cork called?",
+  "choices": [
+   "Muselet",
+   "Cordial",
+   "Cloche",
+   "Crimp"
+  ],
+  "answer": "Muselet",
+  "difficulty": "hard",
+  "explanation": "By convention its loop takes six half-turns to loosen, on almost every producer's bottle.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the metal band holding the rubber onto a pencil called?",
+  "choices": [
+   "Ferrule",
+   "Collet",
+   "Grommet",
+   "Shank"
+  ],
+  "answer": "Ferrule",
+  "difficulty": "hard",
+  "explanation": "The same word covers the metal sleeve on paintbrushes, tool handles and walking sticks.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the pale crescent at the base of a fingernail called?",
+  "choices": [
+   "Lunula",
+   "Cuticle",
+   "Matrix",
+   "Sulcus"
+  ],
+  "answer": "Lunula",
+  "difficulty": "hard",
+  "explanation": "It is the visible edge of the tissue that makes the nail, and is clearest on the thumb.",
+  "unsure": false
+ },
+ {
+  "prompt": "How many days did Britain skip when it adopted the Gregorian calendar in 1752?",
+  "choices": [
+   "11",
+   "7",
+   "10",
+   "14"
+  ],
+  "answer": "11",
+  "difficulty": "hard",
+  "explanation": "The 2nd of September was followed straight by the 14th, to catch up with the Continent.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which is the only month that can pass without a full moon?",
+  "choices": [
+   "February",
+   "January",
+   "April",
+   "November"
+  ],
+  "answer": "February",
+  "difficulty": "hard",
+  "explanation": "At 28 or 29 days it is shorter than the 29.5-day lunar cycle, so it can be skipped.",
+  "unsure": false
+ },
+ {
+  "prompt": "What are the flashing amber globes at a zebra crossing called?",
+  "choices": [
+   "Belisha beacons",
+   "Halo lamps",
+   "Crossing lanterns",
+   "Pelican lights"
+  ],
+  "answer": "Belisha beacons",
+  "difficulty": "hard",
+  "explanation": "They are named for Leslie Hore-Belisha, the transport minister who introduced them in 1934.",
+  "unsure": false
+ },
+ {
+  "prompt": "Who designed the London Underground's famous diagram-style map?",
+  "choices": [
+   "Harry Beck",
+   "Frank Pick",
+   "Charles Holden",
+   "Edward Johnston"
+  ],
+  "answer": "Harry Beck",
+  "difficulty": "hard",
+  "explanation": "An engineering draughtsman, he drew it like a circuit diagram and was paid five guineas.",
+  "unsure": false
+ },
+ {
+  "prompt": "Mary Anderson patented which now-standard vehicle feature in 1903?",
+  "choices": [
+   "The windscreen wiper",
+   "The seat belt",
+   "The wing mirror",
+   "The indicator"
+  ],
+  "answer": "The windscreen wiper",
+  "difficulty": "hard",
+  "explanation": "Makers dismissed it as a distraction, and her patent expired before it became standard.",
+  "unsure": false
+ },
+ {
+  "prompt": "How many pedals does a concert harp have?",
+  "choices": [
+   "Seven",
+   "Three",
+   "Five",
+   "Ten"
+  ],
+  "answer": "Seven",
+  "difficulty": "hard",
+  "explanation": "Each pedal shifts one note across every octave between flat, natural and sharp.",
+  "unsure": false
+ },
+ {
+  "prompt": "A sheet of A0 paper has an area of what?",
+  "choices": [
+   "One square metre",
+   "Half a square metre",
+   "Two square metres",
+   "One square yard"
+  ],
+  "answer": "One square metre",
+  "difficulty": "hard",
+  "explanation": "Every smaller size is the previous one halved, so all A sizes share the same proportions.",
+  "unsure": false
+ },
+ {
+  "prompt": "In Ireland, which old tradition takes place on 26 December?",
+  "choices": [
+   "Wren Day",
+   "Plough Sunday",
+   "Rush Day",
+   "Wake Night"
+  ],
+  "answer": "Wren Day",
+  "difficulty": "hard",
+  "explanation": "Wrenboys in straw costumes parade with a fake bird, going house to house for money.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the gap between the two front teeth properly called?",
+  "choices": [
+   "Diastema",
+   "Lacuna",
+   "Fissure",
+   "Cusp"
+  ],
+  "answer": "Diastema",
+  "difficulty": "hard",
+  "explanation": "It is common in children and often closes as the adult canine teeth push through.",
+  "unsure": false
+ },
+ {
+  "prompt": "The small plastic tripod found inside a pizza box is called what?",
+  "choices": [
+   "A pizza saver",
+   "A box brace",
+   "A crust guard",
+   "A pie stand"
+  ],
+  "answer": "A pizza saver",
+  "difficulty": "hard",
+  "explanation": "Patented in 1983 by Carmela Vitale, it stops the lid sagging onto the melted cheese.",
+  "unsure": false
+ },
+ {
+  "prompt": "The cardboard sleeve on a takeaway coffee cup has which traditional name?",
+  "choices": [
+   "Zarf",
+   "Toque",
+   "Salver",
+   "Coaster"
+  ],
+  "answer": "Zarf",
+  "difficulty": "hard",
+  "explanation": "A zarf was an ornate metal holder for the handleless coffee cups of the Middle East.",
+  "unsure": false
+ },
+ {
+  "prompt": "What did the Q in Q-tips originally stand for?",
+  "choices": [
+   "Quality",
+   "Quick",
+   "Quilted",
+   "Queen"
+  ],
+  "answer": "Quality",
+  "difficulty": "hard",
+  "explanation": "The cotton buds were first sold under the name Baby Gays before the change in 1926.",
+  "unsure": false
+ },
+ {
+  "prompt": "The study of flags is known as what?",
+  "choices": [
+   "Vexillology",
+   "Heraldry",
+   "Semiotics",
+   "Numismatics"
+  ],
+  "answer": "Vexillology",
+  "difficulty": "hard",
+  "explanation": "It comes from vexillum, the small cloth banner carried by Roman cavalry.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the smooth patch of forehead between the eyebrows called?",
+  "choices": [
+   "Glabella",
+   "Sinciput",
+   "Temple",
+   "Nasion"
+  ],
+  "answer": "Glabella",
+  "difficulty": "hard",
+  "explanation": "Doctors pinch the skin there to test elasticity when checking for dehydration.",
+  "unsure": false
+ },
+ {
+  "prompt": "Before plastic bricks, Lego made its toys from which material?",
+  "choices": [
+   "Wood",
+   "Metal",
+   "Rubber",
+   "Card"
+  ],
+  "answer": "Wood",
+  "difficulty": "hard",
+  "explanation": "The Danish firm started in a carpenter's workshop in 1932, making ducks and pull-along cars.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the name of the mark combining a question mark and an exclamation mark?",
+  "choices": [
+   "Interrobang",
+   "Obelus",
+   "Guillemet",
+   "Pilcrow"
+  ],
+  "answer": "Interrobang",
+  "difficulty": "hard",
+  "explanation": "An American advertising executive proposed it in 1962 for disbelieving questions.",
+  "unsure": false
+ },
+ {
+  "prompt": "Chester Greenwood is credited with inventing which item aged 15?",
+  "choices": [
+   "Earmuffs",
+   "Roller skates",
+   "The zip",
+   "The thermos"
+  ],
+  "answer": "Earmuffs",
+  "difficulty": "hard",
+  "explanation": "He patented ear protectors in the 1870s after his ears ached while skating in Maine.",
+  "unsure": false
+ },
+ {
+  "prompt": "In old English land measure, how long is a rod?",
+  "choices": [
+   "Five and a half yards",
+   "Ten yards",
+   "Twenty-two yards",
+   "One hundred yards"
+  ],
+  "answer": "Five and a half yards",
+  "difficulty": "hard",
+  "explanation": "Four rods make a chain of 22 yards, and ten chains make a furlong.",
+  "unsure": false
+ },
+ {
+  "prompt": "A nautical mile is defined from what?",
+  "choices": [
+   "One minute of latitude",
+   "A ship's average speed",
+   "A Roman marching pace",
+   "A Greek stadion"
+  ],
+  "answer": "One minute of latitude",
+  "difficulty": "hard",
+  "explanation": "It equals one sixtieth of a degree of latitude, fixed by agreement at 1,852 metres.",
+  "unsure": false
+ },
+ {
+  "prompt": "In Norse mythology, what is the name of the burning bridge to Asgard?",
+  "choices": [
+   "Bifrost",
+   "Yggdrasil",
+   "Valhalla",
+   "Ginnungagap"
+  ],
+  "answer": "Bifrost",
+  "difficulty": "hard",
+  "explanation": "It appears as a rainbow and is guarded by the watchman god Heimdall.",
+  "unsure": false
+ },
+ {
+  "prompt": "In Egyptian mythology, which god is shown with the head of a jackal?",
+  "choices": [
+   "Anubis",
+   "Horus",
+   "Thoth",
+   "Sobek"
+  ],
+  "answer": "Anubis",
+  "difficulty": "hard",
+  "explanation": "Horus has a falcon head, Thoth an ibis and Sobek a crocodile.",
+  "unsure": false
+ },
+ {
+  "prompt": "In the original Greek story, Pandora's famous container was what?",
+  "choices": [
+   "A jar",
+   "A chest",
+   "A basket",
+   "A bag"
+  ],
+  "answer": "A jar",
+  "difficulty": "hard",
+  "explanation": "A 16th-century mistranslation by Erasmus turned the pithos, a storage jar, into a box.",
+  "unsure": false
+ },
+ {
+  "prompt": "The Rubik's Cube was originally sold under which name?",
+  "choices": [
+   "Magic Cube",
+   "Puzzle Cube",
+   "Logic Cube",
+   "Colour Cube"
+  ],
+  "answer": "Magic Cube",
+  "difficulty": "hard",
+  "explanation": "Erno Rubik built it in 1974 to teach three-dimensional geometry to his students.",
+  "unsure": false
+ },
+ {
+  "prompt": "Why is bubble gum traditionally pink?",
+  "choices": [
+   "It was the only dye to hand",
+   "A marketing study",
+   "A flavour additive",
+   "A patent rule"
+  ],
+  "answer": "It was the only dye to hand",
+  "difficulty": "hard",
+  "explanation": "Walter Diemer had just that colour left in the factory when he perfected the recipe in 1928.",
+  "unsure": false
+ },
+ {
+  "prompt": "In medieval timekeeping, roughly how long was a moment?",
+  "choices": [
+   "90 seconds",
+   "10 seconds",
+   "5 minutes",
+   "1 second"
+  ],
+  "answer": "90 seconds",
+  "difficulty": "hard",
+  "explanation": "The hour was divided into 40 moments, each about a minute and a half.",
+  "unsure": false
+ },
+ {
+  "prompt": "Walter Hunt invented which everyday object in 1849 to clear a small debt?",
+  "choices": [
+   "The safety pin",
+   "The paper clip",
+   "The stapler",
+   "The drawing pin"
+  ],
+  "answer": "The safety pin",
+  "difficulty": "hard",
+  "explanation": "He twisted it from a single piece of wire in a few hours and sold the rights for 400 dollars.",
+  "unsure": false
+ },
+ {
+  "prompt": "Mary Phelps Jacob patented which garment in 1914, made from handkerchiefs and ribbon?",
+  "choices": [
+   "The bra",
+   "The corset",
+   "The camisole",
+   "The girdle"
+  ],
+  "answer": "The bra",
+  "difficulty": "hard",
+  "explanation": "She wanted something lighter than a corset to wear under a sheer evening gown.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the name for the bumpy surface laid at kerbs to guide blind pedestrians?",
+  "choices": [
+   "Tactile paving",
+   "Braille stone",
+   "Guide tread",
+   "Kerb code"
+  ],
+  "answer": "Tactile paving",
+  "difficulty": "hard",
+  "explanation": "Seiichi Miyake developed the raised blocks in Japan in the 1960s at his own expense.",
+  "unsure": false
+ },
+ {
+  "prompt": "A troy pound, used for precious metals, contains how many troy ounces?",
+  "choices": [
+   "12",
+   "16",
+   "14",
+   "20"
+  ],
+  "answer": "12",
+  "difficulty": "hard",
+  "explanation": "Ordinary avoirdupois pounds hold 16 ounces, which is why gold prices confuse people.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the small stiffener slipped into a shirt collar called?",
+  "choices": [
+   "A collar stay",
+   "A gorget",
+   "A placket",
+   "A gusset"
+  ],
+  "answer": "A collar stay",
+  "difficulty": "hard",
+  "explanation": "It sits in a hidden pocket under the collar point to stop it curling upwards.",
+  "unsure": false
+ },
+ {
+  "prompt": "In heraldry, which colour is called gules?",
+  "choices": [
+   "Red",
+   "Blue",
+   "Green",
+   "Black"
+  ],
+  "answer": "Red",
+  "difficulty": "hard",
+  "explanation": "Blue is azure, green is vert and black is sable in the same heraldic vocabulary.",
+  "unsure": false
+ },
+ {
+  "prompt": "Before decimalisation, how many pennies made up one shilling?",
+  "choices": [
+   "12",
+   "10",
+   "20",
+   "24"
+  ],
+  "answer": "12",
+  "difficulty": "hard",
+  "explanation": "Twenty shillings made a pound, so the old pound was worth 240 pennies.",
+  "unsure": false
+ },
+ {
+  "prompt": "Kleenex tissues were first marketed as a way to remove what?",
+  "choices": [
+   "Cold cream",
+   "Ink stains",
+   "Dust",
+   "Grease"
+  ],
+  "answer": "Cold cream",
+  "difficulty": "hard",
+  "explanation": "Sales only took off when the company noticed buyers were blowing their noses instead.",
+  "unsure": false
+ }
+]

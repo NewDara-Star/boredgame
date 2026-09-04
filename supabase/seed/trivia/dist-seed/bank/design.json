@@ -1,0 +1,2303 @@
+[
+ {
+  "prompt": "Which company's logo is a fruit with a bite taken out of it?",
+  "choices": [
+   "Apple",
+   "Samsung",
+   "Sony",
+   "Dell"
+  ],
+  "answer": "Apple",
+  "difficulty": "easy",
+  "explanation": "The bite was added in 1977 so the fruit would not be mistaken for a cherry at small sizes.",
+  "unsure": false
+ },
+ {
+  "prompt": "The 'Golden Arches' are the logo of which fast-food chain?",
+  "choices": [
+   "McDonald's",
+   "Burger King",
+   "KFC",
+   "Subway"
+  ],
+  "answer": "McDonald's",
+  "difficulty": "easy",
+  "explanation": "The arches began as real architectural features on the sides of 1950s McDonald's buildings.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the tick-shaped Nike logo called?",
+  "choices": [
+   "Swoosh",
+   "Sweep",
+   "Slash",
+   "Streak"
+  ],
+  "answer": "Swoosh",
+  "difficulty": "easy",
+  "explanation": "The name evokes the sound of speed, and the mark was drawn by student Carolyn Davidson in 1971.",
+  "unsure": false
+ },
+ {
+  "prompt": "Mixing blue and yellow paint produces which colour?",
+  "choices": [
+   "Green",
+   "Purple",
+   "Orange",
+   "Brown"
+  ],
+  "answer": "Green",
+  "difficulty": "easy",
+  "explanation": "Paint mixing is subtractive: each pigment absorbs light, leaving the green wavelengths both reflect.",
+  "unsure": false
+ },
+ {
+  "prompt": "Mixing red and yellow paint produces which colour?",
+  "choices": [
+   "Orange",
+   "Green",
+   "Violet",
+   "Grey"
+  ],
+  "answer": "Orange",
+  "difficulty": "easy",
+  "explanation": "Orange sits between red and yellow on the colour wheel, making it their secondary mix.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which sportswear brand's logo is three parallel stripes?",
+  "choices": [
+   "Adidas",
+   "Puma",
+   "Reebok",
+   "Umbro"
+  ],
+  "answer": "Adidas",
+  "difficulty": "easy",
+  "explanation": "Adidas bought the three-stripe mark from Finnish firm Karhu in 1952 for two bottles of whisky.",
+  "unsure": false
+ },
+ {
+  "prompt": "In traditional painting, which three are called the primary colours?",
+  "choices": [
+   "Red, yellow and blue",
+   "Red, green and blue",
+   "Cyan, magenta and grey",
+   "Orange, green and violet"
+  ],
+  "answer": "Red, yellow and blue",
+  "difficulty": "easy",
+  "explanation": "They are called primary because no mixture of other pigments is meant to produce them.",
+  "unsure": false
+ },
+ {
+  "prompt": "The Eiffel Tower stands in which city?",
+  "choices": [
+   "Paris",
+   "Brussels",
+   "Vienna",
+   "Lyon"
+  ],
+  "answer": "Paris",
+  "difficulty": "easy",
+  "explanation": "It was built as the entrance arch for the 1889 World's Fair and was meant to be temporary.",
+  "unsure": false
+ },
+ {
+  "prompt": "The Sydney Opera House is in which country?",
+  "choices": [
+   "Australia",
+   "New Zealand",
+   "Canada",
+   "South Africa"
+  ],
+  "answer": "Australia",
+  "difficulty": "easy",
+  "explanation": "Its shell roofs are clad in over a million cream and white tiles made in Sweden.",
+  "unsure": false
+ },
+ {
+  "prompt": "The Taj Mahal is in which country?",
+  "choices": [
+   "India",
+   "Iran",
+   "Turkey",
+   "Egypt"
+  ],
+  "answer": "India",
+  "difficulty": "easy",
+  "explanation": "It was built at Agra as a mausoleum for Mumtaz Mahal, wife of the emperor Shah Jahan.",
+  "unsure": false
+ },
+ {
+  "prompt": "What shape is a standard road stop sign?",
+  "choices": [
+   "Octagon",
+   "Hexagon",
+   "Pentagon",
+   "Diamond"
+  ],
+  "answer": "Octagon",
+  "difficulty": "easy",
+  "explanation": "Its unique eight-sided outline is readable even from behind or when the sign is covered in snow.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which car maker's badge is a three-pointed star in a circle?",
+  "choices": [
+   "Mercedes-Benz",
+   "BMW",
+   "Audi",
+   "Volvo"
+  ],
+  "answer": "Mercedes-Benz",
+  "difficulty": "easy",
+  "explanation": "The three points stand for engines on land, at sea and in the air.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which coffee chain's logo is a green twin-tailed siren?",
+  "choices": [
+   "Starbucks",
+   "Costa Coffee",
+   "Nespresso",
+   "Caffè Nero"
+  ],
+  "answer": "Starbucks",
+  "difficulty": "easy",
+  "explanation": "The siren was taken from a 16th-century Norse woodcut to suit the company's seafaring name.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which animal rears up on the Ferrari badge?",
+  "choices": [
+   "Horse",
+   "Bull",
+   "Lion",
+   "Stag"
+  ],
+  "answer": "Horse",
+  "difficulty": "easy",
+  "explanation": "The prancing horse came from a World War I flying ace's aircraft, given to Enzo Ferrari for luck.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which reptile is the Lacoste logo?",
+  "choices": [
+   "Crocodile",
+   "Chameleon",
+   "Gecko",
+   "Iguana"
+  ],
+  "answer": "Crocodile",
+  "difficulty": "easy",
+  "explanation": "Tennis player René Lacoste was nicknamed 'the Crocodile' before he founded the shirt brand.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which animal is used in the WWF conservation logo?",
+  "choices": [
+   "Giant panda",
+   "Tiger",
+   "Elephant",
+   "Polar bear"
+  ],
+  "answer": "Giant panda",
+  "difficulty": "easy",
+  "explanation": "A panda was chosen partly because black-and-white printing was far cheaper in 1961.",
+  "unsure": false
+ },
+ {
+  "prompt": "The Shell oil company's logo shows which object?",
+  "choices": [
+   "A scallop shell",
+   "A snail shell",
+   "An oil drop",
+   "A conch"
+  ],
+  "answer": "A scallop shell",
+  "difficulty": "easy",
+  "explanation": "The firm began by importing decorative seashells to Victorian London before it sold oil.",
+  "unsure": false
+ },
+ {
+  "prompt": "Times New Roman is an example of what?",
+  "choices": [
+   "A typeface",
+   "A colour",
+   "A paper size",
+   "A print method"
+  ],
+  "answer": "A typeface",
+  "difficulty": "easy",
+  "explanation": "It was commissioned by The Times of London in 1931 to save space and print more crisply.",
+  "unsure": false
+ },
+ {
+  "prompt": "Type size is traditionally measured in which unit?",
+  "choices": [
+   "Points",
+   "Litres",
+   "Degrees",
+   "Watts"
+  ],
+  "answer": "Points",
+  "difficulty": "easy",
+  "explanation": "There are 72 points to an inch, a scale inherited from metal type foundries.",
+  "unsure": false
+ },
+ {
+  "prompt": "Lego bricks were first made in which country?",
+  "choices": [
+   "Denmark",
+   "Germany",
+   "Sweden",
+   "Netherlands"
+  ],
+  "answer": "Denmark",
+  "difficulty": "easy",
+  "explanation": "The name comes from the Danish 'leg godt', meaning 'play well'.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which two colours make up the IKEA logo?",
+  "choices": [
+   "Blue and yellow",
+   "Red and white",
+   "Green and black",
+   "Orange and grey"
+  ],
+  "answer": "Blue and yellow",
+  "difficulty": "easy",
+  "explanation": "They are the colours of the Swedish flag, marking the retailer's country of origin.",
+  "unsure": false
+ },
+ {
+  "prompt": "The Colosseum is a landmark of which city?",
+  "choices": [
+   "Rome",
+   "Athens",
+   "Naples",
+   "Istanbul"
+  ],
+  "answer": "Rome",
+  "difficulty": "easy",
+  "explanation": "Its tiered arcades stack Doric, Ionic and Corinthian columns on successive storeys.",
+  "unsure": false
+ },
+ {
+  "prompt": "The Burj Khalifa skyscraper is in which city?",
+  "choices": [
+   "Dubai",
+   "Doha",
+   "Riyadh",
+   "Shanghai"
+  ],
+  "answer": "Dubai",
+  "difficulty": "easy",
+  "explanation": "Its tapering, spiralling plan is based on a triple-lobed desert flower, the Hymenocallis.",
+  "unsure": false
+ },
+ {
+  "prompt": "The Golden Gate Bridge is in which city?",
+  "choices": [
+   "San Francisco",
+   "New York",
+   "Seattle",
+   "Vancouver"
+  ],
+  "answer": "San Francisco",
+  "difficulty": "easy",
+  "explanation": "Its colour is a specified shade called International Orange, chosen for visibility in fog.",
+  "unsure": false
+ },
+ {
+  "prompt": "Kente cloth is a traditional woven textile of which country?",
+  "choices": [
+   "Ghana",
+   "Kenya",
+   "Morocco",
+   "Ethiopia"
+  ],
+  "answer": "Ghana",
+  "difficulty": "easy",
+  "explanation": "Kente is woven in narrow strips by the Asante and Ewe, then sewn edge to edge into a cloth.",
+  "unsure": false
+ },
+ {
+  "prompt": "The kimono is the traditional dress of which country?",
+  "choices": [
+   "Japan",
+   "China",
+   "Thailand",
+   "Vietnam"
+  ],
+  "answer": "Japan",
+  "difficulty": "easy",
+  "explanation": "Kimono are cut from a single bolt of cloth in straight panels, so almost no fabric is wasted.",
+  "unsure": false
+ },
+ {
+  "prompt": "The sari is a garment traditionally worn in which country?",
+  "choices": [
+   "India",
+   "Japan",
+   "Nigeria",
+   "Peru"
+  ],
+  "answer": "India",
+  "difficulty": "easy",
+  "explanation": "A sari is an uncut length of cloth, draped rather than tailored, usually five to nine metres long.",
+  "unsure": false
+ },
+ {
+  "prompt": "The hanbok is the traditional dress of which country?",
+  "choices": [
+   "Korea",
+   "Japan",
+   "Mongolia",
+   "Nepal"
+  ],
+  "answer": "Korea",
+  "difficulty": "easy",
+  "explanation": "Its design favours flowing lines and bold blocks of colour over close-fitting tailoring.",
+  "unsure": false
+ },
+ {
+  "prompt": "The qipao, or cheongsam, is a traditional dress from which country?",
+  "choices": [
+   "China",
+   "India",
+   "Indonesia",
+   "Philippines"
+  ],
+  "answer": "China",
+  "difficulty": "easy",
+  "explanation": "The close-fitting Shanghai version of the 1920s reshaped a much looser Manchu robe.",
+  "unsure": false
+ },
+ {
+  "prompt": "Origami, the art of paper folding, is most associated with which country?",
+  "choices": [
+   "Japan",
+   "Norway",
+   "Brazil",
+   "Egypt"
+  ],
+  "answer": "Japan",
+  "difficulty": "easy",
+  "explanation": "The name joins 'oru', to fold, and 'kami', paper; classic origami uses no cuts or glue.",
+  "unsure": false
+ },
+ {
+  "prompt": "Mixing red and blue paint gives which colour?",
+  "choices": [
+   "Purple",
+   "Green",
+   "Orange",
+   "Yellow"
+  ],
+  "answer": "Purple",
+  "difficulty": "easy",
+  "explanation": "Purple is a secondary colour, sitting between red and blue on the painter's colour wheel.",
+  "unsure": false
+ },
+ {
+  "prompt": "Mixing black and white paint gives which colour?",
+  "choices": [
+   "Grey",
+   "Brown",
+   "Beige",
+   "Silver"
+  ],
+  "answer": "Grey",
+  "difficulty": "easy",
+  "explanation": "Black and white are not hues but values, so blending them shifts lightness rather than colour.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which fashion house uses two interlocking Cs as its logo?",
+  "choices": [
+   "Chanel",
+   "Gucci",
+   "Prada",
+   "Dior"
+  ],
+  "answer": "Chanel",
+  "difficulty": "easy",
+  "explanation": "The double C stands for Coco Chanel and has been in use since the 1920s.",
+  "unsure": false
+ },
+ {
+  "prompt": "The overlapping 'LV' monogram belongs to which luxury brand?",
+  "choices": [
+   "Louis Vuitton",
+   "Loewe",
+   "Lanvin",
+   "Longchamp"
+  ],
+  "answer": "Louis Vuitton",
+  "difficulty": "easy",
+  "explanation": "The monogram canvas was created in 1896 partly to make the trunks harder to counterfeit.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which drink brand's logo is a white flowing script on red?",
+  "choices": [
+   "Coca-Cola",
+   "Fanta",
+   "Lipton",
+   "Red Bull"
+  ],
+  "answer": "Coca-Cola",
+  "difficulty": "easy",
+  "explanation": "The Spencerian script was drawn in 1886 by the company bookkeeper, Frank Robinson.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which British brand is known for its trench coat and beige check?",
+  "choices": [
+   "Burberry",
+   "Barbour",
+   "Aquascutum",
+   "Hackett"
+  ],
+  "answer": "Burberry",
+  "difficulty": "easy",
+  "explanation": "The check began as a coat lining in the 1920s before becoming the brand's main signature.",
+  "unsure": false
+ },
+ {
+  "prompt": "The Empire State Building is in which city?",
+  "choices": [
+   "New York",
+   "Chicago",
+   "Boston",
+   "Toronto"
+  ],
+  "answer": "New York",
+  "difficulty": "easy",
+  "explanation": "Its stepped silhouette is a classic Art Deco setback design, completed in 1931.",
+  "unsure": false
+ },
+ {
+  "prompt": "The Sagrada Família basilica is in which city?",
+  "choices": [
+   "Barcelona",
+   "Madrid",
+   "Lisbon",
+   "Seville"
+  ],
+  "answer": "Barcelona",
+  "difficulty": "easy",
+  "explanation": "Its columns branch like trees, a structure worked out with hanging chain models rather than maths.",
+  "unsure": false
+ },
+ {
+  "prompt": "The Hagia Sophia is a landmark of which city?",
+  "choices": [
+   "Istanbul",
+   "Cairo",
+   "Athens",
+   "Damascus"
+  ],
+  "answer": "Istanbul",
+  "difficulty": "easy",
+  "explanation": "Its sixth-century dome rests on pendentives, letting a round dome sit over a square hall.",
+  "unsure": false
+ },
+ {
+  "prompt": "St Basil's Cathedral, with its swirling coloured domes, is in which city?",
+  "choices": [
+   "Moscow",
+   "Kyiv",
+   "Prague",
+   "Belgrade"
+  ],
+  "answer": "Moscow",
+  "difficulty": "easy",
+  "explanation": "The onion domes only gained their bright colours in the 17th century; they were once plainer.",
+  "unsure": false
+ },
+ {
+  "prompt": "The Petronas Towers are in which city?",
+  "choices": [
+   "Kuala Lumpur",
+   "Jakarta",
+   "Singapore",
+   "Bangkok"
+  ],
+  "answer": "Kuala Lumpur",
+  "difficulty": "easy",
+  "explanation": "Their floor plans are based on an eight-pointed star drawn from Islamic geometric patterns.",
+  "unsure": false
+ },
+ {
+  "prompt": "A glass pyramid forms the main entrance to which museum?",
+  "choices": [
+   "The Louvre",
+   "The Prado",
+   "The Uffizi",
+   "The Hermitage"
+  ],
+  "answer": "The Louvre",
+  "difficulty": "easy",
+  "explanation": "The 1989 pyramid was fiercely opposed at first for clashing with the palace around it.",
+  "unsure": false
+ },
+ {
+  "prompt": "The clock tower housing Big Ben stands in which city?",
+  "choices": [
+   "London",
+   "Manchester",
+   "Dublin",
+   "Edinburgh"
+  ],
+  "answer": "London",
+  "difficulty": "easy",
+  "explanation": "Big Ben is strictly the bell; the Gothic Revival tower was renamed Elizabeth Tower in 2012.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which city's underground map famously ignores real geography for clarity?",
+  "choices": [
+   "London",
+   "Rome",
+   "Cairo",
+   "Helsinki"
+  ],
+  "answer": "London",
+  "difficulty": "easy",
+  "explanation": "Its diagram straightens lines to 45-degree angles and stretches the crowded centre.",
+  "unsure": false
+ },
+ {
+  "prompt": "Folding a sheet of A4 paper in half gives which size?",
+  "choices": [
+   "A5",
+   "A3",
+   "A6",
+   "B4"
+  ],
+  "answer": "A5",
+  "difficulty": "easy",
+  "explanation": "Every A size halves into the next, keeping the same proportions so layouts scale cleanly.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which paper size is standard for office printing in Europe and Africa?",
+  "choices": [
+   "A4",
+   "A1",
+   "Letter",
+   "Foolscap"
+  ],
+  "answer": "A4",
+  "difficulty": "easy",
+  "explanation": "A4 measures 210 by 297 mm and comes from the ISO 216 system devised in Germany in 1922.",
+  "unsure": false
+ },
+ {
+  "prompt": "In digital design, what does 'UX' stand for?",
+  "choices": [
+   "User experience",
+   "Universal export",
+   "Unified exchange",
+   "Upper extension"
+  ],
+  "answer": "User experience",
+  "difficulty": "easy",
+  "explanation": "The term was popularised at Apple in the 1990s to cover far more than just the screen.",
+  "unsure": false
+ },
+ {
+  "prompt": "In digital design, what does 'UI' stand for?",
+  "choices": [
+   "User interface",
+   "Under image",
+   "Unit index",
+   "Usable input"
+  ],
+  "answer": "User interface",
+  "difficulty": "easy",
+  "explanation": "The UI is the visible layer of controls a person touches, sitting inside the wider experience.",
+  "unsure": false
+ },
+ {
+  "prompt": "Adobe Photoshop is mainly used for which task?",
+  "choices": [
+   "Editing images",
+   "Writing music",
+   "Editing video",
+   "Recording audio"
+  ],
+  "answer": "Editing images",
+  "difficulty": "easy",
+  "explanation": "It works on pixel grids, which is why enlarging a Photoshop image softens its edges.",
+  "unsure": false
+ },
+ {
+  "prompt": "Dyson made its name by redesigning which household appliance?",
+  "choices": [
+   "The vacuum cleaner",
+   "The kettle",
+   "The fridge",
+   "The toaster"
+  ],
+  "answer": "The vacuum cleaner",
+  "difficulty": "easy",
+  "explanation": "Its cyclone design removed the bag, an idea borrowed from industrial sawmill dust extractors.",
+  "unsure": false
+ },
+ {
+  "prompt": "Most manhole covers are made in which shape?",
+  "choices": [
+   "Round",
+   "Square",
+   "Triangular",
+   "Hexagonal"
+  ],
+  "answer": "Round",
+  "difficulty": "easy",
+  "explanation": "A circle has no diagonal, so a round cover cannot be turned and dropped through its own hole.",
+  "unsure": false
+ },
+ {
+  "prompt": "A traditional 'blueprint' showed white lines on what colour of paper?",
+  "choices": [
+   "Blue",
+   "Green",
+   "Red",
+   "Brown"
+  ],
+  "answer": "Blue",
+  "difficulty": "easy",
+  "explanation": "The cyanotype process turned the paper deep blue wherever light struck it, leaving lines white.",
+  "unsure": false
+ },
+ {
+  "prompt": "A design using only shades and tints of one colour is called what?",
+  "choices": [
+   "Monochrome",
+   "Duotone",
+   "Polychrome",
+   "Greyscale"
+  ],
+  "answer": "Monochrome",
+  "difficulty": "easy",
+  "explanation": "Monochrome schemes vary lightness and saturation instead of hue, so they rarely clash.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which of these colours is normally described as 'warm'?",
+  "choices": [
+   "Red",
+   "Blue",
+   "Teal",
+   "Indigo"
+  ],
+  "answer": "Red",
+  "difficulty": "easy",
+  "explanation": "Warm colours appear to advance towards the viewer, which is why they are used for alerts.",
+  "unsure": false
+ },
+ {
+  "prompt": "Along with Paris, Milan and London, which city hosts a 'big four' fashion week?",
+  "choices": [
+   "New York",
+   "Berlin",
+   "Tokyo",
+   "Sydney"
+  ],
+  "answer": "New York",
+  "difficulty": "easy",
+  "explanation": "New York usually opens the cycle, with the other three shows following in fixed order.",
+  "unsure": false
+ },
+ {
+  "prompt": "Milan, a global fashion design capital, is in which country?",
+  "choices": [
+   "Italy",
+   "Spain",
+   "France",
+   "Switzerland"
+  ],
+  "answer": "Italy",
+  "difficulty": "easy",
+  "explanation": "Milan also hosts the Salone del Mobile, the world's largest furniture design fair.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which app's logo is a rounded square containing a simplified camera?",
+  "choices": [
+   "Instagram",
+   "WhatsApp",
+   "Spotify",
+   "Telegram"
+  ],
+  "answer": "Instagram",
+  "difficulty": "easy",
+  "explanation": "The 2016 redesign flattened a detailed Polaroid-style icon into a single outline shape.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which four colours appear in the Google wordmark?",
+  "choices": [
+   "Blue, red, yellow and green",
+   "Blue, pink, orange and grey",
+   "Red, black, gold and teal",
+   "Purple, red, lime and blue"
+  ],
+  "answer": "Blue, red, yellow and green",
+  "difficulty": "easy",
+  "explanation": "The green 'l' deliberately breaks the primary-colour pattern to hint at not following rules.",
+  "unsure": false
+ },
+ {
+  "prompt": "A stylised castle appears in the logo of which entertainment company?",
+  "choices": [
+   "Disney",
+   "Netflix",
+   "Warner Bros",
+   "Universal"
+  ],
+  "answer": "Disney",
+  "difficulty": "easy",
+  "explanation": "The castle is drawn from Sleeping Beauty Castle, itself modelled on Neuschwanstein in Bavaria.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which drawing instrument is used to draw accurate circles?",
+  "choices": [
+   "A compass",
+   "A protractor",
+   "A set square",
+   "A French curve"
+  ],
+  "answer": "A compass",
+  "difficulty": "easy",
+  "explanation": "One leg holds a fixed centre while the other traces every point at an equal radius.",
+  "unsure": false
+ },
+ {
+  "prompt": "The Great Pyramids at Giza were built in which country?",
+  "choices": [
+   "Egypt",
+   "Sudan",
+   "Mexico",
+   "Iraq"
+  ],
+  "answer": "Egypt",
+  "difficulty": "easy",
+  "explanation": "The Great Pyramid's sides are aligned to the cardinal points to within a fraction of a degree.",
+  "unsure": false
+ },
+ {
+  "prompt": "Traditional Japanese shoji screens are made from wood and what?",
+  "choices": [
+   "Paper",
+   "Glass",
+   "Leather",
+   "Cotton"
+  ],
+  "answer": "Paper",
+  "difficulty": "easy",
+  "explanation": "Translucent washi paper spreads daylight softly through a room while still dividing the space.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which fastener was inspired by burrs sticking to a dog's coat?",
+  "choices": [
+   "Velcro",
+   "The zip",
+   "The press stud",
+   "The safety pin"
+  ],
+  "answer": "Velcro",
+  "difficulty": "easy",
+  "explanation": "Swiss engineer George de Mestral studied the burrs' tiny hooks under a microscope in 1941.",
+  "unsure": false
+ },
+ {
+  "prompt": "Charles and Ray Eames are best known for designing which kind of object?",
+  "choices": [
+   "Chairs",
+   "Watches",
+   "Cameras",
+   "Bicycles"
+  ],
+  "answer": "Chairs",
+  "difficulty": "easy",
+  "explanation": "Their moulded plywood work grew out of leg splints they designed for the US Navy in wartime.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which car maker's badge is two overlapping ovals inside a third?",
+  "choices": [
+   "Toyota",
+   "Mazda",
+   "Hyundai",
+   "Nissan"
+  ],
+  "answer": "Toyota",
+  "difficulty": "easy",
+  "explanation": "The interlocking ovals are said to represent the customer, the company and the road ahead.",
+  "unsure": false
+ },
+ {
+  "prompt": "A white lowercase 'f' on blue is the classic logo of which company?",
+  "choices": [
+   "Facebook",
+   "Flickr",
+   "Firefox",
+   "Fiverr"
+  ],
+  "answer": "Facebook",
+  "difficulty": "easy",
+  "explanation": "The letterform is a customised version of the typeface Klavika, not a standard font.",
+  "unsure": false
+ },
+ {
+  "prompt": "'QWERTY' describes the layout of which everyday designed object?",
+  "choices": [
+   "A keyboard",
+   "A remote control",
+   "A calculator",
+   "A dial pad"
+  ],
+  "answer": "A keyboard",
+  "difficulty": "easy",
+  "explanation": "The arrangement dates from 1870s typewriters, where it helped stop neighbouring bars jamming.",
+  "unsure": false
+ },
+ {
+  "prompt": "The 'contour' bottle, ribbed and curved, is a design icon of which drink?",
+  "choices": [
+   "Coca-Cola",
+   "Guinness",
+   "Heineken",
+   "Schweppes"
+  ],
+  "answer": "Coca-Cola",
+  "difficulty": "easy",
+  "explanation": "The 1915 brief asked for a bottle recognisable by touch alone, even smashed on the ground.",
+  "unsure": false
+ },
+ {
+  "prompt": "Delft, famous for blue-and-white decorated pottery, is in which country?",
+  "choices": [
+   "Netherlands",
+   "Portugal",
+   "Denmark",
+   "Poland"
+  ],
+  "answer": "Netherlands",
+  "difficulty": "easy",
+  "explanation": "Delftware imitated imported Chinese porcelain, which Dutch potters could not yet make.",
+  "unsure": false
+ },
+ {
+  "prompt": "The Bic Cristal is a mass-produced classic of which everyday object?",
+  "choices": [
+   "Ballpoint pen",
+   "Cigarette lighter",
+   "Razor",
+   "Pencil sharpener"
+  ],
+  "answer": "Ballpoint pen",
+  "difficulty": "easy",
+  "explanation": "Its hexagonal barrel stops it rolling off desks, and the tiny hole equalises air pressure.",
+  "unsure": false
+ },
+ {
+  "prompt": "In which country was the Bauhaus design school founded?",
+  "choices": [
+   "Germany",
+   "Austria",
+   "Switzerland",
+   "Netherlands"
+  ],
+  "answer": "Germany",
+  "difficulty": "medium",
+  "explanation": "It opened in Weimar in 1919 and was shut down by the Nazi regime in 1933.",
+  "unsure": false
+ },
+ {
+  "prompt": "Who founded the Bauhaus school in 1919?",
+  "choices": [
+   "Walter Gropius",
+   "Le Corbusier",
+   "Peter Behrens",
+   "Adolf Loos"
+  ],
+  "answer": "Walter Gropius",
+  "difficulty": "medium",
+  "explanation": "Gropius wanted craft and fine art taught together so designers could work with industry.",
+  "unsure": false
+ },
+ {
+  "prompt": "After Weimar, the Bauhaus moved to which German city in 1925?",
+  "choices": [
+   "Dessau",
+   "Cologne",
+   "Hamburg",
+   "Leipzig"
+  ],
+  "answer": "Dessau",
+  "difficulty": "medium",
+  "explanation": "Gropius designed the Dessau school building itself, with its famous glass curtain wall.",
+  "unsure": false
+ },
+ {
+  "prompt": "The phrase 'less is more' is most associated with which architect?",
+  "choices": [
+   "Mies van der Rohe",
+   "Frank Gehry",
+   "Antoni Gaudí",
+   "Norman Foster"
+  ],
+  "answer": "Mies van der Rohe",
+  "difficulty": "medium",
+  "explanation": "He also said 'God is in the details', insisting on precise junctions in his steel and glass work.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which architect coined the phrase 'form follows function'?",
+  "choices": [
+   "Louis Sullivan",
+   "Le Corbusier",
+   "Walter Gropius",
+   "Charles Rennie Mackintosh"
+  ],
+  "answer": "Louis Sullivan",
+  "difficulty": "medium",
+  "explanation": "Sullivan, an early skyscraper architect in Chicago, wrote the line in an 1896 essay.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which architect designed Barcelona's Sagrada Família?",
+  "choices": [
+   "Antoni Gaudí",
+   "Santiago Calatrava",
+   "Josep Puig",
+   "Rafael Moneo"
+  ],
+  "answer": "Antoni Gaudí",
+  "difficulty": "medium",
+  "explanation": "Gaudí worked on it for over 40 years and is buried in the basilica's crypt.",
+  "unsure": false
+ },
+ {
+  "prompt": "Who designed the glass pyramid at the Louvre?",
+  "choices": [
+   "I. M. Pei",
+   "Jean Nouvel",
+   "Renzo Piano",
+   "Norman Foster"
+  ],
+  "answer": "I. M. Pei",
+  "difficulty": "medium",
+  "explanation": "Pei, born in China and trained in the US, was chosen directly by President Mitterrand.",
+  "unsure": false
+ },
+ {
+  "prompt": "Who designed the titanium-clad Guggenheim Museum in Bilbao?",
+  "choices": [
+   "Frank Gehry",
+   "Zaha Hadid",
+   "Daniel Libeskind",
+   "Richard Meier"
+  ],
+  "answer": "Frank Gehry",
+  "difficulty": "medium",
+  "explanation": "Its curved forms were only buildable using CATIA, software written for aircraft design.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which architect designed Fallingwater, a house cantilevered over a waterfall?",
+  "choices": [
+   "Frank Lloyd Wright",
+   "Philip Johnson",
+   "Marcel Breuer",
+   "Eero Saarinen"
+  ],
+  "answer": "Frank Lloyd Wright",
+  "difficulty": "medium",
+  "explanation": "Wright called his approach organic architecture, placing the house on the falls rather than facing them.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which architect designed the Sydney Opera House?",
+  "choices": [
+   "Jørn Utzon",
+   "Alvar Aalto",
+   "Arne Jacobsen",
+   "Kenzo Tange"
+  ],
+  "answer": "Jørn Utzon",
+  "difficulty": "medium",
+  "explanation": "Utzon resigned in 1966 amid disputes and never saw the finished building.",
+  "unsure": false
+ },
+ {
+  "prompt": "Richard Rogers designed the Pompidou Centre in Paris with which architect?",
+  "choices": [
+   "Renzo Piano",
+   "Norman Foster",
+   "Rem Koolhaas",
+   "Jean Nouvel"
+  ],
+  "answer": "Renzo Piano",
+  "difficulty": "medium",
+  "explanation": "They put pipes and escalators on the outside so the interior could be left entirely open.",
+  "unsure": false
+ },
+ {
+  "prompt": "Le Corbusier was born in which country?",
+  "choices": [
+   "Switzerland",
+   "France",
+   "Belgium",
+   "Italy"
+  ],
+  "answer": "Switzerland",
+  "difficulty": "medium",
+  "explanation": "Born Charles-Édouard Jeanneret, he took his pen name from an ancestor's surname.",
+  "unsure": false
+ },
+ {
+  "prompt": "The word 'Brutalism' in architecture comes from a French term for what?",
+  "choices": [
+   "Raw concrete",
+   "Broken stone",
+   "Brutal weather",
+   "Bare iron"
+  ],
+  "answer": "Raw concrete",
+  "difficulty": "medium",
+  "explanation": "It derives from 'béton brut', concrete left rough with the grain of its timber moulds showing.",
+  "unsure": false
+ },
+ {
+  "prompt": "Pointed arches and flying buttresses are hallmarks of which architectural style?",
+  "choices": [
+   "Gothic",
+   "Romanesque",
+   "Baroque",
+   "Neoclassical"
+  ],
+  "answer": "Gothic",
+  "difficulty": "medium",
+  "explanation": "Those devices carried the roof load outwards, letting walls become vast stained glass windows.",
+  "unsure": false
+ },
+ {
+  "prompt": "Who created the 1931 London Underground diagram based on electrical circuits?",
+  "choices": [
+   "Harry Beck",
+   "Edward Johnston",
+   "Frank Pick",
+   "Abram Games"
+  ],
+  "answer": "Harry Beck",
+  "difficulty": "medium",
+  "explanation": "Beck was an engineering draughtsman and was paid just a few guineas for the design.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which four inks does CMYK printing use?",
+  "choices": [
+   "Cyan, magenta, yellow, black",
+   "Cyan, magenta, yellow, white",
+   "Crimson, mauve, yellow, black",
+   "Cyan, maroon, khaki, black"
+  ],
+  "answer": "Cyan, magenta, yellow, black",
+  "difficulty": "medium",
+  "explanation": "Black ink is added because mixing the three colour inks makes a muddy brown, not a true black.",
+  "unsure": false
+ },
+ {
+  "prompt": "Combining full red, green and blue light produces which colour?",
+  "choices": [
+   "White",
+   "Black",
+   "Brown",
+   "Grey"
+  ],
+  "answer": "White",
+  "difficulty": "medium",
+  "explanation": "Screens use additive mixing, where adding light adds brightness, unlike mixing paints.",
+  "unsure": false
+ },
+ {
+  "prompt": "On a standard colour wheel, which colour sits opposite red?",
+  "choices": [
+   "Green",
+   "Blue",
+   "Yellow",
+   "Purple"
+  ],
+  "answer": "Green",
+  "difficulty": "medium",
+  "explanation": "Complementary pairs like red and green intensify each other when placed side by side.",
+  "unsure": false
+ },
+ {
+  "prompt": "Pantone is best known for what in design?",
+  "choices": [
+   "A colour matching system",
+   "A paper grade",
+   "A drawing tablet",
+   "A type foundry"
+  ],
+  "answer": "A colour matching system",
+  "difficulty": "medium",
+  "explanation": "Its numbered spot inks let a brand colour print identically in different countries and presses.",
+  "unsure": false
+ },
+ {
+  "prompt": "In typography, kerning adjusts what?",
+  "choices": [
+   "Space between two letters",
+   "Space between lines",
+   "Letter height",
+   "Page margins"
+  ],
+  "answer": "Space between two letters",
+  "difficulty": "medium",
+  "explanation": "Pairs like AV or To need it most, since their shapes leave an awkward gap when set evenly.",
+  "unsure": false
+ },
+ {
+  "prompt": "In typography, 'leading' refers to the space between what?",
+  "choices": [
+   "Lines of type",
+   "Two letters",
+   "Words",
+   "Columns"
+  ],
+  "answer": "Lines of type",
+  "difficulty": "medium",
+  "explanation": "The name survives from strips of lead that compositors slid between rows of metal type.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is a serif on a letterform?",
+  "choices": [
+   "A small finishing stroke",
+   "A curved bowl",
+   "A joining line",
+   "An accent mark"
+  ],
+  "answer": "A small finishing stroke",
+  "difficulty": "medium",
+  "explanation": "Serifs are thought to descend from the chisel marks left when Romans carved letters in stone.",
+  "unsure": false
+ },
+ {
+  "prompt": "Comic Sans was designed to imitate the lettering found in what?",
+  "choices": [
+   "Comic books",
+   "Road signs",
+   "Old manuscripts",
+   "Shop awnings"
+  ],
+  "answer": "Comic books",
+  "difficulty": "medium",
+  "explanation": "It was drawn in 1994 for speech bubbles in a Microsoft program, then escaped into wider use.",
+  "unsure": false
+ },
+ {
+  "prompt": "Swiss Style graphic design is also known by which name?",
+  "choices": [
+   "International Typographic Style",
+   "New Objectivity",
+   "Constructivism",
+   "The New Look"
+  ],
+  "answer": "International Typographic Style",
+  "difficulty": "medium",
+  "explanation": "It favours grids, sans-serif type, photography and text ranged left with a ragged right edge.",
+  "unsure": false
+ },
+ {
+  "prompt": "Art Deco was the dominant decorative style of which period?",
+  "choices": [
+   "The 1920s and 1930s",
+   "The 1860s and 1870s",
+   "The 1960s and 1970s",
+   "The 1990s"
+  ],
+  "answer": "The 1920s and 1930s",
+  "difficulty": "medium",
+  "explanation": "It took its name from the 1925 Paris Exposition of decorative and industrial arts.",
+  "unsure": false
+ },
+ {
+  "prompt": "Art Nouveau is characterised by which visual quality?",
+  "choices": [
+   "Flowing plant-like curves",
+   "Strict square grids",
+   "Raw exposed concrete",
+   "Randomised pixel forms"
+  ],
+  "answer": "Flowing plant-like curves",
+  "difficulty": "medium",
+  "explanation": "Its whiplash lines drew on stems, vines and the Japanese prints then flooding into Europe.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which designer and writer led the Arts and Crafts movement in Britain?",
+  "choices": [
+   "William Morris",
+   "John Ruskin",
+   "Charles Eastlake",
+   "Augustus Pugin"
+  ],
+  "answer": "William Morris",
+  "difficulty": "medium",
+  "explanation": "Morris urged handmade quality against factory goods, though his wallpapers stayed costly.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which Dutch movement used only straight lines, primaries, black, white and grey?",
+  "choices": [
+   "De Stijl",
+   "Vorticism",
+   "Fauvism",
+   "Secession"
+  ],
+  "answer": "De Stijl",
+  "difficulty": "medium",
+  "explanation": "Its name simply means 'The Style', and the group ran a magazine of that name from 1917.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which designer founded the Memphis Group, famed for 1980s clashing colours?",
+  "choices": [
+   "Ettore Sottsass",
+   "Achille Castiglioni",
+   "Gio Ponti",
+   "Philippe Starck"
+  ],
+  "answer": "Ettore Sottsass",
+  "difficulty": "medium",
+  "explanation": "The group was named after a Bob Dylan song playing on repeat at its first Milan meeting.",
+  "unsure": false
+ },
+ {
+  "prompt": "Architect and designer Alvar Aalto came from which country?",
+  "choices": [
+   "Finland",
+   "Sweden",
+   "Norway",
+   "Denmark"
+  ],
+  "answer": "Finland",
+  "difficulty": "medium",
+  "explanation": "His bent birch plywood furniture used a local material and softened modernism's hard edges.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which Danish designer created the Egg chair for a Copenhagen hotel?",
+  "choices": [
+   "Arne Jacobsen",
+   "Hans Wegner",
+   "Verner Panton",
+   "Poul Henningsen"
+  ],
+  "answer": "Arne Jacobsen",
+  "difficulty": "medium",
+  "explanation": "He designed the SAS Royal Hotel down to its cutlery, a complete environment in one hand.",
+  "unsure": false
+ },
+ {
+  "prompt": "The rotund mascot 'Bibendum' is the logo of which company?",
+  "choices": [
+   "Michelin",
+   "Pirelli",
+   "Goodyear",
+   "Continental"
+  ],
+  "answer": "Michelin",
+  "difficulty": "medium",
+  "explanation": "He is white because early tyres were pale grey before carbon black was added to the rubber.",
+  "unsure": false
+ },
+ {
+  "prompt": "The FedEx logo famously hides which shape in its negative space?",
+  "choices": [
+   "An arrow",
+   "A bird",
+   "A key",
+   "A star"
+  ],
+  "answer": "An arrow",
+  "difficulty": "medium",
+  "explanation": "The arrow sits between the E and the x, and designer Lindon Leader tuned a custom letterform for it.",
+  "unsure": false
+ },
+ {
+  "prompt": "A hidden bear is concealed in the mountain of which brand's logo?",
+  "choices": [
+   "Toblerone",
+   "Milka",
+   "Ritter Sport",
+   "Lindt"
+  ],
+  "answer": "Toblerone",
+  "difficulty": "medium",
+  "explanation": "The bear is a symbol of Bern, the Swiss city where the chocolate was created.",
+  "unsure": false
+ },
+ {
+  "prompt": "The arrow in the Amazon logo runs between which two letters?",
+  "choices": [
+   "A and Z",
+   "A and N",
+   "M and Z",
+   "A and O"
+  ],
+  "answer": "A and Z",
+  "difficulty": "medium",
+  "explanation": "It suggests the shop sells everything from A to Z, and doubles as a smile.",
+  "unsure": false
+ },
+ {
+  "prompt": "Who designed the original Volkswagen Beetle?",
+  "choices": [
+   "Ferdinand Porsche",
+   "Rudolf Uhlenhaut",
+   "Giorgetto Giugiaro",
+   "Bruno Sacco"
+  ],
+  "answer": "Ferdinand Porsche",
+  "difficulty": "medium",
+  "explanation": "Its air-cooled engine sat over the driven rear wheels, so no radiator or drive shaft was needed.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which designer led the look of the iMac, iPod and iPhone at Apple?",
+  "choices": [
+   "Jony Ive",
+   "Dieter Rams",
+   "Hartmut Esslinger",
+   "Marc Newson"
+  ],
+  "answer": "Jony Ive",
+  "difficulty": "medium",
+  "explanation": "Ive was born in London and trained at Newcastle Polytechnic before joining Apple in 1992.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which designer wrote the 'ten principles for good design' while at Braun?",
+  "choices": [
+   "Dieter Rams",
+   "Raymond Loewy",
+   "Naoto Fukasawa",
+   "Kenji Ekuan"
+  ],
+  "answer": "Dieter Rams",
+  "difficulty": "medium",
+  "explanation": "His last principle is that good design is as little design as possible.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which Japanese retailer's name means roughly 'no-brand quality goods'?",
+  "choices": [
+   "Muji",
+   "Uniqlo",
+   "Nitori",
+   "Daiso"
+  ],
+  "answer": "Muji",
+  "difficulty": "medium",
+  "explanation": "Its full name, Mujirushi Ryohin, states a philosophy of plain packaging and no visible logo.",
+  "unsure": false
+ },
+ {
+  "prompt": "The Japanese aesthetic 'wabi-sabi' finds beauty in what?",
+  "choices": [
+   "Imperfection and age",
+   "Symmetry and polish",
+   "Bright saturated colour",
+   "Mathematical order"
+  ],
+  "answer": "Imperfection and age",
+  "difficulty": "medium",
+  "explanation": "The related craft of kintsugi repairs broken pottery with gold, highlighting the damage.",
+  "unsure": false
+ },
+ {
+  "prompt": "Adinkra symbols are a visual language of which West African people?",
+  "choices": [
+   "The Akan",
+   "The Zulu",
+   "The Tuareg",
+   "The Wolof"
+  ],
+  "answer": "The Akan",
+  "difficulty": "medium",
+  "explanation": "Each stamped symbol carries a proverb, and the cloths were traditionally worn at funerals.",
+  "unsure": false
+ },
+ {
+  "prompt": "Boldly painted geometric house murals are a tradition of which South African people?",
+  "choices": [
+   "The Ndebele",
+   "The Xhosa",
+   "The Himba",
+   "The Tswana"
+  ],
+  "answer": "The Ndebele",
+  "difficulty": "medium",
+  "explanation": "Ndebele women paint the designs freehand, without rulers or preliminary sketches.",
+  "unsure": false
+ },
+ {
+  "prompt": "Adire, an indigo resist-dyed cloth, is traditionally made by which people?",
+  "choices": [
+   "The Yoruba",
+   "The Ashanti",
+   "The Maasai",
+   "The Berber"
+  ],
+  "answer": "The Yoruba",
+  "difficulty": "medium",
+  "explanation": "Patterns are made by tying, stitching or starch-painting the cloth before it enters the indigo pit.",
+  "unsure": false
+ },
+ {
+  "prompt": "Batik wax-resist dyeing is most closely associated with which country?",
+  "choices": [
+   "Indonesia",
+   "India",
+   "Mexico",
+   "Turkey"
+  ],
+  "answer": "Indonesia",
+  "difficulty": "medium",
+  "explanation": "Javanese batik is drawn with a small spouted tool called a canting, then dyed and boiled clean.",
+  "unsure": false
+ },
+ {
+  "prompt": "Zellij, mosaics of hand-cut glazed tile, is a craft tradition of which country?",
+  "choices": [
+   "Morocco",
+   "Greece",
+   "Portugal",
+   "Uzbekistan"
+  ],
+  "answer": "Morocco",
+  "difficulty": "medium",
+  "explanation": "Each piece is chiselled by hand from a fired tile, then set face-down into a plaster bed.",
+  "unsure": false
+ },
+ {
+  "prompt": "The Great Mosque of Djenné in Mali is built mainly from what?",
+  "choices": [
+   "Sun-dried mud brick",
+   "Limestone blocks",
+   "Fired red brick",
+   "Timber and thatch"
+  ],
+  "answer": "Sun-dried mud brick",
+  "difficulty": "medium",
+  "explanation": "Projecting palm beams act as permanent scaffolding for the yearly community replastering.",
+  "unsure": false
+ },
+ {
+  "prompt": "The golden ratio is approximately which value?",
+  "choices": [
+   "1.618",
+   "1.414",
+   "2.718",
+   "3.142"
+  ],
+  "answer": "1.618",
+  "difficulty": "medium",
+  "explanation": "It is the number where the whole relates to the larger part as that part does to the smaller.",
+  "unsure": false
+ },
+ {
+  "prompt": "In Gestalt theory, which principle says nearby items are read as a group?",
+  "choices": [
+   "Proximity",
+   "Closure",
+   "Similarity",
+   "Continuity"
+  ],
+  "answer": "Proximity",
+  "difficulty": "medium",
+  "explanation": "It is why tightening the space above a heading ties it to the paragraph it belongs to.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which Gestalt principle explains seeing a whole shape from a broken outline?",
+  "choices": [
+   "Closure",
+   "Proximity",
+   "Figure-ground",
+   "Common fate"
+  ],
+  "answer": "Closure",
+  "difficulty": "medium",
+  "explanation": "Logos such as the WWF panda rely on it, letting the viewer complete the missing edges.",
+  "unsure": false
+ },
+ {
+  "prompt": "In interface design, what does 'skeuomorphism' mean?",
+  "choices": [
+   "Imitating real materials",
+   "Removing all colour",
+   "Scaling to screen size",
+   "Hiding menus"
+  ],
+  "answer": "Imitating real materials",
+  "difficulty": "medium",
+  "explanation": "Early phone software used leather stitching and green felt so buttons felt familiar.",
+  "unsure": false
+ },
+ {
+  "prompt": "In UX work, what is a wireframe?",
+  "choices": [
+   "A low-detail layout plan",
+   "A finished visual design",
+   "A colour palette",
+   "A user survey"
+  ],
+  "answer": "A low-detail layout plan",
+  "difficulty": "medium",
+  "explanation": "Leaving out colour and imagery keeps discussion on structure rather than surface style.",
+  "unsure": false
+ },
+ {
+  "prompt": "The phrase 'above the fold' in web design comes from which older medium?",
+  "choices": [
+   "Newspapers",
+   "Cinema",
+   "Radio",
+   "Posters"
+  ],
+  "answer": "Newspapers",
+  "difficulty": "medium",
+  "explanation": "Broadsheets were sold folded, so only the top half was visible on the news-stand.",
+  "unsure": false
+ },
+ {
+  "prompt": "The 'hamburger menu' icon is made of what?",
+  "choices": [
+   "Three stacked lines",
+   "Three dots",
+   "A magnifier",
+   "A gear wheel"
+  ],
+  "answer": "Three stacked lines",
+  "difficulty": "medium",
+  "explanation": "It was drawn by Norm Cox for the 1981 Xerox Star, long before smartphones adopted it.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which designer launched the 'New Look' silhouette in Paris in 1947?",
+  "choices": [
+   "Christian Dior",
+   "Cristóbal Balenciaga",
+   "Hubert de Givenchy",
+   "Pierre Cardin"
+  ],
+  "answer": "Christian Dior",
+  "difficulty": "medium",
+  "explanation": "Its full skirts used yards of fabric, a deliberate break from wartime rationing.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which London designer did most to popularise the miniskirt in the 1960s?",
+  "choices": [
+   "Mary Quant",
+   "Vivienne Westwood",
+   "Zandra Rhodes",
+   "Barbara Hulanicki"
+  ],
+  "answer": "Mary Quant",
+  "difficulty": "medium",
+  "explanation": "She named the skirt after her favourite car, the Mini, and sold it from her King's Road shop.",
+  "unsure": false
+ },
+ {
+  "prompt": "Yves Saint Laurent's 1966 'Le Smoking' was a tuxedo designed for whom?",
+  "choices": [
+   "Women",
+   "Waiters",
+   "Teenagers",
+   "Musicians"
+  ],
+  "answer": "Women",
+  "difficulty": "medium",
+  "explanation": "Some restaurants turned away women wearing it, treating trousers as unacceptable evening dress.",
+  "unsure": false
+ },
+ {
+  "prompt": "A gold Medusa head is the emblem of which Italian fashion house?",
+  "choices": [
+   "Versace",
+   "Fendi",
+   "Valentino",
+   "Missoni"
+  ],
+  "answer": "Versace",
+  "difficulty": "medium",
+  "explanation": "Gianni Versace took the motif from a Medusa floor mosaic near his childhood home.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which British designer is most associated with punk fashion?",
+  "choices": [
+   "Vivienne Westwood",
+   "Stella McCartney",
+   "Paul Smith",
+   "Ozwald Boateng"
+  ],
+  "answer": "Vivienne Westwood",
+  "difficulty": "medium",
+  "explanation": "Her King's Road shop with Malcolm McLaren dressed the Sex Pistols and set the look.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which Japanese designer created the 'Pleats Please' permanently pleated garments?",
+  "choices": [
+   "Issey Miyake",
+   "Yohji Yamamoto",
+   "Rei Kawakubo",
+   "Junya Watanabe"
+  ],
+  "answer": "Issey Miyake",
+  "difficulty": "medium",
+  "explanation": "The clothes are cut oversized then pressed, so the pleats are formed after the garment is sewn.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which designer founded the label Comme des Garçons?",
+  "choices": [
+   "Rei Kawakubo",
+   "Issey Miyake",
+   "Kenzo Takada",
+   "Hanae Mori"
+  ],
+  "answer": "Rei Kawakubo",
+  "difficulty": "medium",
+  "explanation": "Her 1981 Paris debut in torn black knitwear was dubbed 'Hiroshima chic' by hostile critics.",
+  "unsure": false
+ },
+ {
+  "prompt": "The Nike swoosh was bought from its student designer for roughly what fee?",
+  "choices": [
+   "35 dollars",
+   "3,500 dollars",
+   "35,000 dollars",
+   "Nothing at all"
+  ],
+  "answer": "35 dollars",
+  "difficulty": "medium",
+  "explanation": "Carolyn Davidson was later given shares and a gold swoosh ring by the company.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which company's striped 1972 logo was designed by Paul Rand?",
+  "choices": [
+   "IBM",
+   "Kodak",
+   "Xerox",
+   "Intel"
+  ],
+  "answer": "IBM",
+  "difficulty": "medium",
+  "explanation": "The eight horizontal stripes were added to suggest speed and to unify the three letters.",
+  "unsure": false
+ },
+ {
+  "prompt": "The red K6 telephone box seen across Britain was designed by whom?",
+  "choices": [
+   "Giles Gilbert Scott",
+   "Edwin Lutyens",
+   "Charles Holden",
+   "Basil Spence"
+  ],
+  "answer": "Giles Gilbert Scott",
+  "difficulty": "medium",
+  "explanation": "Scott, who also designed Battersea Power Station, based its dome on a Soane mausoleum.",
+  "unsure": false
+ },
+ {
+  "prompt": "Zaha Hadid, known for sweeping curved buildings, was born in which country?",
+  "choices": [
+   "Iraq",
+   "Iran",
+   "Lebanon",
+   "Egypt"
+  ],
+  "answer": "Iraq",
+  "difficulty": "medium",
+  "explanation": "Born in Baghdad in 1950, she studied maths in Beirut before turning to architecture in London.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which award is generally regarded as architecture's highest honour?",
+  "choices": [
+   "The Pritzker Prize",
+   "The Turner Prize",
+   "The Wolf Prize",
+   "The Praemium"
+  ],
+  "answer": "The Pritzker Prize",
+  "difficulty": "medium",
+  "explanation": "Founded in 1979 by the Pritzker family of Chicago, it is awarded to a living architect each year.",
+  "unsure": false
+ },
+ {
+  "prompt": "In graphic design, 'white space' refers to what?",
+  "choices": [
+   "Empty area in a layout",
+   "Unprinted paper edges",
+   "A white colour swatch",
+   "Overexposed photos"
+  ],
+  "answer": "Empty area in a layout",
+  "difficulty": "medium",
+  "explanation": "It need not be white at all; the term simply means space deliberately left free of content.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which Adobe program is the industry standard for vector artwork?",
+  "choices": [
+   "Illustrator",
+   "Photoshop",
+   "Lightroom",
+   "Premiere"
+  ],
+  "answer": "Illustrator",
+  "difficulty": "medium",
+  "explanation": "Vector shapes are stored as maths, so a logo drawn there scales to a billboard without blurring.",
+  "unsure": false
+ },
+ {
+  "prompt": "In printing, a photograph is reproduced as a grid of tiny dots called what?",
+  "choices": [
+   "A halftone",
+   "A gradient",
+   "A raster mask",
+   "A moiré"
+  ],
+  "answer": "A halftone",
+  "difficulty": "medium",
+  "explanation": "Varying dot size fools the eye into seeing continuous tone from a single solid ink.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which style of Islamic decoration uses interlacing geometry and calligraphy?",
+  "choices": [
+   "Arabesque",
+   "Rococo",
+   "Chinoiserie",
+   "Baroque"
+  ],
+  "answer": "Arabesque",
+  "difficulty": "medium",
+  "explanation": "Endlessly repeating patterns suggested infinity while avoiding figurative religious imagery.",
+  "unsure": false
+ },
+ {
+  "prompt": "Perforated stone screens called jali are a feature of which architecture?",
+  "choices": [
+   "Mughal",
+   "Norman",
+   "Aztec",
+   "Shinto"
+  ],
+  "answer": "Mughal",
+  "difficulty": "medium",
+  "explanation": "The pierced patterns cut glare and speed airflow, cooling rooms in a hot climate.",
+  "unsure": false
+ },
+ {
+  "prompt": "Who designed the London Underground's original sans-serif alphabet in 1916?",
+  "choices": [
+   "Edward Johnston",
+   "Eric Gill",
+   "Stanley Morison",
+   "Berthold Wolpe"
+  ],
+  "answer": "Edward Johnston",
+  "difficulty": "hard",
+  "explanation": "His diamond-shaped tittles over the i and j remain a signature of the Underground alphabet.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which designer created the 1972 New York City Subway map and sign system?",
+  "choices": [
+   "Massimo Vignelli",
+   "Milton Glaser",
+   "Saul Bass",
+   "Herb Lubalin"
+  ],
+  "answer": "Massimo Vignelli",
+  "difficulty": "hard",
+  "explanation": "His diagram was withdrawn in 1979 after riders complained the geography was too distorted.",
+  "unsure": false
+ },
+ {
+  "prompt": "Who designed the geometric typeface Futura, released in 1927?",
+  "choices": [
+   "Paul Renner",
+   "Jan Tschichold",
+   "Rudolf Koch",
+   "Herbert Bayer"
+  ],
+  "answer": "Paul Renner",
+  "difficulty": "hard",
+  "explanation": "Its near-circular o and single-storey a came from Bauhaus ideas, though Renner never taught there.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which sculptor and letterer designed the typeface Gill Sans?",
+  "choices": [
+   "Eric Gill",
+   "Edward Wadsworth",
+   "Frank Pick",
+   "Harold Curwen"
+  ],
+  "answer": "Eric Gill",
+  "difficulty": "hard",
+  "explanation": "Gill trained under Edward Johnston, and the typeface was widely used by the LNER railway.",
+  "unsure": false
+ },
+ {
+  "prompt": "Who drew the typeface Helvetica in 1957?",
+  "choices": [
+   "Max Miedinger",
+   "Adrian Frutiger",
+   "Josef Müller-Brockmann",
+   "Emil Ruder"
+  ],
+  "answer": "Max Miedinger",
+  "difficulty": "hard",
+  "explanation": "He worked with Eduard Hoffmann at the Haas foundry to modernise an older grotesque face.",
+  "unsure": false
+ },
+ {
+  "prompt": "Helvetica was originally released under which name?",
+  "choices": [
+   "Neue Haas Grotesk",
+   "Basel Sans",
+   "Akzidenz Neue",
+   "Zurich Gothic"
+  ],
+  "answer": "Neue Haas Grotesk",
+  "difficulty": "hard",
+  "explanation": "It was renamed for international sale in 1960, Helvetica being Latin for Swiss.",
+  "unsure": false
+ },
+ {
+  "prompt": "Bodoni and Didot belong to which typeface classification?",
+  "choices": [
+   "Didone",
+   "Humanist",
+   "Slab serif",
+   "Garalde"
+  ],
+  "answer": "Didone",
+  "difficulty": "hard",
+  "explanation": "Didones pair hairline serifs with extreme thick-thin contrast and a strictly vertical stress.",
+  "unsure": false
+ },
+ {
+  "prompt": "In typography, what does 'x-height' measure?",
+  "choices": [
+   "Height of lowercase letters",
+   "Width of a capital X",
+   "Space above the cap line",
+   "Depth of a descender"
+  ],
+  "answer": "Height of lowercase letters",
+  "difficulty": "hard",
+  "explanation": "A large x-height makes text look bigger at the same point size, aiding small-screen reading.",
+  "unsure": false
+ },
+ {
+  "prompt": "In typography, what is a ligature?",
+  "choices": [
+   "Two letters joined as one",
+   "A slanted variant",
+   "A line under text",
+   "An accent mark"
+  ],
+  "answer": "Two letters joined as one",
+  "difficulty": "hard",
+  "explanation": "The fi ligature exists because the f's overhang would otherwise collide with the dot on the i.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which Swiss designer wrote the influential book 'Grid Systems in Graphic Design'?",
+  "choices": [
+   "Josef Müller-Brockmann",
+   "Armin Hofmann",
+   "Karl Gerstner",
+   "Wim Crouwel"
+  ],
+  "answer": "Josef Müller-Brockmann",
+  "difficulty": "hard",
+  "explanation": "His Zurich concert posters showed the grid could be expressive rather than merely tidy.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which typographer wrote 'Die neue Typographie' and later redesigned Penguin's books?",
+  "choices": [
+   "Jan Tschichold",
+   "El Lissitzky",
+   "Herbert Bayer",
+   "Stanley Morison"
+  ],
+  "answer": "Jan Tschichold",
+  "difficulty": "hard",
+  "explanation": "He publicly renounced his own modernist manifesto and returned to classical, centred typography.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which Bauhaus master taught the preliminary course and wrote on colour contrast?",
+  "choices": [
+   "Johannes Itten",
+   "Paul Klee",
+   "Oskar Schlemmer",
+   "Hannes Meyer"
+  ],
+  "answer": "Johannes Itten",
+  "difficulty": "hard",
+  "explanation": "Itten began classes with breathing exercises, and his mysticism eventually clashed with Gropius.",
+  "unsure": false
+ },
+ {
+  "prompt": "Who wrote 'Interaction of Colour', showing colours change with their neighbours?",
+  "choices": [
+   "Josef Albers",
+   "Wassily Kandinsky",
+   "Michel Chevreul",
+   "Faber Birren"
+  ],
+  "answer": "Josef Albers",
+  "difficulty": "hard",
+  "explanation": "Albers taught the idea through paper exercises, insisting colour is almost always deceptive.",
+  "unsure": false
+ },
+ {
+  "prompt": "The Munsell colour system describes a colour using which three attributes?",
+  "choices": [
+   "Hue, value and chroma",
+   "Red, green and blue",
+   "Tint, tone and shade",
+   "Warmth, weight and glow"
+  ],
+  "answer": "Hue, value and chroma",
+  "difficulty": "hard",
+  "explanation": "Albert Munsell built it as a three-dimensional solid so equal steps look equally spaced.",
+  "unsure": false
+ },
+ {
+  "prompt": "What does 'metamerism' describe in colour work?",
+  "choices": [
+   "Matching under one light only",
+   "Fading over time",
+   "Bleeding between inks",
+   "Shifting with humidity"
+  ],
+  "answer": "Matching under one light only",
+  "difficulty": "hard",
+  "explanation": "It is why two fabric samples can match in the shop and clash badly in daylight outside.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which architect wrote the 1908 essay 'Ornament and Crime'?",
+  "choices": [
+   "Adolf Loos",
+   "Otto Wagner",
+   "Josef Hoffmann",
+   "Peter Behrens"
+  ],
+  "answer": "Adolf Loos",
+  "difficulty": "hard",
+  "explanation": "Loos argued decoration wasted labour, yet lined his own interiors with rich marble and wood.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which 1960s Japanese movement proposed cities as growing, replaceable megastructures?",
+  "choices": [
+   "Metabolism",
+   "Mingei",
+   "Gutai",
+   "Superflat"
+  ],
+  "answer": "Metabolism",
+  "difficulty": "hard",
+  "explanation": "It was launched at the 1960 Tokyo World Design Conference by a group of young architects.",
+  "unsure": false
+ },
+ {
+  "prompt": "Who designed Tokyo's Nakagin Capsule Tower, built from plug-in living pods?",
+  "choices": [
+   "Kisho Kurokawa",
+   "Kenzo Tange",
+   "Arata Isozaki",
+   "Tadao Ando"
+  ],
+  "answer": "Kisho Kurokawa",
+  "difficulty": "hard",
+  "explanation": "The 1972 capsules were meant to be swapped every 25 years, but not one ever was.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which Indian city's master plan was created by Le Corbusier?",
+  "choices": [
+   "Chandigarh",
+   "Jaipur",
+   "Pune",
+   "Bhopal"
+  ],
+  "answer": "Chandigarh",
+  "difficulty": "hard",
+  "explanation": "He laid it out as sectors on a grid, with a giant Open Hand monument as its emblem.",
+  "unsure": false
+ },
+ {
+  "prompt": "Who designed the sweeping civic buildings of Brasília?",
+  "choices": [
+   "Oscar Niemeyer",
+   "Lina Bo Bardi",
+   "Lúcio Costa",
+   "Paulo Mendes da Rocha"
+  ],
+  "answer": "Oscar Niemeyer",
+  "difficulty": "hard",
+  "explanation": "Niemeyer designed the buildings while Lúcio Costa planned the city's aeroplane-shaped layout.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which architect, born in Burkina Faso, won the Pritzker Prize in 2022?",
+  "choices": [
+   "Francis Kéré",
+   "David Adjaye",
+   "Kunlé Adeyemi",
+   "Mariam Kamara"
+  ],
+  "answer": "Francis Kéré",
+  "difficulty": "hard",
+  "explanation": "His Gando primary school used local clay with a raised tin roof that draws hot air out.",
+  "unsure": false
+ },
+ {
+  "prompt": "Who was the first woman awarded the Pritzker Architecture Prize?",
+  "choices": [
+   "Zaha Hadid",
+   "Kazuyo Sejima",
+   "Denise Scott Brown",
+   "Odile Decq"
+  ],
+  "answer": "Zaha Hadid",
+  "difficulty": "hard",
+  "explanation": "She won in 2004, more than twenty years after the prize was first awarded.",
+  "unsure": false
+ },
+ {
+  "prompt": "Who designed the tubular steel Wassily chair at the Bauhaus?",
+  "choices": [
+   "Marcel Breuer",
+   "Mart Stam",
+   "Ludwig Mies van der Rohe",
+   "Gerrit Rietveld"
+  ],
+  "answer": "Marcel Breuer",
+  "difficulty": "hard",
+  "explanation": "Breuer said the bent handlebars of his Adler bicycle gave him the idea for the steel frame.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which designer created the single-pedestal Tulip chair to banish 'the slum of legs'?",
+  "choices": [
+   "Eero Saarinen",
+   "Harry Bertoia",
+   "George Nelson",
+   "Warren Platner"
+  ],
+  "answer": "Eero Saarinen",
+  "difficulty": "hard",
+  "explanation": "The plastic seat sits on an aluminium base, since plastic alone could not take the stress.",
+  "unsure": false
+ },
+ {
+  "prompt": "Who designed Olivetti's bright red portable Valentine typewriter?",
+  "choices": [
+   "Ettore Sottsass",
+   "Marcello Nizzoli",
+   "Mario Bellini",
+   "Dieter Rams"
+  ],
+  "answer": "Ettore Sottsass",
+  "difficulty": "hard",
+  "explanation": "Designed with Perry King in 1969, it was sold as an anti-machine for use anywhere but an office.",
+  "unsure": false
+ },
+ {
+  "prompt": "Who invented the Anglepoise lamp using springs from vehicle suspension?",
+  "choices": [
+   "George Carwardine",
+   "Christian Dell",
+   "Jac Jacobsen",
+   "Serge Mouille"
+  ],
+  "answer": "George Carwardine",
+  "difficulty": "hard",
+  "explanation": "Carwardine was a car suspension engineer, and his 1932 arm holds any position without clamps.",
+  "unsure": false
+ },
+ {
+  "prompt": "Who devised Isotype, the pictogram system for showing statistics visually?",
+  "choices": [
+   "Otto Neurath",
+   "Otl Aicher",
+   "Rudolf Modley",
+   "Henry Dreyfuss"
+  ],
+  "answer": "Otto Neurath",
+  "difficulty": "hard",
+  "explanation": "Its rule was to repeat a small icon rather than enlarge one, so quantities stayed comparable.",
+  "unsure": false
+ },
+ {
+  "prompt": "Who designed the pictogram system for the 1972 Munich Olympics?",
+  "choices": [
+   "Otl Aicher",
+   "Josef Müller-Brockmann",
+   "Anton Stankowski",
+   "Wim Crouwel"
+  ],
+  "answer": "Otl Aicher",
+  "difficulty": "hard",
+  "explanation": "His figures were built on a strict grid of vertical, horizontal and 45-degree lines only.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which designer created the 'I love NY' logo in 1977?",
+  "choices": [
+   "Milton Glaser",
+   "Saul Bass",
+   "Ivan Chermayeff",
+   "Paul Rand"
+  ],
+  "answer": "Milton Glaser",
+  "difficulty": "hard",
+  "explanation": "Glaser sketched it in a taxi with a red crayon and gave the state the design for nothing.",
+  "unsure": false
+ },
+ {
+  "prompt": "The universal recycling symbol was designed in 1970 by whom?",
+  "choices": [
+   "Gary Anderson",
+   "Harvey Ball",
+   "Susan Kare",
+   "Carolyn Davidson"
+  ],
+  "answer": "Gary Anderson",
+  "difficulty": "hard",
+  "explanation": "He was a student who won a competition with a Möbius strip of three folded arrows.",
+  "unsure": false
+ },
+ {
+  "prompt": "International Klein Blue is named after which artist?",
+  "choices": [
+   "Yves Klein",
+   "Franz Kline",
+   "Paul Klee",
+   "Ellsworth Kelly"
+  ],
+  "answer": "Yves Klein",
+  "difficulty": "hard",
+  "explanation": "He developed a binder that let ultramarine keep its powdered intensity instead of dulling.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which Bauhaus workshop did Anni Albers lead?",
+  "choices": [
+   "Weaving",
+   "Metalwork",
+   "Pottery",
+   "Printing"
+  ],
+  "answer": "Weaving",
+  "difficulty": "hard",
+  "explanation": "Women at the school were steered into weaving, which she turned into serious design research.",
+  "unsure": false
+ },
+ {
+  "prompt": "ISO paper sizes such as A4 all share which width-to-height ratio?",
+  "choices": [
+   "1 to the square root of 2",
+   "1 to 1.618",
+   "2 to 3",
+   "3 to 4"
+  ],
+  "answer": "1 to the square root of 2",
+  "difficulty": "hard",
+  "explanation": "Only that ratio survives halving unchanged, so documents scale between sizes without cropping.",
+  "unsure": false
+ },
+ {
+  "prompt": "Fitts's law predicts how long it takes to do what?",
+  "choices": [
+   "Point at a target",
+   "Read a paragraph",
+   "Learn a menu",
+   "Recall an icon"
+  ],
+  "answer": "Point at a target",
+  "difficulty": "hard",
+  "explanation": "Time rises with distance and falls with target size, which is why screen edges are easy to hit.",
+  "unsure": false
+ },
+ {
+  "prompt": "Who wrote 'The Design of Everyday Things', on doors, taps and affordances?",
+  "choices": [
+   "Donald Norman",
+   "Jakob Nielsen",
+   "Henry Dreyfuss",
+   "Bruno Munari"
+  ],
+  "answer": "Donald Norman",
+  "difficulty": "hard",
+  "explanation": "Badly signalled push-or-pull doors are now nicknamed Norman doors after the book.",
+  "unsure": false
+ },
+ {
+  "prompt": "The Akan adinkra symbol 'sankofa' carries which meaning?",
+  "choices": [
+   "Go back and fetch it",
+   "Strength in unity",
+   "Fear no one",
+   "Wealth follows work"
+  ],
+  "answer": "Go back and fetch it",
+  "difficulty": "hard",
+  "explanation": "It is drawn as a bird turning its head backwards, urging that the past be reclaimed.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which typeface did Adrian Frutiger design for signage at a Paris airport?",
+  "choices": [
+   "Frutiger",
+   "Univers",
+   "Avenir",
+   "Meta"
+  ],
+  "answer": "Frutiger",
+  "difficulty": "hard",
+  "explanation": "Drawn for Charles de Gaulle in the 1970s, it was made open and legible seen at speed and angle.",
+  "unsure": false
+ }
+]

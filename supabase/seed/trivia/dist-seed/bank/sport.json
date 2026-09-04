@@ -1,0 +1,2342 @@
+[
+ {
+  "prompt": "In football, how many players from one team start on the pitch?",
+  "choices": [
+   "11",
+   "9",
+   "10",
+   "12"
+  ],
+  "answer": "11",
+  "difficulty": "easy",
+  "explanation": "A side fields ten outfield players plus a goalkeeper, and drops to ten men after a red card.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which country won the 2014 FIFA World Cup?",
+  "choices": [
+   "Germany",
+   "Argentina",
+   "Brazil",
+   "Spain"
+  ],
+  "answer": "Germany",
+  "difficulty": "easy",
+  "explanation": "Mario Gotze's extra-time goal beat Argentina 1-0 at the Maracana in Rio.",
+  "unsure": false
+ },
+ {
+  "prompt": "What colour card does a football referee show to send a player off?",
+  "choices": [
+   "Red",
+   "Yellow",
+   "Blue",
+   "Green"
+  ],
+  "answer": "Red",
+  "difficulty": "easy",
+  "explanation": "The red and yellow card system was introduced at the 1970 World Cup in Mexico.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which city hosted the 2012 Summer Olympic Games?",
+  "choices": [
+   "London",
+   "Beijing",
+   "Athens",
+   "Rio de Janeiro"
+  ],
+  "answer": "London",
+  "difficulty": "easy",
+  "explanation": "It made London the first city to stage the modern Summer Games three times.",
+  "unsure": false
+ },
+ {
+  "prompt": "How many points is a try worth in rugby union?",
+  "choices": [
+   "5",
+   "3",
+   "4",
+   "7"
+  ],
+  "answer": "5",
+  "difficulty": "easy",
+  "explanation": "A successful conversion kick afterwards adds two more, making the score seven.",
+  "unsure": false
+ },
+ {
+  "prompt": "In tennis, what word describes a game score of 40-40?",
+  "choices": [
+   "Deuce",
+   "Advantage",
+   "Love",
+   "Fault"
+  ],
+  "answer": "Deuce",
+  "difficulty": "easy",
+  "explanation": "From deuce a player must win two points in a row to take the game.",
+  "unsure": false
+ },
+ {
+  "prompt": "How many players from each team are on court at once in basketball?",
+  "choices": [
+   "5",
+   "6",
+   "7",
+   "4"
+  ],
+  "answer": "5",
+  "difficulty": "easy",
+  "explanation": "The five are usually two guards, two forwards and a centre.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which sport uses the terms birdie, eagle and bogey?",
+  "choices": [
+   "Golf",
+   "Cricket",
+   "Archery",
+   "Bowls"
+  ],
+  "answer": "Golf",
+  "difficulty": "easy",
+  "explanation": "They describe scores relative to par: one under, two under and one over.",
+  "unsure": false
+ },
+ {
+  "prompt": "In which sport would a player perform a slam dunk?",
+  "choices": [
+   "Basketball",
+   "Volleyball",
+   "Handball",
+   "Netball"
+  ],
+  "answer": "Basketball",
+  "difficulty": "easy",
+  "explanation": "The dunk was banned in American college basketball from 1967 to 1976.",
+  "unsure": false
+ },
+ {
+  "prompt": "How many holes are played in a standard full round of golf?",
+  "choices": [
+   "18",
+   "9",
+   "12",
+   "24"
+  ],
+  "answer": "18",
+  "difficulty": "easy",
+  "explanation": "St Andrews settled on eighteen holes in 1764, and the rest of the game followed.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the maximum break in a standard frame of snooker?",
+  "choices": [
+   "147",
+   "155",
+   "140",
+   "180"
+  ],
+  "answer": "147",
+  "difficulty": "easy",
+  "explanation": "It comes from fifteen reds each followed by a black, then the six colours.",
+  "unsure": false
+ },
+ {
+  "prompt": "Cristiano Ronaldo has played international football for which country?",
+  "choices": [
+   "Portugal",
+   "Spain",
+   "Brazil",
+   "Argentina"
+  ],
+  "answer": "Portugal",
+  "difficulty": "easy",
+  "explanation": "He was born on the Atlantic island of Madeira and started out at Sporting Lisbon.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which sport is played at the Wimbledon Championships?",
+  "choices": [
+   "Tennis",
+   "Cricket",
+   "Golf",
+   "Squash"
+  ],
+  "answer": "Tennis",
+  "difficulty": "easy",
+  "explanation": "Wimbledon began in 1877 and is the only Grand Slam still played on grass.",
+  "unsure": false
+ },
+ {
+  "prompt": "How long is a standard football match, excluding stoppage time?",
+  "choices": [
+   "90 minutes",
+   "60 minutes",
+   "80 minutes",
+   "100 minutes"
+  ],
+  "answer": "90 minutes",
+  "difficulty": "easy",
+  "explanation": "It is split into two halves of 45 minutes with a half-time interval of 15.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which Dublin stadium is the headquarters of the GAA?",
+  "choices": [
+   "Croke Park",
+   "Aviva Stadium",
+   "Dalymount Park",
+   "Thomond Park"
+  ],
+  "answer": "Croke Park",
+  "difficulty": "easy",
+  "explanation": "It is named after Archbishop Thomas Croke, an early patron of the association.",
+  "unsure": false
+ },
+ {
+  "prompt": "In Gaelic football, how many points is a goal worth?",
+  "choices": [
+   "3",
+   "2",
+   "5",
+   "6"
+  ],
+  "answer": "3",
+  "difficulty": "easy",
+  "explanation": "A goal goes under the crossbar into the net; over the bar scores a single point.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the name of the stick used to strike the ball in hurling?",
+  "choices": [
+   "Hurley",
+   "Mallet",
+   "Racket",
+   "Paddle"
+  ],
+  "answer": "Hurley",
+  "difficulty": "easy",
+  "explanation": "Also called a camán, it is traditionally cut from ash and shaped by hand.",
+  "unsure": false
+ },
+ {
+  "prompt": "How long is a marathon, to the nearest tenth of a kilometre?",
+  "choices": [
+   "42.2 km",
+   "38.6 km",
+   "45.0 km",
+   "40.0 km"
+  ],
+  "answer": "42.2 km",
+  "difficulty": "easy",
+  "explanation": "In imperial measure that is 26 miles and 385 yards.",
+  "unsure": false
+ },
+ {
+  "prompt": "The Tour de France is a major event in which sport?",
+  "choices": [
+   "Cycling",
+   "Running",
+   "Motor racing",
+   "Rowing"
+  ],
+  "answer": "Cycling",
+  "difficulty": "easy",
+  "explanation": "The race was launched in 1903 by a newspaper hoping to boost its circulation.",
+  "unsure": false
+ },
+ {
+  "prompt": "What colour jersey is worn by the overall race leader in the Tour de France?",
+  "choices": [
+   "Yellow",
+   "Green",
+   "Red",
+   "White"
+  ],
+  "answer": "Yellow",
+  "difficulty": "easy",
+  "explanation": "Yellow was chosen to match the paper the sponsoring newspaper was printed on.",
+  "unsure": false
+ },
+ {
+  "prompt": "In boxing, what do the initials KO stand for?",
+  "choices": [
+   "Knockout",
+   "Knee out",
+   "Keep open",
+   "Knuckle only"
+  ],
+  "answer": "Knockout",
+  "difficulty": "easy",
+  "explanation": "A fighter is knocked out if unable to beat the referee's count of ten.",
+  "unsure": false
+ },
+ {
+  "prompt": "How many interlocking rings appear on the Olympic flag?",
+  "choices": [
+   "5",
+   "4",
+   "6",
+   "7"
+  ],
+  "answer": "5",
+  "difficulty": "easy",
+  "explanation": "The rings represent the five inhabited continents and were designed in 1913.",
+  "unsure": false
+ },
+ {
+  "prompt": "Usain Bolt became world famous in which branch of athletics?",
+  "choices": [
+   "Sprinting",
+   "Marathon running",
+   "Pole vault",
+   "Race walking"
+  ],
+  "answer": "Sprinting",
+  "difficulty": "easy",
+  "explanation": "His 100m world record of 9.58 seconds was set in Berlin in 2009.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which country won the 2010 FIFA World Cup in South Africa?",
+  "choices": [
+   "Spain",
+   "Netherlands",
+   "Germany",
+   "Uruguay"
+  ],
+  "answer": "Spain",
+  "difficulty": "easy",
+  "explanation": "Andres Iniesta scored the only goal of the final deep into extra time.",
+  "unsure": false
+ },
+ {
+  "prompt": "How many players make up a cricket team on the field?",
+  "choices": [
+   "11",
+   "9",
+   "12",
+   "13"
+  ],
+  "answer": "11",
+  "difficulty": "easy",
+  "explanation": "A twelfth man may field as a substitute but cannot bat, bowl or keep wicket.",
+  "unsure": false
+ },
+ {
+  "prompt": "In cricket, how many runs are scored if the ball clears the boundary without bouncing?",
+  "choices": [
+   "Six",
+   "Four",
+   "Five",
+   "Three"
+  ],
+  "answer": "Six",
+  "difficulty": "easy",
+  "explanation": "If it bounces before crossing the rope, only four runs are awarded.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is it called when a footballer scores three goals in one match?",
+  "choices": [
+   "Hat-trick",
+   "Treble top",
+   "Triple play",
+   "Grand slam"
+  ],
+  "answer": "Hat-trick",
+  "difficulty": "easy",
+  "explanation": "The phrase came from cricket, where a bowler taking three in three won a hat.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which national football team is nicknamed the Super Eagles?",
+  "choices": [
+   "Nigeria",
+   "Ghana",
+   "Cameroon",
+   "Senegal"
+  ],
+  "answer": "Nigeria",
+  "difficulty": "easy",
+  "explanation": "They were called the Green Eagles until a rebrand in the 1980s.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which racket sport is played with a shuttlecock?",
+  "choices": [
+   "Badminton",
+   "Squash",
+   "Tennis",
+   "Table tennis"
+  ],
+  "answer": "Badminton",
+  "difficulty": "easy",
+  "explanation": "A feathered shuttle leaves the racket faster than any other ball in sport.",
+  "unsure": false
+ },
+ {
+  "prompt": "England and Australia compete for the Ashes in which sport?",
+  "choices": [
+   "Cricket",
+   "Rugby union",
+   "Hockey",
+   "Netball"
+  ],
+  "answer": "Cricket",
+  "difficulty": "easy",
+  "explanation": "The urn commemorates a mock obituary for English cricket printed in 1882.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which football club plays its home matches at Old Trafford?",
+  "choices": [
+   "Manchester United",
+   "Manchester City",
+   "Everton",
+   "Leeds United"
+  ],
+  "answer": "Manchester United",
+  "difficulty": "easy",
+  "explanation": "The ground opened in 1910 and is nicknamed the Theatre of Dreams.",
+  "unsure": false
+ },
+ {
+  "prompt": "Scrum-half and fly-half are positions in which sport?",
+  "choices": [
+   "Rugby union",
+   "Hockey",
+   "Football",
+   "Lacrosse"
+  ],
+  "answer": "Rugby union",
+  "difficulty": "easy",
+  "explanation": "They are the two half-backs who link the forwards to the three-quarters.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which flag is waved to signal the end of a Formula 1 race?",
+  "choices": [
+   "Chequered flag",
+   "Red flag",
+   "Yellow flag",
+   "Blue flag"
+  ],
+  "answer": "Chequered flag",
+  "difficulty": "easy",
+  "explanation": "A red flag stops a race early, while yellow warns of danger on track.",
+  "unsure": false
+ },
+ {
+  "prompt": "In darts, how many darts does a player throw in a single turn?",
+  "choices": [
+   "Three",
+   "Two",
+   "Four",
+   "Five"
+  ],
+  "answer": "Three",
+  "difficulty": "easy",
+  "explanation": "A standard leg starts at 501 and must be finished on a double.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the highest score possible with three darts?",
+  "choices": [
+   "180",
+   "170",
+   "150",
+   "200"
+  ],
+  "answer": "180",
+  "difficulty": "easy",
+  "explanation": "It takes three treble twenties, the highest-value single bed on the board.",
+  "unsure": false
+ },
+ {
+  "prompt": "The Super Bowl is the championship game of which sport?",
+  "choices": [
+   "American football",
+   "Baseball",
+   "Ice hockey",
+   "Basketball"
+  ],
+  "answer": "American football",
+  "difficulty": "easy",
+  "explanation": "The winners receive the Vince Lombardi Trophy, named after a famous coach.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which footballer is allowed to handle the ball inside their own penalty area?",
+  "choices": [
+   "The goalkeeper",
+   "The captain",
+   "The centre-back",
+   "Any defender"
+  ],
+  "answer": "The goalkeeper",
+  "difficulty": "easy",
+  "explanation": "Since 1992 the keeper may not pick up a deliberate back-pass from a team-mate.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which country won the 2018 FIFA World Cup in Russia?",
+  "choices": [
+   "France",
+   "Croatia",
+   "Belgium",
+   "England"
+  ],
+  "answer": "France",
+  "difficulty": "easy",
+  "explanation": "They beat Croatia 4-2 in Moscow, twenty years after their first title.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which football club plays its home matches at Anfield?",
+  "choices": [
+   "Liverpool",
+   "Everton",
+   "Newcastle United",
+   "Aston Villa"
+  ],
+  "answer": "Liverpool",
+  "difficulty": "easy",
+  "explanation": "The Kop end is named after a hill from the Second Boer War.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the name of the women's game closely related to hurling?",
+  "choices": [
+   "Camogie",
+   "Rounders",
+   "Shinty",
+   "Handball"
+  ],
+  "answer": "Camogie",
+  "difficulty": "easy",
+  "explanation": "Its own association was founded in 1904, twenty years after the GAA.",
+  "unsure": false
+ },
+ {
+  "prompt": "How long is an Olympic-sized swimming pool?",
+  "choices": [
+   "50 metres",
+   "25 metres",
+   "100 metres",
+   "33 metres"
+  ],
+  "answer": "50 metres",
+  "difficulty": "easy",
+  "explanation": "Short-course world records are set in pools half that length.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the set-piece called when rugby forwards bind together to contest the ball?",
+  "choices": [
+   "Scrum",
+   "Lineout",
+   "Ruck",
+   "Maul"
+  ],
+  "answer": "Scrum",
+  "difficulty": "easy",
+  "explanation": "A rugby union scrum packs down with eight players on each side.",
+  "unsure": false
+ },
+ {
+  "prompt": "In which sport does a score of zero go by the word love?",
+  "choices": [
+   "Tennis",
+   "Golf",
+   "Cricket",
+   "Snooker"
+  ],
+  "answer": "Tennis",
+  "difficulty": "easy",
+  "explanation": "A set won 6-0 is commonly described as a bagel by players and commentators.",
+  "unsure": false
+ },
+ {
+  "prompt": "How many points does a team earn for a win in the Premier League?",
+  "choices": [
+   "3",
+   "2",
+   "4",
+   "1"
+  ],
+  "answer": "3",
+  "difficulty": "easy",
+  "explanation": "English football switched from two points for a win to three back in 1981.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which national rugby team performs the haka before matches?",
+  "choices": [
+   "New Zealand",
+   "Australia",
+   "South Africa",
+   "Fiji"
+  ],
+  "answer": "New Zealand",
+  "difficulty": "easy",
+  "explanation": "The All Blacks' best-known haka, Ka Mate, was composed by a Maori chief.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which boxer was born Cassius Clay and changed his name in 1964?",
+  "choices": [
+   "Muhammad Ali",
+   "Joe Frazier",
+   "Sonny Liston",
+   "George Foreman"
+  ],
+  "answer": "Muhammad Ali",
+  "difficulty": "easy",
+  "explanation": "He took the name after joining the Nation of Islam, days after beating Sonny Liston.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which country won the 2016 UEFA European Championship?",
+  "choices": [
+   "Portugal",
+   "France",
+   "Germany",
+   "Wales"
+  ],
+  "answer": "Portugal",
+  "difficulty": "easy",
+  "explanation": "Eder scored in extra time against the hosts, France, in Paris.",
+  "unsure": false
+ },
+ {
+  "prompt": "How many pins are set up in ten-pin bowling?",
+  "choices": [
+   "10",
+   "9",
+   "12",
+   "8"
+  ],
+  "answer": "10",
+  "difficulty": "easy",
+  "explanation": "They stand in a triangle, and knocking them all down at once is a strike.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which sport is played at Lord's in London?",
+  "choices": [
+   "Cricket",
+   "Rugby union",
+   "Tennis",
+   "Football"
+  ],
+  "answer": "Cricket",
+  "difficulty": "easy",
+  "explanation": "The ground is famous for its pronounced slope across the playing surface.",
+  "unsure": false
+ },
+ {
+  "prompt": "In which sport is the main bunch of competitors called the peloton?",
+  "choices": [
+   "Cycling",
+   "Sailing",
+   "Rowing",
+   "Skiing"
+  ],
+  "answer": "Cycling",
+  "difficulty": "easy",
+  "explanation": "Riding in the pack can cut a rider's energy use by nearly half.",
+  "unsure": false
+ },
+ {
+  "prompt": "How often are the Summer Olympic Games normally held?",
+  "choices": [
+   "Every four years",
+   "Every two years",
+   "Every three years",
+   "Every five years"
+  ],
+  "answer": "Every four years",
+  "difficulty": "easy",
+  "explanation": "The four-year gap is called an Olympiad, a term borrowed from ancient Greece.",
+  "unsure": false
+ },
+ {
+  "prompt": "The Masters golf tournament is played every year at which course?",
+  "choices": [
+   "Augusta National",
+   "St Andrews",
+   "Pebble Beach",
+   "Royal Portrush"
+  ],
+  "answer": "Augusta National",
+  "difficulty": "easy",
+  "explanation": "Its stretch of holes 11 to 13 is nicknamed Amen Corner.",
+  "unsure": false
+ },
+ {
+  "prompt": "How many rounds does a modern world title boxing fight last at most?",
+  "choices": [
+   "12",
+   "15",
+   "10",
+   "8"
+  ],
+  "answer": "12",
+  "difficulty": "easy",
+  "explanation": "Title bouts were cut from fifteen rounds to twelve during the 1980s on safety grounds.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which sport is played with a puck rather than a ball?",
+  "choices": [
+   "Ice hockey",
+   "Field hockey",
+   "Lacrosse",
+   "Water polo"
+  ],
+  "answer": "Ice hockey",
+  "difficulty": "easy",
+  "explanation": "Pucks are frozen before games so they slide rather than bounce.",
+  "unsure": false
+ },
+ {
+  "prompt": "In football, how is play restarted after the ball crosses the touchline?",
+  "choices": [
+   "Throw-in",
+   "Corner kick",
+   "Goal kick",
+   "Drop ball"
+  ],
+  "answer": "Throw-in",
+  "difficulty": "easy",
+  "explanation": "Both feet must stay on the ground and the ball go over the head with two hands.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which London football club is nicknamed the Gunners?",
+  "choices": [
+   "Arsenal",
+   "Chelsea",
+   "Tottenham Hotspur",
+   "West Ham United"
+  ],
+  "answer": "Arsenal",
+  "difficulty": "easy",
+  "explanation": "The club was founded by workers at the Royal Arsenal munitions factory in Woolwich.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which touring rugby side combines players from Ireland, England, Scotland and Wales?",
+  "choices": [
+   "British and Irish Lions",
+   "The Barbarians",
+   "Home Nations XV",
+   "The Combined Isles"
+  ],
+  "answer": "British and Irish Lions",
+  "difficulty": "easy",
+  "explanation": "They tour Australia, New Zealand or South Africa once every four years.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which country won the 1966 FIFA World Cup?",
+  "choices": [
+   "England",
+   "West Germany",
+   "Brazil",
+   "Italy"
+  ],
+  "answer": "England",
+  "difficulty": "easy",
+  "explanation": "Geoff Hurst's hat-trick in the final remains the only one in a World Cup final.",
+  "unsure": false
+ },
+ {
+  "prompt": "In football, what does the abbreviation VAR stand for?",
+  "choices": [
+   "Video Assistant Referee",
+   "Verified Action Review",
+   "Visual Appeal Rule",
+   "Variable Added Return"
+  ],
+  "answer": "Video Assistant Referee",
+  "difficulty": "easy",
+  "explanation": "It was first used at a World Cup in Russia in 2018.",
+  "unsure": false
+ },
+ {
+  "prompt": "How many players are on a Gaelic football team on the pitch?",
+  "choices": [
+   "15",
+   "13",
+   "11",
+   "17"
+  ],
+  "answer": "15",
+  "difficulty": "easy",
+  "explanation": "They line out as a goalkeeper, six backs, two midfielders and six forwards.",
+  "unsure": false
+ },
+ {
+  "prompt": "How many players are on a rugby union team at kick-off?",
+  "choices": [
+   "15",
+   "13",
+   "11",
+   "17"
+  ],
+  "answer": "15",
+  "difficulty": "easy",
+  "explanation": "Eight of them are forwards, and the other seven make up the backs.",
+  "unsure": false
+ },
+ {
+  "prompt": "Serena Williams built her career in which sport?",
+  "choices": [
+   "Tennis",
+   "Athletics",
+   "Golf",
+   "Basketball"
+  ],
+  "answer": "Tennis",
+  "difficulty": "easy",
+  "explanation": "She and her sister Venus also won multiple Olympic doubles gold medals together.",
+  "unsure": false
+ },
+ {
+  "prompt": "In which sport would a competitor use a putter?",
+  "choices": [
+   "Golf",
+   "Croquet",
+   "Hockey",
+   "Curling"
+  ],
+  "answer": "Golf",
+  "difficulty": "easy",
+  "explanation": "It is the flattest-faced club, designed to roll the ball along the green.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which medal is awarded for third place at the Olympic Games?",
+  "choices": [
+   "Bronze",
+   "Silver",
+   "Copper",
+   "Iron"
+  ],
+  "answer": "Bronze",
+  "difficulty": "easy",
+  "explanation": "Three medals per event only became standard at the 1904 Games in St Louis.",
+  "unsure": false
+ },
+ {
+  "prompt": "What offence is it when an attacker is beyond the last defender as the ball is played?",
+  "choices": [
+   "Offside",
+   "Obstruction",
+   "Handball",
+   "Encroachment"
+  ],
+  "answer": "Offside",
+  "difficulty": "easy",
+  "explanation": "A player cannot be offside from a throw-in, corner or goal kick.",
+  "unsure": false
+ },
+ {
+  "prompt": "How many hurdles does each runner clear in the men's 110 metres hurdles?",
+  "choices": [
+   "10",
+   "8",
+   "12",
+   "14"
+  ],
+  "answer": "10",
+  "difficulty": "easy",
+  "explanation": "The barriers stand 42 inches high and are spaced evenly along the straight.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the ball used in hurling called?",
+  "choices": [
+   "Sliotar",
+   "Sliogan",
+   "Camán",
+   "Poc"
+  ],
+  "answer": "Sliotar",
+  "difficulty": "easy",
+  "explanation": "It has raised ridges on its leather cover to help players grip and control it.",
+  "unsure": false
+ },
+ {
+  "prompt": "How long is a single round in professional men's boxing?",
+  "choices": [
+   "3 minutes",
+   "2 minutes",
+   "4 minutes",
+   "5 minutes"
+  ],
+  "answer": "3 minutes",
+  "difficulty": "easy",
+  "explanation": "One minute of rest in the corner separates each round from the next.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which colour ball is worth the most points in snooker?",
+  "choices": [
+   "Black",
+   "Pink",
+   "Blue",
+   "Brown"
+  ],
+  "answer": "Black",
+  "difficulty": "easy",
+  "explanation": "It scores seven, while the pink is worth six and the blue five.",
+  "unsure": false
+ },
+ {
+  "prompt": "The Stanley Cup is the championship trophy of which sport?",
+  "choices": [
+   "Ice hockey",
+   "Baseball",
+   "Basketball",
+   "American football"
+  ],
+  "answer": "Ice hockey",
+  "difficulty": "easy",
+  "explanation": "It is named after Lord Stanley of Preston, a Governor General of Canada.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which Scottish football club plays its home games at Celtic Park?",
+  "choices": [
+   "Celtic",
+   "Rangers",
+   "Aberdeen",
+   "Hearts"
+  ],
+  "answer": "Celtic",
+  "difficulty": "easy",
+  "explanation": "The Glasgow club was founded in 1887 to raise money for poor Irish immigrants.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which club won the first Premier League title in the 1992-93 season?",
+  "choices": [
+   "Manchester United",
+   "Blackburn Rovers",
+   "Arsenal",
+   "Liverpool"
+  ],
+  "answer": "Manchester United",
+  "difficulty": "medium",
+  "explanation": "It ended a wait for the English league title stretching back to 1967.",
+  "unsure": false
+ },
+ {
+  "prompt": "Who managed the Republic of Ireland at the 1990 World Cup?",
+  "choices": [
+   "Jack Charlton",
+   "Mick McCarthy",
+   "Eoin Hand",
+   "Brian Kerr"
+  ],
+  "answer": "Jack Charlton",
+  "difficulty": "medium",
+  "explanation": "The Englishman had won the World Cup as a player with England in 1966.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which country hosted the 1994 FIFA World Cup?",
+  "choices": [
+   "United States",
+   "Mexico",
+   "Italy",
+   "France"
+  ],
+  "answer": "United States",
+  "difficulty": "medium",
+  "explanation": "It still holds the record for the highest average attendance at a World Cup.",
+  "unsure": false
+ },
+ {
+  "prompt": "At which stadium was the 1966 World Cup final played?",
+  "choices": [
+   "Wembley",
+   "Old Trafford",
+   "Hampden Park",
+   "Villa Park"
+  ],
+  "answer": "Wembley",
+  "difficulty": "medium",
+  "explanation": "The old ground's twin towers stood from 1923 until demolition in 2003.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which country won the very first FIFA World Cup in 1930?",
+  "choices": [
+   "Uruguay",
+   "Argentina",
+   "Brazil",
+   "Italy"
+  ],
+  "answer": "Uruguay",
+  "difficulty": "medium",
+  "explanation": "They also hosted that tournament, staging the final in Montevideo.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which African country reached the quarter-finals of the 1990 World Cup?",
+  "choices": [
+   "Cameroon",
+   "Nigeria",
+   "Egypt",
+   "Morocco"
+  ],
+  "answer": "Cameroon",
+  "difficulty": "medium",
+  "explanation": "Roger Milla, then in his late thirties, scored four goals off the bench.",
+  "unsure": false
+ },
+ {
+  "prompt": "In which year did Nigeria win Olympic gold in men's football?",
+  "choices": [
+   "1996",
+   "1988",
+   "2000",
+   "2004"
+  ],
+  "answer": "1996",
+  "difficulty": "medium",
+  "explanation": "The Dream Team beat Argentina 3-2 in the final in Atlanta.",
+  "unsure": false
+ },
+ {
+  "prompt": "Who scored Nigeria's first ever World Cup goal, in 1994?",
+  "choices": [
+   "Rashidi Yekini",
+   "Jay-Jay Okocha",
+   "Daniel Amokachi",
+   "Nwankwo Kanu"
+  ],
+  "answer": "Rashidi Yekini",
+  "difficulty": "medium",
+  "explanation": "His celebration gripping the net after scoring against Bulgaria became iconic.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which country won the 2013 Africa Cup of Nations?",
+  "choices": [
+   "Nigeria",
+   "Ghana",
+   "Ivory Coast",
+   "Egypt"
+  ],
+  "answer": "Nigeria",
+  "difficulty": "medium",
+  "explanation": "Sunday Mba's goal beat Burkina Faso 1-0 in the final in Johannesburg.",
+  "unsure": false
+ },
+ {
+  "prompt": "Jay-Jay Okocha played for which English club between 2002 and 2006?",
+  "choices": [
+   "Bolton Wanderers",
+   "Everton",
+   "Fulham",
+   "Portsmouth"
+  ],
+  "answer": "Bolton Wanderers",
+  "difficulty": "medium",
+  "explanation": "He captained the club and helped them reach the 2004 League Cup final.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which country won Euro 2004 as huge outsiders?",
+  "choices": [
+   "Greece",
+   "Portugal",
+   "Czech Republic",
+   "Denmark"
+  ],
+  "answer": "Greece",
+  "difficulty": "medium",
+  "explanation": "They beat hosts Portugal in both the opening match and the final.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which country won the 2019 FIFA Women's World Cup?",
+  "choices": [
+   "United States",
+   "Netherlands",
+   "Germany",
+   "England"
+  ],
+  "answer": "United States",
+  "difficulty": "medium",
+  "explanation": "They beat the Netherlands 2-0 in the final in Lyon, France.",
+  "unsure": false
+ },
+ {
+  "prompt": "Who scored the Hand of God goal against England at the 1986 World Cup?",
+  "choices": [
+   "Diego Maradona",
+   "Jorge Valdano",
+   "Mario Kempes",
+   "Gabriel Batistuta"
+  ],
+  "answer": "Diego Maradona",
+  "difficulty": "medium",
+  "explanation": "Minutes later he scored a solo goal later voted the goal of the century.",
+  "unsure": false
+ },
+ {
+  "prompt": "The Santiago Bernabeu is the home ground of which football club?",
+  "choices": [
+   "Real Madrid",
+   "Barcelona",
+   "Atletico Madrid",
+   "Valencia"
+  ],
+  "answer": "Real Madrid",
+  "difficulty": "medium",
+  "explanation": "It is named after the club president who had it built in the 1940s.",
+  "unsure": false
+ },
+ {
+  "prompt": "How far is the penalty spot from the goal line in football?",
+  "choices": [
+   "12 yards",
+   "10 yards",
+   "15 yards",
+   "18 yards"
+  ],
+  "answer": "12 yards",
+  "difficulty": "medium",
+  "explanation": "That measures roughly eleven metres, and the penalty kick dates from 1891.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which country won the 1992 European Championship after being called up as late replacements?",
+  "choices": [
+   "Denmark",
+   "Sweden",
+   "Germany",
+   "Netherlands"
+  ],
+  "answer": "Denmark",
+  "difficulty": "medium",
+  "explanation": "They took Yugoslavia's place after its exclusion, then beat Germany in the final.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which county won the 2011 All-Ireland Senior Football Championship?",
+  "choices": [
+   "Dublin",
+   "Kerry",
+   "Mayo",
+   "Tyrone"
+  ],
+  "answer": "Dublin",
+  "difficulty": "medium",
+  "explanation": "Stephen Cluxton kicked the winning free in the last minute against Kerry.",
+  "unsure": false
+ },
+ {
+  "prompt": "The Sam Maguire Cup is presented to the champions of which sport?",
+  "choices": [
+   "Gaelic football",
+   "Hurling",
+   "Camogie",
+   "Handball"
+  ],
+  "answer": "Gaelic football",
+  "difficulty": "medium",
+  "explanation": "It is named after a Cork-born republican who played the game in London.",
+  "unsure": false
+ },
+ {
+  "prompt": "Winners of which competition receive the Liam MacCarthy Cup?",
+  "choices": [
+   "All-Ireland hurling",
+   "All-Ireland football",
+   "Camogie championship",
+   "National League"
+  ],
+  "answer": "All-Ireland hurling",
+  "difficulty": "medium",
+  "explanation": "It is contested by the senior inter-county hurling teams and first awarded in 1923.",
+  "unsure": false
+ },
+ {
+  "prompt": "In Gaelic football, how many steps may a player take while holding the ball?",
+  "choices": [
+   "4",
+   "2",
+   "6",
+   "3"
+  ],
+  "answer": "4",
+  "difficulty": "medium",
+  "explanation": "After four steps the player must bounce the ball or solo it off the foot.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which GAA county's teams are nicknamed the Rebels?",
+  "choices": [
+   "Cork",
+   "Kerry",
+   "Galway",
+   "Wexford"
+  ],
+  "answer": "Cork",
+  "difficulty": "medium",
+  "explanation": "The name goes back to the city's support for a pretender to the English throne.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which Irish county is known in GAA circles as the Kingdom?",
+  "choices": [
+   "Kerry",
+   "Cork",
+   "Mayo",
+   "Meath"
+  ],
+  "answer": "Kerry",
+  "difficulty": "medium",
+  "explanation": "It has won more All-Ireland senior football titles than any other county.",
+  "unsure": false
+ },
+ {
+  "prompt": "In Gaelic games, a score of 1-08 equals how many points in total?",
+  "choices": [
+   "11",
+   "9",
+   "13",
+   "18"
+  ],
+  "answer": "11",
+  "difficulty": "medium",
+  "explanation": "The first figure counts goals worth three points each, the second single points.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which county won the 2013 All-Ireland Senior Hurling Championship?",
+  "choices": [
+   "Clare",
+   "Cork",
+   "Kilkenny",
+   "Tipperary"
+  ],
+  "answer": "Clare",
+  "difficulty": "medium",
+  "explanation": "They beat Cork in a replay after the drawn final in September.",
+  "unsure": false
+ },
+ {
+  "prompt": "In which Irish town was the GAA founded in 1884?",
+  "choices": [
+   "Thurles",
+   "Athlone",
+   "Ennis",
+   "Kilkenny"
+  ],
+  "answer": "Thurles",
+  "difficulty": "medium",
+  "explanation": "The first meeting was held in the billiards room of Hayes's Hotel in County Tipperary.",
+  "unsure": false
+ },
+ {
+  "prompt": "How long is each half in a senior inter-county Gaelic football match?",
+  "choices": [
+   "35 minutes",
+   "30 minutes",
+   "40 minutes",
+   "45 minutes"
+  ],
+  "answer": "35 minutes",
+  "difficulty": "medium",
+  "explanation": "Club games at most grades are shorter, running to thirty minutes a half.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which country won the 2003 Rugby World Cup?",
+  "choices": [
+   "England",
+   "Australia",
+   "New Zealand",
+   "France"
+  ],
+  "answer": "England",
+  "difficulty": "medium",
+  "explanation": "The final in Sydney was decided by a drop goal in the last minute of extra time.",
+  "unsure": false
+ },
+ {
+  "prompt": "Who kicked England's winning drop goal in the 2003 Rugby World Cup final?",
+  "choices": [
+   "Jonny Wilkinson",
+   "Martin Johnson",
+   "Will Greenwood",
+   "Matt Dawson"
+  ],
+  "answer": "Jonny Wilkinson",
+  "difficulty": "medium",
+  "explanation": "He struck it with his weaker right foot after Matt Dawson set the position.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which country won the 1995 Rugby World Cup on home soil?",
+  "choices": [
+   "South Africa",
+   "New Zealand",
+   "Australia",
+   "England"
+  ],
+  "answer": "South Africa",
+  "difficulty": "medium",
+  "explanation": "Nelson Mandela presented the trophy wearing a Springbok jersey at Ellis Park.",
+  "unsure": false
+ },
+ {
+  "prompt": "In which year did Ireland win their Six Nations Grand Slam under Declan Kidney?",
+  "choices": [
+   "2009",
+   "2005",
+   "2012",
+   "2015"
+  ],
+  "answer": "2009",
+  "difficulty": "medium",
+  "explanation": "It was Ireland's first Grand Slam since 1948, sealed in Cardiff against Wales.",
+  "unsure": false
+ },
+ {
+  "prompt": "How many points is a successful penalty kick worth in rugby union?",
+  "choices": [
+   "3",
+   "2",
+   "5",
+   "4"
+  ],
+  "answer": "3",
+  "difficulty": "medium",
+  "explanation": "A drop goal in open play is worth the same three points.",
+  "unsure": false
+ },
+ {
+  "prompt": "The Calcutta Cup is contested annually by which two rugby nations?",
+  "choices": [
+   "England and Scotland",
+   "Wales and Ireland",
+   "France and Italy",
+   "Ireland and Scotland"
+  ],
+  "answer": "England and Scotland",
+  "difficulty": "medium",
+  "explanation": "The trophy was made from melted-down silver rupees by a club in India in 1878.",
+  "unsure": false
+ },
+ {
+  "prompt": "What was the Dublin ground called that stood where the Aviva Stadium now sits?",
+  "choices": [
+   "Lansdowne Road",
+   "Dalymount Park",
+   "Tolka Park",
+   "Richmond Park"
+  ],
+  "answer": "Lansdowne Road",
+  "difficulty": "medium",
+  "explanation": "Opened in 1872, it was the oldest international rugby ground in the world.",
+  "unsure": false
+ },
+ {
+  "prompt": "How many players are on each side in rugby league?",
+  "choices": [
+   "13",
+   "15",
+   "11",
+   "9"
+  ],
+  "answer": "13",
+  "difficulty": "medium",
+  "explanation": "The split from rugby union came in 1895 over paying players for lost wages.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which country won the 2019 Rugby World Cup in Japan?",
+  "choices": [
+   "South Africa",
+   "England",
+   "New Zealand",
+   "Wales"
+  ],
+  "answer": "South Africa",
+  "difficulty": "medium",
+  "explanation": "Siya Kolisi became the first black captain to lift the trophy.",
+  "unsure": false
+ },
+ {
+  "prompt": "Thomond Park in Limerick is the home ground of which rugby province?",
+  "choices": [
+   "Munster",
+   "Leinster",
+   "Ulster",
+   "Connacht"
+  ],
+  "answer": "Munster",
+  "difficulty": "medium",
+  "explanation": "The ground famously saw the province beat the All Blacks in 1978.",
+  "unsure": false
+ },
+ {
+  "prompt": "In rugby union, which shirt number is traditionally worn by the fly-half?",
+  "choices": [
+   "10",
+   "9",
+   "12",
+   "7"
+  ],
+  "answer": "10",
+  "difficulty": "medium",
+  "explanation": "The number nine on the other side of the scrum belongs to the scrum-half.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which Irish athlete won 1500 metres gold at the 1956 Melbourne Olympics?",
+  "choices": [
+   "Ronnie Delany",
+   "Eamonn Coghlan",
+   "John Treacy",
+   "Bob Tisdall"
+  ],
+  "answer": "Ronnie Delany",
+  "difficulty": "medium",
+  "explanation": "He was a student at Villanova University in the United States at the time.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which city hosted the first modern Olympic Games in 1896?",
+  "choices": [
+   "Athens",
+   "Paris",
+   "Rome",
+   "London"
+  ],
+  "answer": "Athens",
+  "difficulty": "medium",
+  "explanation": "They were revived largely through the campaigning of Baron Pierre de Coubertin.",
+  "unsure": false
+ },
+ {
+  "prompt": "Who won the men's Olympic 100 metres title at the 2008 Beijing Games?",
+  "choices": [
+   "Usain Bolt",
+   "Asafa Powell",
+   "Tyson Gay",
+   "Justin Gatlin"
+  ],
+  "answer": "Usain Bolt",
+  "difficulty": "medium",
+  "explanation": "He eased down before the line and still broke the world record.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the distance of the standard Olympic steeplechase race?",
+  "choices": [
+   "3000 metres",
+   "1500 metres",
+   "5000 metres",
+   "2000 metres"
+  ],
+  "answer": "3000 metres",
+  "difficulty": "medium",
+  "explanation": "Runners clear 28 barriers and seven water jumps over the full distance.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which Irish boxer won Olympic gold at the London 2012 Games?",
+  "choices": [
+   "Katie Taylor",
+   "Kellie Harrington",
+   "Michael Conlan",
+   "Paddy Barnes"
+  ],
+  "answer": "Katie Taylor",
+  "difficulty": "medium",
+  "explanation": "It was the first Games at which women's boxing was on the programme.",
+  "unsure": false
+ },
+ {
+  "prompt": "In which event did Sonia O'Sullivan win Olympic silver in Sydney in 2000?",
+  "choices": [
+   "5000 metres",
+   "1500 metres",
+   "Marathon",
+   "10000 metres"
+  ],
+  "answer": "5000 metres",
+  "difficulty": "medium",
+  "explanation": "She had won the same event at the 1995 World Championships in Gothenburg.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which country led the boycott of the 1980 Moscow Olympic Games?",
+  "choices": [
+   "United States",
+   "United Kingdom",
+   "France",
+   "Japan"
+  ],
+  "answer": "United States",
+  "difficulty": "medium",
+  "explanation": "It was a protest at the Soviet invasion of Afghanistan the previous year.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the Latin Olympic motto meaning faster, higher, stronger?",
+  "choices": [
+   "Citius, Altius, Fortius",
+   "Veni, Vidi, Vici",
+   "Ad Astra, Per Aspera",
+   "Fortis et Liber"
+  ],
+  "answer": "Citius, Altius, Fortius",
+  "difficulty": "medium",
+  "explanation": "It was borrowed from a French priest who ran a school sports club.",
+  "unsure": false
+ },
+ {
+  "prompt": "At which Olympic Games did Jesse Owens win four gold medals?",
+  "choices": [
+   "Berlin 1936",
+   "Los Angeles 1932",
+   "London 1948",
+   "Amsterdam 1928"
+  ],
+  "answer": "Berlin 1936",
+  "difficulty": "medium",
+  "explanation": "His wins undercut Nazi claims about racial superiority at their showpiece Games.",
+  "unsure": false
+ },
+ {
+  "prompt": "How many separate events make up the athletics decathlon?",
+  "choices": [
+   "10",
+   "7",
+   "8",
+   "12"
+  ],
+  "answer": "10",
+  "difficulty": "medium",
+  "explanation": "They are spread over two days and scored using a points table.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which Nigerian won Olympic long jump gold at the 1996 Atlanta Games?",
+  "choices": [
+   "Chioma Ajunwa",
+   "Mary Onyali",
+   "Falilat Ogunkoya",
+   "Glory Alozie"
+  ],
+  "answer": "Chioma Ajunwa",
+  "difficulty": "medium",
+  "explanation": "She was the first Nigerian to win an individual Olympic gold medal.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which country won the 2019 Cricket World Cup final on boundary countback?",
+  "choices": [
+   "England",
+   "New Zealand",
+   "Australia",
+   "India"
+  ],
+  "answer": "England",
+  "difficulty": "medium",
+  "explanation": "Both the match at Lord's and the super over that followed finished level.",
+  "unsure": false
+ },
+ {
+  "prompt": "How many legal deliveries make up one over in cricket?",
+  "choices": [
+   "6",
+   "4",
+   "8",
+   "5"
+  ],
+  "answer": "6",
+  "difficulty": "medium",
+  "explanation": "Australia used eight-ball overs in domestic cricket until the late 1970s.",
+  "unsure": false
+ },
+ {
+  "prompt": "In cricket, what does the dismissal LBW stand for?",
+  "choices": [
+   "Leg before wicket",
+   "Left bail wide",
+   "Long ball wide",
+   "Leg bye wicket"
+  ],
+  "answer": "Leg before wicket",
+  "difficulty": "medium",
+  "explanation": "The umpire must judge that the ball would have gone on to hit the stumps.",
+  "unsure": false
+ },
+ {
+  "prompt": "Brian Lara played Test cricket for which team?",
+  "choices": [
+   "West Indies",
+   "South Africa",
+   "Sri Lanka",
+   "New Zealand"
+  ],
+  "answer": "West Indies",
+  "difficulty": "medium",
+  "explanation": "The Trinidadian scored 400 not out against England in Antigua in 2004.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which team won the first Cricket World Cup in 1975?",
+  "choices": [
+   "West Indies",
+   "Australia",
+   "England",
+   "India"
+  ],
+  "answer": "West Indies",
+  "difficulty": "medium",
+  "explanation": "Clive Lloyd made 102 in the final at Lord's against Australia.",
+  "unsure": false
+ },
+ {
+  "prompt": "How long is a cricket pitch from wicket to wicket?",
+  "choices": [
+   "22 yards",
+   "20 yards",
+   "25 yards",
+   "18 yards"
+  ],
+  "answer": "22 yards",
+  "difficulty": "medium",
+  "explanation": "That length is one chain, an old surveyor's unit of measurement.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which country won the 2003 Cricket World Cup?",
+  "choices": [
+   "Australia",
+   "India",
+   "South Africa",
+   "Pakistan"
+  ],
+  "answer": "Australia",
+  "difficulty": "medium",
+  "explanation": "They beat India in the final in Johannesburg without losing a match all tournament.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which NBA team did Michael Jordan lead to six titles in the 1990s?",
+  "choices": [
+   "Chicago Bulls",
+   "Los Angeles Lakers",
+   "Boston Celtics",
+   "New York Knicks"
+  ],
+  "answer": "Chicago Bulls",
+  "difficulty": "medium",
+  "explanation": "He famously wore number 23 and won the titles in two separate three-year runs.",
+  "unsure": false
+ },
+ {
+  "prompt": "In basketball, how many points is a shot from beyond the arc worth?",
+  "choices": [
+   "3",
+   "2",
+   "4",
+   "1"
+  ],
+  "answer": "3",
+  "difficulty": "medium",
+  "explanation": "The NBA only adopted the three-point line for the 1979-80 season.",
+  "unsure": false
+ },
+ {
+  "prompt": "How high is a basketball hoop above the floor?",
+  "choices": [
+   "10 feet",
+   "8 feet",
+   "12 feet",
+   "9 feet"
+  ],
+  "answer": "10 feet",
+  "difficulty": "medium",
+  "explanation": "That is 3.05 metres, unchanged since the game was first devised.",
+  "unsure": false
+ },
+ {
+  "prompt": "How many seconds are on the NBA shot clock?",
+  "choices": [
+   "24",
+   "30",
+   "35",
+   "20"
+  ],
+  "answer": "24",
+  "difficulty": "medium",
+  "explanation": "It was introduced in 1954 to stop teams stalling with a lead.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which tennis Grand Slam tournament is played on clay courts?",
+  "choices": [
+   "French Open",
+   "Wimbledon",
+   "US Open",
+   "Australian Open"
+  ],
+  "answer": "French Open",
+  "difficulty": "medium",
+  "explanation": "It is played at Roland Garros in Paris on crushed brick courts.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which tennis Grand Slam is played first in the calendar year?",
+  "choices": [
+   "Australian Open",
+   "French Open",
+   "Wimbledon",
+   "US Open"
+  ],
+  "answer": "Australian Open",
+  "difficulty": "medium",
+  "explanation": "It takes place in Melbourne in January, in the southern hemisphere summer.",
+  "unsure": false
+ },
+ {
+  "prompt": "In tennis, what is a serve the receiver fails to touch called?",
+  "choices": [
+   "An ace",
+   "A let",
+   "A fault",
+   "A smash"
+  ],
+  "answer": "An ace",
+  "difficulty": "medium",
+  "explanation": "It must land in the correct service box, unlike a fault or a let.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which tennis Grand Slam is played at Flushing Meadows?",
+  "choices": [
+   "US Open",
+   "Australian Open",
+   "French Open",
+   "Wimbledon"
+  ],
+  "answer": "US Open",
+  "difficulty": "medium",
+  "explanation": "Its main court, Arthur Ashe Stadium, is the largest tennis arena in the world.",
+  "unsure": false
+ },
+ {
+  "prompt": "In which city did the 1974 boxing bout the Rumble in the Jungle take place?",
+  "choices": [
+   "Kinshasa",
+   "Lagos",
+   "Nairobi",
+   "Accra"
+  ],
+  "answer": "Kinshasa",
+  "difficulty": "medium",
+  "explanation": "The fight was staged in Zaire, now the Democratic Republic of the Congo.",
+  "unsure": false
+ },
+ {
+  "prompt": "Who did Muhammad Ali fight in the 1975 bout known as the Thrilla in Manila?",
+  "choices": [
+   "Joe Frazier",
+   "George Foreman",
+   "Sonny Liston",
+   "Ken Norton"
+  ],
+  "answer": "Joe Frazier",
+  "difficulty": "medium",
+  "explanation": "It was their third meeting, and Frazier's corner stopped it before the last round.",
+  "unsure": false
+ },
+ {
+  "prompt": "At which weight did Barry McGuigan win a world title in 1985?",
+  "choices": [
+   "Featherweight",
+   "Middleweight",
+   "Welterweight",
+   "Heavyweight"
+  ],
+  "answer": "Featherweight",
+  "difficulty": "medium",
+  "explanation": "He beat the long-reigning Panamanian Eusebio Pedroza at Loftus Road in London.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which Formula 1 team has its factory in Maranello, Italy?",
+  "choices": [
+   "Ferrari",
+   "McLaren",
+   "Williams",
+   "Renault"
+  ],
+  "answer": "Ferrari",
+  "difficulty": "medium",
+  "explanation": "It is the only team to have competed in every season since 1950.",
+  "unsure": false
+ },
+ {
+  "prompt": "The Le Mans 24 Hours endurance race is held in which country?",
+  "choices": [
+   "France",
+   "Belgium",
+   "Italy",
+   "Germany"
+  ],
+  "answer": "France",
+  "difficulty": "medium",
+  "explanation": "The circuit uses public roads closed for the event each June.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which driver won seven Formula 1 world titles between 1994 and 2004?",
+  "choices": [
+   "Michael Schumacher",
+   "Ayrton Senna",
+   "Alain Prost",
+   "Nigel Mansell"
+  ],
+  "answer": "Michael Schumacher",
+  "difficulty": "medium",
+  "explanation": "Five of them came in a row with Ferrari from 2000 onwards.",
+  "unsure": false
+ },
+ {
+  "prompt": "At which racecourse is the Grand National steeplechase run?",
+  "choices": [
+   "Aintree",
+   "Cheltenham",
+   "Epsom",
+   "Ascot"
+  ],
+  "answer": "Aintree",
+  "difficulty": "medium",
+  "explanation": "Its most famous fence, Becher's Brook, is named after a jockey who fell there.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which country won the first European Championship in football, in 1960?",
+  "choices": [
+   "Soviet Union",
+   "Yugoslavia",
+   "Spain",
+   "Italy"
+  ],
+  "answer": "Soviet Union",
+  "difficulty": "hard",
+  "explanation": "Their goalkeeper Lev Yashin is the only keeper to have won the Ballon d'Or.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which club won the first five European Cups, from 1956 to 1960?",
+  "choices": [
+   "Real Madrid",
+   "Benfica",
+   "AC Milan",
+   "Ajax"
+  ],
+  "answer": "Real Madrid",
+  "difficulty": "hard",
+  "explanation": "Alfredo Di Stefano scored in every one of those five finals.",
+  "unsure": false
+ },
+ {
+  "prompt": "Who scored the winning goal in the 1990 World Cup final?",
+  "choices": [
+   "Andreas Brehme",
+   "Lothar Matthaus",
+   "Rudi Voller",
+   "Jurgen Klinsmann"
+  ],
+  "answer": "Andreas Brehme",
+  "difficulty": "hard",
+  "explanation": "He converted a late penalty as West Germany beat Argentina 1-0 in Rome.",
+  "unsure": false
+ },
+ {
+  "prompt": "Who scored the decisive penalty for Ireland in the 1990 shoot-out against Romania?",
+  "choices": [
+   "David O'Leary",
+   "Kevin Sheedy",
+   "Ray Houghton",
+   "Niall Quinn"
+  ],
+  "answer": "David O'Leary",
+  "difficulty": "hard",
+  "explanation": "Packie Bonner's save from Daniel Timofte set up the winning kick in Genoa.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which team did Ireland beat 1-0 in their opening match of the 1994 World Cup?",
+  "choices": [
+   "Italy",
+   "Norway",
+   "Mexico",
+   "Netherlands"
+  ],
+  "answer": "Italy",
+  "difficulty": "hard",
+  "explanation": "Ray Houghton's early lob at Giants Stadium settled it in front of huge Irish support.",
+  "unsure": false
+ },
+ {
+  "prompt": "In which German city did Ray Houghton score against England at Euro 88?",
+  "choices": [
+   "Stuttgart",
+   "Hanover",
+   "Munich",
+   "Cologne"
+  ],
+  "answer": "Stuttgart",
+  "difficulty": "hard",
+  "explanation": "His header after six minutes gave Ireland a 1-0 win in their first major finals match.",
+  "unsure": false
+ },
+ {
+  "prompt": "Who in 1995 became the first African footballer to win the Ballon d'Or?",
+  "choices": [
+   "George Weah",
+   "Abedi Pele",
+   "Roger Milla",
+   "Nwankwo Kanu"
+  ],
+  "answer": "George Weah",
+  "difficulty": "hard",
+  "explanation": "The Liberian striker later became president of his country.",
+  "unsure": false
+ },
+ {
+  "prompt": "In which year did Nigeria first win the FIFA Under-17 World Cup?",
+  "choices": [
+   "1985",
+   "1993",
+   "1997",
+   "1978"
+  ],
+  "answer": "1985",
+  "difficulty": "hard",
+  "explanation": "They beat West Germany in the final of the inaugural tournament, held in China.",
+  "unsure": false
+ },
+ {
+  "prompt": "At which stadium was the 1994 World Cup final played?",
+  "choices": [
+   "Rose Bowl",
+   "Giants Stadium",
+   "Soldier Field",
+   "Cotton Bowl"
+  ],
+  "answer": "Rose Bowl",
+  "difficulty": "hard",
+  "explanation": "Brazil beat Italy in Pasadena in the first World Cup final decided on penalties.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which club in 1967 became the first from Britain or Ireland to win the European Cup?",
+  "choices": [
+   "Celtic",
+   "Manchester United",
+   "Rangers",
+   "Liverpool"
+  ],
+  "answer": "Celtic",
+  "difficulty": "hard",
+  "explanation": "The side beat Inter Milan in Lisbon and were nicknamed the Lisbon Lions.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which county came from far behind late on to win the 1994 All-Ireland hurling final?",
+  "choices": [
+   "Offaly",
+   "Limerick",
+   "Galway",
+   "Wexford"
+  ],
+  "answer": "Offaly",
+  "difficulty": "hard",
+  "explanation": "They scored 2-5 without reply in the closing minutes to beat Limerick.",
+  "unsure": false
+ },
+ {
+  "prompt": "Croke Park's Hogan Stand honours a player shot dead at the ground in which year?",
+  "choices": [
+   "1920",
+   "1916",
+   "1932",
+   "1922"
+  ],
+  "answer": "1920",
+  "difficulty": "hard",
+  "explanation": "Tipperary's Michael Hogan died when crown forces opened fire on Bloody Sunday.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which sport was played at Croke Park for the first time in February 2007?",
+  "choices": [
+   "Rugby union",
+   "Association football",
+   "American football",
+   "Cricket"
+  ],
+  "answer": "Rugby union",
+  "difficulty": "hard",
+  "explanation": "Ireland hosted France there while Lansdowne Road was being rebuilt.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which country won the inaugural Rugby World Cup in 1987?",
+  "choices": [
+   "New Zealand",
+   "Australia",
+   "France",
+   "England"
+  ],
+  "answer": "New Zealand",
+  "difficulty": "hard",
+  "explanation": "They beat France in the final in Auckland at a tournament they co-hosted.",
+  "unsure": false
+ },
+ {
+  "prompt": "In which year did the value of a try in rugby union rise from four points to five?",
+  "choices": [
+   "1992",
+   "1971",
+   "1985",
+   "1999"
+  ],
+  "answer": "1992",
+  "difficulty": "hard",
+  "explanation": "The change was made to encourage attacking play over kicking for goal.",
+  "unsure": true
+ },
+ {
+  "prompt": "Who kicked the drop goal that clinched Ireland's 2009 Grand Slam in Cardiff?",
+  "choices": [
+   "Ronan O'Gara",
+   "Brian O'Driscoll",
+   "Jonathan Sexton",
+   "David Humphreys"
+  ],
+  "answer": "Ronan O'Gara",
+  "difficulty": "hard",
+  "explanation": "Wales then missed a long penalty at the death to leave Ireland 17-15 winners.",
+  "unsure": false
+ },
+ {
+  "prompt": "Who became the first man to run a mile in under four minutes, in 1954?",
+  "choices": [
+   "Roger Bannister",
+   "John Landy",
+   "Herb Elliott",
+   "Chris Chataway"
+  ],
+  "answer": "Roger Bannister",
+  "difficulty": "hard",
+  "explanation": "The medical student clocked 3:59.4 on a cinder track in Oxford.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which Briton won Olympic 1500 metres gold at both the 1980 and 1984 Games?",
+  "choices": [
+   "Sebastian Coe",
+   "Steve Ovett",
+   "Steve Cram",
+   "Peter Elliott"
+  ],
+  "answer": "Sebastian Coe",
+  "difficulty": "hard",
+  "explanation": "He took silver in the 800 metres at both Games, his supposedly stronger event.",
+  "unsure": false
+ },
+ {
+  "prompt": "At which Olympics did Abebe Bikila win the marathon running barefoot?",
+  "choices": [
+   "Rome 1960",
+   "Tokyo 1964",
+   "Melbourne 1956",
+   "Mexico City 1968"
+  ],
+  "answer": "Rome 1960",
+  "difficulty": "hard",
+  "explanation": "The Ethiopian won again four years later in Tokyo, that time wearing shoes.",
+  "unsure": false
+ },
+ {
+  "prompt": "The marathon distance of 26 miles 385 yards was first used at which Olympics?",
+  "choices": [
+   "London 1908",
+   "Athens 1896",
+   "Paris 1900",
+   "Stockholm 1912"
+  ],
+  "answer": "London 1908",
+  "difficulty": "hard",
+  "explanation": "The course ran from Windsor Castle to the finish line inside the White City stadium.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which country won the 1996 Cricket World Cup?",
+  "choices": [
+   "Sri Lanka",
+   "Australia",
+   "Pakistan",
+   "India"
+  ],
+  "answer": "Sri Lanka",
+  "difficulty": "hard",
+  "explanation": "Aravinda de Silva made an unbeaten century in the final in Lahore.",
+  "unsure": false
+ },
+ {
+  "prompt": "In cricket, what is a batter dismissed from the first ball they face called?",
+  "choices": [
+   "A golden duck",
+   "A silver duck",
+   "A diamond duck",
+   "A platinum duck"
+  ],
+  "answer": "A golden duck",
+  "difficulty": "hard",
+  "explanation": "Being run out without facing a ball at all is instead called a diamond duck.",
+  "unsure": false
+ },
+ {
+  "prompt": "In cricket, what is a maiden over?",
+  "choices": [
+   "An over with no runs",
+   "An over with no wickets",
+   "A bowler's first over",
+   "An over of six wides"
+  ],
+  "answer": "An over with no runs",
+  "difficulty": "hard",
+  "explanation": "If the bowler also takes a wicket in it, it is called a wicket maiden.",
+  "unsure": false
+ },
+ {
+  "prompt": "Who invented the game of basketball in 1891?",
+  "choices": [
+   "James Naismith",
+   "Abner Doubleday",
+   "Walter Camp",
+   "William Morgan"
+  ],
+  "answer": "James Naismith",
+  "difficulty": "hard",
+  "explanation": "The Canadian devised it as an indoor winter game for students in Massachusetts.",
+  "unsure": false
+ },
+ {
+  "prompt": "What were the original goals used in the first games of basketball?",
+  "choices": [
+   "Peach baskets",
+   "Barrels",
+   "Metal buckets",
+   "Netted hoops"
+  ],
+  "answer": "Peach baskets",
+  "difficulty": "hard",
+  "explanation": "Someone had to retrieve the ball each time until the bottoms were cut out.",
+  "unsure": false
+ },
+ {
+  "prompt": "How high is a tennis net at the centre of the court?",
+  "choices": [
+   "3 feet",
+   "4 feet",
+   "2 feet",
+   "5 feet"
+  ],
+  "answer": "3 feet",
+  "difficulty": "hard",
+  "explanation": "It sits higher at the posts, at three feet six inches, so it sags in the middle.",
+  "unsure": false
+ },
+ {
+  "prompt": "In tennis, what is it called when a player wins a game on their opponent's serve?",
+  "choices": [
+   "A break of serve",
+   "A hold",
+   "A rebreak point",
+   "A double fault"
+  ],
+  "answer": "A break of serve",
+  "difficulty": "hard",
+  "explanation": "Because serving is such an advantage, sets often turn on a single break.",
+  "unsure": false
+ },
+ {
+  "prompt": "In which weight division did Muhammad Ali win Olympic gold in 1960?",
+  "choices": [
+   "Light heavyweight",
+   "Heavyweight",
+   "Middleweight",
+   "Welterweight"
+  ],
+  "answer": "Light heavyweight",
+  "difficulty": "hard",
+  "explanation": "He won it in Rome while still fighting under the name Cassius Clay.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which boxer was disqualified in 1997 for biting Evander Holyfield's ear?",
+  "choices": [
+   "Mike Tyson",
+   "Lennox Lewis",
+   "Riddick Bowe",
+   "Larry Holmes"
+  ],
+  "answer": "Mike Tyson",
+  "difficulty": "hard",
+  "explanation": "He lost his licence for over a year after the incident in Las Vegas.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which heavyweight retired in 1956 undefeated with a record of 49-0?",
+  "choices": [
+   "Rocky Marciano",
+   "Joe Louis",
+   "Jack Dempsey",
+   "Gene Tunney"
+  ],
+  "answer": "Rocky Marciano",
+  "difficulty": "hard",
+  "explanation": "Forty-three of his wins came by knockout, despite a short reach for the division.",
+  "unsure": false
+ },
+ {
+  "prompt": "Who won the 1976 Formula 1 world title after Niki Lauda's fiery crash?",
+  "choices": [
+   "James Hunt",
+   "Jody Scheckter",
+   "Mario Andretti",
+   "Jackie Stewart"
+  ],
+  "answer": "James Hunt",
+  "difficulty": "hard",
+  "explanation": "He took the crown by a single point in torrential rain in Japan.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which driver is the only posthumous Formula 1 world champion?",
+  "choices": [
+   "Jochen Rindt",
+   "Ayrton Senna",
+   "Gilles Villeneuve",
+   "Jim Clark"
+  ],
+  "answer": "Jochen Rindt",
+  "difficulty": "hard",
+  "explanation": "The Austrian died at Monza in 1970 but nobody caught his points total.",
+  "unsure": false
+ },
+ {
+  "prompt": "How many laps make up the Indianapolis 500 motor race?",
+  "choices": [
+   "200",
+   "150",
+   "250",
+   "300"
+  ],
+  "answer": "200",
+  "difficulty": "hard",
+  "explanation": "The oval measures two and a half miles, giving the race its 500-mile distance.",
+  "unsure": false
+ },
+ {
+  "prompt": "The corner known as Eau Rouge is found at which motor racing circuit?",
+  "choices": [
+   "Spa-Francorchamps",
+   "Monza",
+   "Silverstone",
+   "Suzuka"
+  ],
+  "answer": "Spa-Francorchamps",
+  "difficulty": "hard",
+  "explanation": "The Belgian track runs through the Ardennes forest and is notorious for sudden rain.",
+  "unsure": false
+ },
+ {
+  "prompt": "In golf, what is the name for a score of three under par on a single hole?",
+  "choices": [
+   "Albatross",
+   "Eagle",
+   "Condor",
+   "Ostrich"
+  ],
+  "answer": "Albatross",
+  "difficulty": "hard",
+  "explanation": "It is rarer than a hole in one and is called a double eagle in America.",
+  "unsure": false
+ },
+ {
+  "prompt": "How many clubs may a golfer carry during a competitive round?",
+  "choices": [
+   "14",
+   "12",
+   "16",
+   "10"
+  ],
+  "answer": "14",
+  "difficulty": "hard",
+  "explanation": "Carrying more brings a penalty of two strokes per hole, up to a maximum of four.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which Irish golfer won the Open Championship in both 2007 and 2008?",
+  "choices": [
+   "Padraig Harrington",
+   "Darren Clarke",
+   "Rory McIlroy",
+   "Graeme McDowell"
+  ],
+  "answer": "Padraig Harrington",
+  "difficulty": "hard",
+  "explanation": "The Dubliner won the first in a play-off at Carnoustie against Sergio Garcia.",
+  "unsure": false
+ },
+ {
+  "prompt": "At which Olympics did butterfly first appear as a separate swimming event?",
+  "choices": [
+   "Melbourne 1956",
+   "Helsinki 1952",
+   "Rome 1960",
+   "London 1948"
+  ],
+  "answer": "Melbourne 1956",
+  "difficulty": "hard",
+  "explanation": "Before that it was swum within breaststroke races, where the rules allowed it.",
+  "unsure": true
+ },
+ {
+  "prompt": "How many gold medals did Michael Phelps win at the 2008 Beijing Olympics?",
+  "choices": [
+   "8",
+   "6",
+   "7",
+   "5"
+  ],
+  "answer": "8",
+  "difficulty": "hard",
+  "explanation": "It beat Mark Spitz's haul of seven golds at a single Games, set in 1972.",
+  "unsure": false
+ }
+]

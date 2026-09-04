@@ -1,0 +1,2303 @@
+[
+ {
+  "prompt": "What does the 'www' in a web address stand for?",
+  "choices": [
+   "World Wide Web",
+   "Wireless Web Work",
+   "Web Wide World",
+   "World Web Wire"
+  ],
+  "answer": "World Wide Web",
+  "difficulty": "easy",
+  "explanation": "Tim Berners-Lee coined the name for the hypertext system he proposed at CERN in 1989.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which company launched the iPhone in 2007?",
+  "choices": [
+   "Apple",
+   "Nokia",
+   "Samsung",
+   "Motorola"
+  ],
+  "answer": "Apple",
+  "difficulty": "easy",
+  "explanation": "Steve Jobs unveiled it at Macworld as a phone, an iPod and an internet device in one.",
+  "unsure": false
+ },
+ {
+  "prompt": "What does 'PC' stand for in computing?",
+  "choices": [
+   "Personal Computer",
+   "Private Console",
+   "Program Chip",
+   "Portable Case"
+  ],
+  "answer": "Personal Computer",
+  "difficulty": "easy",
+  "explanation": "The term spread after IBM sold its 1981 Model 5150 as the IBM Personal Computer.",
+  "unsure": false
+ },
+ {
+  "prompt": "What does 'CPU' stand for?",
+  "choices": [
+   "Central Processing Unit",
+   "Computer Power Unit",
+   "Central Program Utility",
+   "Core Print Unit"
+  ],
+  "answer": "Central Processing Unit",
+  "difficulty": "easy",
+  "explanation": "It fetches and executes instructions, which is why it is often called the brain of a machine.",
+  "unsure": false
+ },
+ {
+  "prompt": "What does 'RAM' stand for?",
+  "choices": [
+   "Random Access Memory",
+   "Rapid Active Memory",
+   "Read Access Mode",
+   "Runtime Address Map"
+  ],
+  "answer": "Random Access Memory",
+  "difficulty": "easy",
+  "explanation": "Its contents vanish when the power is cut, unlike files saved on a disk.",
+  "unsure": false
+ },
+ {
+  "prompt": "What does 'USB' stand for?",
+  "choices": [
+   "Universal Serial Bus",
+   "United System Bus",
+   "Universal System Board",
+   "User Service Bus"
+  ],
+  "answer": "Universal Serial Bus",
+  "difficulty": "easy",
+  "explanation": "It arrived in the mid-1990s to replace a clutter of separate serial, parallel and mouse ports.",
+  "unsure": false
+ },
+ {
+  "prompt": "What does 'PDF' stand for?",
+  "choices": [
+   "Portable Document Format",
+   "Printed Document File",
+   "Public Data Format",
+   "Page Design File"
+  ],
+  "answer": "Portable Document Format",
+  "difficulty": "easy",
+  "explanation": "Adobe created it in 1993 so a document would look identical on any machine or printer.",
+  "unsure": false
+ },
+ {
+  "prompt": "What does 'HTML' stand for?",
+  "choices": [
+   "HyperText Markup Language",
+   "High Tech Modern Language",
+   "Hyperlink Media Layout",
+   "Home Tool Markup Language"
+  ],
+  "answer": "HyperText Markup Language",
+  "difficulty": "easy",
+  "explanation": "Its tags tell a browser how the content of a page is structured, not how to style it.",
+  "unsure": false
+ },
+ {
+  "prompt": "What does 'HTTP' stand for?",
+  "choices": [
+   "HyperText Transfer Protocol",
+   "High Transfer Text Program",
+   "Hyperlink Text Transit Path",
+   "Host Transfer Type Protocol"
+  ],
+  "answer": "HyperText Transfer Protocol",
+  "difficulty": "easy",
+  "explanation": "It is the request-and-response protocol a browser uses to fetch pages from a server.",
+  "unsure": false
+ },
+ {
+  "prompt": "What does 'URL' stand for?",
+  "choices": [
+   "Uniform Resource Locator",
+   "Universal Reading Line",
+   "User Registered Link",
+   "Unified Router Label"
+  ],
+  "answer": "Uniform Resource Locator",
+  "difficulty": "easy",
+  "explanation": "It bundles the protocol, the host name and the path to a particular resource.",
+  "unsure": false
+ },
+ {
+  "prompt": "What does 'GPS' stand for?",
+  "choices": [
+   "Global Positioning System",
+   "General Position Service",
+   "Geographic Point Sensor",
+   "Global Pathway Signal"
+  ],
+  "answer": "Global Positioning System",
+  "difficulty": "easy",
+  "explanation": "A receiver works out where it is by timing signals from several orbiting satellites.",
+  "unsure": false
+ },
+ {
+  "prompt": "What does 'SMS' stand for in mobile messaging?",
+  "choices": [
+   "Short Message Service",
+   "Simple Mobile Sending",
+   "Standard Message System",
+   "Sent Mobile Signal"
+  ],
+  "answer": "Short Message Service",
+  "difficulty": "easy",
+  "explanation": "The first text message, reading 'Merry Christmas', was sent over a UK network in 1992.",
+  "unsure": false
+ },
+ {
+  "prompt": "What does 'SIM' stand for in a SIM card?",
+  "choices": [
+   "Subscriber Identity Module",
+   "Signal Input Module",
+   "Secure Internet Memory",
+   "System Identity Marker"
+  ],
+  "answer": "Subscriber Identity Module",
+  "difficulty": "easy",
+  "explanation": "The chip holds the number and secret keys that identify you to a mobile network.",
+  "unsure": false
+ },
+ {
+  "prompt": "What does 'LED' stand for?",
+  "choices": [
+   "Light Emitting Diode",
+   "Low Energy Display",
+   "Linear Electric Device",
+   "Light Enhanced Dot"
+  ],
+  "answer": "Light Emitting Diode",
+  "difficulty": "easy",
+  "explanation": "It gives off light when current passes through a semiconductor, wasting very little heat.",
+  "unsure": false
+ },
+ {
+  "prompt": "What does 'PIN' stand for in a bank card PIN?",
+  "choices": [
+   "Personal Identification Number",
+   "Private Internet Number",
+   "Personal Input Node",
+   "Payment Index Number"
+  ],
+  "answer": "Personal Identification Number",
+  "difficulty": "easy",
+  "explanation": "The idea arrived with the first cash machines, which opened in London in 1967.",
+  "unsure": false
+ },
+ {
+  "prompt": "What does 'ATM' stand for at a cash machine?",
+  "choices": [
+   "Automated Teller Machine",
+   "Automatic Transfer Method",
+   "Account Transaction Module",
+   "Automated Till Manager"
+  ],
+  "answer": "Automated Teller Machine",
+  "difficulty": "easy",
+  "explanation": "The word teller was borrowed from the human bank clerk the machine replaced.",
+  "unsure": false
+ },
+ {
+  "prompt": "What does 'VPN' stand for?",
+  "choices": [
+   "Virtual Private Network",
+   "Verified Public Node",
+   "Variable Protocol Name",
+   "Virtual Proxy Number"
+  ],
+  "answer": "Virtual Private Network",
+  "difficulty": "easy",
+  "explanation": "It tunnels your traffic through an encrypted link to a distant server before it reaches the web.",
+  "unsure": false
+ },
+ {
+  "prompt": "What does 'ISP' stand for?",
+  "choices": [
+   "Internet Service Provider",
+   "Internal System Port",
+   "Internet Signal Protocol",
+   "Integrated Service Point"
+  ],
+  "answer": "Internet Service Provider",
+  "difficulty": "easy",
+  "explanation": "Your provider assigns the connection an IP address and carries its traffic onward.",
+  "unsure": false
+ },
+ {
+  "prompt": "What does 'LAN' stand for?",
+  "choices": [
+   "Local Area Network",
+   "Linked Access Node",
+   "Large Array Network",
+   "Line Access Number"
+  ],
+  "answer": "Local Area Network",
+  "difficulty": "easy",
+  "explanation": "A LAN covers one home or building, while a wide area network spans cities or countries.",
+  "unsure": false
+ },
+ {
+  "prompt": "What does 'OS' stand for on a computer?",
+  "choices": [
+   "Operating System",
+   "Output Source",
+   "Online Server",
+   "Open Software"
+  ],
+  "answer": "Operating System",
+  "difficulty": "easy",
+  "explanation": "It manages memory, files and hardware so that individual applications do not have to.",
+  "unsure": false
+ },
+ {
+  "prompt": "What does 'ROM' stand for?",
+  "choices": [
+   "Read Only Memory",
+   "Rapid Output Memory",
+   "Remote Object Module",
+   "Random Ordered Memory"
+  ],
+  "answer": "Read Only Memory",
+  "difficulty": "easy",
+  "explanation": "Its contents survive a power cut, which is why start-up code is stored there.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which of these programming languages shares its name with a snake?",
+  "choices": [
+   "Python",
+   "Ruby",
+   "Perl",
+   "Swift"
+  ],
+  "answer": "Python",
+  "difficulty": "easy",
+  "explanation": "Its creator actually named it after the comedy troupe Monty Python, not the reptile.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which computer input device was named after the small animal it resembled?",
+  "choices": [
+   "Mouse",
+   "Rat",
+   "Beetle",
+   "Mole"
+  ],
+  "answer": "Mouse",
+  "difficulty": "easy",
+  "explanation": "The 1960s wooden prototype had its cable at the back, looking rather like a tail.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the standard English-language keyboard layout called?",
+  "choices": [
+   "QWERTY",
+   "AZERTY",
+   "QWERTZ",
+   "Dvorak"
+  ],
+  "answer": "QWERTY",
+  "difficulty": "easy",
+  "explanation": "It dates from 1870s typewriters and was arranged around the mechanics of jamming typebars.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which key on a standard keyboard is the widest?",
+  "choices": [
+   "Space bar",
+   "Enter",
+   "Shift",
+   "Backspace"
+  ],
+  "answer": "Space bar",
+  "difficulty": "easy",
+  "explanation": "It sits under the thumbs so that either hand can reach it without leaving the home row.",
+  "unsure": false
+ },
+ {
+  "prompt": "In Windows, which shortcut copies the selected item?",
+  "choices": [
+   "Ctrl+C",
+   "Ctrl+V",
+   "Ctrl+X",
+   "Ctrl+P"
+  ],
+  "answer": "Ctrl+C",
+  "difficulty": "easy",
+  "explanation": "Its neighbours cut and paste, and the three keys sit together for one-handed use.",
+  "unsure": false
+ },
+ {
+  "prompt": "What does the Ctrl+Z shortcut usually do?",
+  "choices": [
+   "Undo",
+   "Save",
+   "Print",
+   "Zoom"
+  ],
+  "answer": "Undo",
+  "difficulty": "easy",
+  "explanation": "Undo was a radical idea in early interfaces, making experiments safe for nervous users.",
+  "unsure": false
+ },
+ {
+  "prompt": "What does the 'e' in 'email' stand for?",
+  "choices": [
+   "Electronic",
+   "External",
+   "Express",
+   "Encrypted"
+  ],
+  "answer": "Electronic",
+  "difficulty": "easy",
+  "explanation": "The term is short for electronic mail and was in use long before the web existed.",
+  "unsure": false
+ },
+ {
+  "prompt": "What does 'AI' stand for?",
+  "choices": [
+   "Artificial Intelligence",
+   "Automated Input",
+   "Advanced Interface",
+   "Analytic Indexing"
+  ],
+  "answer": "Artificial Intelligence",
+  "difficulty": "easy",
+  "explanation": "The label covers systems doing tasks once assumed to need human judgement.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which company develops the Android mobile operating system?",
+  "choices": [
+   "Google",
+   "Apple",
+   "Microsoft",
+   "Sony"
+  ],
+  "answer": "Google",
+  "difficulty": "easy",
+  "explanation": "Google bought the small firm Android Inc. in 2005 and shipped the first phones in 2008.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which company created the Windows operating system?",
+  "choices": [
+   "Microsoft",
+   "IBM",
+   "Dell",
+   "Intel"
+  ],
+  "answer": "Microsoft",
+  "difficulty": "easy",
+  "explanation": "Windows began in 1985 as a graphical shell running on top of MS-DOS.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which pair founded Apple in 1976 alongside Ronald Wayne?",
+  "choices": [
+   "Jobs and Wozniak",
+   "Gates and Allen",
+   "Page and Brin",
+   "Hewlett and Packard"
+  ],
+  "answer": "Jobs and Wozniak",
+  "difficulty": "easy",
+  "explanation": "Wozniak designed the Apple I circuit board while Jobs found people to sell it to.",
+  "unsure": false
+ },
+ {
+  "prompt": "Who co-founded Microsoft with Paul Allen?",
+  "choices": [
+   "Bill Gates",
+   "Steve Jobs",
+   "Larry Ellison",
+   "Michael Dell"
+  ],
+  "answer": "Bill Gates",
+  "difficulty": "easy",
+  "explanation": "The pair began by writing a BASIC interpreter for the Altair 8800 in 1975.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which company founded by Jeff Bezos started out selling books online?",
+  "choices": [
+   "Amazon",
+   "eBay",
+   "Alibaba",
+   "Etsy"
+  ],
+  "answer": "Amazon",
+  "difficulty": "easy",
+  "explanation": "It launched from a Seattle garage in 1995 and only later widened beyond books.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which search engine was founded by Larry Page and Sergey Brin?",
+  "choices": [
+   "Google",
+   "Yahoo",
+   "Bing",
+   "Ask Jeeves"
+  ],
+  "answer": "Google",
+  "difficulty": "easy",
+  "explanation": "It grew from a Stanford project that ranked pages by the links pointing at them.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which online encyclopedia, launched in 2001, is written by volunteers?",
+  "choices": [
+   "Wikipedia",
+   "Britannica",
+   "Encarta",
+   "Quora"
+  ],
+  "answer": "Wikipedia",
+  "difficulty": "easy",
+  "explanation": "Its name blends 'wiki', the Hawaiian word for quick, with 'encyclopedia'.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which company created the PlayStation games console?",
+  "choices": [
+   "Sony",
+   "Nintendo",
+   "Sega",
+   "Microsoft"
+  ],
+  "answer": "Sony",
+  "difficulty": "easy",
+  "explanation": "It grew out of an abandoned CD add-on that Sony had been building for a Nintendo machine.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which company created the Xbox games console?",
+  "choices": [
+   "Microsoft",
+   "Sony",
+   "Atari",
+   "Nintendo"
+  ],
+  "answer": "Microsoft",
+  "difficulty": "easy",
+  "explanation": "It launched in 2001, built largely from PC components, to answer the PlayStation 2.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which company created the video game plumber Mario?",
+  "choices": [
+   "Nintendo",
+   "Sega",
+   "Capcom",
+   "Konami"
+  ],
+  "answer": "Nintendo",
+  "difficulty": "easy",
+  "explanation": "Shigeru Miyamoto first drew the character as the carpenter 'Jumpman' in Donkey Kong.",
+  "unsure": false
+ },
+ {
+  "prompt": "In which classic game do you rotate falling blocks to complete lines?",
+  "choices": [
+   "Tetris",
+   "Pac-Man",
+   "Snake",
+   "Pong"
+  ],
+  "answer": "Tetris",
+  "difficulty": "easy",
+  "explanation": "It was written in 1984 by a researcher at a Soviet computing academy in Moscow.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which arcade character eats dots in a maze while fleeing four ghosts?",
+  "choices": [
+   "Pac-Man",
+   "Q*bert",
+   "Frogger",
+   "Dig Dug"
+  ],
+  "answer": "Pac-Man",
+  "difficulty": "easy",
+  "explanation": "Namco designed the 1980 game to attract players who had no interest in shooting games.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which handheld games console did Nintendo launch in 1989?",
+  "choices": [
+   "Game Boy",
+   "PSP",
+   "Game Gear",
+   "Lynx"
+  ],
+  "answer": "Game Boy",
+  "difficulty": "easy",
+  "explanation": "Its dim green screen beat flashier colour rivals because the batteries lasted far longer.",
+  "unsure": false
+ },
+ {
+  "prompt": "What does the 'G' in the image format GIF stand for?",
+  "choices": [
+   "Graphics",
+   "General",
+   "Global",
+   "Grid"
+  ],
+  "answer": "Graphics",
+  "difficulty": "easy",
+  "explanation": "CompuServe created the Graphics Interchange Format in 1987 for slow dial-up connections.",
+  "unsure": false
+ },
+ {
+  "prompt": "What does 'CD' stand for in CD-ROM?",
+  "choices": [
+   "Compact Disc",
+   "Coded Data",
+   "Colour Display",
+   "Central Drive"
+  ],
+  "answer": "Compact Disc",
+  "difficulty": "easy",
+  "explanation": "Philips and Sony agreed the audio disc standard first, and data versions followed.",
+  "unsure": false
+ },
+ {
+  "prompt": "What does 'HD' stand for in HD television?",
+  "choices": [
+   "High Definition",
+   "Heavy Data",
+   "Hybrid Display",
+   "High Density"
+  ],
+  "answer": "High Definition",
+  "difficulty": "easy",
+  "explanation": "It describes a picture built from far more scan lines than older broadcast standards.",
+  "unsure": false
+ },
+ {
+  "prompt": "What does 'GB' stand for as a measure of computer storage?",
+  "choices": [
+   "Gigabyte",
+   "Graphic Byte",
+   "General Buffer",
+   "Global Bit"
+  ],
+  "answer": "Gigabyte",
+  "difficulty": "easy",
+  "explanation": "A gigabyte is roughly a billion bytes, and each byte holds eight bits.",
+  "unsure": false
+ },
+ {
+  "prompt": "How many bits make up one byte?",
+  "choices": [
+   "8",
+   "4",
+   "16",
+   "32"
+  ],
+  "answer": "8",
+  "difficulty": "easy",
+  "explanation": "Eight bits give 256 combinations, enough to cover one character in early text codes.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which word blends 'malicious' and 'software'?",
+  "choices": [
+   "Malware",
+   "Adware",
+   "Spyware",
+   "Firmware"
+  ],
+  "answer": "Malware",
+  "difficulty": "easy",
+  "explanation": "It is the umbrella term covering viruses, worms, trojans and ransomware alike.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the term for fake messages designed to trick you into giving up passwords?",
+  "choices": [
+   "Phishing",
+   "Buffering",
+   "Streaming",
+   "Caching"
+  ],
+  "answer": "Phishing",
+  "difficulty": "easy",
+  "explanation": "The spelling nods to fishing, with a lure cast widely to see who bites.",
+  "unsure": false
+ },
+ {
+  "prompt": "What does 'QR' stand for in a QR code?",
+  "choices": [
+   "Quick Response",
+   "Quality Record",
+   "Quadrant Reader",
+   "Queued Retrieval"
+  ],
+  "answer": "Quick Response",
+  "difficulty": "easy",
+  "explanation": "A Japanese car parts supplier invented it in 1994 to be scanned faster than a barcode.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which company publishes the image editing program Photoshop?",
+  "choices": [
+   "Adobe",
+   "Corel",
+   "Microsoft",
+   "Autodesk"
+  ],
+  "answer": "Adobe",
+  "difficulty": "easy",
+  "explanation": "The Knoll brothers wrote the original program before Adobe licensed it in 1988.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which company launched the portable cassette player known as the Walkman?",
+  "choices": [
+   "Sony",
+   "Philips",
+   "Panasonic",
+   "Sharp"
+  ],
+  "answer": "Sony",
+  "difficulty": "easy",
+  "explanation": "The 1979 player could not record, which colleagues were sure would sink it.",
+  "unsure": false
+ },
+ {
+  "prompt": "The phone maker Nokia comes from which country?",
+  "choices": [
+   "Finland",
+   "Sweden",
+   "Denmark",
+   "Norway"
+  ],
+  "answer": "Finland",
+  "difficulty": "easy",
+  "explanation": "It began in the 1860s as a wood pulp mill beside a river of the same name.",
+  "unsure": false
+ },
+ {
+  "prompt": "The electronics group Samsung comes from which country?",
+  "choices": [
+   "South Korea",
+   "Japan",
+   "China",
+   "Taiwan"
+  ],
+  "answer": "South Korea",
+  "difficulty": "easy",
+  "explanation": "It was founded in 1938 as a trading firm dealing in dried fish, noodles and vegetables.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which company sells the Kindle e-reader?",
+  "choices": [
+   "Amazon",
+   "Apple",
+   "Sony",
+   "Kobo"
+  ],
+  "answer": "Amazon",
+  "difficulty": "easy",
+  "explanation": "The first model, released in 2007, had a plastic keyboard and sold out within hours.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the name of Apple's built-in voice assistant?",
+  "choices": [
+   "Siri",
+   "Alexa",
+   "Cortana",
+   "Bixby"
+  ],
+  "answer": "Siri",
+  "difficulty": "easy",
+  "explanation": "It arrived on the iPhone 4S in 2011 after Apple bought the start-up that built it.",
+  "unsure": false
+ },
+ {
+  "prompt": "What does 'IT' stand for in an IT department?",
+  "choices": [
+   "Information Technology",
+   "Internal Testing",
+   "Integrated Terminal",
+   "Instant Transfer"
+  ],
+  "answer": "Information Technology",
+  "difficulty": "easy",
+  "explanation": "The phrase spread in the 1980s as computing moved out of labs and into ordinary offices.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the common name for a fault in a piece of software?",
+  "choices": [
+   "Bug",
+   "Fly",
+   "Worm",
+   "Bee"
+  ],
+  "answer": "Bug",
+  "difficulty": "easy",
+  "explanation": "Engineers used the word for machine faults long before a moth was taped into a 1947 logbook.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which web error number means the page could not be found?",
+  "choices": [
+   "404",
+   "200",
+   "301",
+   "500"
+  ],
+  "answer": "404",
+  "difficulty": "easy",
+  "explanation": "Codes in the 400s signal a problem with the request, while 500s blame the server.",
+  "unsure": false
+ },
+ {
+  "prompt": "What does the 'S' at the end of 'HTTPS' stand for?",
+  "choices": [
+   "Secure",
+   "Server",
+   "Standard",
+   "Simple"
+  ],
+  "answer": "Secure",
+  "difficulty": "easy",
+  "explanation": "The connection is encrypted, so anyone listening in sees only scrambled data.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which file extension marks a program you can run on Windows?",
+  "choices": [
+   ".exe",
+   ".txt",
+   ".jpg",
+   ".doc"
+  ],
+  "answer": ".exe",
+  "difficulty": "easy",
+  "explanation": "It is short for executable, meaning the file contains instructions rather than data.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which company makes the macOS operating system?",
+  "choices": [
+   "Apple",
+   "Microsoft",
+   "IBM",
+   "Sun"
+  ],
+  "answer": "Apple",
+  "difficulty": "easy",
+  "explanation": "Modern macOS descends from NeXTSTEP, the system Jobs built during his years away.",
+  "unsure": false
+ },
+ {
+  "prompt": "How does a 3D printer build an object?",
+  "choices": [
+   "Adds material in layers",
+   "Carves it from a block",
+   "Casts it in a mould",
+   "Presses it in a stamp"
+  ],
+  "answer": "Adds material in layers",
+  "difficulty": "easy",
+  "explanation": "The formal name is additive manufacturing, the opposite of cutting material away.",
+  "unsure": false
+ },
+ {
+  "prompt": "What does a computer firewall do?",
+  "choices": [
+   "Filters network traffic",
+   "Cools the processor",
+   "Backs up your files",
+   "Boosts Wi-Fi range"
+  ],
+  "answer": "Filters network traffic",
+  "difficulty": "easy",
+  "explanation": "The name comes from building walls designed to stop a fire spreading between rooms.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which company made the Mega Drive games console?",
+  "choices": [
+   "Sega",
+   "Nintendo",
+   "Atari",
+   "NEC"
+  ],
+  "answer": "Sega",
+  "difficulty": "easy",
+  "explanation": "The same machine was sold in North America under the name Genesis.",
+  "unsure": false
+ },
+ {
+  "prompt": "The word 'app' is short for what?",
+  "choices": [
+   "Application",
+   "Appliance",
+   "Approach",
+   "Apparatus"
+  ],
+  "answer": "Application",
+  "difficulty": "easy",
+  "explanation": "It was old software jargon long before phone stores turned it into everyday speech.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which company produces the Galaxy range of smartphones?",
+  "choices": [
+   "Samsung",
+   "LG",
+   "Huawei",
+   "Sony"
+  ],
+  "answer": "Samsung",
+  "difficulty": "easy",
+  "explanation": "The line launched in 2009 running Google's Android operating system.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the name for a program used to view web pages?",
+  "choices": [
+   "Browser",
+   "Compiler",
+   "Server",
+   "Router"
+  ],
+  "answer": "Browser",
+  "difficulty": "easy",
+  "explanation": "The very first one, written in 1990, could edit pages as well as display them.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which company was founded by Bill Hewlett and David Packard?",
+  "choices": [
+   "HP",
+   "Dell",
+   "IBM",
+   "Compaq"
+  ],
+  "answer": "HP",
+  "difficulty": "easy",
+  "explanation": "They tossed a coin in 1939 to decide whose surname would come first in the name.",
+  "unsure": false
+ },
+ {
+  "prompt": "Who proposed the World Wide Web while working at CERN in 1989?",
+  "choices": [
+   "Tim Berners-Lee",
+   "Vint Cerf",
+   "Marc Andreessen",
+   "Bill Atkinson"
+  ],
+  "answer": "Tim Berners-Lee",
+  "difficulty": "medium",
+  "explanation": "His manager scribbled 'vague but exciting' on the proposal and let him carry on.",
+  "unsure": false
+ },
+ {
+  "prompt": "CERN, where the web was invented, sits near which Swiss city?",
+  "choices": [
+   "Geneva",
+   "Zurich",
+   "Bern",
+   "Basel"
+  ],
+  "answer": "Geneva",
+  "difficulty": "medium",
+  "explanation": "The particle physics lab needed a way to share documents between scattered research teams.",
+  "unsure": false
+ },
+ {
+  "prompt": "Who designed the Python programming language?",
+  "choices": [
+   "Guido van Rossum",
+   "Bjarne Stroustrup",
+   "James Gosling",
+   "Rasmus Lerdorf"
+  ],
+  "answer": "Guido van Rossum",
+  "difficulty": "medium",
+  "explanation": "He started it in the Netherlands over the Christmas holidays of 1989 as a side project.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which language did James Gosling create at Sun Microsystems?",
+  "choices": [
+   "Java",
+   "Ruby",
+   "Perl",
+   "Swift"
+  ],
+  "answer": "Java",
+  "difficulty": "medium",
+  "explanation": "It was designed to run anywhere through a virtual machine, first aimed at set-top boxes.",
+  "unsure": false
+ },
+ {
+  "prompt": "Who created the C programming language at Bell Labs?",
+  "choices": [
+   "Dennis Ritchie",
+   "Grace Hopper",
+   "John Backus",
+   "Niklaus Wirth"
+  ],
+  "answer": "Dennis Ritchie",
+  "difficulty": "medium",
+  "explanation": "He built it so Unix could be rewritten in a language that moved between machines.",
+  "unsure": false
+ },
+ {
+  "prompt": "Who created the C++ programming language?",
+  "choices": [
+   "Bjarne Stroustrup",
+   "Dennis Ritchie",
+   "Anders Hejlsberg",
+   "Ken Thompson"
+  ],
+  "answer": "Bjarne Stroustrup",
+  "difficulty": "medium",
+  "explanation": "He added classes to C, and the name puns on C's operator for adding one.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which language was famously written in about ten days at Netscape in 1995?",
+  "choices": [
+   "JavaScript",
+   "PHP",
+   "Python",
+   "Ruby"
+  ],
+  "answer": "JavaScript",
+  "difficulty": "medium",
+  "explanation": "Brendan Eich built it under deadline; the name was a marketing nod to the unrelated Java.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which language is named after a mathematician who built an early calculating machine?",
+  "choices": [
+   "Pascal",
+   "Fortran",
+   "Lisp",
+   "Algol"
+  ],
+  "answer": "Pascal",
+  "difficulty": "medium",
+  "explanation": "Niklaus Wirth designed it in 1970 to teach structured programming to students.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which programming language is named after Ada Lovelace?",
+  "choices": [
+   "Ada",
+   "Cobol",
+   "Eiffel",
+   "Lua"
+  ],
+  "answer": "Ada",
+  "difficulty": "medium",
+  "explanation": "The US military commissioned it in the 1970s to unify software for embedded systems.",
+  "unsure": false
+ },
+ {
+  "prompt": "Who wrote what is often called the first computer program, for Babbage's engine?",
+  "choices": [
+   "Ada Lovelace",
+   "Grace Hopper",
+   "Mary Somerville",
+   "Hedy Lamarr"
+  ],
+  "answer": "Ada Lovelace",
+  "difficulty": "medium",
+  "explanation": "Her 1843 notes set out how the machine could compute a sequence of Bernoulli numbers.",
+  "unsure": false
+ },
+ {
+  "prompt": "What did Charles Babbage call his proposed general-purpose calculating machine?",
+  "choices": [
+   "Analytical Engine",
+   "Logic Engine",
+   "Turing Engine",
+   "Universal Loom"
+  ],
+  "answer": "Analytical Engine",
+  "difficulty": "medium",
+  "explanation": "It was to be programmed with punched cards, an idea borrowed from the Jacquard loom.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which English country estate housed Britain's wartime code-breakers?",
+  "choices": [
+   "Bletchley Park",
+   "Chartwell",
+   "Highclere Castle",
+   "Blenheim Palace"
+  ],
+  "answer": "Bletchley Park",
+  "difficulty": "medium",
+  "explanation": "Its huts decrypted German signals, work that stayed officially secret for decades.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which machine did Alan Turing help design to attack the Enigma cipher?",
+  "choices": [
+   "The Bombe",
+   "Colossus",
+   "ENIAC",
+   "Difference Engine"
+  ],
+  "answer": "The Bombe",
+  "difficulty": "medium",
+  "explanation": "It rapidly ruled out wheel settings that could not have produced the intercepted text.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which network, funded by the US defence department, was the internet's ancestor?",
+  "choices": [
+   "ARPANET",
+   "NSFNET",
+   "Usenet",
+   "Ethernet"
+  ],
+  "answer": "ARPANET",
+  "difficulty": "medium",
+  "explanation": "Its first link, in 1969, connected computers at UCLA and Stanford Research Institute.",
+  "unsure": false
+ },
+ {
+  "prompt": "What does 'TCP' stand for in TCP/IP?",
+  "choices": [
+   "Transmission Control Protocol",
+   "Transfer Copy Protocol",
+   "Terminal Control Program",
+   "Trusted Client Protocol"
+  ],
+  "answer": "Transmission Control Protocol",
+  "difficulty": "medium",
+  "explanation": "It splits data into packets and makes sure they all arrive and are reassembled in order.",
+  "unsure": false
+ },
+ {
+  "prompt": "What does the 'IP' in 'IP address' stand for?",
+  "choices": [
+   "Internet Protocol",
+   "Internal Path",
+   "Identity Provider",
+   "Information Packet"
+  ],
+  "answer": "Internet Protocol",
+  "difficulty": "medium",
+  "explanation": "The protocol handles addressing and routing packets between separate networks.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the main job of the domain name system, DNS?",
+  "choices": [
+   "Turns names into IP addresses",
+   "Encrypts web traffic",
+   "Stores website passwords",
+   "Compresses web images"
+  ],
+  "answer": "Turns names into IP addresses",
+  "difficulty": "medium",
+  "explanation": "It works like a phone book, so nobody has to memorise strings of numbers.",
+  "unsure": false
+ },
+ {
+  "prompt": "What does 'SMTP' stand for?",
+  "choices": [
+   "Simple Mail Transfer Protocol",
+   "Secure Mail Transit Program",
+   "Standard Message Text Protocol",
+   "System Mail Transport Path"
+  ],
+  "answer": "Simple Mail Transfer Protocol",
+  "difficulty": "medium",
+  "explanation": "It is the protocol mail servers use to hand messages on to one another.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which protocol is traditionally used to upload files to a server?",
+  "choices": [
+   "FTP",
+   "SMTP",
+   "DNS",
+   "ICMP"
+  ],
+  "answer": "FTP",
+  "difficulty": "medium",
+  "explanation": "File Transfer Protocol dates from the early 1970s, well before the web existed.",
+  "unsure": false
+ },
+ {
+  "prompt": "What does 'PNG' stand for?",
+  "choices": [
+   "Portable Network Graphics",
+   "Public Network Graphic",
+   "Pixel Numeric Grid",
+   "Packed Native Graphic"
+  ],
+  "answer": "Portable Network Graphics",
+  "difficulty": "medium",
+  "explanation": "It was created in 1995 as a patent-free replacement for the GIF format.",
+  "unsure": false
+ },
+ {
+  "prompt": "The 'J' in the JPEG image format stands for which word?",
+  "choices": [
+   "Joint",
+   "Java",
+   "Journal",
+   "Jumbo"
+  ],
+  "answer": "Joint",
+  "difficulty": "medium",
+  "explanation": "It comes from the Joint Photographic Experts Group, the committee that set the standard.",
+  "unsure": false
+ },
+ {
+  "prompt": "What does 'CSS' stand for in web design?",
+  "choices": [
+   "Cascading Style Sheets",
+   "Central Style System",
+   "Computed Screen Syntax",
+   "Coded Site Structure"
+  ],
+  "answer": "Cascading Style Sheets",
+  "difficulty": "medium",
+  "explanation": "It separates how a page looks from the HTML describing what the content actually is.",
+  "unsure": false
+ },
+ {
+  "prompt": "What does 'SQL' stand for?",
+  "choices": [
+   "Structured Query Language",
+   "Simple Question Layer",
+   "System Quality Log",
+   "Sorted Queue Language"
+  ],
+  "answer": "Structured Query Language",
+  "difficulty": "medium",
+  "explanation": "IBM researchers devised it in the 1970s for querying relational databases.",
+  "unsure": false
+ },
+ {
+  "prompt": "What does 'GUI' stand for?",
+  "choices": [
+   "Graphical User Interface",
+   "General Utility Index",
+   "Guided User Input",
+   "Graphic Unit Interpreter"
+  ],
+  "answer": "Graphical User Interface",
+  "difficulty": "medium",
+  "explanation": "The windows, icons and pointer combination was refined in Californian labs in the 1970s.",
+  "unsure": false
+ },
+ {
+  "prompt": "At which research centre were the graphical interface and Ethernet both developed?",
+  "choices": [
+   "Xerox PARC",
+   "Bell Labs",
+   "MIT Media Lab",
+   "RAND Corporation"
+  ],
+  "answer": "Xerox PARC",
+  "difficulty": "medium",
+  "explanation": "Its 1973 Alto machine had overlapping windows and a mouse a decade before rivals.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which company made the Commodore 64 home computer?",
+  "choices": [
+   "Commodore",
+   "Atari",
+   "Tandy",
+   "Texas Instruments"
+  ],
+  "answer": "Commodore",
+  "difficulty": "medium",
+  "explanation": "Its sound chip was so distinctive that musicians still compose with emulations of it.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which company sold the Amiga home computer from 1985?",
+  "choices": [
+   "Commodore",
+   "Atari",
+   "Apple",
+   "Acorn"
+  ],
+  "answer": "Commodore",
+  "difficulty": "medium",
+  "explanation": "Custom chips gave the Amiga graphics and sound years ahead of standard business PCs.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which 1972 arcade game simulated a game of table tennis?",
+  "choices": [
+   "Pong",
+   "Breakout",
+   "Space Invaders",
+   "Asteroids"
+  ],
+  "answer": "Pong",
+  "difficulty": "medium",
+  "explanation": "An early cabinet reportedly stopped working because its coin box had overflowed.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which Soviet computer scientist created Tetris?",
+  "choices": [
+   "Alexey Pajitnov",
+   "Sergey Brin",
+   "Andrey Markov",
+   "Nikolai Basov"
+  ],
+  "answer": "Alexey Pajitnov",
+  "difficulty": "medium",
+  "explanation": "He earned nothing from it for years because the rights belonged to his state employer.",
+  "unsure": false
+ },
+ {
+  "prompt": "Nintendo was founded in 1889 to make what?",
+  "choices": [
+   "Playing cards",
+   "Sewing machines",
+   "Bicycles",
+   "Radios"
+  ],
+  "answer": "Playing cards",
+  "difficulty": "medium",
+  "explanation": "It printed hanafuda cards in Kyoto for most of a century before making video games.",
+  "unsure": false
+ },
+ {
+  "prompt": "What does 'BIOS' stand for on a PC?",
+  "choices": [
+   "Basic Input Output System",
+   "Binary Internal Operating Set",
+   "Boot Instruction Sequence",
+   "Base Integrated Output Store"
+  ],
+  "answer": "Basic Input Output System",
+  "difficulty": "medium",
+  "explanation": "It is the firmware that wakes the hardware up before an operating system can load.",
+  "unsure": false
+ },
+ {
+  "prompt": "What does 'SSD' stand for?",
+  "choices": [
+   "Solid State Drive",
+   "Secure Storage Disk",
+   "Serial System Drive",
+   "Static Save Device"
+  ],
+  "answer": "Solid State Drive",
+  "difficulty": "medium",
+  "explanation": "With no spinning platter there is no seek time, so access is nearly instant.",
+  "unsure": false
+ },
+ {
+  "prompt": "What does 'GPU' stand for?",
+  "choices": [
+   "Graphics Processing Unit",
+   "General Purpose Unit",
+   "Grid Power Unit",
+   "Graphic Pixel Utility"
+  ],
+  "answer": "Graphics Processing Unit",
+  "difficulty": "medium",
+  "explanation": "Its many simple cores suit parallel maths, which is why it also drives machine learning.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which company made the first commercial microprocessor, the 4004?",
+  "choices": [
+   "Intel",
+   "AMD",
+   "Motorola",
+   "Zilog"
+  ],
+  "answer": "Intel",
+  "difficulty": "medium",
+  "explanation": "The 1971 chip was originally designed to power a Japanese desktop calculator.",
+  "unsure": false
+ },
+ {
+  "prompt": "Whose famous 'law' predicted that transistor counts on a chip would keep doubling?",
+  "choices": [
+   "Gordon Moore",
+   "Andy Grove",
+   "Jack Kilby",
+   "Grace Hopper"
+  ],
+  "answer": "Gordon Moore",
+  "difficulty": "medium",
+  "explanation": "The Intel co-founder set the observation out in a trade magazine article in 1965.",
+  "unsure": false
+ },
+ {
+  "prompt": "What does 'IBM' stand for?",
+  "choices": [
+   "International Business Machines",
+   "Integrated Binary Metrics",
+   "Institute of Basic Mechanics",
+   "Internal Board Manufacturing"
+  ],
+  "answer": "International Business Machines",
+  "difficulty": "medium",
+  "explanation": "The firm took the name in 1924, having previously sold scales and punch-clocks.",
+  "unsure": false
+ },
+ {
+  "prompt": "By what colourful nickname is IBM long known?",
+  "choices": [
+   "Big Blue",
+   "Old Green",
+   "Grey Giant",
+   "Red Tower"
+  ],
+  "answer": "Big Blue",
+  "difficulty": "medium",
+  "explanation": "The tag is usually traced to its blue logo and the blue suits worn by its salesmen.",
+  "unsure": false
+ },
+ {
+  "prompt": "What does 'DOS' stand for in MS-DOS?",
+  "choices": [
+   "Disk Operating System",
+   "Data Output System",
+   "Direct Object Store",
+   "Dual Operation Shell"
+  ],
+  "answer": "Disk Operating System",
+  "difficulty": "medium",
+  "explanation": "Microsoft bought an existing system outright and licensed it to IBM in 1981.",
+  "unsure": false
+ },
+ {
+  "prompt": "Who wrote the Linux kernel as a student project in 1991?",
+  "choices": [
+   "Linus Torvalds",
+   "Richard Stallman",
+   "Ken Thompson",
+   "Andrew Tanenbaum"
+  ],
+  "answer": "Linus Torvalds",
+  "difficulty": "medium",
+  "explanation": "He announced it on a Usenet group as a hobby that would not be 'big and professional'.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which older operating system was Linux modelled on?",
+  "choices": [
+   "Unix",
+   "VMS",
+   "CP/M",
+   "OS/2"
+  ],
+  "answer": "Unix",
+  "difficulty": "medium",
+  "explanation": "Its philosophy of small tools piped together shaped decades of software design.",
+  "unsure": false
+ },
+ {
+  "prompt": "At which laboratory was Unix first developed, in 1969?",
+  "choices": [
+   "Bell Labs",
+   "Xerox PARC",
+   "Lawrence Livermore",
+   "RAND Corporation"
+  ],
+  "answer": "Bell Labs",
+  "difficulty": "medium",
+  "explanation": "Ken Thompson and Dennis Ritchie built it on a spare PDP-7 minicomputer.",
+  "unsure": false
+ },
+ {
+  "prompt": "Who created the version control system Git?",
+  "choices": [
+   "Linus Torvalds",
+   "Guido van Rossum",
+   "Brendan Eich",
+   "Larry Wall"
+  ],
+  "answer": "Linus Torvalds",
+  "difficulty": "medium",
+  "explanation": "He wrote it in 2005 after Linux developers lost access to the tool they had been using.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which 1993 program was the first widely popular graphical web browser?",
+  "choices": [
+   "Mosaic",
+   "Netscape Navigator",
+   "Opera",
+   "Internet Explorer"
+  ],
+  "answer": "Mosaic",
+  "difficulty": "medium",
+  "explanation": "It came out of an Illinois supercomputing centre and led directly to Netscape.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which Netscape browser's released source code gave rise to the Mozilla project?",
+  "choices": [
+   "Navigator",
+   "Mosaic",
+   "Konqueror",
+   "Lynx"
+  ],
+  "answer": "Navigator",
+  "difficulty": "medium",
+  "explanation": "The 1998 code release eventually produced Firefox several years later.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which US naval officer helped create COBOL and popularised the word 'debugging'?",
+  "choices": [
+   "Grace Hopper",
+   "Ada Lovelace",
+   "Katherine Johnson",
+   "Jean Bartik"
+  ],
+  "answer": "Grace Hopper",
+  "difficulty": "medium",
+  "explanation": "She argued that programs should be written in something close to plain English.",
+  "unsure": false
+ },
+ {
+  "prompt": "What does the 'B' in the language name COBOL stand for?",
+  "choices": [
+   "Business",
+   "Binary",
+   "Basic",
+   "Batch"
+  ],
+  "answer": "Business",
+  "difficulty": "medium",
+  "explanation": "Common Business-Oriented Language still runs payroll and banking systems today.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which company made the first handheld mobile phone call, in 1973?",
+  "choices": [
+   "Motorola",
+   "Nokia",
+   "Ericsson",
+   "Siemens"
+  ],
+  "answer": "Motorola",
+  "difficulty": "medium",
+  "explanation": "Martin Cooper rang a rival researcher at Bell Labs from a New York pavement.",
+  "unsure": false
+ },
+ {
+  "prompt": "What does 'GSM' stand for in mobile telephony?",
+  "choices": [
+   "Global System for Mobile",
+   "General Signal Modulation",
+   "Grouped Switch Multiplexing",
+   "Global Standard Messaging"
+  ],
+  "answer": "Global System for Mobile",
+  "difficulty": "medium",
+  "explanation": "The European standard is what made roaming across borders practical in the 1990s.",
+  "unsure": false
+ },
+ {
+  "prompt": "How many characters fit in a single standard SMS text message?",
+  "choices": [
+   "160",
+   "120",
+   "200",
+   "256"
+  ],
+  "answer": "160",
+  "difficulty": "medium",
+  "explanation": "The limit came from the spare signalling capacity the messages were squeezed into.",
+  "unsure": false
+ },
+ {
+  "prompt": "The word 'modem' is a contraction of which two words?",
+  "choices": [
+   "Modulator-demodulator",
+   "Modular memory",
+   "Mobile demand",
+   "Modern medium"
+  ],
+  "answer": "Modulator-demodulator",
+  "difficulty": "medium",
+  "explanation": "It turns digital data into tones a phone line can carry, then back again at the far end.",
+  "unsure": false
+ },
+ {
+  "prompt": "The word 'bit' is short for what?",
+  "choices": [
+   "Binary digit",
+   "Basic item",
+   "Byte unit",
+   "Bound integer"
+  ],
+  "answer": "Binary digit",
+  "difficulty": "medium",
+  "explanation": "The contraction was coined in the 1940s and popularised by Claude Shannon.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which number base does hexadecimal use?",
+  "choices": [
+   "16",
+   "8",
+   "12",
+   "32"
+  ],
+  "answer": "16",
+  "difficulty": "medium",
+  "explanation": "Letters A to F stand for ten to fifteen, letting one digit represent four bits.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is 2 to the power of 10?",
+  "choices": [
+   "1024",
+   "1000",
+   "512",
+   "2048"
+  ],
+  "answer": "1024",
+  "difficulty": "medium",
+  "explanation": "Its closeness to a thousand is why a kilobyte was long taken to mean 1024 bytes.",
+  "unsure": false
+ },
+ {
+  "prompt": "What does 'NFC' stand for, the technology behind contactless payment?",
+  "choices": [
+   "Near Field Communication",
+   "New Format Chip",
+   "Network Frequency Control",
+   "Node Free Connection"
+  ],
+  "answer": "Near Field Communication",
+  "difficulty": "medium",
+  "explanation": "It works only over a few centimetres, which makes interception much harder.",
+  "unsure": false
+ },
+ {
+  "prompt": "What does 'RFID' stand for?",
+  "choices": [
+   "Radio Frequency Identification",
+   "Rapid Field Data",
+   "Remote Format Identity",
+   "Radial Frequency Indicator"
+  ],
+  "answer": "Radio Frequency Identification",
+  "difficulty": "medium",
+  "explanation": "Passive tags need no battery, drawing their power from the reader's own signal.",
+  "unsure": false
+ },
+ {
+  "prompt": "What does the 'O' in OLED screens stand for?",
+  "choices": [
+   "Organic",
+   "Optical",
+   "Overlay",
+   "Oxide"
+  ],
+  "answer": "Organic",
+  "difficulty": "medium",
+  "explanation": "Its carbon-based layers emit their own light, so no backlight is required.",
+  "unsure": false
+ },
+ {
+  "prompt": "What does 'LCD' stand for?",
+  "choices": [
+   "Liquid Crystal Display",
+   "Light Colour Diode",
+   "Layered Circuit Display",
+   "Low Current Device"
+  ],
+  "answer": "Liquid Crystal Display",
+  "difficulty": "medium",
+  "explanation": "The crystals twist to block or pass light coming from a backlight behind the panel.",
+  "unsure": false
+ },
+ {
+  "prompt": "The Bluetooth standard is named after what?",
+  "choices": [
+   "A Danish king",
+   "A Norwegian fjord",
+   "A Swedish inventor",
+   "A German town"
+  ],
+  "answer": "A Danish king",
+  "difficulty": "medium",
+  "explanation": "Harald Bluetooth united warring Danish tribes, as the standard united device makers.",
+  "unsure": false
+ },
+ {
+  "prompt": "Who invented the computer mouse in the 1960s?",
+  "choices": [
+   "Douglas Engelbart",
+   "Alan Kay",
+   "Ivan Sutherland",
+   "Steve Wozniak"
+  ],
+  "answer": "Douglas Engelbart",
+  "difficulty": "medium",
+  "explanation": "His lab also demonstrated hypertext links and video conferencing in the same 1968 session.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which Apple computer, named after Jobs's daughter, came before the Macintosh?",
+  "choices": [
+   "Lisa",
+   "Newton",
+   "Apple III",
+   "Pippin"
+  ],
+  "answer": "Lisa",
+  "difficulty": "medium",
+  "explanation": "It shipped in 1983 with a graphical interface but cost far too much to sell in numbers.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which film director shot Apple's famous 1984 Macintosh advert?",
+  "choices": [
+   "Ridley Scott",
+   "Steven Spielberg",
+   "George Lucas",
+   "James Cameron"
+  ],
+  "answer": "Ridley Scott",
+  "difficulty": "medium",
+  "explanation": "The Blade Runner director made the Orwell-themed spot, which aired in a Super Bowl.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is a cryptographic hash function designed to produce?",
+  "choices": [
+   "A fixed-length digest",
+   "A compressed archive",
+   "An encrypted key pair",
+   "A random password"
+  ],
+  "answer": "A fixed-length digest",
+  "difficulty": "medium",
+  "explanation": "The same input always gives the same digest, but the digest cannot be turned back.",
+  "unsure": false
+ },
+ {
+  "prompt": "What does 'SHA' stand for in SHA-256?",
+  "choices": [
+   "Secure Hash Algorithm",
+   "Standard Header Address",
+   "Shared Access Array",
+   "Simple Hash Assembly"
+  ],
+  "answer": "Secure Hash Algorithm",
+  "difficulty": "medium",
+  "explanation": "The family of functions was designed by the US National Security Agency.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which cipher shifts every letter a fixed number of places along the alphabet?",
+  "choices": [
+   "Caesar cipher",
+   "Vigenere cipher",
+   "Playfair cipher",
+   "Enigma cipher"
+  ],
+  "answer": "Caesar cipher",
+  "difficulty": "medium",
+  "explanation": "It is named for Julius Caesar, who reportedly shifted his letters by three places.",
+  "unsure": false
+ },
+ {
+  "prompt": "In public-key cryptography, which key can be handed out freely?",
+  "choices": [
+   "The public key",
+   "The private key",
+   "The session key",
+   "The master key"
+  ],
+  "answer": "The public key",
+  "difficulty": "medium",
+  "explanation": "Anyone can encrypt with it, but only the matching private key will decrypt the result.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which protocol succeeded SSL for encrypting web traffic?",
+  "choices": [
+   "TLS",
+   "SSH",
+   "IPsec",
+   "PGP"
+  ],
+  "answer": "TLS",
+  "difficulty": "medium",
+  "explanation": "Transport Layer Security took over in 1999, though people still say SSL out of habit.",
+  "unsure": false
+ },
+ {
+  "prompt": "Under what pseudonym was the Bitcoin white paper published in 2008?",
+  "choices": [
+   "Satoshi Nakamoto",
+   "Nick Szabo",
+   "Hal Finney",
+   "Wei Dai"
+  ],
+  "answer": "Satoshi Nakamoto",
+  "difficulty": "medium",
+  "explanation": "The paper described peer-to-peer electronic cash needing no trusted middleman.",
+  "unsure": false
+ },
+ {
+  "prompt": "What was the Y2K problem about?",
+  "choices": [
+   "Two-digit year dates",
+   "A failed satellite launch",
+   "A 1990s computer virus",
+   "An early mobile standard"
+  ],
+  "answer": "Two-digit year dates",
+  "difficulty": "medium",
+  "explanation": "Programs storing the year as two digits risked reading 2000 as 1900.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which company built the first mass-produced hard disk drive, in 1956?",
+  "choices": [
+   "IBM",
+   "DEC",
+   "Seagate",
+   "Fujitsu"
+  ],
+  "answer": "IBM",
+  "difficulty": "medium",
+  "explanation": "The RAMAC unit was the size of two wardrobes and held about five megabytes.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which country's mathematicians first broke the Enigma cipher, in the 1930s?",
+  "choices": [
+   "Poland",
+   "France",
+   "Britain",
+   "Netherlands"
+  ],
+  "answer": "Poland",
+  "difficulty": "hard",
+  "explanation": "Marian Rejewski's team handed their methods to Britain and France just before the war.",
+  "unsure": false
+ },
+ {
+  "prompt": "What was Google originally called while it was still a Stanford research project?",
+  "choices": [
+   "BackRub",
+   "PageRank",
+   "Googol",
+   "WebCrawl"
+  ],
+  "answer": "BackRub",
+  "difficulty": "hard",
+  "explanation": "The name referred to its analysis of the back links pointing at a given page.",
+  "unsure": false
+ },
+ {
+  "prompt": "The company name 'Intel' is a contraction of which two words?",
+  "choices": [
+   "Integrated Electronics",
+   "Intelligent Logic",
+   "Internal Elements",
+   "International Electric"
+  ],
+  "answer": "Integrated Electronics",
+  "difficulty": "hard",
+  "explanation": "Robert Noyce and Gordon Moore founded the firm in 1968 after leaving Fairchild.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which British home computer company's research produced the first ARM processor?",
+  "choices": [
+   "Acorn",
+   "Sinclair",
+   "Amstrad",
+   "Psion"
+  ],
+  "answer": "Acorn",
+  "difficulty": "hard",
+  "explanation": "Acorn RISC Machine chips were designed to power a successor to the BBC Micro.",
+  "unsure": false
+ },
+ {
+  "prompt": "Who was Apple's third co-founder, selling his stake within weeks of the launch?",
+  "choices": [
+   "Ronald Wayne",
+   "Mike Markkula",
+   "Bill Fernandez",
+   "Regis McKenna"
+  ],
+  "answer": "Ronald Wayne",
+  "difficulty": "hard",
+  "explanation": "He drew the first Apple logo and let his ten per cent share go for 800 dollars.",
+  "unsure": false
+ },
+ {
+  "prompt": "Who sent the first networked email and chose the @ sign for addresses?",
+  "choices": [
+   "Ray Tomlinson",
+   "Vint Cerf",
+   "Leonard Kleinrock",
+   "Jon Postel"
+  ],
+  "answer": "Ray Tomlinson",
+  "difficulty": "hard",
+  "explanation": "He picked @ in 1971 because it meant 'at' and never appeared in a user name.",
+  "unsure": false
+ },
+ {
+  "prompt": "What were the first characters ever transmitted over the ARPANET, in 1969?",
+  "choices": [
+   "LO",
+   "HI",
+   "AB",
+   "OK"
+  ],
+  "answer": "LO",
+  "difficulty": "hard",
+  "explanation": "The team was typing LOGIN when the remote machine crashed after two letters.",
+  "unsure": false
+ },
+ {
+  "prompt": "Who co-invented Ethernet at Xerox PARC in the 1970s?",
+  "choices": [
+   "Robert Metcalfe",
+   "Vint Cerf",
+   "Radia Perlman",
+   "Paul Baran"
+  ],
+  "answer": "Robert Metcalfe",
+  "difficulty": "hard",
+  "explanation": "He later founded 3Com to sell the networking hardware commercially.",
+  "unsure": false
+ },
+ {
+  "prompt": "How many bits long is an IPv4 address?",
+  "choices": [
+   "32",
+   "64",
+   "16",
+   "128"
+  ],
+  "answer": "32",
+  "difficulty": "hard",
+  "explanation": "Four eight-bit numbers give about 4.3 billion addresses, which is why IPv6 exists.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which port number does unencrypted web traffic use by default?",
+  "choices": [
+   "80",
+   "21",
+   "25",
+   "110"
+  ],
+  "answer": "80",
+  "difficulty": "hard",
+  "explanation": "Encrypted traffic uses 443 instead, a convention fixed by the earliest web servers.",
+  "unsure": false
+ },
+ {
+  "prompt": "What does the recursive acronym GNU stand for?",
+  "choices": [
+   "GNU's Not Unix",
+   "General New Utility",
+   "Grand Network Unit",
+   "Global Named Unix"
+  ],
+  "answer": "GNU's Not Unix",
+  "difficulty": "hard",
+  "explanation": "Richard Stallman began the project in 1983 to build a free Unix-compatible system.",
+  "unsure": false
+ },
+ {
+  "prompt": "The Unix command 'sudo' is short for what?",
+  "choices": [
+   "Superuser do",
+   "Sudden action",
+   "Supervised output",
+   "Subsystem domain"
+  ],
+  "answer": "Superuser do",
+  "difficulty": "hard",
+  "explanation": "It runs one command with another account's privileges, usually those of root.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which 1979 program is credited as the first spreadsheet and the first killer app?",
+  "choices": [
+   "VisiCalc",
+   "Lotus 1-2-3",
+   "SuperCalc",
+   "Multiplan"
+  ],
+  "answer": "VisiCalc",
+  "difficulty": "hard",
+  "explanation": "Accountants bought Apple II machines purely in order to run it.",
+  "unsure": false
+ },
+ {
+  "prompt": "What did a famous 1991 Cambridge University webcam point at?",
+  "choices": [
+   "A coffee pot",
+   "A fish tank",
+   "A car park",
+   "A model railway"
+  ],
+  "answer": "A coffee pot",
+  "difficulty": "hard",
+  "explanation": "Researchers wanted to know it was full before walking down to the shared kitchen.",
+  "unsure": false
+ },
+ {
+  "prompt": "What was the first item ever sold on eBay?",
+  "choices": [
+   "A broken laser pointer",
+   "A used car",
+   "A comic book",
+   "A pair of trainers"
+  ],
+  "answer": "A broken laser pointer",
+  "difficulty": "hard",
+  "explanation": "The founder listed it as a test and was startled when a collector actually paid.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which was the first internet domain name ever registered, back in 1985?",
+  "choices": [
+   "symbolics.com",
+   "apple.com",
+   "mit.edu",
+   "ibm.com"
+  ],
+  "answer": "symbolics.com",
+  "difficulty": "hard",
+  "explanation": "It belonged to a Massachusetts company that built specialised Lisp computers.",
+  "unsure": false
+ },
+ {
+  "prompt": "What does 'POP' stand for in the email protocol POP3?",
+  "choices": [
+   "Post Office Protocol",
+   "Packet Order Protocol",
+   "Personal Output Port",
+   "Protected Object Path"
+  ],
+  "answer": "Post Office Protocol",
+  "difficulty": "hard",
+  "explanation": "It traditionally pulls mail down to one device and clears it off the server.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which ageing cipher did AES replace as the US encryption standard?",
+  "choices": [
+   "DES",
+   "RSA",
+   "PGP",
+   "MD5"
+  ],
+  "answer": "DES",
+  "difficulty": "hard",
+  "explanation": "Its 56-bit key had become short enough for dedicated hardware to crack by brute force.",
+  "unsure": false
+ },
+ {
+  "prompt": "Under what name was the algorithm that became AES originally submitted?",
+  "choices": [
+   "Rijndael",
+   "Serpent",
+   "Twofish",
+   "Blowfish"
+  ],
+  "answer": "Rijndael",
+  "difficulty": "hard",
+  "explanation": "The name blends those of its two Belgian designers, Daemen and Rijmen.",
+  "unsure": false
+ },
+ {
+  "prompt": "Where do the letters in RSA encryption come from?",
+  "choices": [
+   "Its inventors' surnames",
+   "A Latin phrase",
+   "A US agency",
+   "A type of prime number"
+  ],
+  "answer": "Its inventors' surnames",
+  "difficulty": "hard",
+  "explanation": "Rivest, Shamir and Adleman published the public-key scheme in 1977.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which method lets two strangers agree a shared secret key over an open channel?",
+  "choices": [
+   "Diffie-Hellman",
+   "One-time pad",
+   "Caesar shift",
+   "Steganography"
+  ],
+  "answer": "Diffie-Hellman",
+  "difficulty": "hard",
+  "explanation": "Their 1976 paper made encrypted trade between parties who had never met possible.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which encryption scheme is unbreakable if its key is truly random and used only once?",
+  "choices": [
+   "One-time pad",
+   "RSA",
+   "AES",
+   "SHA-256"
+  ],
+  "answer": "One-time pad",
+  "difficulty": "hard",
+  "explanation": "Its flaw is practical: the key must be as long as the message and never reused.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the practice of hiding a secret message inside an image or sound file called?",
+  "choices": [
+   "Steganography",
+   "Cryptanalysis",
+   "Obfuscation",
+   "Tokenisation"
+  ],
+  "answer": "Steganography",
+  "difficulty": "hard",
+  "explanation": "The word is Greek for covered writing and long predates computers.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the very first block of a blockchain called?",
+  "choices": [
+   "Genesis block",
+   "Root block",
+   "Prime block",
+   "Seed block"
+  ],
+  "answer": "Genesis block",
+  "difficulty": "hard",
+  "explanation": "Bitcoin's contains the text of a newspaper headline dated January 2009.",
+  "unsure": false
+ },
+ {
+  "prompt": "Who created the Lisp language and coined the term 'artificial intelligence'?",
+  "choices": [
+   "John McCarthy",
+   "Marvin Minsky",
+   "Allen Newell",
+   "Norbert Wiener"
+  ],
+  "answer": "John McCarthy",
+  "difficulty": "hard",
+  "explanation": "He proposed the 1956 Dartmouth workshop that gave the field its lasting name.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which language, released in 1957, was the first widely used high-level compiled language?",
+  "choices": [
+   "Fortran",
+   "Cobol",
+   "Algol",
+   "Lisp"
+  ],
+  "answer": "Fortran",
+  "difficulty": "hard",
+  "explanation": "John Backus led the IBM team that built it for heavy scientific calculation.",
+  "unsure": false
+ },
+ {
+  "prompt": "At which US college was the BASIC programming language created in 1964?",
+  "choices": [
+   "Dartmouth",
+   "MIT",
+   "Stanford",
+   "Caltech"
+  ],
+  "answer": "Dartmouth",
+  "difficulty": "hard",
+  "explanation": "Its authors wanted every student, not just engineers, to be able to write programs.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which company built the PDP and VAX minicomputers?",
+  "choices": [
+   "DEC",
+   "Data General",
+   "Wang",
+   "Honeywell"
+  ],
+  "answer": "DEC",
+  "difficulty": "hard",
+  "explanation": "Digital Equipment's cheaper machines loosened IBM's grip on serious computing.",
+  "unsure": false
+ },
+ {
+  "prompt": "At which laboratory was the transistor invented in 1947?",
+  "choices": [
+   "Bell Labs",
+   "Fairchild",
+   "RCA Labs",
+   "General Electric"
+  ],
+  "answer": "Bell Labs",
+  "difficulty": "hard",
+  "explanation": "Bardeen, Brattain and Shockley shared a Nobel Prize in physics for the work.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which Texas Instruments engineer built the first working integrated circuit?",
+  "choices": [
+   "Jack Kilby",
+   "Robert Noyce",
+   "Gordon Moore",
+   "Jean Hoerni"
+  ],
+  "answer": "Jack Kilby",
+  "difficulty": "hard",
+  "explanation": "He made it in 1958 during a summer when most colleagues were away on holiday.",
+  "unsure": false
+ },
+ {
+  "prompt": "Who wrote the 1948 paper that founded information theory?",
+  "choices": [
+   "Claude Shannon",
+   "Norbert Wiener",
+   "Alan Turing",
+   "John von Neumann"
+  ],
+  "answer": "Claude Shannon",
+  "difficulty": "hard",
+  "explanation": "A Mathematical Theory of Communication introduced measuring information in bits.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which computer architecture keeps program instructions and data in the same memory?",
+  "choices": [
+   "Von Neumann",
+   "Harvard",
+   "Dataflow",
+   "Systolic"
+  ],
+  "answer": "Von Neumann",
+  "difficulty": "hard",
+  "explanation": "The rival Harvard design keeps them separate, which is why caches are often split.",
+  "unsure": false
+ },
+ {
+  "prompt": "What was the name of the first web browser, written by Tim Berners-Lee?",
+  "choices": [
+   "WorldWideWeb",
+   "Mosaic",
+   "Lynx",
+   "Erwise"
+  ],
+  "answer": "WorldWideWeb",
+  "difficulty": "hard",
+  "explanation": "It was renamed Nexus so people would stop confusing it with the web itself.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which IBM engineer devised the Ctrl+Alt+Delete key combination?",
+  "choices": [
+   "David Bradley",
+   "Mark Dean",
+   "Bill Lowe",
+   "Ted Selker"
+  ],
+  "answer": "David Bradley",
+  "difficulty": "hard",
+  "explanation": "He spread the keys far apart so no one could restart a machine by accident.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which 1960s language first introduced classes and objects to programming?",
+  "choices": [
+   "Simula",
+   "Algol",
+   "PL/I",
+   "Smalltalk"
+  ],
+  "answer": "Simula",
+  "difficulty": "hard",
+  "explanation": "Norwegian researchers invented objects while trying to model ships and queues.",
+  "unsure": false
+ },
+ {
+  "prompt": "The 'Q' in QDOS, the system Microsoft bought and turned into MS-DOS, stood for what?",
+  "choices": [
+   "Quick and Dirty",
+   "Quality",
+   "Queued",
+   "Quadratic"
+  ],
+  "answer": "Quick and Dirty",
+  "difficulty": "hard",
+  "explanation": "Tim Paterson wrote the Quick and Dirty Operating System in a matter of weeks.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which satellite navigation system is operated by the European Union?",
+  "choices": [
+   "Galileo",
+   "GLONASS",
+   "BeiDou",
+   "QZSS"
+  ],
+  "answer": "Galileo",
+  "difficulty": "hard",
+  "explanation": "It was built so Europe would not depend on a system run by the US military.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which programming language was created by Larry Wall in 1987 for text processing?",
+  "choices": [
+   "Perl",
+   "Awk",
+   "Tcl",
+   "Ruby"
+  ],
+  "answer": "Perl",
+  "difficulty": "hard",
+  "explanation": "It became the glue of early web servers before newer scripting languages arrived.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which theoretical machine, described in 1936, underpins modern computer science?",
+  "choices": [
+   "Turing machine",
+   "Babbage engine",
+   "Boolean lattice",
+   "Markov chain"
+  ],
+  "answer": "Turing machine",
+  "difficulty": "hard",
+  "explanation": "Its tape and rules define what any computer can, and cannot, ever compute.",
+  "unsure": false
+ }
+]

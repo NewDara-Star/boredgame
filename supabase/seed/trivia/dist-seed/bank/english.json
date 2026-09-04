@@ -1,0 +1,2329 @@
+[
+ {
+  "prompt": "What is the collective noun for a group of lions?",
+  "choices": [
+   "A pride",
+   "A herd",
+   "A shoal",
+   "A swarm"
+  ],
+  "answer": "A pride",
+  "difficulty": "easy",
+  "explanation": "Pride for lions is recorded in English from the 15th century, when it also meant splendour.",
+  "unsure": false
+ },
+ {
+  "prompt": "A group of crows is traditionally called what?",
+  "choices": [
+   "A murder",
+   "A giggle",
+   "A bundle",
+   "A stack"
+  ],
+  "answer": "A murder",
+  "difficulty": "easy",
+  "explanation": "The term comes from medieval hunting books that gave deliberately fanciful names to animal groups.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is a group of geese on the ground called?",
+  "choices": [
+   "A gaggle",
+   "A gallop",
+   "A cluster",
+   "A rabble"
+  ],
+  "answer": "A gaggle",
+  "difficulty": "easy",
+  "explanation": "In flight the same birds are called a skein, so the name changes with what the geese are doing.",
+  "unsure": false
+ },
+ {
+  "prompt": "A group of fish swimming together is called what?",
+  "choices": [
+   "A school",
+   "A college",
+   "A class",
+   "A library"
+  ],
+  "answer": "A school",
+  "difficulty": "easy",
+  "explanation": "It comes from a Dutch word for a crowd, not from education, despite the tempting coincidence.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the collective noun for a group of wolves?",
+  "choices": [
+   "A pack",
+   "A pride",
+   "A pod",
+   "A hive"
+  ],
+  "answer": "A pack",
+  "difficulty": "easy",
+  "explanation": "Pack also applies to hounds, and gave English the phrase to lead the pack.",
+  "unsure": false
+ },
+ {
+  "prompt": "A group of sheep is called what?",
+  "choices": [
+   "A flock",
+   "A pod",
+   "A pride",
+   "A swarm"
+  ],
+  "answer": "A flock",
+  "difficulty": "easy",
+  "explanation": "Flock is also used for birds and, figuratively, for a priest's congregation.",
+  "unsure": false
+ },
+ {
+  "prompt": "A large moving group of bees is called what?",
+  "choices": [
+   "A swarm",
+   "A flock",
+   "A herd",
+   "A shoal"
+  ],
+  "answer": "A swarm",
+  "difficulty": "easy",
+  "explanation": "A resting group of bees in a hive is instead called a colony.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the collective noun for a group of whales?",
+  "choices": [
+   "A pod",
+   "A pack",
+   "A flock",
+   "A nest"
+  ],
+  "answer": "A pod",
+  "difficulty": "easy",
+  "explanation": "Pod is used for dolphins and porpoises too, and originally meant a small herd.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which word is a homophone of 'flour'?",
+  "choices": [
+   "Flower",
+   "Floor",
+   "Flavour",
+   "Fluent"
+  ],
+  "answer": "Flower",
+  "difficulty": "easy",
+  "explanation": "Both words come from the same root: flour was once the finest 'flower' of the ground grain.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which word sounds exactly like 'knight'?",
+  "choices": [
+   "Night",
+   "Nought",
+   "Neat",
+   "Knot"
+  ],
+  "answer": "Night",
+  "difficulty": "easy",
+  "explanation": "The k in knight was actually pronounced in Old and Middle English before falling silent.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which word is a homophone of 'sea'?",
+  "choices": [
+   "See",
+   "Say",
+   "Sew",
+   "Sigh"
+  ],
+  "answer": "See",
+  "difficulty": "easy",
+  "explanation": "The two are unrelated in origin: sea is Germanic, while see descends from Old English seon.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which word is a homophone of 'bear'?",
+  "choices": [
+   "Bare",
+   "Beer",
+   "Bore",
+   "Barn"
+  ],
+  "answer": "Bare",
+  "difficulty": "easy",
+  "explanation": "Bare means uncovered, which is why we say bare-faced rather than bear-faced cheek.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which word sounds the same as 'pair'?",
+  "choices": [
+   "Pear",
+   "Purr",
+   "Pier",
+   "Pour"
+  ],
+  "answer": "Pear",
+  "difficulty": "easy",
+  "explanation": "English also has a third homophone here: pare, meaning to trim or peel.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which spelling of this word meaning \"required\" is correct?",
+  "choices": [
+   "Necessary",
+   "Neccessary",
+   "Necesary",
+   "Nesessary"
+  ],
+  "answer": "Necessary",
+  "difficulty": "easy",
+  "explanation": "A common memory trick is one collar and two sleeves: one c and two s letters.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which spelling of this word meaning \"without doubt\" is correct?",
+  "choices": [
+   "Definitely",
+   "Definately",
+   "Defiantly",
+   "Definitley"
+  ],
+  "answer": "Definitely",
+  "difficulty": "easy",
+  "explanation": "The word contains 'finite', which is a useful clue that the middle vowel is an i.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which spelling of this word meaning \"to divide\" is correct?",
+  "choices": [
+   "Separate",
+   "Seperate",
+   "Seperete",
+   "Sepparate"
+  ],
+  "answer": "Separate",
+  "difficulty": "easy",
+  "explanation": "It comes from Latin separare, to pull apart, which keeps the a in the middle.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which spelling of this word for a musical beat pattern is correct?",
+  "choices": [
+   "Rhythm",
+   "Rythm",
+   "Rythem",
+   "Rhythem"
+  ],
+  "answer": "Rhythm",
+  "difficulty": "easy",
+  "explanation": "The word arrived from Greek rhythmos, which is why it carries an h after the r.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which spelling of this word for lodging is correct?",
+  "choices": [
+   "Accommodation",
+   "Acommodation",
+   "Accomodation",
+   "Acomodation"
+  ],
+  "answer": "Accommodation",
+  "difficulty": "easy",
+  "explanation": "It is one of the most misspelled words in English, needing double c and double m.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the plural of 'child'?",
+  "choices": [
+   "Children",
+   "Childs",
+   "Childes",
+   "Childrens"
+  ],
+  "answer": "Children",
+  "difficulty": "easy",
+  "explanation": "It is a double plural: Old English used cildru, and later English added an extra -en ending.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the plural of 'mouse' when referring to the animal?",
+  "choices": [
+   "Mice",
+   "Mouses",
+   "Mousen",
+   "Meese"
+  ],
+  "answer": "Mice",
+  "difficulty": "easy",
+  "explanation": "It survives from an old vowel-changing plural pattern, the same one behind foot and feet.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the plural of 'goose'?",
+  "choices": [
+   "Geese",
+   "Gooses",
+   "Geeses",
+   "Goosen"
+  ],
+  "answer": "Geese",
+  "difficulty": "easy",
+  "explanation": "Mongoose does not follow it: its plural is mongooses, because the word is unrelated to goose.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which part of speech is a word that describes an action, such as 'run'?",
+  "choices": [
+   "A verb",
+   "A noun",
+   "An adjective",
+   "A preposition"
+  ],
+  "answer": "A verb",
+  "difficulty": "easy",
+  "explanation": "The name comes from Latin verbum, simply meaning 'word', as the verb was seen as central.",
+  "unsure": false
+ },
+ {
+  "prompt": "What do we call a word that describes a noun, such as 'blue'?",
+  "choices": [
+   "An adjective",
+   "A verb",
+   "An adverb",
+   "A conjunction"
+  ],
+  "answer": "An adjective",
+  "difficulty": "easy",
+  "explanation": "The term comes from Latin meaning 'thrown next to', since it sits alongside the noun.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the term for a word that means the opposite of another?",
+  "choices": [
+   "An antonym",
+   "A synonym",
+   "An acronym",
+   "A pseudonym"
+  ],
+  "answer": "An antonym",
+  "difficulty": "easy",
+  "explanation": "The Greek prefix anti- means against, while -onym means name or word.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the term for a word with the same meaning as another?",
+  "choices": [
+   "A synonym",
+   "An antonym",
+   "A homonym",
+   "A pseudonym"
+  ],
+  "answer": "A synonym",
+  "difficulty": "easy",
+  "explanation": "The Greek prefix syn- means together, the same element found in synchronise.",
+  "unsure": false
+ },
+ {
+  "prompt": "What does the idiom 'raining cats and dogs' mean?",
+  "choices": [
+   "Raining very heavily",
+   "Snowing lightly",
+   "A sudden silence",
+   "A lucky escape"
+  ],
+  "answer": "Raining very heavily",
+  "difficulty": "easy",
+  "explanation": "It appears in print by the 17th century, though nobody has settled where the animals came from.",
+  "unsure": false
+ },
+ {
+  "prompt": "If you 'break the ice', what are you doing?",
+  "choices": [
+   "Easing an awkward start",
+   "Ending a friendship",
+   "Cancelling a plan",
+   "Losing your temper"
+  ],
+  "answer": "Easing an awkward start",
+  "difficulty": "easy",
+  "explanation": "The image is of ships breaking channels through frozen water so that others could follow.",
+  "unsure": false
+ },
+ {
+  "prompt": "If a task is 'a piece of cake', what is it?",
+  "choices": [
+   "Very easy",
+   "Very expensive",
+   "Very dangerous",
+   "Very slow"
+  ],
+  "answer": "Very easy",
+  "difficulty": "easy",
+  "explanation": "It likely comes from cakewalk contests, where cakes were prizes for the easiest, most graceful walking.",
+  "unsure": false
+ },
+ {
+  "prompt": "Someone who says they are 'under the weather' is what?",
+  "choices": [
+   "Feeling unwell",
+   "Running late",
+   "Deeply in debt",
+   "Very angry"
+  ],
+  "answer": "Feeling unwell",
+  "difficulty": "easy",
+  "explanation": "It is nautical: seasick sailors were sent below deck, out from under the weather rail.",
+  "unsure": false
+ },
+ {
+  "prompt": "To 'let the cat out of the bag' means to do what?",
+  "choices": [
+   "Reveal a secret",
+   "Start a fight",
+   "Waste money",
+   "Leave a job"
+  ],
+  "answer": "Reveal a secret",
+  "difficulty": "easy",
+  "explanation": "One story ties it to market fraud, where a cat was passed off as a piglet in a sack.",
+  "unsure": false
+ },
+ {
+  "prompt": "If something 'costs an arm and a leg', it is what?",
+  "choices": [
+   "Extremely expensive",
+   "Completely free",
+   "Highly dangerous",
+   "Very fragile"
+  ],
+  "answer": "Extremely expensive",
+  "difficulty": "easy",
+  "explanation": "The phrase is surprisingly recent, appearing in American English only in the 1940s.",
+  "unsure": false
+ },
+ {
+  "prompt": "Something that happens 'once in a blue moon' happens how often?",
+  "choices": [
+   "Very rarely",
+   "Every morning",
+   "Twice a day",
+   "Constantly"
+  ],
+  "answer": "Very rarely",
+  "difficulty": "easy",
+  "explanation": "A blue moon is an extra full moon in a season or month, which happens every few years.",
+  "unsure": false
+ },
+ {
+  "prompt": "If you 'hit the sack', what are you doing?",
+  "choices": [
+   "Going to bed",
+   "Starting an argument",
+   "Paying a bill",
+   "Leaving a party early"
+  ],
+  "answer": "Going to bed",
+  "difficulty": "easy",
+  "explanation": "Mattresses were once literally sacks stuffed with straw, which is where the phrase comes from.",
+  "unsure": false
+ },
+ {
+  "prompt": "To 'burn the midnight oil' means to do what?",
+  "choices": [
+   "Work late into the night",
+   "Spend money quickly",
+   "Cook a large meal",
+   "Travel a long way"
+  ],
+  "answer": "Work late into the night",
+  "difficulty": "easy",
+  "explanation": "It dates from when studying after dark meant burning oil in a lamp.",
+  "unsure": false
+ },
+ {
+  "prompt": "Who wrote the play 'Romeo and Juliet'?",
+  "choices": [
+   "William Shakespeare",
+   "Charles Dickens",
+   "Jane Austen",
+   "Mark Twain"
+  ],
+  "answer": "William Shakespeare",
+  "difficulty": "easy",
+  "explanation": "He based it on an Italian tale already retold in English verse by Arthur Brooke.",
+  "unsure": false
+ },
+ {
+  "prompt": "Who wrote the novel 'Oliver Twist'?",
+  "choices": [
+   "Charles Dickens",
+   "Thomas Hardy",
+   "H.G. Wells",
+   "George Eliot"
+  ],
+  "answer": "Charles Dickens",
+  "difficulty": "easy",
+  "explanation": "It was published in monthly instalments, a serial format that made him hugely popular.",
+  "unsure": false
+ },
+ {
+  "prompt": "Who wrote the Harry Potter series of novels?",
+  "choices": [
+   "J.K. Rowling",
+   "Philip Pullman",
+   "Roald Dahl",
+   "C.S. Lewis"
+  ],
+  "answer": "J.K. Rowling",
+  "difficulty": "easy",
+  "explanation": "Her publisher used initials rather than her first name, hoping to appeal to boy readers.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which author created the detective Sherlock Holmes?",
+  "choices": [
+   "Arthur Conan Doyle",
+   "Agatha Christie",
+   "Wilkie Collins",
+   "Edgar Wallace"
+  ],
+  "answer": "Arthur Conan Doyle",
+  "difficulty": "easy",
+  "explanation": "He was a doctor, and modelled Holmes on a surgeon known for diagnosing patients at a glance.",
+  "unsure": false
+ },
+ {
+  "prompt": "Who wrote the novel 'Pride and Prejudice'?",
+  "choices": [
+   "Jane Austen",
+   "Emily Dickinson",
+   "Mary Shelley",
+   "Elizabeth Gaskell"
+  ],
+  "answer": "Jane Austen",
+  "difficulty": "easy",
+  "explanation": "Her novels were published anonymously in her lifetime, credited only to 'a Lady'.",
+  "unsure": false
+ },
+ {
+  "prompt": "Who wrote the novel 'Nineteen Eighty-Four'?",
+  "choices": [
+   "George Orwell",
+   "Aldous Huxley",
+   "Ray Bradbury",
+   "H.G. Wells"
+  ],
+  "answer": "George Orwell",
+  "difficulty": "easy",
+  "explanation": "George Orwell was a pen name; the author was born Eric Arthur Blair.",
+  "unsure": false
+ },
+ {
+  "prompt": "Who wrote the novel 'Things Fall Apart'?",
+  "choices": [
+   "Chinua Achebe",
+   "Ngugi wa Thiong'o",
+   "Ben Okri",
+   "Camara Laye"
+  ],
+  "answer": "Chinua Achebe",
+  "difficulty": "easy",
+  "explanation": "Its title is taken from a line in a poem by the Irish writer W.B. Yeats.",
+  "unsure": false
+ },
+ {
+  "prompt": "Who wrote the novel 'Dracula'?",
+  "choices": [
+   "Bram Stoker",
+   "Mary Shelley",
+   "Edgar Allan Poe",
+   "Robert Louis Stevenson"
+  ],
+  "answer": "Bram Stoker",
+  "difficulty": "easy",
+  "explanation": "Stoker was Dublin-born and spent years managing a London theatre while writing fiction.",
+  "unsure": false
+ },
+ {
+  "prompt": "A poem of fourteen lines is known as what?",
+  "choices": [
+   "A sonnet",
+   "A ballad",
+   "An ode",
+   "An elegy"
+  ],
+  "answer": "A sonnet",
+  "difficulty": "easy",
+  "explanation": "The name comes from Italian sonetto, meaning a 'little song'.",
+  "unsure": false
+ },
+ {
+  "prompt": "The haiku, a very short poem form, originated in which country?",
+  "choices": [
+   "Japan",
+   "Greece",
+   "Ireland",
+   "Peru"
+  ],
+  "answer": "Japan",
+  "difficulty": "easy",
+  "explanation": "It grew out of the opening verse of a longer collaborative form called renga.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the term for words like 'buzz' and 'hiss' that imitate sounds?",
+  "choices": [
+   "Onomatopoeia",
+   "Alliteration",
+   "Personification",
+   "Hyperbole"
+  ],
+  "answer": "Onomatopoeia",
+  "difficulty": "easy",
+  "explanation": "The word is Greek for 'name-making', and such words differ oddly between languages.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the term for a word that reads the same backwards as forwards?",
+  "choices": [
+   "A palindrome",
+   "An anagram",
+   "An acronym",
+   "A homophone"
+  ],
+  "answer": "A palindrome",
+  "difficulty": "easy",
+  "explanation": "It is Greek for 'running back again', and the longest common English one is redivider.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which of these words is a palindrome?",
+  "choices": [
+   "Level",
+   "Table",
+   "Water",
+   "Stone"
+  ],
+  "answer": "Level",
+  "difficulty": "easy",
+  "explanation": "Other everyday examples include noon, civic and rotator.",
+  "unsure": false
+ },
+ {
+  "prompt": "English borrowed the word 'ballet' from which language?",
+  "choices": [
+   "French",
+   "German",
+   "Arabic",
+   "Russian"
+  ],
+  "answer": "French",
+  "difficulty": "easy",
+  "explanation": "French took it from Italian balletto, a little dance, as the art form began in Italy.",
+  "unsure": false
+ },
+ {
+  "prompt": "The word 'pizza' came into English from which language?",
+  "choices": [
+   "Italian",
+   "Spanish",
+   "Greek",
+   "Turkish"
+  ],
+  "answer": "Italian",
+  "difficulty": "easy",
+  "explanation": "It appeared in English only in the 19th century, long after the dish existed in Naples.",
+  "unsure": false
+ },
+ {
+  "prompt": "English took the word 'kindergarten' from which language?",
+  "choices": [
+   "German",
+   "Dutch",
+   "Swedish",
+   "Polish"
+  ],
+  "answer": "German",
+  "difficulty": "easy",
+  "explanation": "It literally means 'children's garden', a name coined by the educator Friedrich Froebel.",
+  "unsure": false
+ },
+ {
+  "prompt": "The word 'safari' entered English from which language?",
+  "choices": [
+   "Swahili",
+   "Zulu",
+   "Hausa",
+   "Amharic"
+  ],
+  "answer": "Swahili",
+  "difficulty": "easy",
+  "explanation": "In Swahili it simply means a journey, and it derives ultimately from Arabic.",
+  "unsure": false
+ },
+ {
+  "prompt": "The word 'tsunami' came into English from which language?",
+  "choices": [
+   "Japanese",
+   "Mandarin",
+   "Korean",
+   "Malay"
+  ],
+  "answer": "Japanese",
+  "difficulty": "easy",
+  "explanation": "It combines the Japanese words for harbour and wave, describing where the wave is felt most.",
+  "unsure": false
+ },
+ {
+  "prompt": "The word 'yoga' entered English from which ancient language?",
+  "choices": [
+   "Sanskrit",
+   "Latin",
+   "Hebrew",
+   "Old Norse"
+  ],
+  "answer": "Sanskrit",
+  "difficulty": "easy",
+  "explanation": "It means a yoking or union, and shares a distant root with the English word yoke.",
+  "unsure": false
+ },
+ {
+  "prompt": "The word 'alphabet' is built from the first two letters of which alphabet?",
+  "choices": [
+   "Greek",
+   "Latin",
+   "Hebrew",
+   "Cyrillic"
+  ],
+  "answer": "Greek",
+  "difficulty": "easy",
+  "explanation": "Alpha and beta are the Greek names, themselves borrowed from earlier Phoenician letters.",
+  "unsure": false
+ },
+ {
+  "prompt": "How many letters are in the modern English alphabet?",
+  "choices": [
+   "26",
+   "24",
+   "28",
+   "30"
+  ],
+  "answer": "26",
+  "difficulty": "easy",
+  "explanation": "Old English also used extra letters such as thorn and eth, which later fell out of use.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which letter appears most frequently in written English?",
+  "choices": [
+   "E",
+   "A",
+   "S",
+   "T"
+  ],
+  "answer": "E",
+  "difficulty": "easy",
+  "explanation": "Its dominance is why it is the first letter guessed in most simple letter-frequency codes.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which of these letters is not a vowel?",
+  "choices": [
+   "R",
+   "A",
+   "E",
+   "I"
+  ],
+  "answer": "R",
+  "difficulty": "easy",
+  "explanation": "English has five main vowel letters, with y sometimes acting as a sixth.",
+  "unsure": false
+ },
+ {
+  "prompt": "In writing, what does the abbreviation 'e.g.' mean?",
+  "choices": [
+   "For example",
+   "In conclusion",
+   "And so on",
+   "That is to say"
+  ],
+  "answer": "For example",
+  "difficulty": "easy",
+  "explanation": "It stands for Latin exempli gratia, while i.e. means 'that is'.",
+  "unsure": false
+ },
+ {
+  "prompt": "The abbreviation 'etc.' is short for which Latin phrase?",
+  "choices": [
+   "Et cetera",
+   "Et alia",
+   "Ergo cetera",
+   "Exit causa"
+  ],
+  "answer": "Et cetera",
+  "difficulty": "easy",
+  "explanation": "It literally means 'and the rest', which is why writing 'and etc.' is redundant.",
+  "unsure": false
+ },
+ {
+  "prompt": "In clock times, 'a.m.' is short for which Latin phrase?",
+  "choices": [
+   "Ante meridiem",
+   "Ad mane",
+   "Anno mundi",
+   "Alta mattina"
+  ],
+  "answer": "Ante meridiem",
+  "difficulty": "easy",
+  "explanation": "It means 'before midday', so noon itself is strictly neither a.m. nor p.m.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which word means extremely large?",
+  "choices": [
+   "Enormous",
+   "Fragile",
+   "Silent",
+   "Damp"
+  ],
+  "answer": "Enormous",
+  "difficulty": "easy",
+  "explanation": "It comes from Latin meaning 'out of the norm', literally beyond the usual measure.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which word means 'able to be seen'?",
+  "choices": [
+   "Visible",
+   "Audible",
+   "Edible",
+   "Portable"
+  ],
+  "answer": "Visible",
+  "difficulty": "easy",
+  "explanation": "The Latin root videre, to see, also gives English video and evidence.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which word is the opposite of 'ancient'?",
+  "choices": [
+   "Modern",
+   "Heavy",
+   "Distant",
+   "Quiet"
+  ],
+  "answer": "Modern",
+  "difficulty": "easy",
+  "explanation": "Modern comes from Latin modo, meaning 'just now'.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is a doctor who treats animals called?",
+  "choices": [
+   "A vet",
+   "A dentist",
+   "A florist",
+   "A chemist"
+  ],
+  "answer": "A vet",
+  "difficulty": "easy",
+  "explanation": "Vet is short for veterinarian, from a Latin word for cattle and working beasts.",
+  "unsure": false
+ },
+ {
+  "prompt": "A person described as bilingual speaks how many languages?",
+  "choices": [
+   "Two",
+   "One",
+   "Four",
+   "Seven"
+  ],
+  "answer": "Two",
+  "difficulty": "easy",
+  "explanation": "The root lingua means tongue, so bilingual literally means 'two-tongued'.",
+  "unsure": false
+ },
+ {
+  "prompt": "In words like 'triangle' and 'tricycle', what does the prefix 'tri-' mean?",
+  "choices": [
+   "Three",
+   "Two",
+   "Five",
+   "Ten"
+  ],
+  "answer": "Three",
+  "difficulty": "easy",
+  "explanation": "It comes from Greek and Latin, and also gives us trilogy and tripod.",
+  "unsure": false
+ },
+ {
+  "prompt": "In words like 'hopeless' and 'fearless', what does the suffix '-less' mean?",
+  "choices": [
+   "Without",
+   "Full of",
+   "Before",
+   "Again"
+  ],
+  "answer": "Without",
+  "difficulty": "easy",
+  "explanation": "It comes from Old English leas, meaning free from, and is unrelated to the word 'less'.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the main job of a full stop in English writing?",
+  "choices": [
+   "To end a sentence",
+   "To join two nouns",
+   "To show possession",
+   "To mark a quotation"
+  ],
+  "answer": "To end a sentence",
+  "difficulty": "easy",
+  "explanation": "American English calls the same mark a period, from a Greek word for a complete sentence.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which of these words is a conjunction?",
+  "choices": [
+   "And",
+   "Quickly",
+   "Blue",
+   "Table"
+  ],
+  "answer": "And",
+  "difficulty": "easy",
+  "explanation": "Conjunctions join words or clauses, from Latin meaning 'to yoke together'.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which of these words is a pronoun?",
+  "choices": [
+   "She",
+   "Run",
+   "Green",
+   "Slowly"
+  ],
+  "answer": "She",
+  "difficulty": "easy",
+  "explanation": "Pronouns stand in for nouns, saving us from repeating a name in every sentence.",
+  "unsure": false
+ },
+ {
+  "prompt": "In grammar, a noun names what?",
+  "choices": [
+   "A person, place or thing",
+   "An action",
+   "A quality of a verb",
+   "A link between clauses"
+  ],
+  "answer": "A person, place or thing",
+  "difficulty": "easy",
+  "explanation": "The word noun comes from Latin nomen, simply meaning 'name'.",
+  "unsure": false
+ },
+ {
+  "prompt": "The sandwich is said to be named after a title held by which kind of figure?",
+  "choices": [
+   "An English earl",
+   "A Spanish bishop",
+   "A Dutch admiral",
+   "A Russian tsar"
+  ],
+  "answer": "An English earl",
+  "difficulty": "medium",
+  "explanation": "John Montagu, 4th Earl of Sandwich, reputedly asked for meat between bread so he could keep working.",
+  "unsure": false
+ },
+ {
+  "prompt": "The word 'salary' is traced to a Latin word connected with which substance?",
+  "choices": [
+   "Salt",
+   "Silver",
+   "Wine",
+   "Iron"
+  ],
+  "answer": "Salt",
+  "difficulty": "medium",
+  "explanation": "Roman salarium was an allowance linked to salt, a valuable preservative in the ancient world.",
+  "unsure": false
+ },
+ {
+  "prompt": "'Quarantine' comes from an Italian word for what number of days?",
+  "choices": [
+   "Forty",
+   "Seven",
+   "Twelve",
+   "One hundred"
+  ],
+  "answer": "Forty",
+  "difficulty": "medium",
+  "explanation": "Venetian-controlled ports made arriving ships wait forty days during plague outbreaks.",
+  "unsure": false
+ },
+ {
+  "prompt": "In the word 'nightmare', what did the 'mare' part originally mean?",
+  "choices": [
+   "An evil spirit",
+   "A female horse",
+   "A dark sea",
+   "A deep sleep"
+  ],
+  "answer": "An evil spirit",
+  "difficulty": "medium",
+  "explanation": "The mare was a demon believed to sit on a sleeper's chest, causing crushing dreams.",
+  "unsure": false
+ },
+ {
+  "prompt": "The word 'sabotage' derives from 'sabot', a French word for what?",
+  "choices": [
+   "A wooden shoe",
+   "A hammer",
+   "A cart wheel",
+   "A rope"
+  ],
+  "answer": "A wooden shoe",
+  "difficulty": "medium",
+  "explanation": "The related verb saboter meant to clatter or botch a job, as if working in clumsy clogs.",
+  "unsure": false
+ },
+ {
+  "prompt": "'Muscle' comes from a Latin word meaning which small animal?",
+  "choices": [
+   "A mouse",
+   "A frog",
+   "A bee",
+   "A snail"
+  ],
+  "answer": "A mouse",
+  "difficulty": "medium",
+  "explanation": "Latin musculus, 'little mouse', described how a flexing bicep seems to scurry under the skin.",
+  "unsure": false
+ },
+ {
+  "prompt": "'Companion' comes from Latin roots meaning someone you share what with?",
+  "choices": [
+   "Bread",
+   "A bed",
+   "A horse",
+   "A name"
+  ],
+  "answer": "Bread",
+  "difficulty": "medium",
+  "explanation": "Com plus panis means 'with bread', the same panis behind the word pantry.",
+  "unsure": false
+ },
+ {
+  "prompt": "The word 'disaster' is built from roots meaning 'bad' plus what?",
+  "choices": [
+   "Star",
+   "Road",
+   "Water",
+   "King"
+  ],
+  "answer": "Star",
+  "difficulty": "medium",
+  "explanation": "It reflects the old belief that misfortune came from an unfavourable alignment of the stars.",
+  "unsure": false
+ },
+ {
+  "prompt": "'Vaccine' derives from the Latin name of which animal?",
+  "choices": [
+   "Cow",
+   "Snake",
+   "Goat",
+   "Horse"
+  ],
+  "answer": "Cow",
+  "difficulty": "medium",
+  "explanation": "Edward Jenner used cowpox material, and Latin vacca means cow.",
+  "unsure": false
+ },
+ {
+  "prompt": "The word 'panic' comes from the name of which Greek god?",
+  "choices": [
+   "Pan",
+   "Ares",
+   "Hermes",
+   "Hades"
+  ],
+  "answer": "Pan",
+  "difficulty": "medium",
+  "explanation": "Pan was believed to cause sudden irrational terror in lonely places, especially in flocks.",
+  "unsure": false
+ },
+ {
+  "prompt": "The word 'cereal' is derived from the name of which Roman goddess?",
+  "choices": [
+   "Ceres",
+   "Juno",
+   "Diana",
+   "Vesta"
+  ],
+  "answer": "Ceres",
+  "difficulty": "medium",
+  "explanation": "Ceres was the goddess of grain and agriculture, honoured at the festival called Cerealia.",
+  "unsure": false
+ },
+ {
+  "prompt": "The month name January comes from which Roman god?",
+  "choices": [
+   "Janus",
+   "Jupiter",
+   "Mars",
+   "Neptune"
+  ],
+  "answer": "Janus",
+  "difficulty": "medium",
+  "explanation": "Janus had two faces, looking backwards and forwards, fitting for the turn of the year.",
+  "unsure": false
+ },
+ {
+  "prompt": "Wednesday takes its name from which Norse god?",
+  "choices": [
+   "Odin",
+   "Loki",
+   "Freyr",
+   "Balder"
+  ],
+  "answer": "Odin",
+  "difficulty": "medium",
+  "explanation": "The English form came via Woden, the Anglo-Saxon name for the same god.",
+  "unsure": false
+ },
+ {
+  "prompt": "Thursday is named after which Norse god?",
+  "choices": [
+   "Thor",
+   "Odin",
+   "Tyr",
+   "Njord"
+  ],
+  "answer": "Thor",
+  "difficulty": "medium",
+  "explanation": "Tuesday honours Tyr and Friday Frigg, so the week carries several Norse names.",
+  "unsure": false
+ },
+ {
+  "prompt": "The word 'volcano' comes from the name of which Roman god?",
+  "choices": [
+   "Vulcan",
+   "Mercury",
+   "Saturn",
+   "Apollo"
+  ],
+  "answer": "Vulcan",
+  "difficulty": "medium",
+  "explanation": "Vulcan was the god of fire and metalworking, said to keep a forge beneath a Sicilian island.",
+  "unsure": false
+ },
+ {
+  "prompt": "A book of maps is called an atlas after a figure who did what in myth?",
+  "choices": [
+   "Held up the sky",
+   "Stole fire",
+   "Sailed the world",
+   "Built a labyrinth"
+  ],
+  "answer": "Held up the sky",
+  "difficulty": "medium",
+  "explanation": "Mercator put the Titan on the title page of his map collection, and the name stuck.",
+  "unsure": false
+ },
+ {
+  "prompt": "The word 'boycott' comes from a land agent who was shunned in which country?",
+  "choices": [
+   "Ireland",
+   "Scotland",
+   "Canada",
+   "Australia"
+  ],
+  "answer": "Ireland",
+  "difficulty": "medium",
+  "explanation": "Captain Charles Boycott was ostracised in County Mayo in 1880 during a tenants' campaign.",
+  "unsure": false
+ },
+ {
+  "prompt": "'Nicotine' honours Jean Nicot, who introduced tobacco to which country's court?",
+  "choices": [
+   "France",
+   "Portugal",
+   "Denmark",
+   "Austria"
+  ],
+  "answer": "France",
+  "difficulty": "medium",
+  "explanation": "Nicot was a diplomat in Lisbon who sent the plant home, and the plant genus Nicotiana bears his name.",
+  "unsure": false
+ },
+ {
+  "prompt": "'Silhouette' comes from Étienne de Silhouette, who held which office?",
+  "choices": [
+   "Finance minister",
+   "Court painter",
+   "Army general",
+   "Chief physician"
+  ],
+  "answer": "Finance minister",
+  "difficulty": "medium",
+  "explanation": "His penny-pinching taxes made his name a byword for anything done cheaply, like a cut-paper portrait.",
+  "unsure": false
+ },
+ {
+  "prompt": "The guillotine is named after a man who worked in which profession?",
+  "choices": [
+   "Physician",
+   "Carpenter",
+   "Lawyer",
+   "Blacksmith"
+  ],
+  "answer": "Physician",
+  "difficulty": "medium",
+  "explanation": "Joseph-Ignace Guillotin proposed the device as a swifter, less cruel method, and did not invent it.",
+  "unsure": false
+ },
+ {
+  "prompt": "The cardigan and the raglan sleeve are both named after figures from which war?",
+  "choices": [
+   "The Crimean War",
+   "The Boer War",
+   "The Hundred Years War",
+   "The American Civil War"
+  ],
+  "answer": "The Crimean War",
+  "difficulty": "medium",
+  "explanation": "Lord Cardigan led the Charge of the Light Brigade, and Lord Raglan commanded the British forces.",
+  "unsure": false
+ },
+ {
+  "prompt": "The word 'sideburns' is a rearrangement of whose surname?",
+  "choices": [
+   "Burnside",
+   "Sidewell",
+   "Burnham",
+   "Sideman"
+  ],
+  "answer": "Burnside",
+  "difficulty": "medium",
+  "explanation": "The American general Ambrose Burnside wore such striking whiskers that they took his name.",
+  "unsure": false
+ },
+ {
+  "prompt": "The word 'maverick' comes from a Texan rancher who famously did what?",
+  "choices": [
+   "Left his cattle unbranded",
+   "Refused to sell land",
+   "Rode alone at night",
+   "Built the first fence"
+  ],
+  "answer": "Left his cattle unbranded",
+  "difficulty": "medium",
+  "explanation": "Samuel Maverick's unmarked calves meant any stray without a brand was called a maverick.",
+  "unsure": false
+ },
+ {
+  "prompt": "The word 'jumbo' meaning huge came from the name of what?",
+  "choices": [
+   "An elephant",
+   "A steam ship",
+   "A cannon",
+   "A racehorse"
+  ],
+  "answer": "An elephant",
+  "difficulty": "medium",
+  "explanation": "Jumbo was a celebrated African elephant at London Zoo, later sold to a travelling circus.",
+  "unsure": false
+ },
+ {
+  "prompt": "'Gerrymander' blends a politician's name with the name of which creature?",
+  "choices": [
+   "A salamander",
+   "A spider",
+   "A crocodile",
+   "A magpie"
+  ],
+  "answer": "A salamander",
+  "difficulty": "medium",
+  "explanation": "A newspaper said a district redrawn under Governor Elbridge Gerry looked like the lizard.",
+  "unsure": false
+ },
+ {
+  "prompt": "'Sarcasm' comes from a Greek verb meaning to tear what?",
+  "choices": [
+   "Flesh",
+   "Cloth",
+   "Paper",
+   "Bread"
+  ],
+  "answer": "Flesh",
+  "difficulty": "medium",
+  "explanation": "The image is of biting remarks stripping a victim like a dog tearing meat.",
+  "unsure": false
+ },
+ {
+  "prompt": "The word 'clue' originally meant a ball of what?",
+  "choices": [
+   "Thread",
+   "Wax",
+   "Clay",
+   "Dough"
+  ],
+  "answer": "Thread",
+  "difficulty": "medium",
+  "explanation": "It comes from 'clew', the thread Theseus unwound to find his way out of the labyrinth.",
+  "unsure": false
+ },
+ {
+  "prompt": "The word 'gossip' originally described what kind of person?",
+  "choices": [
+   "A godparent",
+   "A market trader",
+   "A town crier",
+   "A travelling monk"
+  ],
+  "answer": "A godparent",
+  "difficulty": "medium",
+  "explanation": "Old English godsibb meant a sponsor at a baptism, then a close friend, then idle talk itself.",
+  "unsure": false
+ },
+ {
+  "prompt": "In Middle English, the word 'nice' originally meant what?",
+  "choices": [
+   "Foolish or ignorant",
+   "Wealthy",
+   "Brave",
+   "Fragrant"
+  ],
+  "answer": "Foolish or ignorant",
+  "difficulty": "medium",
+  "explanation": "It came from Latin nescius, not knowing, and drifted through 'fussy' before becoming pleasant.",
+  "unsure": false
+ },
+ {
+  "prompt": "The word 'silly' originally carried which meaning?",
+  "choices": [
+   "Blessed or happy",
+   "Loud",
+   "Poor",
+   "Hairy"
+  ],
+  "answer": "Blessed or happy",
+  "difficulty": "medium",
+  "explanation": "From blessed it slid to innocent, then helpless, then weak-minded, a classic case of meaning decay.",
+  "unsure": false
+ },
+ {
+  "prompt": "The phrase 'bury the hatchet' comes from a peace custom associated with whom?",
+  "choices": [
+   "Native American peoples",
+   "Viking raiders",
+   "Roman legions",
+   "Samurai clans"
+  ],
+  "answer": "Native American peoples",
+  "difficulty": "medium",
+  "explanation": "Weapons were literally buried when Iroquois nations agreed peace, a ritual noted by colonists.",
+  "unsure": false
+ },
+ {
+  "prompt": "'Turn a blind eye' is traditionally linked to which naval commander?",
+  "choices": [
+   "Horatio Nelson",
+   "Francis Drake",
+   "James Cook",
+   "John Paul Jones"
+  ],
+  "answer": "Horatio Nelson",
+  "difficulty": "medium",
+  "explanation": "At Copenhagen he is said to have raised a telescope to his blind eye to ignore a signal to withdraw.",
+  "unsure": false
+ },
+ {
+  "prompt": "'Mad as a hatter' is linked to poisoning by which substance?",
+  "choices": [
+   "Mercury",
+   "Lead",
+   "Arsenic",
+   "Copper"
+  ],
+  "answer": "Mercury",
+  "difficulty": "medium",
+  "explanation": "Hat-makers used mercury compounds to treat felt, and long exposure caused tremors and confusion.",
+  "unsure": false
+ },
+ {
+  "prompt": "In the phrase 'red herring', how was the fish treated to make it red?",
+  "choices": [
+   "Smoked and cured",
+   "Boiled in wine",
+   "Dyed with beetroot",
+   "Frozen in salt"
+  ],
+  "answer": "Smoked and cured",
+  "difficulty": "medium",
+  "explanation": "Heavy smoking turns herring reddish and pungent, and the strong smell could pull hounds off a trail.",
+  "unsure": false
+ },
+ {
+  "prompt": "The good-luck phrase 'break a leg' belongs to which profession?",
+  "choices": [
+   "Theatre",
+   "Fishing",
+   "Mining",
+   "Banking"
+  ],
+  "answer": "Theatre",
+  "difficulty": "medium",
+  "explanation": "Actors treat wishing good luck outright as unlucky, so they wish for the opposite instead.",
+  "unsure": false
+ },
+ {
+  "prompt": "In the word 'blackmail', what did the 'mail' part originally mean?",
+  "choices": [
+   "Rent or tribute",
+   "Armour",
+   "A letter",
+   "A sack"
+  ],
+  "answer": "Rent or tribute",
+  "difficulty": "medium",
+  "explanation": "Scottish border chiefs demanded protection payments, black in contrast to lawful silver rent.",
+  "unsure": false
+ },
+ {
+  "prompt": "'Curfew' comes from a French phrase meaning to cover what?",
+  "choices": [
+   "The fire",
+   "The head",
+   "The gate",
+   "The eyes"
+  ],
+  "answer": "The fire",
+  "difficulty": "medium",
+  "explanation": "A bell told medieval townspeople to damp their hearths, reducing the risk of night-time fires.",
+  "unsure": false
+ },
+ {
+  "prompt": "The word 'alcohol' came into English from which language?",
+  "choices": [
+   "Arabic",
+   "Greek",
+   "Hebrew",
+   "Persian"
+  ],
+  "answer": "Arabic",
+  "difficulty": "medium",
+  "explanation": "Arabic al-kuhl first named a fine powder used as eye cosmetic, later any purified essence.",
+  "unsure": false
+ },
+ {
+  "prompt": "The word 'zero' traces back to an Arabic word meaning what?",
+  "choices": [
+   "Empty",
+   "Round",
+   "Cold",
+   "Endless"
+  ],
+  "answer": "Empty",
+  "difficulty": "medium",
+  "explanation": "Arabic sifr also gave English the word cipher, which once meant zero itself.",
+  "unsure": false
+ },
+ {
+  "prompt": "The word 'robot' was coined in a 1920s play written in which language?",
+  "choices": [
+   "Czech",
+   "Hungarian",
+   "Danish",
+   "Serbian"
+  ],
+  "answer": "Czech",
+  "difficulty": "medium",
+  "explanation": "Karel Capek's play R.U.R. used robota, a word for forced labour or drudgery.",
+  "unsure": false
+ },
+ {
+  "prompt": "'Ketchup' is generally traced to a sauce name from which language family?",
+  "choices": [
+   "Chinese",
+   "Portuguese",
+   "Turkish",
+   "Russian"
+  ],
+  "answer": "Chinese",
+  "difficulty": "medium",
+  "explanation": "The likely source is a Hokkien word for a fermented fish sauce; tomatoes came much later.",
+  "unsure": true
+ },
+ {
+  "prompt": "The word 'bungalow' describes a house style from which country?",
+  "choices": [
+   "India",
+   "Egypt",
+   "Brazil",
+   "Norway"
+  ],
+  "answer": "India",
+  "difficulty": "medium",
+  "explanation": "It comes from a word meaning 'of Bengal', describing low cottages with wide verandas.",
+  "unsure": false
+ },
+ {
+  "prompt": "'Shampoo' comes from a South Asian word that originally meant what?",
+  "choices": [
+   "To press or massage",
+   "To boil",
+   "To perfume",
+   "To braid"
+  ],
+  "answer": "To press or massage",
+  "difficulty": "medium",
+  "explanation": "It entered English as a word for a therapeutic head massage before it meant hair soap.",
+  "unsure": false
+ },
+ {
+  "prompt": "'Juggernaut' derives from a huge temple chariot procession in which country?",
+  "choices": [
+   "India",
+   "Thailand",
+   "Ethiopia",
+   "Mexico"
+  ],
+  "answer": "India",
+  "difficulty": "medium",
+  "explanation": "European visitors to the Jagannath festival at Puri described an unstoppable rolling cart.",
+  "unsure": false
+ },
+ {
+  "prompt": "The word 'assassin' is commonly traced to a group named after which substance?",
+  "choices": [
+   "Hashish",
+   "Wine",
+   "Opium",
+   "Incense"
+  ],
+  "answer": "Hashish",
+  "difficulty": "medium",
+  "explanation": "Medieval accounts called the sect hashishin, though whether they used the drug is disputed.",
+  "unsure": false
+ },
+ {
+  "prompt": "'Tycoon' came into English from which language?",
+  "choices": [
+   "Japanese",
+   "Mandarin",
+   "Korean",
+   "Mongolian"
+  ],
+  "answer": "Japanese",
+  "difficulty": "medium",
+  "explanation": "Taikun meant 'great lord', a title used for the shogun in dealings with foreign envoys.",
+  "unsure": false
+ },
+ {
+  "prompt": "The fabric name 'denim' comes from a town in which country?",
+  "choices": [
+   "France",
+   "Italy",
+   "Spain",
+   "Belgium"
+  ],
+  "answer": "France",
+  "difficulty": "medium",
+  "explanation": "It is short for serge de Nimes, a sturdy twill woven in the city of Nimes.",
+  "unsure": false
+ },
+ {
+  "prompt": "The word 'jeans' is linked to sailors from which Italian city?",
+  "choices": [
+   "Genoa",
+   "Venice",
+   "Naples",
+   "Turin"
+  ],
+  "answer": "Genoa",
+  "difficulty": "medium",
+  "explanation": "Genoese sailors wore hard-wearing cotton trousers, and the city's French name was Genes.",
+  "unsure": false
+ },
+ {
+  "prompt": "'Laconic', meaning using few words, refers to the region around which Greek city?",
+  "choices": [
+   "Sparta",
+   "Athens",
+   "Corinth",
+   "Thebes"
+  ],
+  "answer": "Sparta",
+  "difficulty": "medium",
+  "explanation": "Sparta lay in Laconia, and its people were famous for blunt one-word replies.",
+  "unsure": false
+ },
+ {
+  "prompt": "The word 'stoic' comes from a Greek word for what kind of place?",
+  "choices": [
+   "A covered porch",
+   "A mountain cave",
+   "A war camp",
+   "A temple crypt"
+  ],
+  "answer": "A covered porch",
+  "difficulty": "medium",
+  "explanation": "Zeno taught at the Stoa Poikile, a painted colonnade in the Athenian marketplace.",
+  "unsure": false
+ },
+ {
+  "prompt": "The word 'academy' comes from a grove where which philosopher taught?",
+  "choices": [
+   "Plato",
+   "Aristotle",
+   "Epicurus",
+   "Pythagoras"
+  ],
+  "answer": "Plato",
+  "difficulty": "medium",
+  "explanation": "The grove outside Athens was named after a local hero, Akademos.",
+  "unsure": false
+ },
+ {
+  "prompt": "The word 'utopia' was coined by which English writer?",
+  "choices": [
+   "Thomas More",
+   "Francis Bacon",
+   "John Bunyan",
+   "Christopher Marlowe"
+  ],
+  "answer": "Thomas More",
+  "difficulty": "medium",
+  "explanation": "He built it from Greek meaning 'no place', a pun on 'good place' that suits an ideal society.",
+  "unsure": false
+ },
+ {
+  "prompt": "'Malapropism' is named after a character created by which playwright?",
+  "choices": [
+   "Richard Sheridan",
+   "Ben Jonson",
+   "Oliver Goldsmith",
+   "John Webster"
+  ],
+  "answer": "Richard Sheridan",
+  "difficulty": "medium",
+  "explanation": "Mrs Malaprop in The Rivals muddled long words, and her name nods to French mal a propos.",
+  "unsure": false
+ },
+ {
+  "prompt": "'Serendipity' was coined from an old name for which island?",
+  "choices": [
+   "Sri Lanka",
+   "Cyprus",
+   "Madagascar",
+   "Java"
+  ],
+  "answer": "Sri Lanka",
+  "difficulty": "medium",
+  "explanation": "Horace Walpole invented it after a fairy tale about three princes of Serendip.",
+  "unsure": false
+ },
+ {
+  "prompt": "The word 'pandemonium' was invented by which poet for his epic?",
+  "choices": [
+   "John Milton",
+   "Edmund Spenser",
+   "Alexander Pope",
+   "William Blake"
+  ],
+  "answer": "John Milton",
+  "difficulty": "medium",
+  "explanation": "In Paradise Lost it names the capital of hell, built from Greek for 'all the demons'.",
+  "unsure": false
+ },
+ {
+  "prompt": "The word 'chortle' was invented by which author?",
+  "choices": [
+   "Lewis Carroll",
+   "Edward Lear",
+   "Rudyard Kipling",
+   "Kenneth Grahame"
+  ],
+  "answer": "Lewis Carroll",
+  "difficulty": "medium",
+  "explanation": "It appears in Jabberwocky and blends chuckle with snort, a type he called a portmanteau word.",
+  "unsure": false
+ },
+ {
+  "prompt": "The German loanword 'schadenfreude' describes pleasure at what?",
+  "choices": [
+   "Another's misfortune",
+   "A long holiday",
+   "Sudden wealth",
+   "Perfect weather"
+  ],
+  "answer": "Another's misfortune",
+  "difficulty": "medium",
+  "explanation": "It joins Schaden, harm, with Freude, joy, and English never coined a neat word of its own.",
+  "unsure": false
+ },
+ {
+  "prompt": "The French phrase 'deja vu' literally translates as what?",
+  "choices": [
+   "Already seen",
+   "Never again",
+   "Sudden turn",
+   "Half awake"
+  ],
+  "answer": "Already seen",
+  "difficulty": "medium",
+  "explanation": "The related term jamais vu, 'never seen', describes a familiar thing suddenly feeling strange.",
+  "unsure": false
+ },
+ {
+  "prompt": "The Japanese word 'karaoke' literally means 'empty' what?",
+  "choices": [
+   "Orchestra",
+   "Stage",
+   "Room",
+   "Voice"
+  ],
+  "answer": "Orchestra",
+  "difficulty": "medium",
+  "explanation": "The 'oke' is a clipped borrowing of the English word orchestra, so the band is missing.",
+  "unsure": false
+ },
+ {
+  "prompt": "The borrowed phrase 'cul-de-sac' literally means the bottom of what?",
+  "choices": [
+   "A bag",
+   "A hill",
+   "A well",
+   "A ship"
+  ],
+  "answer": "A bag",
+  "difficulty": "medium",
+  "explanation": "French speakers today more often say 'impasse' for a dead-end street.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the traditional collective noun for a group of owls?",
+  "choices": [
+   "A parliament",
+   "A congress",
+   "A jury",
+   "A senate"
+  ],
+  "answer": "A parliament",
+  "difficulty": "medium",
+  "explanation": "It was popularised in the 20th century, playing on the owl's reputation for solemn wisdom.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the traditional collective noun for a group of larks?",
+  "choices": [
+   "An exaltation",
+   "A jubilation",
+   "A rapture",
+   "An ovation"
+  ],
+  "answer": "An exaltation",
+  "difficulty": "medium",
+  "explanation": "It appears in 15th-century lists of hunting terms and evokes the lark's soaring song.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the name for a large swirling flock of starlings?",
+  "choices": [
+   "A murmuration",
+   "A whispering",
+   "A shimmering",
+   "A humming"
+  ],
+  "answer": "A murmuration",
+  "difficulty": "medium",
+  "explanation": "The word echoes the low rushing sound made by thousands of wings turning together.",
+  "unsure": false
+ },
+ {
+  "prompt": "In careful English, which word is used with things you can count?",
+  "choices": [
+   "Fewer",
+   "Less",
+   "Lesser",
+   "Little"
+  ],
+  "answer": "Fewer",
+  "difficulty": "medium",
+  "explanation": "So it is fewer bottles but less water, since water is measured rather than counted.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which literary device repeats the same initial consonant sound in nearby words?",
+  "choices": [
+   "Alliteration",
+   "Assonance",
+   "Metaphor",
+   "Irony"
+  ],
+  "answer": "Alliteration",
+  "difficulty": "medium",
+  "explanation": "Old English verse was built on it, using stressed alliterating syllables instead of rhyme.",
+  "unsure": false
+ },
+ {
+  "prompt": "Who wrote 'The Canterbury Tales'?",
+  "choices": [
+   "Geoffrey Chaucer",
+   "Thomas Malory",
+   "William Langland",
+   "John Gower"
+  ],
+  "answer": "Geoffrey Chaucer",
+  "difficulty": "medium",
+  "explanation": "He wrote in Middle English at a time when courtly writing in England still favoured French and Latin.",
+  "unsure": false
+ },
+ {
+  "prompt": "Who wrote the long modernist poem 'The Waste Land'?",
+  "choices": [
+   "T.S. Eliot",
+   "Ezra Pound",
+   "W.H. Auden",
+   "Dylan Thomas"
+  ],
+  "answer": "T.S. Eliot",
+  "difficulty": "medium",
+  "explanation": "Ezra Pound edited the draft heavily, cutting it to roughly half its original length.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which Nigerian writer was the first African to win the Nobel Prize in Literature?",
+  "choices": [
+   "Wole Soyinka",
+   "Chinua Achebe",
+   "Ben Okri",
+   "Amos Tutuola"
+  ],
+  "answer": "Wole Soyinka",
+  "difficulty": "medium",
+  "explanation": "He won in 1986 and is best known as a playwright, including A Dance of the Forests.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which Bronte sister wrote 'Wuthering Heights'?",
+  "choices": [
+   "Emily",
+   "Charlotte",
+   "Anne",
+   "Maria"
+  ],
+  "answer": "Emily",
+  "difficulty": "medium",
+  "explanation": "It first appeared under the pen name Ellis Bell, one of three male pseudonyms the sisters used.",
+  "unsure": false
+ },
+ {
+  "prompt": "Who wrote the play 'Waiting for Godot'?",
+  "choices": [
+   "Samuel Beckett",
+   "Harold Pinter",
+   "Sean O'Casey",
+   "Tom Stoppard"
+  ],
+  "answer": "Samuel Beckett",
+  "difficulty": "medium",
+  "explanation": "The Dublin-born writer first wrote it in French, then translated it into English himself.",
+  "unsure": false
+ },
+ {
+  "prompt": "Chocolate, tomato and coyote all entered English from which language?",
+  "choices": [
+   "Nahuatl",
+   "Quechua",
+   "Guarani",
+   "Tagalog"
+  ],
+  "answer": "Nahuatl",
+  "difficulty": "hard",
+  "explanation": "Nahuatl was the language of the Aztec empire, and Spanish carried its words into Europe.",
+  "unsure": false
+ },
+ {
+  "prompt": "'Grog' and 'groggy' come from the nickname of which British admiral?",
+  "choices": [
+   "Edward Vernon",
+   "Horatio Nelson",
+   "Francis Drake",
+   "John Jervis"
+  ],
+  "answer": "Edward Vernon",
+  "difficulty": "hard",
+  "explanation": "Vernon wore a grogram cloak, earning him 'Old Grog', and he ordered sailors' rum watered down.",
+  "unsure": false
+ },
+ {
+  "prompt": "'Tawdry' comes from cheap lace sold at a fair honouring which saint?",
+  "choices": [
+   "Saint Audrey",
+   "Saint Bridget",
+   "Saint Cecilia",
+   "Saint Margaret"
+  ],
+  "answer": "Saint Audrey",
+  "difficulty": "hard",
+  "explanation": "Necklaces sold at her Ely fair were called Saint Audrey's lace, slurred into tawdry lace.",
+  "unsure": false
+ },
+ {
+  "prompt": "'Maudlin', meaning tearfully sentimental, derives from which biblical figure?",
+  "choices": [
+   "Mary Magdalene",
+   "Martha of Bethany",
+   "Ruth",
+   "Salome"
+  ],
+  "answer": "Mary Magdalene",
+  "difficulty": "hard",
+  "explanation": "Painters so often showed her weeping that the English form of her name came to mean maudlin.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which popular origin story for the word 'posh' is dismissed by lexicographers?",
+  "choices": [
+   "Port out, starboard home",
+   "Polish of the shoes",
+   "Post office ship handling",
+   "Palace of the shire"
+  ],
+  "answer": "Port out, starboard home",
+  "difficulty": "hard",
+  "explanation": "No ticket or shipping record has ever been found using the supposed abbreviation.",
+  "unsure": false
+ },
+ {
+  "prompt": "The most widely accepted origin of 'OK' is a jokey abbreviation of which phrase?",
+  "choices": [
+   "Oll korrect",
+   "Old Kinderhook",
+   "Open key",
+   "Only known"
+  ],
+  "answer": "Oll korrect",
+  "difficulty": "hard",
+  "explanation": "It came from an 1839 Boston newspaper fad for comic misspelled initials, then spread via politics.",
+  "unsure": false
+ },
+ {
+  "prompt": "To 'bowdlerise' a text comes from a man who expurgated whose works?",
+  "choices": [
+   "Shakespeare",
+   "Chaucer",
+   "Milton",
+   "Homer"
+  ],
+  "answer": "Shakespeare",
+  "difficulty": "hard",
+  "explanation": "Thomas Bowdler's Family Shakspeare removed material he judged unfit to be read aloud at home.",
+  "unsure": false
+ },
+ {
+  "prompt": "The word 'hooligan' is usually traced to a surname of which origin?",
+  "choices": [
+   "Irish",
+   "Welsh",
+   "Flemish",
+   "Basque"
+  ],
+  "answer": "Irish",
+  "difficulty": "hard",
+  "explanation": "London newspapers of the 1890s used a rowdy fictional family whose name echoed Houlihan.",
+  "unsure": false
+ },
+ {
+  "prompt": "The word 'petrichor' names the smell of what?",
+  "choices": [
+   "Rain on dry earth",
+   "Burning wood",
+   "Sea spray",
+   "Cut grass"
+  ],
+  "answer": "Rain on dry earth",
+  "difficulty": "hard",
+  "explanation": "Two Australian scientists coined it in 1964 from Greek for stone and the fluid of the gods.",
+  "unsure": false
+ },
+ {
+  "prompt": "'Defenestration' means throwing someone or something out of what?",
+  "choices": [
+   "A window",
+   "A boat",
+   "A carriage",
+   "A tower gate"
+  ],
+  "answer": "A window",
+  "difficulty": "hard",
+  "explanation": "Latin fenestra means window, and the Defenestrations of Prague helped popularise the term.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the grammatical name for an '-ing' form used as a noun, as in 'swimming'?",
+  "choices": [
+   "A gerund",
+   "A participle",
+   "An infinitive",
+   "An article"
+  ],
+  "answer": "A gerund",
+  "difficulty": "hard",
+  "explanation": "The identical-looking present participle instead works as part of a verb or as an adjective.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the term for a word like 'cleave' that can mean its own opposite?",
+  "choices": [
+   "A contronym",
+   "A homonym",
+   "An eponym",
+   "A toponym"
+  ],
+  "answer": "A contronym",
+  "difficulty": "hard",
+  "explanation": "Sanction and dust behave the same way, and such words are also called Janus words.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the term for a word derived from a person's name, such as 'sandwich'?",
+  "choices": [
+   "An eponym",
+   "A synonym",
+   "An acronym",
+   "A homograph"
+  ],
+  "answer": "An eponym",
+  "difficulty": "hard",
+  "explanation": "Diesel, boycott and mesmerise are eponyms too, each taken from a real individual.",
+  "unsure": false
+ },
+ {
+  "prompt": "A line of iambic pentameter contains how many stressed syllables?",
+  "choices": [
+   "Five",
+   "Three",
+   "Eight",
+   "Ten"
+  ],
+  "answer": "Five",
+  "difficulty": "hard",
+  "explanation": "Each of the five feet pairs an unstressed with a stressed syllable, giving ten syllables in all.",
+  "unsure": false
+ },
+ {
+  "prompt": "In a sonnet, what is the 'volta'?",
+  "choices": [
+   "A turn in the argument",
+   "The closing rhyme",
+   "The opening image",
+   "A repeated refrain"
+  ],
+  "answer": "A turn in the argument",
+  "difficulty": "hard",
+  "explanation": "In the Italian form it usually falls at line nine, shifting from problem to resolution.",
+  "unsure": false
+ },
+ {
+  "prompt": "In a Petrarchan sonnet, the first eight lines are known as what?",
+  "choices": [
+   "The octave",
+   "The sestet",
+   "The quatrain",
+   "The couplet"
+  ],
+  "answer": "The octave",
+  "difficulty": "hard",
+  "explanation": "The remaining six lines form the sestet, whereas the English form ends in a rhyming couplet.",
+  "unsure": false
+ },
+ {
+  "prompt": "The epic poem 'Beowulf' was composed in which form of English?",
+  "choices": [
+   "Old English",
+   "Middle English",
+   "Early Modern English",
+   "Scots English"
+  ],
+  "answer": "Old English",
+  "difficulty": "hard",
+  "explanation": "Its story is set in Scandinavia, and it survives in a single fire-damaged manuscript.",
+  "unsure": false
+ },
+ {
+  "prompt": "The Great Vowel Shift changed which feature of English?",
+  "choices": [
+   "Vowel pronunciation",
+   "Word order",
+   "Verb tenses",
+   "Consonant spelling"
+  ],
+  "answer": "Vowel pronunciation",
+  "difficulty": "hard",
+  "explanation": "Spelling had largely settled before the shift finished, which is why English spelling looks so odd.",
+  "unsure": false
+ },
+ {
+  "prompt": "Samuel Johnson published his famous Dictionary of the English Language in which century?",
+  "choices": [
+   "The 18th",
+   "The 16th",
+   "The 17th",
+   "The 19th"
+  ],
+  "answer": "The 18th",
+  "difficulty": "hard",
+  "explanation": "It appeared in 1755 after about nine years' work, and included witty personal definitions.",
+  "unsure": false
+ },
+ {
+  "prompt": "W.C. Minor, a prolific contributor to the first Oxford English Dictionary, was detained where?",
+  "choices": [
+   "An asylum",
+   "A monastery",
+   "A debtors' prison",
+   "A naval academy"
+  ],
+  "answer": "An asylum",
+  "difficulty": "hard",
+  "explanation": "He sent thousands of quotation slips from Broadmoor, where he was held after killing a man.",
+  "unsure": false
+ },
+ {
+  "prompt": "The old English letter thorn represented which sound?",
+  "choices": [
+   "Th",
+   "Sh",
+   "Ch",
+   "Ng"
+  ],
+  "answer": "Th",
+  "difficulty": "hard",
+  "explanation": "Borrowed from runes, it survived into printing before being replaced by the digraph th.",
+  "unsure": false
+ },
+ {
+  "prompt": "In mock-antique signs like 'Ye Olde Shoppe', how was 'Ye' originally pronounced?",
+  "choices": [
+   "The",
+   "Yee",
+   "Yay",
+   "Ay"
+  ],
+  "answer": "The",
+  "difficulty": "hard",
+  "explanation": "Early printers lacked the letter thorn and substituted y, so the word was always 'the'.",
+  "unsure": false
+ },
+ {
+  "prompt": "The name 'ampersand' is a slurring of which phrase?",
+  "choices": [
+   "And per se and",
+   "Amper and sign",
+   "And per sand",
+   "Ampere and"
+  ],
+  "answer": "And per se and",
+  "difficulty": "hard",
+  "explanation": "Children reciting the alphabet ended with the symbol, saying it meant 'and' by itself.",
+  "unsure": false
+ },
+ {
+  "prompt": "'Sirloin' most likely comes from a French phrase meaning what?",
+  "choices": [
+   "Above the loin",
+   "Knight's cut",
+   "Slow roast",
+   "Royal rib"
+  ],
+  "answer": "Above the loin",
+  "difficulty": "hard",
+  "explanation": "The tale of a king knighting a joint of beef is a later invention, not the true source.",
+  "unsure": false
+ },
+ {
+  "prompt": "'Gormless' comes from an old northern word 'gaum' meaning what?",
+  "choices": [
+   "Heed or attention",
+   "Strength",
+   "Wealth",
+   "Speech"
+  ],
+  "answer": "Heed or attention",
+  "difficulty": "hard",
+  "explanation": "The word is Norse-derived, so a gormless person literally takes no notice of anything.",
+  "unsure": false
+ },
+ {
+  "prompt": "'Berserk' comes from Norse warriors said to wear what?",
+  "choices": [
+   "Bear shirts",
+   "Iron masks",
+   "Wolf teeth",
+   "Raven feathers"
+  ],
+  "answer": "Bear shirts",
+  "difficulty": "hard",
+  "explanation": "Berserkers were described as fighting in a trance-like fury, ignoring wounds and fear.",
+  "unsure": false
+ },
+ {
+  "prompt": "The word 'slogan' comes from a Gaelic term for what?",
+  "choices": [
+   "A battle cry",
+   "A harvest song",
+   "A market price",
+   "A clan tartan"
+  ],
+  "answer": "A battle cry",
+  "difficulty": "hard",
+  "explanation": "Sluagh-ghairm meant an army shout, which advertising later turned into a catchphrase.",
+  "unsure": false
+ },
+ {
+  "prompt": "'Whisky' comes from a Gaelic phrase meaning what?",
+  "choices": [
+   "Water of life",
+   "Fire of the glen",
+   "Gift of the barley",
+   "Breath of smoke"
+  ],
+  "answer": "Water of life",
+  "difficulty": "hard",
+  "explanation": "Uisce beatha was anglicised to usquebaugh and then clipped to whisky.",
+  "unsure": false
+ },
+ {
+  "prompt": "The word 'galore' comes from an Irish phrase meaning what?",
+  "choices": [
+   "Plenty",
+   "Farewell",
+   "Quickly",
+   "Bravely"
+  ],
+  "answer": "Plenty",
+  "difficulty": "hard",
+  "explanation": "Irish go leor means enough or sufficient, and English kept its unusual position after the noun.",
+  "unsure": false
+ },
+ {
+  "prompt": "The word 'smithereens' entered English from which language?",
+  "choices": [
+   "Irish",
+   "Welsh",
+   "Cornish",
+   "Manx"
+  ],
+  "answer": "Irish",
+  "difficulty": "hard",
+  "explanation": "It comes from smidirini, small fragments, where the ending is an Irish diminutive.",
+  "unsure": false
+ },
+ {
+  "prompt": "'Pyjamas' derives from a Persian and Urdu word for a garment worn where?",
+  "choices": [
+   "On the legs",
+   "On the head",
+   "Over the shoulders",
+   "Around the waist"
+  ],
+  "answer": "On the legs",
+  "difficulty": "hard",
+  "explanation": "The word combines roots meaning leg and clothing, and British residents in India adopted them.",
+  "unsure": false
+ },
+ {
+  "prompt": "'Bedlam', meaning uproar, comes from a London hospital named after which place?",
+  "choices": [
+   "Bethlehem",
+   "Bermondsey",
+   "Belgravia",
+   "Battersea"
+  ],
+  "answer": "Bethlehem",
+  "difficulty": "hard",
+  "explanation": "The priory of St Mary of Bethlehem became a hospital for the mentally ill, its name worn down to Bedlam.",
+  "unsure": false
+ },
+ {
+  "prompt": "'Halcyon days' refers to a mythical bird identified with which modern bird?",
+  "choices": [
+   "The kingfisher",
+   "The swan",
+   "The heron",
+   "The albatross"
+  ],
+  "answer": "The kingfisher",
+  "difficulty": "hard",
+  "explanation": "It was said to nest on calm winter seas, so the phrase came to mean a peaceful spell.",
+  "unsure": false
+ },
+ {
+  "prompt": "The word 'cynic' comes from a Greek word for which animal?",
+  "choices": [
+   "Dog",
+   "Fox",
+   "Goat",
+   "Crow"
+  ],
+  "answer": "Dog",
+  "difficulty": "hard",
+  "explanation": "The Cynic philosophers were mocked for living roughly and shamelessly, like street dogs.",
+  "unsure": false
+ },
+ {
+  "prompt": "'Sycophant' literally refers to someone who shows which fruit?",
+  "choices": [
+   "A fig",
+   "A grape",
+   "An olive",
+   "A pomegranate"
+  ],
+  "answer": "A fig",
+  "difficulty": "hard",
+  "explanation": "The Greek compound means fig-shower, and it first described an informer rather than a flatterer.",
+  "unsure": false
+ },
+ {
+  "prompt": "In Greek myth, Nemesis was the goddess of what?",
+  "choices": [
+   "Retribution",
+   "Harvest",
+   "Wisdom",
+   "The hearth"
+  ],
+  "answer": "Retribution",
+  "difficulty": "hard",
+  "explanation": "She punished excessive pride, which is why a nemesis is an unavoidable downfall, not just a rival.",
+  "unsure": false
+ },
+ {
+  "prompt": "The verb 'tantalise' comes from a mythological figure punished how?",
+  "choices": [
+   "With food kept out of reach",
+   "By being turned to stone",
+   "With eternal sleep",
+   "By losing his voice"
+  ],
+  "answer": "With food kept out of reach",
+  "difficulty": "hard",
+  "explanation": "Tantalus stood in water beneath fruit, both retreating whenever he reached for them.",
+  "unsure": false
+ },
+ {
+  "prompt": "In lexicography, 'dord' is famous as an example of what?",
+  "choices": [
+   "A dictionary error",
+   "An early acronym",
+   "A regional dialect word",
+   "A legal term"
+  ],
+  "answer": "A dictionary error",
+  "difficulty": "hard",
+  "explanation": "A misread note meaning 'D or d' for density created a ghost word that stood for years.",
+  "unsure": false
+ }
+]

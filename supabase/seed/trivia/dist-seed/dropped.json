@@ -1,0 +1,44 @@
+[
+ [
+  "design",
+  56,
+  "ambiguous: Puffin is also defensible - the Puffin Books logo is a puffin, itself a small black-and-white bird (and arguably smaller than a penguin).",
+  "Which publisher's logo is a small black-and-white bird?"
+ ],
+ [
+  "design",
+  66,
+  "ambiguous: Bauhaus is also defensible - Bauhaus 93 / ITC Bauhaus is a real, widely distributed typeface, so two options are literally typefaces.",
+  "Which of these is a typeface?"
+ ],
+ [
+  "design",
+  86,
+  "ambiguous: Composite is also defensible - the Composite capital is topped by Ionic-style scroll volutes above acanthus leaves.",
+  "Which classical column order is topped by scroll-shaped volutes?"
+ ],
+ [
+  "english",
+  107,
+  "ambiguous: 'On a printing press' is also widely repeated in word-origin books (a line on the press bed beyond which type would not print); the Civil-War prison-camp line is the earliest attested sense, but a knowledgeable player could defensibly pick the press.",
+  "The word 'deadline' originally referred to a line drawn where?"
+ ],
+ [
+  "general",
+  103,
+  "ambiguous: Christmas puddings traditionally carry several charms; 'a ring' (for marriage) is also a genuine traditional pudding charm, though the silver sixpence is the best known.",
+  "What is traditionally hidden inside a British Christmas pudding?"
+ ],
+ [
+  "science",
+  87,
+  "ambiguous: \"Plasma proteins\" is also defensible — clotting requires the plasma clotting factors (fibrinogen, prothrombin) as much as platelets; the question asks for one 'essential' component.",
+  "Which component of blood is essential for clotting?"
+ ],
+ [
+  "tech",
+  94,
+  "ambiguous: Amstrad also defensible - Amstrad bought the Sinclair computer line in 1986 and manufactured the later ZX Spectrum +2/+3 models, so 'produced the ZX Spectrum' has two supportable readings.",
+  "Which company produced the ZX Spectrum home computer?"
+ ]
+]

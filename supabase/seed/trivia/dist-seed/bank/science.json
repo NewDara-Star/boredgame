@@ -1,0 +1,1809 @@
+[
+ {
+  "prompt": "What force pulls objects towards the centre of the Earth?",
+  "choices": [
+   "Gravity",
+   "Magnetism",
+   "Friction",
+   "Buoyancy"
+  ],
+  "answer": "Gravity",
+  "difficulty": "easy",
+  "explanation": "Gravity acts between all masses, and Earth's pull accelerates falling objects at about 9.8 metres per second squared.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the chemical symbol for gold?",
+  "choices": [
+   "Au",
+   "Ag",
+   "Gd",
+   "Go"
+  ],
+  "answer": "Au",
+  "difficulty": "easy",
+  "explanation": "It comes from aurum, the Latin word for gold; Ag is silver, from argentum.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which gas do plants take in from the air to carry out photosynthesis?",
+  "choices": [
+   "Carbon dioxide",
+   "Oxygen",
+   "Nitrogen",
+   "Hydrogen"
+  ],
+  "answer": "Carbon dioxide",
+  "difficulty": "easy",
+  "explanation": "Plants combine it with water using light energy, releasing oxygen as a waste product.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which planet is known as the Red Planet?",
+  "choices": [
+   "Mars",
+   "Venus",
+   "Mercury",
+   "Neptune"
+  ],
+  "answer": "Mars",
+  "difficulty": "easy",
+  "explanation": "Iron oxide dust, essentially rust, coats the Martian surface and gives it the colour.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the hardest naturally occurring mineral?",
+  "choices": [
+   "Diamond",
+   "Quartz",
+   "Topaz",
+   "Corundum"
+  ],
+  "answer": "Diamond",
+  "difficulty": "easy",
+  "explanation": "It sits at 10 on the Mohs scale and scratches every other mineral, including corundum at 9.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which gas makes up the largest share of the Earth's atmosphere?",
+  "choices": [
+   "Nitrogen",
+   "Oxygen",
+   "Carbon dioxide",
+   "Argon"
+  ],
+  "answer": "Nitrogen",
+  "difficulty": "easy",
+  "explanation": "Nitrogen is about 78% of dry air, with oxygen at roughly 21% and argon under 1%.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which organ pumps blood around the human body?",
+  "choices": [
+   "The heart",
+   "The liver",
+   "The lungs",
+   "The spleen"
+  ],
+  "answer": "The heart",
+  "difficulty": "easy",
+  "explanation": "Its left ventricle has the thickest wall because it drives blood through the whole body.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which star is closest to the Earth?",
+  "choices": [
+   "The Sun",
+   "Proxima Centauri",
+   "Sirius",
+   "Polaris"
+  ],
+  "answer": "The Sun",
+  "difficulty": "easy",
+  "explanation": "The Sun sits about 150 million km away; the next nearest star is over 250,000 times further.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which blood cells carry oxygen around the body?",
+  "choices": [
+   "Red blood cells",
+   "White blood cells",
+   "Platelets",
+   "Stem cells"
+  ],
+  "answer": "Red blood cells",
+  "difficulty": "easy",
+  "explanation": "Haemoglobin, an iron-rich protein inside them, binds oxygen and gives blood its colour.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which unit is used to measure electrical resistance?",
+  "choices": [
+   "Ohm",
+   "Volt",
+   "Watt",
+   "Ampere"
+  ],
+  "answer": "Ohm",
+  "difficulty": "easy",
+  "explanation": "It honours Georg Ohm, who in 1827 linked voltage, current and resistance in one law.",
+  "unsure": false
+ },
+ {
+  "prompt": "Common table salt is which chemical compound?",
+  "choices": [
+   "Sodium chloride",
+   "Calcium carbonate",
+   "Potassium nitrate",
+   "Sodium hydroxide"
+  ],
+  "answer": "Sodium chloride",
+  "difficulty": "easy",
+  "explanation": "Sodium and chlorine are both dangerous alone, yet together they form a stable ionic crystal.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which instrument is used to detect and record earthquake waves?",
+  "choices": [
+   "Seismometer",
+   "Barometer",
+   "Anemometer",
+   "Hygrometer"
+  ],
+  "answer": "Seismometer",
+  "difficulty": "easy",
+  "explanation": "It holds a heavy mass nearly still while the ground moves beneath it, tracing the difference.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which cell structure is often called the powerhouse of the cell?",
+  "choices": [
+   "Mitochondrion",
+   "Ribosome",
+   "Nucleus",
+   "Golgi body"
+  ],
+  "answer": "Mitochondrion",
+  "difficulty": "easy",
+  "explanation": "Mitochondria make ATP, the small molecule cells spend to power almost every process.",
+  "unsure": false
+ },
+ {
+  "prompt": "Roughly how long does sunlight take to reach the Earth?",
+  "choices": [
+   "About 8 minutes",
+   "About 8 seconds",
+   "About 8 hours",
+   "It arrives instantly"
+  ],
+  "answer": "About 8 minutes",
+  "difficulty": "easy",
+  "explanation": "Light crosses the 150 million km gap at close to 300,000 kilometres per second.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which vitamin does the skin produce when exposed to sunlight?",
+  "choices": [
+   "Vitamin D",
+   "Vitamin C",
+   "Vitamin B12",
+   "Vitamin K"
+  ],
+  "answer": "Vitamin D",
+  "difficulty": "easy",
+  "explanation": "UVB light converts a cholesterol derivative in the skin into vitamin D, needed to absorb calcium.",
+  "unsure": false
+ },
+ {
+  "prompt": "What usually happens to a metal bar when it is heated?",
+  "choices": [
+   "It expands",
+   "It contracts",
+   "It becomes magnetic",
+   "It becomes an insulator"
+  ],
+  "answer": "It expands",
+  "difficulty": "easy",
+  "explanation": "Heat makes the atoms vibrate further apart, which is why bridges are built with expansion joints.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which gas gives fizzy drinks their bubbles?",
+  "choices": [
+   "Carbon dioxide",
+   "Oxygen",
+   "Nitrogen",
+   "Helium"
+  ],
+  "answer": "Carbon dioxide",
+  "difficulty": "easy",
+  "explanation": "It is dissolved under pressure and escapes as bubbles the moment the bottle is opened.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the largest organ of the human body?",
+  "choices": [
+   "The skin",
+   "The liver",
+   "The brain",
+   "The heart"
+  ],
+  "answer": "The skin",
+  "difficulty": "easy",
+  "explanation": "Skin is a barrier organ weighing several kilograms that also controls heat and water loss.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is molten rock called once it has reached the Earth's surface?",
+  "choices": [
+   "Lava",
+   "Magma",
+   "Basalt",
+   "Pumice"
+  ],
+  "answer": "Lava",
+  "difficulty": "easy",
+  "explanation": "The same material is called magma while underground; the name changes as it erupts.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the main cause of the ocean tides?",
+  "choices": [
+   "The Moon's gravity",
+   "Earth's magnetic field",
+   "Prevailing winds",
+   "Ocean currents"
+  ],
+  "answer": "The Moon's gravity",
+  "difficulty": "easy",
+  "explanation": "The Moon raises water into bulges on both sides of the Earth, with the Sun adding a smaller pull.",
+  "unsure": false
+ },
+ {
+  "prompt": "Who proposed the theory of evolution by natural selection?",
+  "choices": [
+   "Charles Darwin",
+   "Gregor Mendel",
+   "Louis Pasteur",
+   "Carl Linnaeus"
+  ],
+  "answer": "Charles Darwin",
+  "difficulty": "easy",
+  "explanation": "He published On the Origin of Species in 1859 after more than twenty years gathering evidence.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which colour of visible light has the longest wavelength?",
+  "choices": [
+   "Red",
+   "Blue",
+   "Green",
+   "Violet"
+  ],
+  "answer": "Red",
+  "difficulty": "easy",
+  "explanation": "Red is near 700 nanometres, roughly twice the wavelength of violet at the other end.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which element has the chemical symbol Fe?",
+  "choices": [
+   "Iron",
+   "Fluorine",
+   "Lead",
+   "Tin"
+  ],
+  "answer": "Iron",
+  "difficulty": "easy",
+  "explanation": "Fe comes from ferrum, the Latin name for iron; fluorine is simply F.",
+  "unsure": false
+ },
+ {
+  "prompt": "What are animals that eat only plants called?",
+  "choices": [
+   "Herbivores",
+   "Carnivores",
+   "Omnivores",
+   "Scavengers"
+  ],
+  "answer": "Herbivores",
+  "difficulty": "easy",
+  "explanation": "They tend to have long guts and flat grinding teeth to break down tough plant fibre.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which is the largest planet in the Solar System?",
+  "choices": [
+   "Jupiter",
+   "Saturn",
+   "Neptune",
+   "Earth"
+  ],
+  "answer": "Jupiter",
+  "difficulty": "easy",
+  "explanation": "Jupiter is more massive than all the other planets in the Solar System put together.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which type of rock forms when magma or lava cools and solidifies?",
+  "choices": [
+   "Igneous",
+   "Sedimentary",
+   "Metamorphic",
+   "Organic"
+  ],
+  "answer": "Igneous",
+  "difficulty": "easy",
+  "explanation": "Granite cools slowly underground into large crystals, while basalt cools fast into fine ones.",
+  "unsure": false
+ },
+ {
+  "prompt": "A vaccine trains the immune system to produce what?",
+  "choices": [
+   "Antibodies",
+   "Red blood cells",
+   "Insulin",
+   "Digestive enzymes"
+  ],
+  "answer": "Antibodies",
+  "difficulty": "easy",
+  "explanation": "It shows the immune system a harmless piece of a pathogen so it recognises the real thing later.",
+  "unsure": false
+ },
+ {
+  "prompt": "Sound travels fastest through which of these?",
+  "choices": [
+   "Steel",
+   "Air",
+   "Water",
+   "A vacuum"
+  ],
+  "answer": "Steel",
+  "difficulty": "easy",
+  "explanation": "Sound needs matter to travel, and moves quickest where particles are tightly bound, as in solids.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which part of a plant takes up most of its water?",
+  "choices": [
+   "The roots",
+   "The leaves",
+   "The flowers",
+   "The stem"
+  ],
+  "answer": "The roots",
+  "difficulty": "easy",
+  "explanation": "Fine root hairs give an enormous surface area for water to enter by osmosis.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the pH of a neutral solution such as pure water?",
+  "choices": [
+   "7",
+   "0",
+   "14",
+   "1"
+  ],
+  "answer": "7",
+  "difficulty": "easy",
+  "explanation": "At room temperature pure water holds equal amounts of hydrogen and hydroxide ions.",
+  "unsure": false
+ },
+ {
+  "prompt": "What kind of object is the Milky Way?",
+  "choices": [
+   "A galaxy",
+   "A star cluster",
+   "A nebula",
+   "A constellation"
+  ],
+  "answer": "A galaxy",
+  "difficulty": "easy",
+  "explanation": "It is a barred spiral galaxy holding our Sun among hundreds of billions of stars.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which gas do humans breathe out much more of than they breathe in?",
+  "choices": [
+   "Carbon dioxide",
+   "Oxygen",
+   "Nitrogen",
+   "Argon"
+  ],
+  "answer": "Carbon dioxide",
+  "difficulty": "easy",
+  "explanation": "Respiration burns glucose using oxygen, leaving carbon dioxide and water to be exhaled.",
+  "unsure": false
+ },
+ {
+  "prompt": "What creates a rainbow?",
+  "choices": [
+   "Sunlight bending in raindrops",
+   "Dust high in the air",
+   "Reflection off cloud tops",
+   "Static in the atmosphere"
+  ],
+  "answer": "Sunlight bending in raindrops",
+  "difficulty": "easy",
+  "explanation": "Each drop bends and reflects light, splitting it because each colour bends by a different amount.",
+  "unsure": false
+ },
+ {
+  "prompt": "What does a barometer measure?",
+  "choices": [
+   "Air pressure",
+   "Humidity",
+   "Wind speed",
+   "Rainfall"
+  ],
+  "answer": "Air pressure",
+  "difficulty": "easy",
+  "explanation": "Falling pressure often comes before storms, which is why barometers help forecast weather.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which part of a flower produces pollen?",
+  "choices": [
+   "The anther",
+   "The stigma",
+   "The ovary",
+   "The sepal"
+  ],
+  "answer": "The anther",
+  "difficulty": "easy",
+  "explanation": "The anther sits atop the stamen, the male part of the flower; the stigma receives pollen.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which element has the chemical symbol K?",
+  "choices": [
+   "Potassium",
+   "Krypton",
+   "Phosphorus",
+   "Calcium"
+  ],
+  "answer": "Potassium",
+  "difficulty": "easy",
+  "explanation": "K comes from kalium, a name traced back to the Arabic word for plant ash.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which organ produces the hormone insulin?",
+  "choices": [
+   "The pancreas",
+   "The liver",
+   "The kidney",
+   "The thyroid"
+  ],
+  "answer": "The pancreas",
+  "difficulty": "easy",
+  "explanation": "Beta cells in the pancreatic islets release insulin whenever blood sugar rises.",
+  "unsure": false
+ },
+ {
+  "prompt": "Saturn's rings are made mostly of what?",
+  "choices": [
+   "Water ice",
+   "Solid rock",
+   "Dense gas",
+   "Liquid methane"
+  ],
+  "answer": "Water ice",
+  "difficulty": "easy",
+  "explanation": "Countless chunks of ice, from grains to house-sized blocks, orbit in a remarkably thin disc.",
+  "unsure": false
+ },
+ {
+  "prompt": "What type of energy does a moving object possess because of its motion?",
+  "choices": [
+   "Kinetic energy",
+   "Potential energy",
+   "Chemical energy",
+   "Nuclear energy"
+  ],
+  "answer": "Kinetic energy",
+  "difficulty": "easy",
+  "explanation": "It rises with the square of speed, so doubling a car's speed quadruples the energy to absorb.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which metal is a liquid at ordinary room temperature?",
+  "choices": [
+   "Mercury",
+   "Lead",
+   "Zinc",
+   "Aluminium"
+  ],
+  "answer": "Mercury",
+  "difficulty": "easy",
+  "explanation": "Mercury's atoms hold their outer electrons so tightly that metallic bonding stays unusually weak.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which planet orbits closest to the Sun?",
+  "choices": [
+   "Mercury",
+   "Venus",
+   "Earth",
+   "Mars"
+  ],
+  "answer": "Mercury",
+  "difficulty": "easy",
+  "explanation": "Mercury circles the Sun in just 88 days and has almost no atmosphere to retain heat.",
+  "unsure": false
+ },
+ {
+  "prompt": "What does DNA stand for?",
+  "choices": [
+   "Deoxyribonucleic acid",
+   "Dinucleic acid",
+   "Deoxyribose nuclear acid",
+   "Diribonucleic acid"
+  ],
+  "answer": "Deoxyribonucleic acid",
+  "difficulty": "easy",
+  "explanation": "The deoxyribose sugar in its backbone is exactly what distinguishes DNA from RNA.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the Earth's outermost solid layer called?",
+  "choices": [
+   "The crust",
+   "The mantle",
+   "The outer core",
+   "The inner core"
+  ],
+  "answer": "The crust",
+  "difficulty": "easy",
+  "explanation": "Ocean crust is only a few kilometres thick, while continental crust can exceed 40 kilometres.",
+  "unsure": false
+ },
+ {
+  "prompt": "The patella is better known by which common name?",
+  "choices": [
+   "The kneecap",
+   "The collarbone",
+   "The shin bone",
+   "The shoulder blade"
+  ],
+  "answer": "The kneecap",
+  "difficulty": "easy",
+  "explanation": "It is a sesamoid bone set inside the tendon that straightens the knee, improving leverage.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which device converts sunlight directly into electricity?",
+  "choices": [
+   "A solar cell",
+   "A dynamo",
+   "A turbine",
+   "A transformer"
+  ],
+  "answer": "A solar cell",
+  "difficulty": "easy",
+  "explanation": "Photons knock electrons loose across a silicon junction, and the flow becomes a current.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the term for all the living things in an area plus their physical environment?",
+  "choices": [
+   "An ecosystem",
+   "A population",
+   "A community",
+   "A food chain"
+  ],
+  "answer": "An ecosystem",
+  "difficulty": "easy",
+  "explanation": "A community covers only the living part; an ecosystem adds soil, water, air and climate.",
+  "unsure": false
+ },
+ {
+  "prompt": "Rust that forms on iron is chemically which compound?",
+  "choices": [
+   "Iron oxide",
+   "Iron sulphide",
+   "Iron carbonate",
+   "Iron chloride"
+  ],
+  "answer": "Iron oxide",
+  "difficulty": "easy",
+  "explanation": "Iron reacts with oxygen and water, and the flaky result exposes fresh metal to corrode further.",
+  "unsure": false
+ },
+ {
+  "prompt": "Frogs and newts belong to which group of animals?",
+  "choices": [
+   "Amphibians",
+   "Reptiles",
+   "Fish",
+   "Mammals"
+  ],
+  "answer": "Amphibians",
+  "difficulty": "easy",
+  "explanation": "Most begin life in water breathing through gills before developing lungs for life on land.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is a shooting star actually made of?",
+  "choices": [
+   "Space dust burning up",
+   "A star falling to Earth",
+   "A passing comet",
+   "A dying star"
+  ],
+  "answer": "Space dust burning up",
+  "difficulty": "easy",
+  "explanation": "Most meteors are grain-sized specks that heat the air until it glows, some 80 km up.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is it called when a solid turns straight into a gas without melting first?",
+  "choices": [
+   "Sublimation",
+   "Condensation",
+   "Evaporation",
+   "Fusion"
+  ],
+  "answer": "Sublimation",
+  "difficulty": "medium",
+  "explanation": "Dry ice sublimes at about minus 78 degrees Celsius, making fog rather than a puddle.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the scientific study of fungi called?",
+  "choices": [
+   "Mycology",
+   "Botany",
+   "Entomology",
+   "Ichthyology"
+  ],
+  "answer": "Mycology",
+  "difficulty": "medium",
+  "explanation": "Mycologists established that fungi are genetically closer to animals than to plants.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which subatomic particle carries no electric charge?",
+  "choices": [
+   "The neutron",
+   "The proton",
+   "The electron",
+   "The positron"
+  ],
+  "answer": "The neutron",
+  "difficulty": "medium",
+  "explanation": "Neutrons sit in the nucleus with protons, and their number decides which isotope an atom is.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which element is the most abundant in the universe?",
+  "choices": [
+   "Hydrogen",
+   "Helium",
+   "Oxygen",
+   "Carbon"
+  ],
+  "answer": "Hydrogen",
+  "difficulty": "medium",
+  "explanation": "Hydrogen makes up roughly three-quarters of ordinary matter by mass, with helium most of the rest.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which blood group is described as the universal donor for red blood cells?",
+  "choices": [
+   "O negative",
+   "AB positive",
+   "A positive",
+   "B negative"
+  ],
+  "answer": "O negative",
+  "difficulty": "medium",
+  "explanation": "Its cells carry no A, B or RhD antigens for a recipient's immune system to attack.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which planet rotates almost on its side, tilted by about 98 degrees?",
+  "choices": [
+   "Uranus",
+   "Neptune",
+   "Saturn",
+   "Mercury"
+  ],
+  "answer": "Uranus",
+  "difficulty": "medium",
+  "explanation": "A giant collision early in its history is the leading explanation for that extreme tilt.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the boundary between the Earth's crust and mantle called?",
+  "choices": [
+   "The Moho",
+   "The Gutenberg zone",
+   "The Benioff line",
+   "The Curie point"
+  ],
+  "answer": "The Moho",
+  "difficulty": "medium",
+  "explanation": "Andrija Mohorovicic spotted it in 1909 when seismic waves sped up sharply below a certain depth.",
+  "unsure": false
+ },
+ {
+  "prompt": "Who discovered penicillin after noticing a mould killing bacteria on a dish?",
+  "choices": [
+   "Alexander Fleming",
+   "Joseph Lister",
+   "Robert Koch",
+   "Paul Ehrlich"
+  ],
+  "answer": "Alexander Fleming",
+  "difficulty": "medium",
+  "explanation": "Fleming spotted it in 1928, but Florey and Chain later turned it into a usable drug.",
+  "unsure": false
+ },
+ {
+  "prompt": "Ordinary window glass is made mainly from which compound?",
+  "choices": [
+   "Silicon dioxide",
+   "Calcium sulphate",
+   "Aluminium oxide",
+   "Sodium chloride"
+  ],
+  "answer": "Silicon dioxide",
+  "difficulty": "medium",
+  "explanation": "It is melted silica sand, with soda and lime added to bring the melting point down.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which type of cell division produces two genetically identical cells for growth and repair?",
+  "choices": [
+   "Mitosis",
+   "Meiosis",
+   "Osmosis",
+   "Mutation"
+  ],
+  "answer": "Mitosis",
+  "difficulty": "medium",
+  "explanation": "Meiosis is the other kind, halving the chromosome count to make eggs and sperm.",
+  "unsure": false
+ },
+ {
+  "prompt": "What does an electrical transformer change about a mains supply?",
+  "choices": [
+   "Its voltage",
+   "Its frequency",
+   "Its direction",
+   "Its resistance"
+  ],
+  "answer": "Its voltage",
+  "difficulty": "medium",
+  "explanation": "Two coils on a shared iron core trade voltage for current, which is why grids use alternating current.",
+  "unsure": false
+ },
+ {
+  "prompt": "What compact object is left when a massive star explodes but does not form a black hole?",
+  "choices": [
+   "A neutron star",
+   "A white dwarf",
+   "A red giant",
+   "A brown dwarf"
+  ],
+  "answer": "A neutron star",
+  "difficulty": "medium",
+  "explanation": "It packs more than a Sun's worth of mass into a sphere roughly 20 kilometres across.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which kind of tectonic plate boundary produces deep ocean trenches?",
+  "choices": [
+   "Convergent",
+   "Divergent",
+   "Transform",
+   "Passive"
+  ],
+  "answer": "Convergent",
+  "difficulty": "medium",
+  "explanation": "One plate subducts beneath the other, dragging the sea floor down into the mantle.",
+  "unsure": false
+ },
+ {
+  "prompt": "A deficiency of which vitamin causes scurvy?",
+  "choices": [
+   "Vitamin C",
+   "Vitamin A",
+   "Vitamin D",
+   "Vitamin B1"
+  ],
+  "answer": "Vitamin C",
+  "difficulty": "medium",
+  "explanation": "Without it the body cannot build collagen properly, so gums bleed and old wounds reopen.",
+  "unsure": false
+ },
+ {
+  "prompt": "Who arranged the periodic table so that gaps predicted undiscovered elements?",
+  "choices": [
+   "Dmitri Mendeleev",
+   "Antoine Lavoisier",
+   "John Dalton",
+   "Humphry Davy"
+  ],
+  "answer": "Dmitri Mendeleev",
+  "difficulty": "medium",
+  "explanation": "He forecast the properties of gallium and germanium years before anyone isolated them.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which gas is the main component of natural gas?",
+  "choices": [
+   "Methane",
+   "Propane",
+   "Butane",
+   "Ethene"
+  ],
+  "answer": "Methane",
+  "difficulty": "medium",
+  "explanation": "Methane is CH4, the simplest hydrocarbon, and burns to carbon dioxide and water.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which organelle carries out photosynthesis in a plant cell?",
+  "choices": [
+   "The chloroplast",
+   "The mitochondrion",
+   "The vacuole",
+   "The nucleus"
+  ],
+  "answer": "The chloroplast",
+  "difficulty": "medium",
+  "explanation": "Chloroplasts descend from free-living cyanobacteria taken in by an ancient host cell.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the SI unit of force?",
+  "choices": [
+   "The newton",
+   "The joule",
+   "The pascal",
+   "The watt"
+  ],
+  "answer": "The newton",
+  "difficulty": "medium",
+  "explanation": "One newton accelerates one kilogram by one metre per second every second.",
+  "unsure": false
+ },
+ {
+  "prompt": "What term describes an animal with no natural predators of its own as an adult?",
+  "choices": [
+   "Apex predator",
+   "Keystone species",
+   "Primary consumer",
+   "Decomposer"
+  ],
+  "answer": "Apex predator",
+  "difficulty": "medium",
+  "explanation": "Removing one often triggers a trophic cascade that reshapes the whole food web below it.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the name for the point in a planet's orbit closest to the Sun?",
+  "choices": [
+   "Perihelion",
+   "Aphelion",
+   "Perigee",
+   "Apogee"
+  ],
+  "answer": "Perihelion",
+  "difficulty": "medium",
+  "explanation": "Perigee and apogee are the matching terms for something orbiting the Earth instead.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which gas high in the atmosphere absorbs most incoming ultraviolet light?",
+  "choices": [
+   "Ozone",
+   "Nitrogen",
+   "Argon",
+   "Helium"
+  ],
+  "answer": "Ozone",
+  "difficulty": "medium",
+  "explanation": "Ozone is a three-atom form of oxygen that keeps re-forming as ultraviolet splits it apart.",
+  "unsure": false
+ },
+ {
+  "prompt": "Proteins are built from chains of which smaller molecules?",
+  "choices": [
+   "Amino acids",
+   "Fatty acids",
+   "Nucleotides",
+   "Simple sugars"
+  ],
+  "answer": "Amino acids",
+  "difficulty": "medium",
+  "explanation": "Twenty standard amino acids link in sequences that fold into precise working shapes.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which noble gas glows red-orange when electrified in a glass tube?",
+  "choices": [
+   "Neon",
+   "Argon",
+   "Krypton",
+   "Xenon"
+  ],
+  "answer": "Neon",
+  "difficulty": "medium",
+  "explanation": "Other colours in so-called neon signs come from different gases or coloured tube coatings.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which monk worked out the basic rules of inheritance by breeding pea plants?",
+  "choices": [
+   "Gregor Mendel",
+   "Charles Darwin",
+   "Thomas Morgan",
+   "Hugo de Vries"
+  ],
+  "answer": "Gregor Mendel",
+  "difficulty": "medium",
+  "explanation": "His 1860s crosses revealed dominant and recessive factors, later understood as genes.",
+  "unsure": false
+ },
+ {
+  "prompt": "Why does a steel ship float when a lump of steel sinks?",
+  "choices": [
+   "It displaces enough water",
+   "Steel is light in water",
+   "Air makes steel float",
+   "Its paint repels water"
+  ],
+  "answer": "It displaces enough water",
+  "difficulty": "medium",
+  "explanation": "By Archimedes' principle the hull pushes aside a weight of water equal to the ship's own.",
+  "unsure": false
+ },
+ {
+  "prompt": "Antibiotics are effective against which kind of organism?",
+  "choices": [
+   "Bacteria",
+   "Viruses",
+   "Prions",
+   "Insects"
+  ],
+  "answer": "Bacteria",
+  "difficulty": "medium",
+  "explanation": "They attack bacterial cell walls or ribosomes, structures that viruses simply do not have.",
+  "unsure": false
+ },
+ {
+  "prompt": "Roughly how long does light reflected from the Moon take to reach the Earth?",
+  "choices": [
+   "About 1.3 seconds",
+   "About 13 seconds",
+   "About 1.3 minutes",
+   "About 13 minutes"
+  ],
+  "answer": "About 1.3 seconds",
+  "difficulty": "medium",
+  "explanation": "The Moon averages 384,000 km away, a distance light covers in just over a second.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which is the largest desert in the world by area?",
+  "choices": [
+   "Antarctica",
+   "The Sahara",
+   "The Gobi",
+   "The Arabian Desert"
+  ],
+  "answer": "Antarctica",
+  "difficulty": "medium",
+  "explanation": "Deserts are defined by scarce precipitation, and Antarctica is by far the driest continent.",
+  "unsure": false
+ },
+ {
+  "prompt": "What makes a solution alkaline?",
+  "choices": [
+   "Excess hydroxide ions",
+   "Excess hydrogen ions",
+   "Excess dissolved salt",
+   "Excess dissolved oxygen"
+  ],
+  "answer": "Excess hydroxide ions",
+  "difficulty": "medium",
+  "explanation": "Alkalis release hydroxide ions, which neutralise the hydrogen ions that make acids acidic.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which sense is processed mainly by the occipital lobe of the brain?",
+  "choices": [
+   "Vision",
+   "Hearing",
+   "Smell",
+   "Touch"
+  ],
+  "answer": "Vision",
+  "difficulty": "medium",
+  "explanation": "It sits at the very back of the skull, the furthest point from the eyes that feed it.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is absolute zero on the Celsius scale?",
+  "choices": [
+   "-273.15°C",
+   "0°C",
+   "-100°C",
+   "-459.67°C"
+  ],
+  "answer": "-273.15°C",
+  "difficulty": "medium",
+  "explanation": "It equals zero kelvin, the point where particles hold the least energy physics permits.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which moon of Jupiter is the most volcanically active body known?",
+  "choices": [
+   "Io",
+   "Europa",
+   "Ganymede",
+   "Callisto"
+  ],
+  "answer": "Io",
+  "difficulty": "medium",
+  "explanation": "Jupiter's tides knead Io constantly, melting its interior and driving sulphurous eruptions.",
+  "unsure": false
+ },
+ {
+  "prompt": "Whose 1543 book argued that the Earth orbits the Sun rather than the reverse?",
+  "choices": [
+   "Nicolaus Copernicus",
+   "Galileo Galilei",
+   "Johannes Kepler",
+   "Tycho Brahe"
+  ],
+  "answer": "Nicolaus Copernicus",
+  "difficulty": "medium",
+  "explanation": "De revolutionibus appeared as he lay dying, sparing him the controversy that followed.",
+  "unsure": false
+ },
+ {
+  "prompt": "What word describes trees that shed all their leaves each year?",
+  "choices": [
+   "Deciduous",
+   "Coniferous",
+   "Evergreen",
+   "Succulent"
+  ],
+  "answer": "Deciduous",
+  "difficulty": "medium",
+  "explanation": "Dropping leaves cuts water loss in winter, when frozen ground makes water hard to draw up.",
+  "unsure": false
+ },
+ {
+  "prompt": "Baking soda is the common name for which chemical?",
+  "choices": [
+   "Sodium bicarbonate",
+   "Sodium chloride",
+   "Sodium hydroxide",
+   "Calcium carbonate"
+  ],
+  "answer": "Sodium bicarbonate",
+  "difficulty": "medium",
+  "explanation": "Heat or acid breaks it down, releasing the carbon dioxide that makes a cake rise.",
+  "unsure": false
+ },
+ {
+  "prompt": "What happens to the pitch of a siren as the vehicle moves away from you?",
+  "choices": [
+   "It falls",
+   "It rises",
+   "It stays the same",
+   "It doubles"
+  ],
+  "answer": "It falls",
+  "difficulty": "medium",
+  "explanation": "The Doppler effect stretches the waves behind a receding source, lowering their frequency.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which part of the brain is chiefly responsible for balance and coordination?",
+  "choices": [
+   "The cerebellum",
+   "The hippocampus",
+   "The medulla",
+   "The thalamus"
+  ],
+  "answer": "The cerebellum",
+  "difficulty": "medium",
+  "explanation": "Despite its modest size it contains more neurons than the whole of the rest of the brain.",
+  "unsure": false
+ },
+ {
+  "prompt": "Broad, gently sloping volcanoes built by runny basaltic lava are called what?",
+  "choices": [
+   "Shield volcanoes",
+   "Stratovolcanoes",
+   "Cinder cones",
+   "Fissure vents"
+  ],
+  "answer": "Shield volcanoes",
+  "difficulty": "medium",
+  "explanation": "The lava travels far before setting, so the cone spreads out instead of piling up steeply.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the Kuiper Belt?",
+  "choices": [
+   "Icy bodies beyond Neptune",
+   "Rock between Mars and Jupiter",
+   "A dust ring around the Sun",
+   "A cloud of interstellar gas"
+  ],
+  "answer": "Icy bodies beyond Neptune",
+  "difficulty": "medium",
+  "explanation": "Pluto is one of its largest members, and many short-period comets originate there.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which acid gives vinegar its sharp taste and smell?",
+  "choices": [
+   "Acetic acid",
+   "Citric acid",
+   "Lactic acid",
+   "Formic acid"
+  ],
+  "answer": "Acetic acid",
+  "difficulty": "medium",
+  "explanation": "Vinegar is roughly five per cent acetic acid, made by bacteria oxidising alcohol.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the bending of light as it passes from air into water called?",
+  "choices": [
+   "Refraction",
+   "Reflection",
+   "Diffraction",
+   "Polarisation"
+  ],
+  "answer": "Refraction",
+  "difficulty": "medium",
+  "explanation": "Light travels more slowly in water, so a beam arriving at an angle changes direction.",
+  "unsure": false
+ },
+ {
+  "prompt": "What word describes an animal that is most active at dawn and dusk?",
+  "choices": [
+   "Crepuscular",
+   "Nocturnal",
+   "Diurnal",
+   "Arboreal"
+  ],
+  "answer": "Crepuscular",
+  "difficulty": "medium",
+  "explanation": "Rabbits and deer feed in that half-light, when many predators see poorly.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which two scientists published the double helix model of DNA in 1953?",
+  "choices": [
+   "Watson and Crick",
+   "Meselson and Stahl",
+   "Hershey and Chase",
+   "Beadle and Tatum"
+  ],
+  "answer": "Watson and Crick",
+  "difficulty": "medium",
+  "explanation": "Rosalind Franklin's X-ray image, Photo 51, supplied the helical spacing their model needed.",
+  "unsure": false
+ },
+ {
+  "prompt": "What causes the Earth's seasons?",
+  "choices": [
+   "Earth's axial tilt",
+   "Distance from the Sun",
+   "Solar flares",
+   "The Moon's orbit"
+  ],
+  "answer": "Earth's axial tilt",
+  "difficulty": "medium",
+  "explanation": "The 23.4 degree tilt changes how directly sunlight strikes each hemisphere through the year.",
+  "unsure": false
+ },
+ {
+  "prompt": "Two isotopes of the same element differ in what?",
+  "choices": [
+   "Number of neutrons",
+   "Number of protons",
+   "Electric charge",
+   "Physical state"
+  ],
+  "answer": "Number of neutrons",
+  "difficulty": "medium",
+  "explanation": "Carbon-12 and carbon-14 both hold six protons but differ by two neutrons in the nucleus.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the movement of water across a partially permeable membrane called?",
+  "choices": [
+   "Osmosis",
+   "Diffusion",
+   "Active transport",
+   "Filtration"
+  ],
+  "answer": "Osmosis",
+  "difficulty": "medium",
+  "explanation": "Water shifts towards the more concentrated solution until the pressures on each side balance.",
+  "unsure": false
+ },
+ {
+  "prompt": "Malaria is caused by which type of organism?",
+  "choices": [
+   "A parasite",
+   "A virus",
+   "A bacterium",
+   "A fungus"
+  ],
+  "answer": "A parasite",
+  "difficulty": "medium",
+  "explanation": "Plasmodium parasites, carried by Anopheles mosquitoes, multiply inside red blood cells.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which of these is not part of the electromagnetic spectrum?",
+  "choices": [
+   "Sound waves",
+   "X-rays",
+   "Microwaves",
+   "Infrared"
+  ],
+  "answer": "Sound waves",
+  "difficulty": "medium",
+  "explanation": "Sound is a pressure wave in matter, so unlike light it cannot travel across a vacuum.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which is the nearest large spiral galaxy to the Milky Way?",
+  "choices": [
+   "Andromeda",
+   "Triangulum",
+   "The Whirlpool",
+   "Centaurus A"
+  ],
+  "answer": "Andromeda",
+  "difficulty": "medium",
+  "explanation": "It lies some 2.5 million light years off and is moving towards us, not away.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the main role of decomposers in an ecosystem?",
+  "choices": [
+   "Returning nutrients to soil",
+   "Making oxygen from light",
+   "Hunting herbivores",
+   "Pollinating flowers"
+  ],
+  "answer": "Returning nutrients to soil",
+  "difficulty": "medium",
+  "explanation": "Fungi and bacteria break dead tissue into minerals that living plants can take up again.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which process separates a mixture of liquids using their different boiling points?",
+  "choices": [
+   "Distillation",
+   "Filtration",
+   "Chromatography",
+   "Crystallisation"
+  ],
+  "answer": "Distillation",
+  "difficulty": "medium",
+  "explanation": "A fractionating column splits crude oil into petrol, kerosene and bitumen this way.",
+  "unsure": false
+ },
+ {
+  "prompt": "Who devised the two-part Latin naming system still used for species?",
+  "choices": [
+   "Carl Linnaeus",
+   "Georges Cuvier",
+   "Jean-Baptiste Lamarck",
+   "Joseph Banks"
+  ],
+  "answer": "Carl Linnaeus",
+  "difficulty": "medium",
+  "explanation": "His 1753 scheme gives every species a genus and a species name, as in Homo sapiens.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the largest animal known to have ever lived?",
+  "choices": [
+   "The blue whale",
+   "The sperm whale",
+   "Argentinosaurus",
+   "The African elephant"
+  ],
+  "answer": "The blue whale",
+  "difficulty": "medium",
+  "explanation": "A blue whale can exceed 150 tonnes, heavier than any dinosaur yet dug up.",
+  "unsure": false
+ },
+ {
+  "prompt": "What was the supercontinent that existed roughly 250 million years ago called?",
+  "choices": [
+   "Pangaea",
+   "Gondwana",
+   "Laurasia",
+   "Rodinia"
+  ],
+  "answer": "Pangaea",
+  "difficulty": "medium",
+  "explanation": "It later split into Laurasia in the north and Gondwana in the south as the plates moved.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which carbon molecule is made of 60 atoms arranged like a football?",
+  "choices": [
+   "Buckminsterfullerene",
+   "Graphene",
+   "Carbon nanotube",
+   "Graphite"
+  ],
+  "answer": "Buckminsterfullerene",
+  "difficulty": "hard",
+  "explanation": "Found in 1985, it was named after Buckminster Fuller, whose geodesic domes it resembles.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which conservation law follows from the fact that physics does not change over time?",
+  "choices": [
+   "Conservation of energy",
+   "Conservation of charge",
+   "Conservation of momentum",
+   "Conservation of mass"
+  ],
+  "answer": "Conservation of energy",
+  "difficulty": "hard",
+  "explanation": "Noether's theorem pairs each symmetry with a conserved quantity; space symmetry gives momentum.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which element is the most electronegative?",
+  "choices": [
+   "Fluorine",
+   "Oxygen",
+   "Chlorine",
+   "Nitrogen"
+  ],
+  "answer": "Fluorine",
+  "difficulty": "hard",
+  "explanation": "Its small radius and strong nuclear charge pull bonding electrons harder than any other atom.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which enzyme unwinds the DNA double helix so it can be copied?",
+  "choices": [
+   "Helicase",
+   "Ligase",
+   "Polymerase",
+   "Primase"
+  ],
+  "answer": "Helicase",
+  "difficulty": "hard",
+  "explanation": "It breaks the hydrogen bonds between base pairs, opening a fork for polymerase to work in.",
+  "unsure": false
+ },
+ {
+  "prompt": "The Chandrasekhar limit is the maximum mass of which kind of star?",
+  "choices": [
+   "A white dwarf",
+   "A neutron star",
+   "A red giant",
+   "A brown dwarf"
+  ],
+  "answer": "A white dwarf",
+  "difficulty": "hard",
+  "explanation": "Above about 1.4 solar masses, electron pressure can no longer hold the star up and it collapses.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which mass extinction, around 252 million years ago, was the most severe in Earth's history?",
+  "choices": [
+   "Permian-Triassic",
+   "Cretaceous-Palaeogene",
+   "Ordovician-Silurian",
+   "Triassic-Jurassic"
+  ],
+  "answer": "Permian-Triassic",
+  "difficulty": "hard",
+  "explanation": "Nicknamed the Great Dying, it wiped out the great majority of marine species.",
+  "unsure": false
+ },
+ {
+  "prompt": "Who showed that doctors washing their hands cut deaths from childbed fever, and was ignored?",
+  "choices": [
+   "Ignaz Semmelweis",
+   "Joseph Lister",
+   "John Snow",
+   "Florence Nightingale"
+  ],
+  "answer": "Ignaz Semmelweis",
+  "difficulty": "hard",
+  "explanation": "In 1840s Vienna he slashed maternal mortality, yet colleagues dismissed him for decades.",
+  "unsure": false
+ },
+ {
+  "prompt": "Interaction with the Higgs field gives fundamental particles which property?",
+  "choices": [
+   "Mass",
+   "Electric charge",
+   "Spin",
+   "Colour charge"
+  ],
+  "answer": "Mass",
+  "difficulty": "hard",
+  "explanation": "Particles that couple more strongly to the field behave as though they are heavier.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which industrial process combines nitrogen and hydrogen to make ammonia for fertiliser?",
+  "choices": [
+   "The Haber process",
+   "The Contact process",
+   "The Solvay process",
+   "The Ostwald process"
+  ],
+  "answer": "The Haber process",
+  "difficulty": "hard",
+  "explanation": "It forces the gases over an iron catalyst at high pressure, and now feeds much of the world.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is it called when unrelated species independently evolve very similar features?",
+  "choices": [
+   "Convergent evolution",
+   "Divergent evolution",
+   "Coevolution",
+   "Genetic drift"
+  ],
+  "answer": "Convergent evolution",
+  "difficulty": "hard",
+  "explanation": "Dolphins and the extinct ichthyosaurs both grew streamlined bodies from quite different ancestors.",
+  "unsure": false
+ },
+ {
+  "prompt": "Roughly how old is the Universe?",
+  "choices": [
+   "About 13.8 billion years",
+   "About 4.5 billion years",
+   "About 100 billion years",
+   "About 1 billion years"
+  ],
+  "answer": "About 13.8 billion years",
+  "difficulty": "hard",
+  "explanation": "Measurements of the cosmic microwave background fix the age close to 13.8 billion years.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the deepest known point in the world's oceans called?",
+  "choices": [
+   "The Challenger Deep",
+   "The Sunda Trench",
+   "The Puerto Rico Trench",
+   "The Kermadec Deep"
+  ],
+  "answer": "The Challenger Deep",
+  "difficulty": "hard",
+  "explanation": "It lies in the Mariana Trench, nearly 11 km down, and is named after HMS Challenger.",
+  "unsure": false
+ },
+ {
+  "prompt": "Haemophilia A is caused by a lack of which clotting factor?",
+  "choices": [
+   "Factor VIII",
+   "Factor IX",
+   "Fibrinogen",
+   "Prothrombin"
+  ],
+  "answer": "Factor VIII",
+  "difficulty": "hard",
+  "explanation": "Haemophilia B, also called Christmas disease, is the version caused by missing factor IX.",
+  "unsure": false
+ },
+ {
+  "prompt": "The Pauli exclusion principle forbids two electrons in an atom from sharing what?",
+  "choices": [
+   "The same quantum state",
+   "The same orbital",
+   "The same energy",
+   "The same spin"
+  ],
+  "answer": "The same quantum state",
+  "difficulty": "hard",
+  "explanation": "It is why electrons stack up into shells instead of all crowding into the lowest level.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which element was identified in the Sun's spectrum before it was ever found on Earth?",
+  "choices": [
+   "Helium",
+   "Neon",
+   "Argon",
+   "Hydrogen"
+  ],
+  "answer": "Helium",
+  "difficulty": "hard",
+  "explanation": "An unexplained yellow line in an 1868 eclipse spectrum led to its name, from helios, the Sun.",
+  "unsure": false
+ },
+ {
+  "prompt": "Who argued in 1912 that the continents had drifted apart, long before the idea was accepted?",
+  "choices": [
+   "Alfred Wegener",
+   "Charles Lyell",
+   "James Hutton",
+   "Harry Hess"
+  ],
+  "answer": "Alfred Wegener",
+  "difficulty": "hard",
+  "explanation": "His theory lacked a mechanism until sea-floor spreading supplied one in the 1960s.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the name of the orderly, programmed self-destruction of a cell?",
+  "choices": [
+   "Apoptosis",
+   "Necrosis",
+   "Mitosis",
+   "Phagocytosis"
+  ],
+  "answer": "Apoptosis",
+  "difficulty": "hard",
+  "explanation": "It sculpts tissues during development, such as clearing the webbing between fingers.",
+  "unsure": false
+ },
+ {
+  "prompt": "Henrietta Leavitt linked brightness to pulsation period in which kind of star?",
+  "choices": [
+   "Cepheid variables",
+   "Red giants",
+   "Pulsars",
+   "Quasars"
+  ],
+  "answer": "Cepheid variables",
+  "difficulty": "hard",
+  "explanation": "Her period-luminosity law turned these stars into yardsticks for measuring cosmic distance.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which mineral group makes up roughly half of the Earth's crust?",
+  "choices": [
+   "Feldspars",
+   "Micas",
+   "Olivines",
+   "Carbonates"
+  ],
+  "answer": "Feldspars",
+  "difficulty": "hard",
+  "explanation": "Feldspars crystallise out of most magmas, and their weathering produces the world's clay.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the temperature above which a material loses its permanent magnetism called?",
+  "choices": [
+   "The Curie point",
+   "The Debye point",
+   "The Fermi level",
+   "The triple point"
+  ],
+  "answer": "The Curie point",
+  "difficulty": "hard",
+  "explanation": "Above it, heat scrambles the aligned magnetic domains that made the material ferromagnetic.",
+  "unsure": false
+ },
+ {
+  "prompt": "What does a catalyst do to a chemical reaction?",
+  "choices": [
+   "Lowers activation energy",
+   "Shifts the equilibrium",
+   "Raises the maximum yield",
+   "Adds energy to reactants"
+  ],
+  "answer": "Lowers activation energy",
+  "difficulty": "hard",
+  "explanation": "It offers an easier route and emerges unchanged, so the final equilibrium is unaffected.",
+  "unsure": false
+ },
+ {
+  "prompt": "Whose swan-necked flask experiments disproved the spontaneous generation of microbes?",
+  "choices": [
+   "Louis Pasteur",
+   "Robert Hooke",
+   "Edward Jenner",
+   "Antonie van Leeuwenhoek"
+  ],
+  "answer": "Louis Pasteur",
+  "difficulty": "hard",
+  "explanation": "Broth stayed clear though open to the air, because the curved neck trapped incoming dust.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the term for the population size an environment can support indefinitely?",
+  "choices": [
+   "Carrying capacity",
+   "Biotic potential",
+   "Population density",
+   "Niche breadth"
+  ],
+  "answer": "Carrying capacity",
+  "difficulty": "hard",
+  "explanation": "Beyond it, competition, disease or hunger push numbers back down towards the limit.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which sugar forms the backbone of RNA but not of DNA?",
+  "choices": [
+   "Ribose",
+   "Deoxyribose",
+   "Glucose",
+   "Fructose"
+  ],
+  "answer": "Ribose",
+  "difficulty": "hard",
+  "explanation": "Its extra hydroxyl group makes RNA more chemically reactive, and far less stable than DNA.",
+  "unsure": false
+ },
+ {
+  "prompt": "What are the three tiny bones of the middle ear collectively known as?",
+  "choices": [
+   "The ossicles",
+   "The cochlea",
+   "The labyrinth",
+   "The vestibule"
+  ],
+  "answer": "The ossicles",
+  "difficulty": "hard",
+  "explanation": "Malleus, incus and stapes amplify eardrum vibrations enough to move fluid in the cochlea.",
+  "unsure": false
+ },
+ {
+  "prompt": "On which planet is a single rotation longer than its entire year?",
+  "choices": [
+   "Venus",
+   "Mercury",
+   "Uranus",
+   "Neptune"
+  ],
+  "answer": "Venus",
+  "difficulty": "hard",
+  "explanation": "Venus turns once in about 243 Earth days but circles the Sun in roughly 225.",
+  "unsure": false
+ },
+ {
+  "prompt": "The regular radio pulses of a pulsar come from what?",
+  "choices": [
+   "A spinning neutron star",
+   "A pulsating red giant",
+   "An orbiting black hole",
+   "A collapsing nebula"
+  ],
+  "answer": "A spinning neutron star",
+  "difficulty": "hard",
+  "explanation": "Beams from its magnetic poles sweep past the Earth like a lighthouse as the star rotates.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which greenhouse gas released by fertilised soils also destroys stratospheric ozone?",
+  "choices": [
+   "Nitrous oxide",
+   "Methane",
+   "Carbon dioxide",
+   "Sulphur dioxide"
+  ],
+  "answer": "Nitrous oxide",
+  "difficulty": "hard",
+  "explanation": "Soil microbes convert surplus nitrogen into it, and it warms far more strongly than carbon dioxide.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is a body of rock that stores and transmits usable groundwater called?",
+  "choices": [
+   "An aquifer",
+   "A moraine",
+   "A regolith",
+   "A batholith"
+  ],
+  "answer": "An aquifer",
+  "difficulty": "hard",
+  "explanation": "Porous, permeable rock such as sandstone holds the water that wells and springs draw on.",
+  "unsure": false
+ },
+ {
+  "prompt": "Who first estimated the Earth's circumference by comparing shadows in two cities?",
+  "choices": [
+   "Eratosthenes",
+   "Ptolemy",
+   "Archimedes",
+   "Pythagoras"
+  ],
+  "answer": "Eratosthenes",
+  "difficulty": "hard",
+  "explanation": "Around 240 BC he compared midday shadow angles at Alexandria and Syene to get a close figure.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the approximate half-life of carbon-14, the isotope used in radiocarbon dating?",
+  "choices": [
+   "About 5,700 years",
+   "About 1,600 years",
+   "About 24,000 years",
+   "About 700 million years"
+  ],
+  "answer": "About 5,700 years",
+  "difficulty": "hard",
+  "explanation": "That decay rate limits reliable radiocarbon dating to roughly the last 50,000 years.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the visible surface layer of the Sun called?",
+  "choices": [
+   "The photosphere",
+   "The chromosphere",
+   "The corona",
+   "The convective zone"
+  ],
+  "answer": "The photosphere",
+  "difficulty": "hard",
+  "explanation": "The corona above it is far hotter but so thin it shows only during a total eclipse.",
+  "unsure": false
+ },
+ {
+  "prompt": "Fusion in a massive star's core stops once it has built up which element?",
+  "choices": [
+   "Iron",
+   "Carbon",
+   "Oxygen",
+   "Uranium"
+  ],
+  "answer": "Iron",
+  "difficulty": "hard",
+  "explanation": "Fusing iron absorbs energy instead of releasing it, so the core collapses and the star explodes.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which effect explains why a clear daytime sky looks blue?",
+  "choices": [
+   "Rayleigh scattering",
+   "Refraction",
+   "Diffraction",
+   "Fluorescence"
+  ],
+  "answer": "Rayleigh scattering",
+  "difficulty": "hard",
+  "explanation": "Air molecules scatter short blue wavelengths far more strongly than long red ones.",
+  "unsure": false
+ },
+ {
+  "prompt": "What is the term for an animal whose body temperature follows its surroundings?",
+  "choices": [
+   "An ectotherm",
+   "An endotherm",
+   "A homeotherm",
+   "A heterotroph"
+  ],
+  "answer": "An ectotherm",
+  "difficulty": "hard",
+  "explanation": "Ectotherms manage heat by behaviour, such as basking, rather than by burning food for warmth.",
+  "unsure": false
+ },
+ {
+  "prompt": "Which work earned Albert Einstein his Nobel Prize in Physics?",
+  "choices": [
+   "The photoelectric effect",
+   "Special relativity",
+   "General relativity",
+   "Mass-energy equivalence"
+  ],
+  "answer": "The photoelectric effect",
+  "difficulty": "hard",
+  "explanation": "His 1905 photon explanation, not relativity, was cited for the prize awarded in 1921.",
+  "unsure": false
+ }
+]
