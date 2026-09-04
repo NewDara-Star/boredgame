@@ -15,13 +15,14 @@ import { startConnect4 } from "@/features/connect4/useC4Room";
 import { Lobby } from "./Lobby";
 import { InviteCard } from "./InviteCard";
 import { AuthCard } from "@/features/profile/AuthCard";
+import { GuestCard, ClaimCard } from "@/features/profile/GuestCard";
 import { Avatar } from "@/shared/ui/Avatar";
 import { ROOM_GAMES } from "@/features/play/registry";
 
 export function RoomsPage() {
   const { code } = useParams();
   const nav = useNavigate();
-  const { user, profile, offline } = useAuth();
+  const { user, profile, offline, isGuest } = useAuth();
   const [joinCode, setJoinCode] = useState("");
   const [guess, setGuess] = useState("");
   const [startError, setStartError] = useState<string | null>(null);
@@ -105,7 +106,14 @@ export function RoomsPage() {
               </div>
             )}
           </div>
-          <AuthCard kept="Pick a name and you're straight into the room — it takes a second." />
+          <GuestCard note="Type a name and you're in the room. No password." />
+          <details className="group">
+            <summary className="text-[11px] font-black uppercase tracking-wider text-soft
+              underline underline-offset-4 cursor-pointer list-none text-center">
+              I have an account
+            </summary>
+            <div className="mt-3"><AuthCard /></div>
+          </details>
         </div>
       );
     }
@@ -113,9 +121,16 @@ export function RoomsPage() {
       <div className="space-y-4">
         <h1 className="font-display text-[30px] leading-none font-semibold">Head-to-head</h1>
         <p className="text-sm text-soft font-semibold">
-          Rooms need to know who you are, so they can tell you apart.
+          A room needs to tell you two apart. A name is enough for that.
         </p>
-        <AuthCard />
+        <GuestCard />
+        <details>
+          <summary className="text-[11px] font-black uppercase tracking-wider text-soft
+            underline underline-offset-4 cursor-pointer list-none text-center">
+            I have an account
+          </summary>
+          <div className="mt-3"><AuthCard /></div>
+        </details>
       </div>
     );
   }
@@ -211,6 +226,8 @@ export function RoomsPage() {
           players={players} userId={user.id}
           plain={room.mode === "connect4"} />
       )}
+
+      {iAmIn && isGuest && (waiting || room.status === "finished") && <ClaimCard />}
 
       {iAmIn && (
         <button onClick={() => nav("/rooms")}

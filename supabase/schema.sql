@@ -572,3 +572,69 @@ begin
   where r.id = p_room and r.status = 'waiting';
   update public.room_players p set ready = false where p.room_id = p_room;
 end $$;
+
+-- ============ guests ============
+-- Rooms required an account, and "a name and a password" is where a nine-year-old
+-- or a grandparent stops. A guest signs in anonymously with a name and nothing
+-- else. REQUIRES "Anonymous sign-ins" to be ON in Supabase → Authentication →
+-- Sign In / Providers; with it off, signInAnonymously() errors and the app says
+-- so rather than failing silently.
+alter table public.profiles add column if not exists is_guest boolean not null default false;
+
+create or replace function public.handle_new_user()
+returns trigger language plpgsql security definer set search_path to 'public' as $$
+declare
+  wanted text := nullif(btrim(new.raw_user_meta_data->>'username'), '');
+  base   text;
+  suffix text := substr(new.id::text, 1, 4);
+  guest  boolean := coalesce(new.is_anonymous, false);
+begin
+  if wanted is not null and wanted ~ '^[A-Za-z0-9_]{3,20}$'
+     and not exists (select 1 from profiles where lower(username) = lower(wanted)) then
+    insert into profiles (id, username, is_guest) values (new.id, wanted, guest)
+      on conflict do nothing;
+    return new;
+  end if;
+  -- A guest has no email at all, so the fallback has to survive a null.
+  base := regexp_replace(split_part(coalesce(new.email, ''), '@', 1), '[^A-Za-z0-9_]', '', 'g');
+  base := left(nullif(base, ''), 15);
+  if base is null or length(base) < 2 then base := case when guest then 'guest' else 'player' end; end if;
+  insert into profiles (id, username, is_guest) values (new.id, base || '_' || suffix, guest)
+    on conflict do nothing;
+  return new;
+end; $$;
+
+-- Claiming an account is an UPDATE on auth.users, so without this a claimed
+-- account stays flagged a guest and never reaches the leaderboard it just earned.
+create or replace function public.sync_guest_flag()
+returns trigger language plpgsql security definer set search_path to 'public' as $$
+begin
+  if coalesce(new.is_anonymous, false) is distinct from coalesce(old.is_anonymous, false) then
+    update public.profiles set is_guest = coalesce(new.is_anonymous, false) where id = new.id;
+  end if;
+  return new;
+end; $$;
+
+drop trigger if exists on_auth_user_claimed on auth.users;
+create trigger on_auth_user_claimed after update on auth.users
+  for each row execute function public.sync_guest_flag();
+
+-- Every "just play" creates a permanent row. Run by hand, never scheduled:
+--   select public.sweep_stale_guests(30);
+create or replace function public.sweep_stale_guests(p_days int default 30)
+returns int language plpgsql security definer set search_path to 'public', 'auth' as $$
+declare n int;
+begin
+  with doomed as (
+    select u.id from auth.users u
+    join public.profiles p on p.id = u.id
+    where coalesce(u.is_anonymous, false) and p.is_guest
+      and u.created_at < now() - make_interval(days => p_days)
+      and coalesce(p.total_answered, 0) = 0
+      and not exists (select 1 from public.room_players rp where rp.user_id = u.id)
+  )
+  delete from auth.users u using doomed d where u.id = d.id;
+  get diagnostics n = row_count;
+  return n;
+end $$;
+revoke all on function public.sweep_stale_guests(int) from public, anon, authenticated;

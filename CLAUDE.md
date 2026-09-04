@@ -285,6 +285,28 @@ once when the room was found, which meant changing the game in the lobby left
 the previous bank in place: the category chips described the game you had just
 left, and a race dealt out of it.
 
+## A guest is a real account with the password left out
+
+Rooms required an account. "A name and a password" is not hard, but it reads as
+a commitment before you have seen the thing, and that is where a nine-year-old
+or a grandparent stops. `signInAsGuest` is `signInAnonymously` with the typed
+name in user metadata, so the same trigger that names a real account names a
+guest, and `profiles.is_guest` keeps them off the leaderboard — ranking someone
+who can never sign back in puts a permanent stranger on the board.
+
+`claimAccount` is `updateUser({email, password})` on the SAME row, so the id
+survives and every game already attached to it comes along. The flag is cleared
+by a trigger on `auth.users` UPDATE, because claiming is an update and nothing
+else would ever clear it.
+
+Two things to know. **It needs "Anonymous sign-ins" ON** in Supabase →
+Authentication → Sign In / Providers; with it off, `signInAnonymously` errors
+and the card says exactly that rather than failing silently. And every guest is
+a permanent row in `auth.users` that nothing removes, so
+`select public.sweep_stale_guests(30);` deletes anonymous accounts older than 30
+days that never joined a room and never answered anything. Run by hand, read the
+number, then decide — it is deliberately not scheduled.
+
 ## Brand: sticker on neon, but only where you are not reading
 
 The references are logo boards and packaging — saturated grounds, white fills,

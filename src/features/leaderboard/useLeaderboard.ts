@@ -37,6 +37,9 @@ export function useLeaderboard(userId?: string, limit = 50): Board {
         .from("profiles")
         .select("id, username, total_answered, total_correct, streak")
         .gt("total_answered", 0)
+        // Guests have a name but not an account. Ranking them would put a row
+        // on the board that nobody can ever sign back in to.
+        .eq("is_guest", false)
         // id last so the order is stable between loads instead of shuffling ties.
         .order("total_answered", { ascending: false })
         .order("total_correct", { ascending: false })

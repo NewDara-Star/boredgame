@@ -25,6 +25,15 @@ interface AuthValue {
   /** `id` is a username, or an email for the accounts made before names. */
   signUp(id: string, password: string): Promise<{ error: string | null }>;
   signInWithLink(email: string): Promise<{ error: string | null }>;
+  /** A name and nothing else. The wall in front of a nine-year-old or a
+      grandparent was "and a password", so a guest gets neither an email nor
+      one — just an anonymous session and the name they typed. */
+  signInAsGuest(name: string): Promise<{ error: string | null }>;
+  /** Turns that same account into a real one, keeping its id, so a guest who
+      decides to stay does not lose the games they already played. */
+  claimAccount(name: string, password: string): Promise<{ error: string | null }>;
+  /** True while the session is anonymous. Guests are kept off the leaderboard. */
+  isGuest: boolean;
   setPassword(password: string): Promise<{ error: string | null }>;
   /** Names are chosen, not generated — everything social shows one. */
   setUsername(name: string): Promise<{ error: string | null }>;
@@ -104,6 +113,57 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }
 
+  async function signInAsGuest(name: string) {
+    if (!supabase) return { error: "Supabase is not configured yet." };
+    const username = name.trim();
+    if (username) {
+      // Same check the real sign-up does. Without it the trigger silently falls
+      // back to guest_ab12 and the player wonders who that is.
+      const { data: free } = await supabase.rpc("username_available", { p_name: username });
+      if (free === false) {
+        return { error: "Someone's already using that name — try another." };
+      }
+    }
+    const { error } = await supabase.auth.signInAnonymously({
+      options: { data: username ? { username } : undefined },
+    });
+    if (!error) return { error: null };
+    // The one failure worth naming, because it is a project setting rather
+    // than anything the player did.
+    return {
+      error: /anonymous/i.test(error.message)
+        ? "Guest play is switched off for this app. Enable anonymous sign-ins in Supabase → Authentication → Sign In / Providers."
+        : error.message,
+    };
+  }
+
+  /**
+   * Anonymous → permanent, on the same row, so the id survives and with it every
+   * room, score and streak already attached to it. The trigger on auth.users
+   * clears is_guest when is_anonymous flips.
+   */
+  async function claimAccount(name: string, password: string) {
+    if (!supabase || !user) return { error: "Supabase is not configured yet." };
+    const username = name.trim();
+    const { data: free } = await supabase.rpc("username_available", { p_name: username });
+    if (free === false && profile?.username.toLowerCase() !== username.toLowerCase()) {
+      return { error: "That name is already taken." };
+    }
+    const { error } = await supabase.auth.updateUser({
+      email: asLogin(username), password, data: { username },
+    });
+    if (error) {
+      return {
+        error: /already registered|already been/i.test(error.message)
+          ? "That name is already taken."
+          : error.message,
+      };
+    }
+    if (username) await setUsername(username);
+    await refreshProfile();
+    return { error: null };
+  }
+
   /** Kept as a fallback. Will hit the rate limit until custom SMTP is set up. */
   async function signInWithLink(email: string) {
     if (!supabase) return { error: "Supabase is not configured yet." };
@@ -141,7 +201,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <Ctx.Provider value={{ user, profile, loading, offline: !isConfigured, signIn, signUp, signInWithLink, setPassword, setUsername, signOut, refreshProfile, applyProfile: setProfile }}>
+    <Ctx.Provider value={{ user, profile, loading, offline: !isConfigured, isGuest: !!user?.is_anonymous,
+      signIn, signUp, signInWithLink, signInAsGuest, claimAccount,
+      setPassword, setUsername, signOut, refreshProfile, applyProfile: setProfile }}>
       {children}
     </Ctx.Provider>
   );

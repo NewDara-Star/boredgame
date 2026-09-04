@@ -70,6 +70,8 @@ export interface Profile {
   best_streak: number;
   /** YYYY-MM-DD, in whatever calendar the player's device was on */
   last_played: string | null;
+  /** Signed in anonymously — playing, but not on the leaderboard yet. */
+  is_guest: boolean;
   created_at: string;
 }
 
