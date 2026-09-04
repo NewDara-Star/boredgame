@@ -73,6 +73,23 @@ npm run typecheck  # tsc --noEmit
 npm run build      # tsc -b && vite build
 ```
 
+## Deployment
+
+Vercel, static build of `dist/`. **`vercel.json` is load-bearing**: this is a
+single-page app, so every path has to be rewritten to `index.html`. Without that
+rewrite, `/picto` works when you click to it and 404s when you refresh or share
+the link — and a room URL like `/rooms/ABC123` never works at all, which would
+quietly kill head-to-head.
+
+Environment variables to set in the Vercel dashboard (Settings → Environment
+Variables), not in the repo:
+
+- `VITE_SUPABASE_URL`
+- `VITE_SUPABASE_ANON_KEY`
+
+`SUPABASE_SERVICE_KEY` is for `scripts/seed.mjs` only. It never goes near Vercel
+and never gets committed — it bypasses row-level security entirely.
+
 ## Conventions
 
 - `normalise()` in `src/shared/lib/normalise.ts` must stay identical to

@@ -4,8 +4,12 @@
 
 -- ============ helpers ============
 -- Mirrors normalise() in src/shared/lib/normalise.ts. Change one, change the other.
+-- search_path is pinned: without it a role could shadow regexp_replace and
+-- change what "correct" means.
 create or replace function normalise_answer(t text)
-returns text language sql immutable as $$
+returns text language sql immutable
+set search_path = pg_catalog, public
+as $$
   select regexp_replace(lower(coalesce(t,'')), '[^a-z0-9]', '', 'g');
 $$;
 
@@ -95,12 +99,16 @@ create table if not exists puzzles (
   created_at timestamptz default now(),
 
   -- The junk that reached the 2025 database cannot reach this one.
-  constraint answer_has_substance    check (length(trim(answer))    >= 2),
+  -- Scoped per game: picto answers are phrases, but a trivia answer is
+  -- legitimately as short as "4".
+  constraint answer_has_substance    check (length(trim(answer)) >= (case when game = 'picto' then 2 else 1 end)),
   constraint alt_hint_has_substance  check (length(trim(alt_hint))  >= 8),
   constraint char_hint_has_substance check (length(trim(char_hint)) >= 3),
   constraint picto_text_needs_spec   check (game <> 'picto' or render <> 'text'  or spec is not null),
   constraint picto_image_needs_url   check (game <> 'picto' or render <> 'image' or image_url is not null),
-  constraint trivia_needs_prompt     check (game <> 'trivia' or (prompt is not null and array_length(choices,1) = 4))
+  constraint trivia_needs_prompt     check (game <> 'trivia' or (prompt is not null and array_length(choices,1) = 4)),
+  -- A trivia question can never be presented with no correct option.
+  constraint trivia_answer_in_choices check (game <> 'trivia' or answer = any(choices))
 );
 create index if not exists puzzles_live_idx on puzzles (status, game, difficulty);
 
@@ -203,3 +211,17 @@ do $$ begin
   alter publication supabase_realtime add table room_players; exception when duplicate_object then null; end $$;
 do $$ begin
   alter publication supabase_realtime add table room_rounds;  exception when duplicate_object then null; end $$;
+
+-- ============ hardening ============
+-- These two are trigger functions. They run SECURITY DEFINER so they can write
+-- to profiles, but nothing should reach them over the REST API —
+-- bump_profile_counters via RPC would let anyone inflate another player's stats.
+revoke execute on function public.bump_profile_counters() from anon, authenticated, public;
+revoke execute on function public.handle_new_user() from anon, authenticated, public;
+
+-- is_admin() stays callable on purpose: RLS policies evaluate it as the querying
+-- role, so revoking it would break every policy that uses it. It only reports
+-- whether the caller is an admin, which the caller already knows.
+
+-- `admins` has RLS on and no policies. That is deliberate: it denies all client
+-- access. Rows are added from the Supabase dashboard only.
