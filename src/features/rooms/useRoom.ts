@@ -95,14 +95,15 @@ export function useRoom(code: string | undefined, userId: string | undefined) {
 }
 
 export async function createRoom(
-  userId: string, game: "picto" | "trivia", username: string
+  userId: string, game: "picto" | "trivia", username: string,
+  mode: "race" | "squareoff" = "race",
 ): Promise<string | null> {
   if (!supabase) return null;
   const code = Array.from({ length: 6 }, () =>
     "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"[Math.floor(Math.random() * 32)]).join("");
   const { data, error } = await supabase
     .from("rooms")
-    .insert({ code, host_id: userId, game, status: "waiting", best_of: 5 })
+    .insert({ code, host_id: userId, game, mode, status: "waiting", best_of: 5 })
     .select().single();
   if (error || !data) return null;
   // Creating a room is joining it. Making the host click "Join this room" on a

@@ -179,6 +179,47 @@ npm install
 Claude can edit files, typecheck and run the dev server through the bridge.
 Dependency installs and production builds belong in your own Terminal.
 
+## Square Off
+
+Tic-tac-toe where claiming a square costs a right answer. The rule that makes it
+a game rather than a speed quiz with a grid drawn on it:
+
+    X picks a square, X answers
+      correct -> X claims it
+      wrong   -> O gets ONE shot at that same square, on a fresh question
+                   correct -> O claims it
+                   wrong   -> the square stays open
+    ...and either way the next pick is O's.
+
+Turns alternate by **pick**. A steal is an interrupt that never changes whose
+pick comes next, so missing costs you the square and hands your opponent a free
+attempt, but never costs you a turn outright.
+
+`rules.ts` is pure and holds every one of those rules. The solo game and the
+two-player room both reduce through it — that is the only way the rules are
+guaranteed to match on both sides of a network. It is checked by
+`npm run check:squareoff`, not eyeballed.
+
+Two things that will bite if you change them:
+
+- **Deal the question in the same tick the phase becomes "asking"**
+  (`commit` in `useSquareOff`). Dealing it from a separate effect leaves one
+  render where the phase and the question disagree, and the bot answers the
+  previous question.
+- **Exactly one client writes each transition.** The picker writes the pick, the
+  answerer writes the answer, and the answerer also writes the move on from the
+  reveal. Any other arrangement has both browsers racing to write the same row.
+
+The bot is deliberately not a solved player — win, block, centre, corner. A
+minimax opponent makes every solo game a draw, and the tension here is meant to
+come from the questions. It answers the same questions you do at a rate set by
+difficulty and can be watched getting them wrong, so its skill is visible rather
+than a hidden dice roll on the outcome.
+
+Rooms carry a `mode` (`race` | `squareoff`) rather than there being a second
+room system. Board state lives in `ttt_games`, one row per room, nine characters
+of text for the board.
+
 ## Status, streaks and the leaderboard
 
 `profiles` carries `streak`, `best_streak` and `last_played`. None of them are

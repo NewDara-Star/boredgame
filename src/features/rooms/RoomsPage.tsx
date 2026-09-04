@@ -7,6 +7,7 @@ import { Button } from "@/shared/ui/Button";
 import { Card } from "@/shared/ui/Card";
 import { Field, Input } from "@/shared/ui/Field";
 import { isCorrect } from "@/shared/lib/normalise";
+import { SquareOffRoom } from "@/features/squareoff/SquareOffRoom";
 
 export function RoomsPage() {
   const { code } = useParams();
@@ -39,14 +40,33 @@ export function RoomsPage() {
     return (
       <div className="space-y-5">
         <h1 className="text-2xl font-bold">Head-to-head</h1>
-        <p className="text-sm text-soft">Same puzzle, two players, first correct answer takes the round.</p>
-        <div className="grid gap-2 sm:grid-cols-2">
-          <Button onClick={async () => { const c = await createRoom(user.id, "picto", uname); if (c) nav(`/rooms/${c}`); }}>
-            Create a Picto room
+
+        <div className="piece p-4">
+          <p className="text-[10px] font-black uppercase tracking-widest text-soft">Square Off</p>
+          <p className="text-sm font-semibold mt-1">
+            Tic-tac-toe where a square costs a right answer. Miss, and your opponent gets one shot at it.
+          </p>
+          <Button className="w-full mt-3"
+            onClick={async () => {
+              const c = await createRoom(user.id, "trivia", uname, "squareoff");
+              if (c) nav(`/rooms/${c}`);
+            }}>
+            Create a Square Off room
           </Button>
-          <Button variant="ghost" onClick={async () => { const c = await createRoom(user.id, "trivia", uname); if (c) nav(`/rooms/${c}`); }}>
-            Create a Trivia room
-          </Button>
+        </div>
+
+        <div>
+          <p className="text-[10px] font-black uppercase tracking-widest text-soft mb-2">
+            Race — same puzzle, first correct answer takes the round
+          </p>
+          <div className="grid gap-2 sm:grid-cols-2">
+            <Button variant="ghost" onClick={async () => { const c = await createRoom(user.id, "picto", uname); if (c) nav(`/rooms/${c}`); }}>
+              Picto race
+            </Button>
+            <Button variant="ghost" onClick={async () => { const c = await createRoom(user.id, "trivia", uname); if (c) nav(`/rooms/${c}`); }}>
+              Trivia race
+            </Button>
+          </div>
         </div>
         <form onSubmit={(e) => { e.preventDefault(); if (joinCode.trim()) nav(`/rooms/${joinCode.trim().toUpperCase()}`); }}>
           <Field label="Join with a code">
@@ -91,10 +111,16 @@ export function RoomsPage() {
         <Button onClick={() => void join(user.email?.split("@")[0] ?? "player")}>Join this room</Button>
       )}
 
-      {iAmIn && !round && isHost && <Button onClick={() => void startNextRound()}>Start the match</Button>}
-      {iAmIn && !round && !isHost && <p className="text-sm text-soft">Waiting for the host to start…</p>}
+      {iAmIn && room.mode === "squareoff" && (
+        <SquareOffRoom roomId={room.id} players={players} userId={user.id} isHost={isHost} />
+      )}
 
-      {round && currentPuzzle && (
+      {room.mode !== "squareoff" && iAmIn && !round && isHost &&
+        <Button onClick={() => void startNextRound()}>Start the match</Button>}
+      {room.mode !== "squareoff" && iAmIn && !round && !isHost &&
+        <p className="text-sm text-soft">Waiting for the host to start…</p>}
+
+      {room.mode !== "squareoff" && round && currentPuzzle && (
         <>
           <p className="text-[10px] uppercase tracking-widest text-soft">Round {round.round_no} of {room.best_of}</p>
           <Card className="aspect-square max-h-[44vh] mx-auto w-full grid place-items-center p-6 text-ink">

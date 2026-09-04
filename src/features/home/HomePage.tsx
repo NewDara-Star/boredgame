@@ -24,10 +24,10 @@ export function HomePage() {
         Short rounds, no ads, no feed. Built to be opened for four minutes and closed again.
       </motion.p>
 
-      <div className="grid gap-4 mt-7 sm:grid-cols-2">
+      <div className="grid gap-4 mt-7 sm:grid-cols-3">
         <motion.div variants={riseIn}>
           <Link to="/picto" className="piece press block p-5 h-full">
-            <div className="h-28 text-picto mb-4">
+            <div className="h-24 text-picto mb-4">
               <PictoRenderer spec={{ items: teaser.items }} animate seed={teaser.slug} />
             </div>
             <span className="inline-block text-[10px] font-black uppercase tracking-widest
@@ -40,7 +40,7 @@ export function HomePage() {
 
         <motion.div variants={riseIn}>
           <Link to="/trivia" className="piece press block p-5 h-full">
-            <div className="h-28 mb-4 grid place-items-center">
+            <div className="h-24 mb-4 grid place-items-center">
               <motion.span
                 className="text-6xl leading-none text-trivia"
                 animate={{ rotate: [0, -8, 8, 0], scale: [1, 1.08, 1] }}
@@ -52,6 +52,30 @@ export function HomePage() {
             <h2 className="text-2xl font-semibold mt-2">Star Trivia</h2>
             <p className="text-sm text-soft mt-1 font-semibold">Four options, one right, ten questions.</p>
             <p className="text-xs text-soft/70 mt-3 font-bold">{counts.trivia} questions</p>
+          </Link>
+        </motion.div>
+
+        <motion.div variants={riseIn}>
+          <Link to="/squareoff" className="piece press block p-5 h-full">
+            <div className="h-24 mb-4 grid place-items-center">
+              <motion.svg viewBox="0 0 100 100" className="h-full"
+                animate={{ rotate: [0, 4, -4, 0] }}
+                transition={{ duration: 3.2, repeat: Infinity, repeatDelay: 2, ease: "easeInOut" }}>
+                <g stroke="var(--color-ink)" strokeWidth="4" strokeLinecap="round">
+                  <path d="M36 12 V88 M64 12 V88 M12 36 H88 M12 64 H88" />
+                </g>
+                <g strokeWidth="8" strokeLinecap="round" fill="none">
+                  <path d="M18 18 L30 30 M30 18 L18 30" stroke="var(--color-picto)" />
+                  <circle cx="50" cy="50" r="9" stroke="var(--color-trivia)" />
+                  <path d="M70 70 L82 82 M82 70 L70 82" stroke="var(--color-picto)" />
+                </g>
+              </motion.svg>
+            </div>
+            <span className="inline-block text-[10px] font-black uppercase tracking-widest
+              bg-ink text-paper rounded-full px-2.5 py-1">Board game</span>
+            <h2 className="text-2xl font-semibold mt-2">Square Off</h2>
+            <p className="text-sm text-soft mt-1 font-semibold">Answer right to claim a square.</p>
+            <p className="text-xs text-soft/70 mt-3 font-bold">Solo or head-to-head</p>
           </Link>
         </motion.div>
       </div>

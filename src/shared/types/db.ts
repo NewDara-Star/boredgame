@@ -89,6 +89,8 @@ export interface Room {
   code: string;
   host_id: string;
   game: GameKey;
+  /** 'race' is the original first-correct-answer-wins; 'squareoff' is the board. */
+  mode: "race" | "squareoff";
   status: RoomStatus;
   best_of: number;
   created_at: string;

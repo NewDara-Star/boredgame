@@ -1,6 +1,6 @@
 # STATUS — BoredGame
 
-Last updated: 2026-09-04 (streaks, leaderboard, phone navigation)
+Last updated: 2026-09-04 (Square Off)
 
 ## Verified working
 
@@ -17,11 +17,16 @@ Each claim below was checked by running it, not by reading the code.
 | Leaderboard podium, list and sticky row render | stubbed 8 players; podium, rows 4–8 and the signed-out CTA all correct |
 | Locked vs unlocked ranks read differently | profile screenshot: 5 unlocked in colour, 5 greyed with "n to go" |
 | Type is the real Fredoka/Nunito | fonts substituted locally from `@fontsource-variable`, not the system fallback |
+| Square Off rules hold | `npm run check:squareoff` — 22 assertions, including the steal and turn order |
+| A full solo Square Off game plays | Playwright drove 60 turns to "The bot wins", no console errors |
+| The steal fires and is narrated correctly | screenshot: "You miss. The bot gets one shot at it." |
+| Board and answers fit one phone screen | board shrinks while a question is up; verified at 390x844 |
 | Profiles cannot be self-inflated | `information_schema.column_privileges`: authenticated has UPDATE on `username`, `avatar` only |
 
 ## Content
 
-**374 puzzles live in Supabase.**
+**374 puzzles live in Supabase.** Square Off draws on the same trivia bank, so
+it needed no new content at all.
 
 - 104 rebus — 39 easy, 51 medium, 14 hard
 - 270 trivia — 128 easy, 119 medium, 23 hard, all with explanations
@@ -46,9 +51,11 @@ tabs do not fit 390px, and the header now carries status — streak and rank bad
 
 ## Not yet verified
 
-- **Head-to-head rooms.** The realtime code is written, typechecks and has one
-  abandoned round sitting in the database from a solo test. It has never had two
-  browsers in a room. Treat it as unproven until it has.
+- **Head-to-head rooms — both modes.** The realtime code is written and
+  typechecks, and Square Off's rules are unit-checked and proven in solo play,
+  but no room has ever had two browsers in it. The parts that only exist in the
+  two-player path — seat assignment, who writes which transition, the shared
+  clock — are reasoned about, not observed. Treat as unproven.
 - **The streak across a real day boundary.** `touch_streak` is unit-obvious and
   the same-day path is exercised, but nothing has yet played on two consecutive
   real days. Worth checking tomorrow.
@@ -57,7 +64,8 @@ tabs do not fit 390px, and the header now carries status — streak and rank bad
 ## Next, in order
 
 1. Push the waiting commits, confirm the Vercel build.
-2. Test rooms with two browsers. Still the step most likely to surface bugs.
+2. Test rooms with two browsers — a Square Off room is the best test, since it
+   exercises far more of the realtime path than the race mode does.
 3. Come back tomorrow and check the streak reads 2, not 1.
 4. Decide the product name before pointing a domain at it.
 

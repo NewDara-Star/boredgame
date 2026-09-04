@@ -283,3 +283,51 @@ end; $$;
 
 revoke all on function public.touch_streak(date) from public, anon;
 grant execute on function public.touch_streak(date) to authenticated;
+
+-- ============ Square Off ============
+-- Rooms already do "same puzzle, first correct answer wins". Square Off is a
+-- different shape on the same plumbing, so rooms gain a mode rather than a
+-- second room system.
+alter table public.rooms
+  add column if not exists mode text not null default 'race'
+    check (mode in ('race', 'squareoff'));
+
+create table if not exists public.ttt_games (
+  room_id   bigint primary key references public.rooms(id) on delete cascade,
+  -- nine characters, 'x' | 'o' | '-'. A text board is trivially diffable in the
+  -- dashboard when something goes wrong mid-match, which an array is not.
+  board     text not null default '---------' check (char_length(board) = 9),
+  turn      text not null default 'x' check (turn in ('x','o')),
+  phase     text not null default 'picking'
+              check (phase in ('picking','asking','revealed','over')),
+  target    smallint check (target between 0 and 8),
+  steal     boolean not null default false,
+  last      jsonb,
+  winner    text check (winner in ('x','o','draw')),
+  puzzle_id bigint references public.puzzles(id),
+  x_player  uuid references auth.users(id) on delete set null,
+  o_player  uuid references auth.users(id) on delete set null,
+  updated_at timestamptz not null default now()
+);
+
+alter table public.ttt_games enable row level security;
+
+drop policy if exists "ttt readable by anyone with the code" on public.ttt_games;
+create policy "ttt readable by anyone with the code" on public.ttt_games
+  for select using (true);
+
+-- Only the two people sitting at the board may move it.
+drop policy if exists "ttt written by members" on public.ttt_games;
+create policy "ttt written by members" on public.ttt_games
+  for all using (
+    exists (select 1 from public.room_players p
+            where p.room_id = ttt_games.room_id and p.user_id = auth.uid())
+  ) with check (
+    exists (select 1 from public.room_players p
+            where p.room_id = ttt_games.room_id and p.user_id = auth.uid())
+  );
+
+do $$ begin
+  alter publication supabase_realtime add table public.ttt_games;
+  exception when duplicate_object then null;
+end $$;
