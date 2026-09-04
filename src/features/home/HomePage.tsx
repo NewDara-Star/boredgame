@@ -3,13 +3,13 @@ import { motion } from "framer-motion";
 import { PICTO_SEED } from "@/shared/data/picto";
 import { useCounts } from "@/features/play/counts";
 import { PictoRenderer } from "@/features/picto/PictoRenderer";
-import { readLocal } from "@/features/play/progress";
+import { useProgress } from "@/features/play/useProgress";
 import { rankFor } from "@/features/play/rank";
 import { RankBadge } from "@/features/play/RankBadge";
 import { stagger, riseIn, popIn } from "@/shared/ui/motion";
 
 export function HomePage() {
-  const p = readLocal();
+  const p = useProgress();
   const counts = useCounts();
   const { current, next, progress } = rankFor(p.answered);
   const teaser = PICTO_SEED[Math.floor(Math.random() * PICTO_SEED.length)];

@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/app/providers/AuthProvider";
-import { readLocal } from "@/features/play/progress";
+import { useProgress } from "@/features/play/useProgress";
 import { rankFor, RANKS } from "@/features/play/rank";
 import { RankBadge } from "@/features/play/RankBadge";
 import { Button } from "@/shared/ui/Button";
 import { Field, Input } from "@/shared/ui/Field";
 
 export function ProfilePage() {
-  const { user, profile, offline, signIn, signUp, signInWithLink, setPassword: savePassword, signOut } = useAuth();
+  const { user, offline, signIn, signUp, signInWithLink, setPassword: savePassword, signOut } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [mode, setMode] = useState<"signin" | "signup">("signin");
@@ -32,9 +32,9 @@ export function ProfilePage() {
     history.replaceState(null, "", window.location.pathname);
   }, []);
 
-  const local = readLocal();
-  const answered = profile?.total_answered ?? local.answered;
-  const correct = profile?.total_correct ?? local.correct;
+  const local = useProgress();
+  const answered = local.answered;
+  const correct = local.correct;
   const { current, next, progress } = rankFor(answered);
 
   return (
