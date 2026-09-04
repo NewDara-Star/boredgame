@@ -39,6 +39,34 @@ each other. Verify any new puzzle by rendering the contact sheet.
 player is fully playable before any database exists. Do not make the app depend
 on Supabase to boot.
 
+## Adding rebus puzzles
+
+Run the gate before anything reaches the database:
+
+```
+node --experimental-strip-types scripts/check-rebus.mts
+```
+
+It catches the two things that actually go wrong:
+
+- **the visual is wrong** — items overlap, run off the 100x100 canvas, or are
+  too small to read. Eleven of the first 36 puzzles shipped with colliding text
+  because nothing checked this.
+- **the puzzle doesn't work** — the canvas spells the answer outright, the hints
+  are placeholder, or two puzzles share an answer.
+
+Geometry is *estimated*, not measured: SVG text width depends on font metrics the
+renderer never exposes. So the gate flags suspects — it is a filter, not a judge.
+**Always render the contact sheet and look at it too.** The gate cannot tell you
+that six puzzles in a row use the same trick, which is its own quality problem.
+
+### Sourcing
+
+Use the traditional rebus canon — "head over heels", "man overboard". It is folk
+material, published everywhere, owned by nobody. **Do not lift puzzles from
+Reddit or puzzle apps**: those are usually someone's original work, and most are
+images that this renderer cannot use anyway.
+
 ## Realtime
 
 There is no socket code. Both browsers subscribe to `rooms`, `room_players` and

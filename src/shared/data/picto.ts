@@ -109,8 +109,6 @@ export const PICTO_SEED: PictoSeed[] = [
   { slug: "excuse-me", items: [t("X", 13, 50, { size: 15, w: 10 }), t("Q Q Q", 47, 50, { size: 12, w: 37 }), t("ME", 84, 50, { size: 13, w: 17 })],
     answer: "excuse me", alt_hint: "Say each letter out loud rather than reading it", char_hint: "2 words · polite interruption", difficulty: "hard", category: "Everyday" },
 
-  { slug: "touchdown", items: [t("TOUCH", 50, 34, { size: 15 }), t("DOWN", 50, 66, { size: 15 })],
-    answer: "touchdown", alt_hint: "Read the top, then where it sits", char_hint: "1 word · American football", difficulty: "easy", category: "Sport" },
 
   { slug: "just-under-the-wire", items: [t("WIRE", 50, 33, { size: 15 }), t("JUST", 50, 67, { size: 15 })],
     answer: "just under the wire", alt_hint: "Barely made it", char_hint: "4 words · about being on time", difficulty: "medium", category: "Idioms" },
@@ -127,4 +125,61 @@ export const PICTO_SEED: PictoSeed[] = [
 
   { slug: "upside-down", items: [t("UPSIDE", 50, 50, { size: 15, rotate: 180 })],
     answer: "upside down", alt_hint: "The word is doing what it says", char_hint: "2 words · 6 then 4", difficulty: "easy", category: "Everyday" },
+
+  { slug: "misunderstanding", items: [t("STANDING", 50, 34, { size: 12, w: 60 }), t("MIS", 50, 66, { size: 14, w: 26 })],
+    answer: "misunderstanding", alt_hint: "One word sits beneath the other", char_hint: "1 word · what a row usually is", difficulty: "medium", category: "Idioms" },
+
+  { slug: "water-under-the-bridge", items: [t("BRIDGE", 50, 33, { size: 14, w: 52 }), t("WATER", 50, 67, { size: 14, w: 44 })],
+    answer: "water under the bridge", alt_hint: "Read the lower word's position", char_hint: "4 words · about letting things go", difficulty: "easy", category: "Idioms" },
+
+  { slug: "all-over-the-world", items: [t("ALL", 50, 34, { size: 15, w: 28 }), t("WORLD", 50, 66, { size: 14, w: 44 })],
+    answer: "all over the world", alt_hint: "The top word is sitting on the bottom one", char_hint: "4 words · everywhere", difficulty: "easy", category: "Places" },
+
+  { slug: "long-underwear", items: [t("LONG", 50, 34, { size: 15, w: 37 }), t("WEAR", 50, 66, { size: 15, w: 37 })],
+    answer: "long underwear", alt_hint: "One word is beneath the other", char_hint: "2 words · you put it on when it's cold", difficulty: "medium", category: "Everyday" },
+
+  { slug: "play-on-words", items: [t("PLAY", 50, 34, { size: 15, w: 37 }), t("WORDS", 50, 66, { size: 14, w: 44 })],
+    answer: "play on words", alt_hint: "The top word rests on the bottom one", char_hint: "3 words · what this whole game is", difficulty: "easy", category: "Idioms" },
+
+  { slug: "eggs-over-easy", items: [t("EGGS", 50, 34, { size: 15, w: 37 }), t("EASY", 50, 66, { size: 15, w: 37 })],
+    answer: "eggs over easy", alt_hint: "Position tells you the middle word", char_hint: "3 words · a breakfast order", difficulty: "easy", category: "Food" },
+
+  { slug: "hand-over-hand", items: [t("HAND", 50, 34, { size: 15, w: 37 }), t("HAND", 50, 66, { size: 15, w: 37 })],
+    answer: "hand over hand", alt_hint: "The same word twice, one above the other", char_hint: "3 words · how you climb a rope", difficulty: "easy", category: "Everyday" },
+
+  { slug: "walking-on-air", items: [t("WALKING", 50, 34, { size: 12, w: 52 }), t("AIR", 50, 66, { size: 15, w: 28 })],
+    answer: "walking on air", alt_hint: "The top word rests on the bottom one", char_hint: "3 words · how delight feels", difficulty: "easy", category: "Idioms" },
+
+  { slug: "banana-split", items: [t("BAN", 30, 50, { size: 15, w: 28 }), t("ANA", 70, 50, { size: 15, w: 28 })],
+    answer: "banana split", alt_hint: "One word has been divided in two", char_hint: "2 words · a dessert", difficulty: "medium", category: "Food" },
+
+  { slug: "one-in-a-million", items: [t("MIL", 22, 50, { size: 15, w: 28 }), t("1", 50, 50, { size: 20, w: 8 }), t("ION", 78, 50, { size: 15, w: 28 })],
+    answer: "one in a million", alt_hint: "A number has been placed inside a word", char_hint: "4 words · high praise", difficulty: "hard", category: "Idioms" },
+
+  { slug: "time-after-time", items: [t("TIME", 28, 50, { size: 13, w: 32 }), t("TIME", 72, 50, { size: 13, w: 32 })],
+    answer: "time after time", alt_hint: "The same word twice, left to right", char_hint: "3 words · again and again", difficulty: "medium", category: "Idioms" },
+
+  { slug: "face-to-face", items: [t("FACE", 28, 50, { size: 13, w: 32 }), t("FACE", 72, 50, { size: 13, w: 32 })],
+    answer: "face to face", alt_hint: "Two of the same, side by side", char_hint: "3 words · in person", difficulty: "easy", category: "Idioms" },
+
+  { slug: "side-by-side", items: [t("SIDE", 28, 50, { size: 13, w: 32 }), t("SIDE", 72, 50, { size: 13, w: 32 })],
+    answer: "side by side", alt_hint: "Two of the same, next to each other", char_hint: "3 words · the layout is the clue", difficulty: "easy", category: "Idioms" },
+
+  { slug: "forgive", items: [t("GIVE", 14, 50, { size: 9, w: 22 }), t("GIVE", 38, 50, { size: 9, w: 22 }), t("GIVE", 62, 50, { size: 9, w: 22 }), t("GIVE", 86, 50, { size: 9, w: 22 })],
+    answer: "forgive", alt_hint: "Count them, then say the number out loud", char_hint: "1 word · what you do after an apology", difficulty: "medium", category: "Idioms" },
+
+  { slug: "about-face", items: [t("ECAF", 50, 50, { size: 17, w: 42 })],
+    answer: "about face", alt_hint: "The word has been turned around", char_hint: "2 words · a sharp reversal", difficulty: "medium", category: "Idioms" },
+
+  { slug: "broken-record", items: [t("RECORD", 50, 50, { size: 15, w: 56, strike: true })],
+    answer: "broken record", alt_hint: "A line has been drawn through it", char_hint: "2 words · someone who repeats themselves", difficulty: "easy", category: "Music" },
+
+  { slug: "broken-english", items: [t("ENGLISH", 50, 50, { size: 14, w: 60, strike: true })],
+    answer: "broken english", alt_hint: "A line has been drawn through it", char_hint: "2 words · about halting speech", difficulty: "easy", category: "Everyday" },
+
+  { slug: "turn-around", items: [t("AROUND", 50, 50, { size: 15, w: 56, rotate: 180 })],
+    answer: "turn around", alt_hint: "The word is doing what it says", char_hint: "2 words · 4 then 6", difficulty: "easy", category: "Everyday" },
+
+  { slug: "water-h-to-o", items: [t("H  I J K L M N  O", 50, 50, { size: 11, w: 86 })],
+    answer: "water", alt_hint: "Read the first letter, then where the run ends", char_hint: "1 word · H to O", difficulty: "hard", category: "Food" },
 ];
