@@ -7,7 +7,7 @@ import { Board } from "./Board";
 import { QuestionPanel, Timer } from "./QuestionPanel";
 import { describe, stallWriter, type Mark } from "./rules";
 import { useTttRoom } from "./useTttRoom";
-import { drawMatchCard, downloadCard } from "./matchCard";
+import { drawMatchCard, saveCard, type MatchCard } from "./matchCard";
 import { ASK_MS } from "./useSquareOff";
 
 /** How long after a deadline passes before the other player takes over. Long
@@ -26,7 +26,7 @@ export function SquareOffRoom({
   players: RoomPlayer[]; userId: string;
 }) {
   const t = useTttRoom(roomId, userId, categories);
-  const [card, setCard] = useState<{ sig: string; url: string } | null>(null);
+  const [card, setCard] = useState<(MatchCard & { sig: string }) | null>(null);
   const [chosen, setChosen] = useState<string | null>(null);
   const [now, setNow] = useState(Date.now());
 
@@ -83,7 +83,7 @@ export function SquareOffRoom({
     if (!done || !seated || card?.sig === sig) return;
     let cancelled = false;
     void drawMatchCard(code, sides[0], sides[1])
-      .then((url) => { if (!cancelled) setCard({ sig, url }); })
+      .then((made) => { if (!cancelled) setCard({ ...made, sig }); })
       .catch(() => { /* canvas unavailable; the score is still on screen */ });
     return () => { cancelled = true; };
   }, [done, seated, sig, card?.sig, code, sides]);
@@ -111,7 +111,7 @@ export function SquareOffRoom({
           <>
             <img src={card.url} alt={`Square Off result: ${a.name} ${a.score}, ${b.name} ${b.score}`}
               className="w-full rounded-2xl border-[3px] border-ink" />
-            <button onClick={() => downloadCard(card.url, code)}
+            <button onClick={() => saveCard(card.file)}
               className="piece press w-full py-4 font-display text-lg font-semibold bg-pop">
               Save the image
             </button>

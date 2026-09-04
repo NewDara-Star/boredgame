@@ -74,7 +74,12 @@ function fitSize(c: CanvasRenderingContext2D, text: string, max: number, start: 
 
 export interface Side { name: string; score: number; mark: "x" | "o" }
 
-export async function drawMatchCard(code: string | null, a: Side, b: Side): Promise<string> {
+/** `url` is for putting it on screen, `file` is for getting it off the screen.
+    Both come from the same canvas, and the file is built up front on purpose —
+    see saveCard(). */
+export interface MatchCard { url: string; file: File }
+
+export async function drawMatchCard(code: string | null, a: Side, b: Side): Promise<MatchCard> {
   // Without this the first render falls back to a system font mid-draw.
   if (document.fonts?.ready) { try { await document.fonts.ready; } catch { /* older browsers */ } }
 
@@ -128,15 +133,52 @@ export async function drawMatchCard(code: string | null, a: Side, b: Side): Prom
     { day: "numeric", month: "long", year: "numeric" }), SIZE / 2, 852);
 
   sticker(c, "BoredGame", SIZE / 2, 990, 58, "#FFFFFF", 8);
-  return canvas.toDataURL("image/png");
+
+  const name = `square-off-${(code ?? "solo").toLowerCase()}.png`;
+  const blob = await new Promise<Blob | null>((done) => canvas.toBlob(done, "image/png"));
+  return {
+    url: canvas.toDataURL("image/png"),
+    file: new File([blob ?? new Blob([], { type: "image/png" })], name, { type: "image/png" }),
+  };
 }
 
-/** Hands the browser a file. Only place in the app that does. */
-export function downloadCard(dataUrl: string, code: string | null) {
+function viaLink(file: File) {
+  // A blob: URL is same-origin and carries a real MIME type, so the download
+  // attribute is honoured. Pointed at a data: URL it is not: Safari saves an
+  // unnamed "Unknown" file and iOS ignores it entirely.
+  const url = URL.createObjectURL(file);
   const a = document.createElement("a");
-  a.href = dataUrl;
-  a.download = `square-off-${(code ?? "solo").toLowerCase()}.png`;
+  a.href = url;
+  a.download = file.name;
+  a.rel = "noopener";
   document.body.appendChild(a);
   a.click();
   a.remove();
+  // Revoking immediately cancels the download in Safari, which reads the blob
+  // after the click returns.
+  setTimeout(() => URL.revokeObjectURL(url), 30_000);
+}
+
+/**
+ * Gets the card off the screen. Only place in the app that hands over a file.
+ *
+ * Two things this must not do. It must not await anything before calling
+ * share(): iOS requires transient activation, and a single await between the
+ * tap and the call loses it — which is why the File is built when the card is
+ * drawn rather than here. And it must not treat Web Share as present just
+ * because `navigator.share` exists; desktop Chrome has it and refuses files.
+ * `canShare({ files })` is the only test that answers the real question.
+ *
+ * On a phone this opens the share sheet, where "Save Image" is one tap. A
+ * cancelled sheet is a choice, not a failure — anything else falls back to the
+ * link, and the picture is still on screen to press and hold.
+ */
+export function saveCard(file: File) {
+  if (navigator.canShare?.({ files: [file] })) {
+    navigator.share({ files: [file] }).catch((e: unknown) => {
+      if ((e as Error)?.name !== "AbortError") viaLink(file);
+    });
+    return;
+  }
+  viaLink(file);
 }

@@ -6,7 +6,7 @@ import { Board } from "./Board";
 import { QuestionPanel, Timer } from "./QuestionPanel";
 import { describe, type Mark } from "./rules";
 import { useSquareOff } from "./useSquareOff";
-import { drawMatchCard, downloadCard } from "./matchCard";
+import { drawMatchCard, saveCard, type MatchCard } from "./matchCard";
 
 function Side({ mark, name, active, score }:
   { mark: Mark; name: string; active: boolean; score: number }) {
@@ -28,7 +28,7 @@ function Side({ mark, name, active, score }:
 export function SquareOffPage() {
   const s = useSquareOff();
   const g = s.game;
-  const [card, setCard] = useState<string | null>(null);
+  const [card, setCard] = useState<MatchCard | null>(null);
 
   const sides = [
     { mark: "x" as Mark, name: "You", score: s.wins.x },
@@ -39,7 +39,7 @@ export function SquareOffPage() {
     if (!s.ended) { setCard(null); return; }
     let cancelled = false;
     void drawMatchCard(null, sides[0], sides[1])
-      .then((url) => { if (!cancelled) setCard(url); })
+      .then((made) => { if (!cancelled) setCard(made); })
       .catch(() => { /* canvas unavailable; the score is still on screen */ });
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -61,12 +61,15 @@ export function SquareOffPage() {
         </motion.div>
         {card ? (
           <>
-            <img src={card} alt={`Square Off session: you ${s.wins.x}, the bot ${s.wins.o}`}
+            <img src={card.url} alt={`Square Off session: you ${s.wins.x}, the bot ${s.wins.o}`}
               className="w-full rounded-2xl border-[3px] border-ink" />
-            <button onClick={() => downloadCard(card, null)}
+            <button onClick={() => saveCard(card.file)}
               className="piece press w-full py-4 font-display text-lg font-semibold bg-pop">
               Save the image
             </button>
+            <p className="text-[11px] font-bold text-soft text-center">
+              On a phone you can also press and hold the picture to save or share it.
+            </p>
           </>
         ) : (
           <div className="piece grid place-items-center aspect-square bg-surface">

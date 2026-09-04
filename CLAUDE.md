@@ -210,6 +210,22 @@ Two things that will bite if you change them:
   answerer writes the answer, and the answerer also writes the move on from the
   reveal. Any other arrangement has both browsers racing to write the same row.
 
+**Handing over a file has exactly one correct shape, and it is not `<a download>`
+on a data: URL.** That was a 254KB base64 string in an href: iOS Safari ignores
+the download attribute on data: URLs and opens the image instead, and desktop
+Safari saves an unnamed "Unknown" file. `drawMatchCard()` now returns a real
+`File` alongside the data URL for `<img src>`, and `saveCard()` offers the share
+sheet — "Save Image" is one tap there — before falling back to a blob: URL link.
+
+Two rules inside `saveCard()`, both easy to break by tidying it:
+
+- **Nothing may be awaited before `navigator.share()`.** iOS needs transient
+  activation, and one await between the tap and the call loses it. That is the
+  whole reason the `File` is built when the card is drawn rather than on click.
+- **Feature-test with `canShare({ files })`, never `navigator.share`.** Desktop
+  Chrome has `share` and refuses files, so testing for the wrong one sends every
+  desktop user down a path that silently does nothing.
+
 The bot is deliberately not a solved player — win, block, centre, corner. A
 minimax opponent makes every solo game a draw, and the tension here is meant to
 come from the questions. It answers the same questions you do at a rate set by
