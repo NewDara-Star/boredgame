@@ -3,6 +3,8 @@ import type { ReactNode } from "react";
 import { Counter } from "@/shared/ui/Counter";
 import { SPRING, stagger, riseIn, popIn } from "@/shared/ui/motion";
 import type { PlayItem } from "./types";
+import type { RoundOutcome } from "./progress";
+import { UnlockGate } from "./Unlock";
 
 export function Hud({ index, total, score, streak, accent }:
   { index: number; total: number; score: number; streak: number; accent: string }) {
@@ -123,8 +125,9 @@ export function Reveal({ correct, near, answer, gained, onNext, isLast, explanat
   );
 }
 
-export function Summary({ score, results, onAgain, children }:
-  { score: number; results: { correct: boolean }[]; onAgain: () => void; children?: ReactNode }) {
+export function Summary({ score, results, outcome, onAgain, children }:
+  { score: number; results: { correct: boolean }[]; outcome?: RoundOutcome | null;
+    onAgain: () => void; children?: ReactNode }) {
   const right = results.filter((r) => r.correct).length;
   return (
     <motion.div variants={stagger(0.08)} initial="hidden" animate="show" className="text-center">
@@ -137,11 +140,19 @@ export function Summary({ score, results, onAgain, children }:
       <motion.p variants={riseIn} className="text-sm font-bold text-soft">
         {right} of {results.length} correct
       </motion.p>
+      {!!outcome?.streak && (
+        <motion.p variants={popIn}
+          className="inline-block mt-3 text-[11px] font-black uppercase tracking-widest
+            bg-pop border-[2.5px] border-ink rounded-full px-3 py-1">
+          Day {outcome.streak} streak
+        </motion.p>
+      )}
       <motion.div variants={riseIn} className="mt-6 text-left">{children}</motion.div>
       <motion.button variants={riseIn} onClick={onAgain}
         className="piece press w-full mt-5 py-4 font-display text-lg font-semibold bg-picto text-surface">
         Play again
       </motion.button>
+      <UnlockGate outcome={outcome ?? null} />
     </motion.div>
   );
 }

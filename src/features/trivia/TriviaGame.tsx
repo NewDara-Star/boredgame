@@ -1,6 +1,5 @@
 import { useMemo } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { useAuth } from "@/app/providers/AuthProvider";
 import { useRound } from "@/features/play/useRound";
 import { shuffle } from "@/features/play/content";
 import { Hud, Reveal, Summary, Burst } from "@/features/play/RoundChrome";
@@ -10,8 +9,7 @@ const SHAPES = ["▲", "◆", "●", "■"];
 const HUES = ["#EF5A2A", "#4B5BD6", "#FFC93C", "#17914B"];
 
 export function TriviaGame() {
-  const { user } = useAuth();
-  const r = useRound("trivia", 10, user?.id);
+  const r = useRound("trivia", 10);
 
   // Shuffle once per question, not per render, or the options jump around.
   const options = useMemo(
@@ -35,7 +33,7 @@ export function TriviaGame() {
 
   if (r.phase === "done") {
     return (
-      <Summary score={r.score} results={r.results} onAgain={r.restart}>
+      <Summary score={r.score} results={r.results} outcome={r.outcome} onAgain={r.restart}>
         <div className="grid gap-2.5">
           {r.results.map((res, i) => (
             <motion.div key={i}

@@ -15,6 +15,9 @@ interface AuthValue {
   setPassword(password: string): Promise<{ error: string | null }>;
   signOut(): Promise<void>;
   refreshProfile(): Promise<void>;
+  /** Drop in a profile row we already have — touch_streak returns one, and
+      refetching it just to see the same numbers is a wasted round trip. */
+  applyProfile(p: Profile): void;
 }
 
 const Ctx = createContext<AuthValue | null>(null);
@@ -91,7 +94,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <Ctx.Provider value={{ user, profile, loading, offline: !isConfigured, signIn, signUp, signInWithLink, setPassword, signOut, refreshProfile }}>
+    <Ctx.Provider value={{ user, profile, loading, offline: !isConfigured, signIn, signUp, signInWithLink, setPassword, signOut, refreshProfile, applyProfile: setProfile }}>
       {children}
     </Ctx.Provider>
   );

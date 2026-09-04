@@ -65,6 +65,11 @@ export interface Profile {
   avatar: string | null;
   total_answered: number;
   total_correct: number;
+  /** consecutive days played, advanced server-side by touch_streak() */
+  streak: number;
+  best_streak: number;
+  /** YYYY-MM-DD, in whatever calendar the player's device was on */
+  last_played: string | null;
   created_at: string;
 }
 

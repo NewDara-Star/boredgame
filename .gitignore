@@ -6,3 +6,7 @@ dist
 *.log
 seed-generated.sql
 _to_delete/
+
+# vite writes these while building and an agent shell cannot delete them
+vite.config.ts.timestamp-*.mjs
+_to_delete/

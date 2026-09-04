@@ -225,3 +225,61 @@ revoke execute on function public.handle_new_user() from anon, authenticated, pu
 
 -- `admins` has RLS on and no policies. That is deliberate: it denies all client
 -- access. Rows are added from the Supabase dashboard only.
+
+-- ============ streaks and the leaderboard ============
+alter table public.profiles
+  add column if not exists streak      int  not null default 0,
+  add column if not exists best_streak int  not null default 0,
+  add column if not exists last_played  date;
+
+-- A leaderboard makes profiles worth lying about. "own profile update" let any
+-- signed-in player set total_answered to whatever they liked; nobody saw it, so
+-- it did not matter. It does now. Only the display fields are theirs to write.
+revoke update on public.profiles from authenticated, anon;
+grant update (username, avatar) on public.profiles to authenticated;
+
+-- Streak is advanced server-side for the same reason.
+create or replace function public.touch_streak(p_local_date date default null)
+returns public.profiles
+language plpgsql
+security definer
+set search_path to 'public'
+as $$
+declare
+  uid       uuid := auth.uid();
+  utc_today date := (now() at time zone 'utc')::date;
+  d         date;
+  prev      date;
+  cur       int;
+  rec       public.profiles;
+begin
+  if uid is null then
+    raise exception 'touch_streak requires a signed-in user';
+  end if;
+
+  -- The client sends its own calendar date, so a player at UTC+13 is not told
+  -- their streak broke at teatime. A day either side of UTC is as far as it is
+  -- trusted; past that the clock is wrong or someone is fishing.
+  d := coalesce(p_local_date, utc_today);
+  if abs(d - utc_today) > 1 then d := utc_today; end if;
+
+  select p.last_played, p.streak into prev, cur from public.profiles p where p.id = uid;
+
+  if prev is null then       cur := 1;
+  elsif d <= prev then       null;            -- already counted today
+  elsif d = prev + 1 then    cur := cur + 1;
+  else                       cur := 1;        -- a day was missed
+  end if;
+
+  update public.profiles p set
+    streak      = cur,
+    best_streak = greatest(p.best_streak, cur),
+    last_played = greatest(coalesce(p.last_played, d), d)
+  where p.id = uid
+  returning p.* into rec;
+
+  return rec;
+end; $$;
+
+revoke all on function public.touch_streak(date) from public, anon;
+grant execute on function public.touch_streak(date) to authenticated;

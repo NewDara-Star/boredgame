@@ -1,6 +1,6 @@
 # STATUS — BoredGame
 
-Last updated: 2026-09-04 (design pass)
+Last updated: 2026-09-04 (streaks, leaderboard, phone navigation)
 
 ## Verified working
 
@@ -8,65 +8,66 @@ Each claim below was checked by running it, not by reading the code.
 
 | Claim | Proof |
 |---|---|
-| Typechecks clean | `npm run typecheck` — no output |
-| Builds clean | `npm run build` — 101 modules, 218 kB / 70 kB gzip |
-| Home, Picto and Trivia render and navigate | Playwright screenshots, 420×900 viewport |
-| Picto play loop works end to end | submitted a wrong answer, got the reveal + correct answer |
-| Trivia options shuffle | correct answer was not in first position on screen |
-| All 36 rebus puzzles render legibly | contact sheet screenshot of every puzzle, inspected |
-| No console errors | Playwright console listener |
-| Rebus letters animate into place | screenshot captured mid-assembly, letters in flight |
-| Coloured states render correctly | wrong-answer panel screenshot — red, not white |
-| Header fits at 420px | screenshot at phone width, nothing clipped |
+| Typechecks clean | `npx tsc --noEmit` — no output |
+| Builds clean | `npx vite build --emptyOutDir false` — 516 modules, 664 kB / 199 kB gzip |
+| Home, Profile, Leaderboard, Trivia render and navigate | Playwright screenshots, 390×844 and 1120×900 |
+| A full trivia round plays end to end | 10 questions answered by automation, summary reached |
+| Crossing a rank line fires the unlock modal | seeded 19 answered, played 10, Apprentice card appeared |
+| Streak lands on the summary and in the header | "Day 1 streak" chip after the round; flame chip in the header |
+| Leaderboard podium, list and sticky row render | stubbed 8 players; podium, rows 4–8 and the signed-out CTA all correct |
+| Locked vs unlocked ranks read differently | profile screenshot: 5 unlocked in colour, 5 greyed with "n to go" |
+| Type is the real Fredoka/Nunito | fonts substituted locally from `@fontsource-variable`, not the system fallback |
+| Profiles cannot be self-inflated | `information_schema.column_privileges`: authenticated has UPDATE on `username`, `avatar` only |
 
 ## Content
 
-- 36 rebus puzzles (`src/shared/data/picto.ts`)
-- 51 trivia questions (`src/shared/data/trivia.ts`)
+**374 puzzles live in Supabase.**
 
-Both bundled into the app, so it is playable with no backend at all.
+- 104 rebus — 39 easy, 51 medium, 14 hard
+- 270 trivia — 128 easy, 119 medium, 23 hard, all with explanations
+
+`src/shared/data/*.ts` holds a smaller bundled starter set so the app is
+playable with no backend. It is a starter set, not a mirror of the database.
 
 ## Design
 
 Identity is "playful toy": ink outlines with hard offset shadows, saturated flat
 colour, rounded heavy type, everything presses down onto its own shadow.
-Deliberately light-only — a toy in a dark room is a different product.
+Deliberately light-only.
 
 Motion is choreographed with framer-motion. One spring (`src/shared/ui/motion.ts`)
-is used everywhere so the whole app moves with the same weight. The signature
-move: **rebus letters fly in and assemble**, so the puzzle builds in front of you.
-Correct answers burst; wrong answers shake; scores count up rather than jumping.
-All of it respects `prefers-reduced-motion`.
+is used everywhere. Signature moves: rebus letters fly in and assemble; correct
+answers burst; wrong answers shake; scores count up; the nav pill slides between
+tabs; crossing a rank line drops a confetti card.
 
-**One thing not verified:** Fredoka and Nunito load from Google Fonts, which my
-sandbox blocks — every screenshot above is the system-font fallback. The layout
-and colour are confirmed; the *typography* is not. Check it locally first.
+Navigation is a bottom bar on phones and header tabs from `sm` up. Five labelled
+tabs do not fit 390px, and the header now carries status — streak and rank badge
+— instead.
 
 ## Not yet verified
 
-These are built but have **not** been run against a live database:
-
-- Supabase auth (magic link)
-- Publishing from the admin screen
-- Progress syncing to `attempts` / `profiles`
-- **Head-to-head rooms** — the realtime code is written and typechecks, but has
-  never had two browsers in a room. Treat it as unproven until it has.
+- **Head-to-head rooms.** The realtime code is written, typechecks and has one
+  abandoned round sitting in the database from a solo test. It has never had two
+  browsers in a room. Treat it as unproven until it has.
+- **The streak across a real day boundary.** `touch_streak` is unit-obvious and
+  the same-day path is exercised, but nothing has yet played on two consecutive
+  real days. Worth checking tomorrow.
+- Publishing from the admin screen against the live database.
 
 ## Next, in order
 
-1. Create a Supabase project. Put the URL and anon key in `.env`.
-2. Run `supabase/schema.sql` in the SQL editor.
-3. `VITE_SUPABASE_URL=… SUPABASE_SERVICE_KEY=… node scripts/seed.mjs`
-4. Sign in, then add yourself to the `admins` table so the admin screen can publish.
-5. Test rooms with two browsers. This is the step most likely to surface bugs.
-6. Deploy to Netlify, point the Namecheap domain's DNS at it.
+1. Push the waiting commits, confirm the Vercel build.
+2. Test rooms with two browsers. Still the step most likely to surface bugs.
+3. Come back tomorrow and check the streak reads 2, not 1.
+4. Decide the product name before pointing a domain at it.
 
 ## Known gaps
 
-- No image upload yet — the admin screen takes an image URL. Supabase Storage
-  is the intended home; not wired.
+- Trivia hard tier is thin: 23 of 270, about 8.5%.
+- No image upload — the admin screen takes an image URL.
 - No round timer on screen. Scoring uses elapsed time but nothing counts down.
-- Rooms only serve puzzles that live in the database, not bundled ones —
-  `startNextRound` says so rather than failing silently.
-- Product name undecided: folder and header say BoredGame, the two games are
-  Picto Phrase and Star Trivia. Decide before buying/pointing a domain.
+- Rooms only serve puzzles that live in the database, not bundled ones.
+- Idioms are not tagged by cultural register, so a UK-specific phrase can land
+  on someone who has never heard it.
+- Product name undecided: folder and header say BoredGame, the games are Picto
+  Phrase and Star Trivia.

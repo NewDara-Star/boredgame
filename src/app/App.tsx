@@ -7,6 +7,7 @@ import { TriviaGame } from "@/features/trivia/TriviaGame";
 import { ProfilePage } from "@/features/profile/ProfilePage";
 import { AdminPage } from "@/features/admin/AdminPage";
 import { RoomsPage } from "@/features/rooms/RoomsPage";
+import { LeaderboardPage } from "@/features/leaderboard/LeaderboardPage";
 
 export function App() {
   return (
@@ -17,6 +18,7 @@ export function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/picto" element={<PictoGame />} />
             <Route path="/trivia" element={<TriviaGame />} />
+            <Route path="/ranks" element={<LeaderboardPage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/admin" element={<AdminPage />} />
             <Route path="/rooms" element={<RoomsPage />} />

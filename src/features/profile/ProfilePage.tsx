@@ -1,13 +1,30 @@
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import { useAuth } from "@/app/providers/AuthProvider";
 import { useProgress } from "@/features/play/useProgress";
 import { rankFor, RANKS } from "@/features/play/rank";
 import { RankBadge } from "@/features/play/RankBadge";
+import { MILESTONES } from "@/features/play/streak";
+import { Avatar } from "@/shared/ui/Avatar";
 import { Button } from "@/shared/ui/Button";
 import { Field, Input } from "@/shared/ui/Field";
+import { stagger, riseIn, popIn } from "@/shared/ui/motion";
+
+/** A number worth looking at, with a word under it. That is the whole card. */
+function Stat({ value, label, accent = "" }:
+  { value: string | number; label: string; accent?: string }) {
+  return (
+    <motion.div variants={popIn} className={`piece p-3.5 ${accent}`}>
+      <b className="block font-display text-[28px] leading-none font-semibold tabular-nums">{value}</b>
+      <span className="block text-[9.5px] font-black uppercase tracking-widest text-soft mt-1.5">
+        {label}
+      </span>
+    </motion.div>
+  );
+}
 
 export function ProfilePage() {
-  const { user, offline, signIn, signUp, signInWithLink, setPassword: savePassword, signOut } = useAuth();
+  const { user, profile, offline, signIn, signUp, signInWithLink, setPassword: savePassword, signOut } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [mode, setMode] = useState<"signin" | "signup">("signin");
@@ -32,58 +49,94 @@ export function ProfilePage() {
     history.replaceState(null, "", window.location.pathname);
   }, []);
 
-  const local = useProgress();
-  const answered = local.answered;
-  const correct = local.correct;
-  const { current, next, progress } = rankFor(answered);
+  const p = useProgress();
+  const { current, next, progress } = rankFor(p.answered);
+  const name = profile?.username ?? "Guest";
+  const best = Math.max(p.bestScore.picto ?? 0, p.bestScore.trivia ?? 0);
 
   return (
-    <div className="space-y-6">
+    <motion.div variants={stagger(0.06)} initial="hidden" animate="show" className="space-y-7">
+      <motion.section variants={riseIn} className="flex items-center gap-4">
+        <Avatar id={user?.id ?? "anon"} name={name} size={62} />
+        <div className="min-w-0">
+          <h1 className="font-display text-[26px] leading-tight font-semibold truncate">{name}</h1>
+          <p className="text-xs font-bold text-soft mt-0.5">
+            {user ? user.email : "Playing signed out — progress stays in this browser"}
+          </p>
+        </div>
+        <div className="flex-1" />
+        <RankBadge rank={current.key} size={54} animate className="shrink-0" />
+      </motion.section>
+
       <section>
-        <p className="text-[10px] font-black uppercase tracking-widest text-soft">Rank</p>
-        <div className="flex items-center gap-5 mt-2">
-          <RankBadge rank={current.key} size={88} animate />
-          <div>
-            <h1 className="font-display text-3xl font-semibold">{current.name}</h1>
-            <p className="text-xs text-soft font-bold mt-0.5 tabular-nums">{answered} answered</p>
+        <motion.div variants={riseIn} className="piece p-4">
+          <div className="flex items-baseline justify-between gap-3">
+            <span className="font-display text-xl font-semibold">{current.name}</span>
+            <span className="text-xs font-bold text-soft tabular-nums">
+              {next ? `${next.min - p.answered} to ${next.name}` : "Top rank"}
+            </span>
           </div>
-        </div>
-        <div className="h-1.5 bg-surface rounded-full mt-3 overflow-hidden">
-          <div className="h-full rounded-full transition-all" style={{ width: `${Math.round(progress * 100)}%`, background: current.color }} />
-        </div>
-        <p className="text-xs text-soft mt-2">
-          {next ? `${next.min - answered} more answers to ${next.name}` : "Top rank"}
-        </p>
+          <div className="h-3.5 bg-sand rounded-full mt-2.5 overflow-hidden border-2 border-ink">
+            <motion.div className="h-full bg-pop"
+              initial={{ width: 0 }}
+              animate={{ width: `${Math.round(progress * 100)}%` }}
+              transition={{ type: "spring", stiffness: 90, damping: 18, delay: 0.3 }} />
+          </div>
+        </motion.div>
       </section>
 
-      <section className="grid grid-cols-3 gap-px bg-surface border-[2.5px] border-ink rounded-2xl overflow-hidden">
-        <div className="piece p-4"><b className="block text-2xl font-bold tabular-nums">{answered}</b>
-          <span className="text-[10px] uppercase tracking-widest text-soft">Answered</span></div>
-        <div className="piece p-4"><b className="block text-2xl font-bold tabular-nums">
-          {answered ? Math.round((correct / answered) * 100) + "%" : "—"}</b>
-          <span className="text-[10px] uppercase tracking-widest text-soft">Accuracy</span></div>
-        <div className="piece p-4"><b className="block text-2xl font-bold tabular-nums">
-          {Math.max(local.bestScore.picto ?? 0, local.bestScore.trivia ?? 0)}</b>
-          <span className="text-[10px] uppercase tracking-widest text-soft">Best round</span></div>
-      </section>
+      <motion.section variants={stagger(0.05)} className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+        <Stat value={p.streak} label="Day streak" accent={p.streak > 0 ? "bg-pop" : ""} />
+        <Stat value={p.answered} label="Answered" />
+        <Stat value={p.answered ? Math.round((p.correct / p.answered) * 100) + "%" : "—"} label="Accuracy" />
+        <Stat value={best || "—"} label="Best round" />
+      </motion.section>
 
       <section>
-        <p className="text-[10px] uppercase tracking-widest text-soft mb-2">All ranks</p>
-        <div className="grid grid-cols-5 gap-x-1.5 gap-y-4">
-          {RANKS.map((rk) => {
-            const locked = answered < rk.min;
+        <p className="text-[10px] font-black uppercase tracking-widest text-soft mb-2.5">
+          Streaks · best run {p.bestStreak} {p.bestStreak === 1 ? "day" : "days"}
+        </p>
+        <motion.div variants={stagger(0.04)} className="grid grid-cols-6 gap-2">
+          {MILESTONES.map((m) => {
+            const earned = p.bestStreak >= m.days;
             return (
-              <div key={rk.key} className="text-center">
-                <div className="h-11 grid place-items-center"><RankBadge rank={rk.key} size={40} locked={locked} /></div>
-                {/* No tracking and a hard break: "Accomplished" next to "Advanced"
-                    collided at phone width with letter-spacing applied. */}
-                <p className={`text-[7.5px] font-black uppercase mt-1.5 leading-[1.15] break-words
-                  ${locked ? "text-soft/50" : "text-ink"}`}>{rk.name}</p>
-                <p className="text-[8px] font-bold text-soft/60 tabular-nums leading-tight">{rk.min}</p>
-              </div>
+              <motion.div key={m.days} variants={popIn} title={m.name}
+                className={`piece grid place-items-center aspect-square
+                  ${earned ? "bg-pop" : "bg-sand opacity-45"}`}>
+                <span className="font-display text-lg font-semibold tabular-nums leading-none">
+                  {m.days}
+                </span>
+                <span className="text-[7.5px] font-black uppercase tracking-wider text-soft">day</span>
+              </motion.div>
             );
           })}
-        </div>
+        </motion.div>
+      </section>
+
+      <section>
+        <p className="text-[10px] font-black uppercase tracking-widest text-soft mb-2.5">
+          Ranks · {RANKS.filter((r) => p.answered >= r.min).length} of {RANKS.length}
+        </p>
+        <motion.div variants={stagger(0.035)} className="grid grid-cols-3 sm:grid-cols-5 gap-2.5">
+          {RANKS.map((rk) => {
+            const locked = p.answered < rk.min;
+            return (
+              <motion.div key={rk.key} variants={popIn}
+                className={`piece px-2 py-3 text-center ${locked ? "bg-sand" : ""}`}>
+                <div className="h-10 grid place-items-center">
+                  <RankBadge rank={rk.key} size={36} locked={locked} />
+                </div>
+                {/* No tracking and a hard break: "Accomplished" next to "Advanced"
+                    collided at phone width with letter-spacing applied. */}
+                <p className={`text-[9px] font-black uppercase mt-1.5 leading-[1.15] break-words
+                  ${locked ? "text-soft/60" : "text-ink"}`}>{rk.name}</p>
+                <p className="text-[9px] font-bold text-soft/60 tabular-nums leading-tight mt-0.5">
+                  {locked ? `${rk.min - p.answered} to go` : "unlocked"}
+                </p>
+              </motion.div>
+            );
+          })}
+        </motion.div>
       </section>
 
       <section className="border-t border-ink pt-6">
@@ -180,6 +233,6 @@ export function ProfilePage() {
           </form>
         )}
       </section>
-    </div>
+    </motion.div>
   );
 }

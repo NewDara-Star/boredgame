@@ -74,14 +74,39 @@ export function HomePage() {
         <p className="text-xs text-soft mt-2 font-bold">
           {next ? `${next.min - p.answered} more to ${next.name}` : "Top rank reached"}
         </p>
+
+        {/* The streak line is the one that decides whether today gets a round,
+            so it sits under the rank rather than on a page nobody opens. */}
+        <div className="flex items-center gap-2.5 mt-4 pt-4 border-t-2 border-sand">
+          <span className={`grid place-items-center h-9 w-9 rounded-full border-[2.5px] border-ink
+            font-display font-semibold tabular-nums text-sm shrink-0
+            ${p.streak > 0 ? "bg-pop" : "bg-sand text-soft"}`}>
+            {p.streak}
+          </span>
+          <p className="text-xs font-bold text-soft">
+            {p.streak === 0
+              ? "No streak going. One round today starts one."
+              : p.playedToday
+                ? `${p.streak}-day streak, safe until tomorrow.`
+                : `${p.streak}-day streak — play today to keep it.`}
+          </p>
+        </div>
       </motion.div>
 
-      <motion.div variants={popIn} className="mt-4">
-        <Link to="/rooms"
-          className="piece press block p-4 text-center font-display font-semibold bg-pop">
-          Head-to-head — race someone on the same puzzle →
-        </Link>
-      </motion.div>
+      <div className="grid gap-3 sm:grid-cols-2 mt-4">
+        <motion.div variants={popIn}>
+          <Link to="/rooms"
+            className="piece press block p-4 text-center font-display font-semibold bg-pop h-full">
+            Head-to-head →
+          </Link>
+        </motion.div>
+        <motion.div variants={popIn}>
+          <Link to="/ranks"
+            className="piece press block p-4 text-center font-display font-semibold h-full">
+            Leaderboard →
+          </Link>
+        </motion.div>
+      </div>
     </motion.div>
   );
 }

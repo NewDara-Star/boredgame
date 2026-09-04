@@ -179,6 +179,29 @@ npm install
 Claude can edit files, typecheck and run the dev server through the bridge.
 Dependency installs and production builds belong in your own Terminal.
 
+## Status, streaks and the leaderboard
+
+`profiles` carries `streak`, `best_streak` and `last_played`. None of them are
+writable from the client: `update` on `profiles` is granted per-column and only
+covers `username` and `avatar`. Everything else moves through triggers or the
+`touch_streak(p_local_date date)` RPC, which `recordRound` calls once a round
+ends and which returns the whole updated profile row so nothing has to refetch it.
+
+`touch_streak` takes the player's OWN calendar date rather than deriving one
+from `now()`. A streak that breaks at 1am because the server counts days in
+London is the fastest way to make the number worthless. The server trusts a
+date within a day of UTC and falls back to UTC past that.
+
+The leaderboard reads `profiles` directly — it is already `select using (true)`
+— ordered by `total_answered`, then `total_correct`, then `id`. The last key is
+not decoration: without it ties reshuffle between loads. Ranking on answers
+rather than accuracy or score is deliberate; accuracy rewards answering less and
+score rewards farming the easy tier.
+
+Anonymous play keeps its own streak in the same per-user localStorage key as the
+rest of local progress. `useProgress` shows a streak of 0 once the run is dead
+rather than the number you used to have.
+
 ## Commands
 
 ```
@@ -186,6 +209,27 @@ npm run dev        # local
 npm run typecheck  # tsc --noEmit
 npm run build      # tsc -b && vite build
 ```
+
+`npm run build` fails from an agent shell with `EPERM ... unlink dist/assets/…`:
+emptying `dist/` needs delete permission that shell does not have. Use
+`npx vite build --emptyOutDir false` instead — old hashed assets pile up in a
+gitignored folder, which costs nothing. Your own terminal is unaffected.
+
+## Screenshots without a display
+
+Nothing here can run a browser against a dev server: each `device_bash` call is
+a fresh network-isolated sandbox, so a server started in one call is gone by the
+next. The way to actually look at a change is:
+
+1. `npx vite build --emptyOutDir false`
+2. copy `dist/` somewhere with a filesystem and a browser
+3. serve it with an SPA fallback and drive it with Playwright, stubbing
+   `**://*.supabase.co/**` and seeding `localStorage` to reach a given state
+
+Google Fonts is not reachable from that environment either — substitute
+`@fontsource-variable/fredoka` and `@fontsource-variable/nunito` locally, or the
+screenshots lie about every line-wrap. Three separate rendering bugs in this
+project were found only by rendering and looking; none of them were type errors.
 
 ## Deployment
 

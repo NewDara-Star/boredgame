@@ -1,14 +1,17 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useAuth } from "@/app/providers/AuthProvider";
 import type { GameKey } from "@/shared/types/db";
 import { isCorrect, closeness } from "@/shared/lib/normalise";
 import { loadContent, shuffle } from "./content";
-import { readLocal, recordRound } from "./progress";
+import { readLocal, recordRound, type RoundOutcome } from "./progress";
 import { scoreAnswer } from "./scoring";
 import type { PlayItem, RoundResult } from "./types";
 
 export type Phase = "loading" | "empty" | "playing" | "revealed" | "done";
 
-export function useRound(game: GameKey, size: number, userId?: string) {
+export function useRound(game: GameKey, size: number) {
+  const { user, applyProfile } = useAuth();
+  const userId = user?.id;
   const [items, setItems] = useState<PlayItem[]>([]);
   const [index, setIndex] = useState(0);
   const [phase, setPhase] = useState<Phase>("loading");
@@ -17,6 +20,7 @@ export function useRound(game: GameKey, size: number, userId?: string) {
   const [bestStreak, setBestStreak] = useState(0);
   const [hintsUsed, setHintsUsed] = useState(0);
   const [results, setResults] = useState<RoundResult[]>([]);
+  const [outcome, setOutcome] = useState<RoundOutcome | null>(null);
   const [last, setLast] = useState<{ correct: boolean; given: string; gained: number; near: boolean } | null>(null);
   const startedAt = useRef(Date.now());
 
@@ -31,7 +35,7 @@ export function useRound(game: GameKey, size: number, userId?: string) {
     const pool = fresh.length >= size ? fresh : all;
     setItems(shuffle(pool).slice(0, Math.min(size, pool.length)));
     setIndex(0); setScore(0); setStreak(0); setBestStreak(0);
-    setResults([]); setLast(null); setHintsUsed(0);
+    setResults([]); setLast(null); setHintsUsed(0); setOutcome(null);
     startedAt.current = Date.now();
     setPhase("playing");
   }, [game, size, userId]);
@@ -77,13 +81,16 @@ export function useRound(game: GameKey, size: number, userId?: string) {
   useEffect(() => {
     if (phase === "done" && !saved.current) {
       saved.current = true;
-      void recordRound(game, results, score, userId);
+      void recordRound(game, results, score, userId).then((o) => {
+        setOutcome(o);
+        if (o.profile) applyProfile(o.profile);
+      });
     }
     if (phase === "playing") saved.current = false;
-  }, [phase, game, results, score, userId]);
+  }, [phase, game, results, score, userId, applyProfile]);
 
   return {
-    items, current, index, phase, score, streak, bestStreak, results, last,
+    items, current, index, phase, score, streak, bestStreak, results, last, outcome,
     hintsUsed, useHint: () => setHintsUsed((h) => h + 1),
     submit, next, restart: build,
   };

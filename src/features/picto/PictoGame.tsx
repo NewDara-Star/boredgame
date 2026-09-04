@@ -1,14 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { useAuth } from "@/app/providers/AuthProvider";
 import { useRound } from "@/features/play/useRound";
 import { Hud, HintBar, Reveal, Summary, Burst } from "@/features/play/RoundChrome";
 import { PictoRenderer } from "./PictoRenderer";
 import { SPRING, shake } from "@/shared/ui/motion";
 
 export function PictoGame() {
-  const { user } = useAuth();
-  const r = useRound("picto", 8, user?.id);
+  const r = useRound("picto", 8);
   const [guess, setGuess] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -21,7 +19,7 @@ export function PictoGame() {
 
   if (r.phase === "done") {
     return (
-      <Summary score={r.score} results={r.results} onAgain={r.restart}>
+      <Summary score={r.score} results={r.results} outcome={r.outcome} onAgain={r.restart}>
         <div className="grid gap-2.5">
           {r.results.map((res, i) => (
             <motion.div key={i}
