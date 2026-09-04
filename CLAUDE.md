@@ -232,9 +232,37 @@ come from the questions. It answers the same questions you do at a rate set by
 difficulty and can be watched getting them wrong, so its skill is visible rather
 than a hidden dice roll on the outcome.
 
-Rooms carry a `mode` (`race` | `squareoff`) rather than there being a second
-room system. Board state lives in `ttt_games`, one row per room, nine characters
-of text for the board.
+Rooms carry a `mode` rather than there being a second room system. Board state
+lives in `ttt_games`, one row per room, nine characters of text for the board.
+
+## The other three board games
+
+`tictactoe`, `connect4` and `connect4trivia` are room modes alongside `race` and
+`squareoff`. Square Off's questions were too hard for half the people he plays
+with, so the plain versions exist to give them a game with no bank behind it at
+all.
+
+Plain Tic Tac Toe is not a second engine. `place()` lives in
+`squareoff/rules.ts`, next to `pick`/`answer`/`advance`, and `useTttRoom` takes
+a `plain` flag — the board, the row and the reducer are the ones already in
+production. `place()` is in that file rather than its own because a rules module
+may not import another one: the check scripts run under bare Node, which needs
+file extensions in import paths, while tsconfig sets
+`allowImportingTsExtensions: false`. No cross-module imports, no conflict.
+
+Connect 4 is its own slice: 7×6, `row 0 is the TOP`, board stored as 42
+characters in `c4_games`. Plain drops on tap; the trivia version names a column
+first, then asks. **A miss loses the turn and nothing else** — there is no steal,
+so `advance()` always flips the turn. That was his call, not a simplification.
+
+A bankless game still writes a `game_key` (rooms.game is NOT NULL) and ignores
+it. `GameDef.bank` is `null` for those two, which is what the catalogue, the home
+page and the lobby key off — a null bank is not an empty bank, so they are never
+greyed out for want of questions, and the lobby hides the category step entirely.
+
+`c4_games` needs to be in the `supabase_realtime` publication. It was created
+without it, and the symptom is the worst kind: your own moves appear instantly
+and your opponent's board never changes.
 
 ## Brand: sticker on neon, but only where you are not reading
 
@@ -602,6 +630,8 @@ unlock; git commit -F msg.txt
 npm run dev        # local
 npm run typecheck  # tsc --noEmit
 npm run build      # tsc -b && vite build
+
+for f in scripts/check-*.mts; do node --experimental-strip-types "$f"; done
 ```
 
 `npm run build` fails from an agent shell with `EPERM ... unlink dist/assets/…`:

@@ -440,3 +440,64 @@ begin
 end $$;
 revoke all on function public.join_room(bigint, text) from public, anon;
 grant execute on function public.join_room(bigint, text) to authenticated;
+
+-- ============ three more room modes ============
+-- Plain Tic Tac Toe, plain Connect 4 and Connect 4 Trivia. The two plain ones
+-- draw on no bank at all; rooms.game stays NOT NULL and is simply ignored.
+alter table public.rooms drop constraint if exists rooms_mode_check;
+alter table public.rooms add constraint rooms_mode_check
+  check (mode in ('race','squareoff','tictactoe','connect4','connect4trivia'));
+
+create or replace function public.set_room_setup(
+  p_room bigint, p_mode text, p_game text, p_categories text[])
+returns void language plpgsql security definer set search_path to 'public' as $$
+begin
+  if not exists (select 1 from public.room_players p
+                 where p.room_id = p_room and p.user_id = auth.uid()) then
+    raise exception 'not a member of room %', p_room;
+  end if;
+  if p_mode not in ('race','squareoff','tictactoe','connect4','connect4trivia') then
+    raise exception 'unknown mode %', p_mode;
+  end if;
+  update public.rooms r set
+    mode = p_mode, game = p_game::game_key, categories = nullif(p_categories, '{}')
+  where r.id = p_room and r.status = 'waiting';
+  update public.room_players p set ready = false where p.room_id = p_room;
+end $$;
+
+-- Same shape as ttt_games: one row per room, the board as a string, and the
+-- phase machine the reducer writes. 42 cells, row 0 is the top.
+create table if not exists public.c4_games (
+  room_id    bigint primary key references public.rooms(id) on delete cascade,
+  board      text not null default '------------------------------------------'
+             check (char_length(board) = 42),
+  turn       text not null default 'x' check (turn in ('x','o')),
+  phase      text not null default 'picking'
+             check (phase in ('picking','asking','revealed','over')),
+  target     smallint check (target between 0 and 6),
+  last       jsonb,
+  winner     text check (winner in ('x','o','draw')),
+  puzzle_id  bigint references public.puzzles(id),
+  x_player   uuid references auth.users(id) on delete set null,
+  o_player   uuid references auth.users(id) on delete set null,
+  updated_at timestamptz not null default now()
+);
+
+alter table public.c4_games enable row level security;
+
+drop policy if exists "c4 readable by anyone with the code" on public.c4_games;
+create policy "c4 readable by anyone with the code" on public.c4_games
+  for select using (true);
+
+drop policy if exists "c4 written by members" on public.c4_games;
+create policy "c4 written by members" on public.c4_games
+  for all using (exists (select 1 from public.room_players p
+                         where p.room_id = c4_games.room_id and p.user_id = auth.uid()))
+      with check (exists (select 1 from public.room_players p
+                          where p.room_id = c4_games.room_id and p.user_id = auth.uid()));
+
+-- Without this the opponent's screen never hears about a move: the board only
+-- updates for whoever wrote it.
+do $$ begin
+  alter publication supabase_realtime add table public.c4_games;
+exception when duplicate_object then null; end $$;

@@ -132,7 +132,7 @@ export function HomePage() {
                 </p>
                 <span className="flex-1" />
                 <p className="text-[11px] text-soft/70 font-bold mt-2 tabular-nums">
-                  {counts[g.bank] ?? 0} in the bank
+                  {g.bank ? `${counts[g.bank] ?? 0} in the bank` : "Head-to-head"}
                 </p>
               </Link>
             </motion.div>

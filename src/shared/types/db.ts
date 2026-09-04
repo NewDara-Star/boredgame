@@ -89,8 +89,10 @@ export interface Room {
   code: string;
   host_id: string;
   game: GameKey;
-  /** 'race' is the original first-correct-answer-wins; 'squareoff' is the board. */
-  mode: "race" | "squareoff";
+  /** 'race' is the original first-correct-answer-wins; the rest are boards.
+      Kept in step by hand with the rooms_mode_check constraint and with
+      RoomMode in features/play/registry. */
+  mode: "race" | "squareoff" | "tictactoe" | "connect4" | "connect4trivia";
   /** null means every category; stored on the room so both players share a pool */
   categories: string[] | null;
   status: RoomStatus;

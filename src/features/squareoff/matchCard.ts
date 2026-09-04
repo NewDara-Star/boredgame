@@ -94,7 +94,11 @@ export interface Side { name: string; score: number; mark: "x" | "o" }
     see saveCard(). */
 export interface MatchCard { url: string; file: File }
 
-export async function drawMatchCard(code: string | null, a: Side, b: Side): Promise<MatchCard> {
+export async function drawMatchCard(
+  code: string | null, a: Side, b: Side,
+  /** The game name repeated behind everything. Connect 4 cards say so too. */
+  title = "SQUARE OFF",
+): Promise<MatchCard> {
   // Without this the first render falls back to a system font mid-draw.
   if (document.fonts?.ready) { try { await document.fonts.ready; } catch { /* older browsers */ } }
 
@@ -111,7 +115,7 @@ export async function drawMatchCard(code: string | null, a: Side, b: Side): Prom
   c.font = "600 132px Fredoka, system-ui, sans-serif";
   c.textAlign = "left"; c.textBaseline = "alphabetic";
   for (let row = 0, y = 120; y < SIZE + 140; y += 128, row++) {
-    c.fillText("SQUARE OFF  SQUARE OFF", -160 + (row % 2) * 130, y);
+    c.fillText(`${title}  ${title}`, -160 + (row % 2) * 130, y);
   }
   c.restore();
 
@@ -149,7 +153,7 @@ export async function drawMatchCard(code: string | null, a: Side, b: Side): Prom
 
   sticker(c, "BoredGame", SIZE / 2, 990, 58, "#FFFFFF", 8);
 
-  const name = `square-off-${(code ?? "solo").toLowerCase()}.png`;
+  const name = `${title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${(code ?? "solo").toLowerCase()}.png`;
   const blob = await new Promise<Blob | null>((done) => canvas.toBlob(done, "image/png"));
   return {
     url: canvas.toDataURL("image/png"),

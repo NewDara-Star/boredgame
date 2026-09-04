@@ -97,6 +97,31 @@ export function answer(g: Game, correct: boolean): Game {
 }
 
 /**
+ * Plain Tic Tac Toe: take a square, no question attached.
+ *
+ * It lives here rather than in its own module so that both games share one win
+ * test. A separate file would have to import this one, and every rules module
+ * in this project must stay runnable by bare Node for the check scripts —
+ * which rules out cross-module imports, which would leave only duplication.
+ * Two boards disagreeing about what counts as three in a row is precisely the
+ * bug nobody finds until someone is staring at an unfinished winning line.
+ */
+export function place(g: Game, square: number): Game {
+  if (g.phase !== "picking") return g;
+  if (square < 0 || square > 8 || g.board[square] !== null) return g;
+
+  const board = g.board.slice();
+  board[square] = g.turn;
+  const last = { by: g.turn, square, correct: true, steal: false };
+
+  const win = winnerOf(board);
+  if (win) return { ...g, board, phase: "over", target: null, answerer: null, last, winner: win.mark, line: win.line };
+  if (openSquares(board).length === 0)
+    return { ...g, board, phase: "over", target: null, answerer: null, last, winner: "draw" as const };
+  return { ...g, board, turn: other(g.turn), last: null };
+}
+
+/**
  * Move on from a resolved question: into the steal if one is owed, otherwise to
  * the other player's pick.
  */

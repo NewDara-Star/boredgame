@@ -1,0 +1,71 @@
+import { motion } from "framer-motion";
+import { SPRING } from "@/shared/ui/motion";
+import { COLS, ROWS, landingRow, type Cell, type Mark } from "./rules";
+
+const COLOUR: Record<Mark, string> = { x: "var(--color-picto)", o: "var(--color-trivia)" };
+
+/**
+ * The whole column is the tap target, not the individual cell. On a phone the
+ * bottom cell of a column is a 40px square, and asking someone to hit the one
+ * empty slot in a stack is a worse game than asking them to hit the column.
+ */
+export function Board({
+  board, target, line, canPick, compact = false, onPick,
+}: {
+  board: Cell[]; target: number | null; line: number[] | null;
+  canPick: boolean; compact?: boolean; onPick: (col: number) => void;
+}) {
+  return (
+    <motion.div
+      className="grid grid-cols-7 mx-auto w-full"
+      animate={{ maxWidth: compact ? 260 : 360, gap: compact ? 3 : 5 }}
+      transition={SPRING}>
+      {Array.from({ length: COLS }, (_, c) => {
+        const open = landingRow(board, c) >= 0;
+        const pickable = canPick && open;
+        const contested = target === c;
+        return (
+          <button
+            key={c}
+            disabled={!pickable}
+            onClick={() => pickable && onPick(c)}
+            aria-label={open ? `Column ${c + 1}, open` : `Column ${c + 1}, full`}
+            className={`flex flex-col rounded-[10px] p-[2px]
+              ${pickable ? "press cursor-pointer" : "cursor-default"}
+              ${contested ? "bg-pop" : pickable ? "bg-sand/70" : "bg-transparent"}`}
+            style={{ gap: compact ? 3 : 5 }}>
+            {Array.from({ length: ROWS }, (_, r) => {
+              const i = r * COLS + c;
+              const cell = board[i];
+              const won = line?.includes(i);
+              return (
+                <span key={r}
+                  className={`aspect-square rounded-full grid place-items-center
+                    border-[3px] border-ink ${won ? "bg-good" : "bg-surface"}`}>
+                  {cell && (
+                    // Dropped, not faded in: the disc arrives from above so you
+                    // can see which column it fell down.
+                    <motion.span
+                      className="block rounded-full"
+                      style={{ background: COLOUR[cell], width: "78%", height: "78%" }}
+                      initial={{ y: -140, opacity: 0 }}
+                      animate={won
+                        ? { y: 0, opacity: 1, scale: [1, 1.18, 1] }
+                        : { y: 0, opacity: 1, scale: 1 }}
+                      transition={won
+                        ? { ...SPRING, delay: (line?.indexOf(i) ?? 0) * 0.09 }
+                        : { type: "spring", stiffness: 420, damping: 24 }} />
+                  )}
+                </span>
+              );
+            })}
+            <span className={`font-display font-semibold tabular-nums text-center leading-none pt-[3px]
+              ${compact ? "text-[10px]" : "text-xs"} ${pickable ? "text-soft/60" : "text-soft/20"}`}>
+              {c + 1}
+            </span>
+          </button>
+        );
+      })}
+    </motion.div>
+  );
+}

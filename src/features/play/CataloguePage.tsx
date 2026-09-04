@@ -38,10 +38,11 @@ export function CataloguePage() {
 
       <div className="grid gap-3 mt-5 sm:grid-cols-2">
         {shown.map((g) => {
-          const live = counts[g.bank] ?? 0;
-          // A game with an empty bank should say so here rather than letting you
-          // walk into a round that immediately tells you there is nothing to play.
-          const playable = live > 0;
+          // A pure board game has no bank and is always playable; only a game
+          // that WANTS content and has none should be greyed out here rather
+          // than letting you walk into an empty round.
+          const live = g.bank ? counts[g.bank] ?? 0 : null;
+          const playable = live === null || live > 0;
           const card = (
             <div className={`piece ${playable ? "press" : ""} p-4 h-full flex items-center gap-4
               ${playable ? "" : "opacity-55"}`}>
@@ -52,8 +53,8 @@ export function CataloguePage() {
                 <h2 className="font-display text-xl font-semibold mt-1">{g.name}</h2>
                 <p className="text-[13px] text-soft font-semibold leading-snug">{g.tagline}</p>
                 <p className="text-[11px] font-bold text-soft/70 mt-1 tabular-nums">
-                  {playable ? `${live} in the bank` : "Nothing live yet"}
-                  {g.room && playable && " · head-to-head"}
+                  {live === null ? "Head-to-head" : playable ? `${live} in the bank` : "Nothing live yet"}
+                  {g.room && playable && live !== null && " · head-to-head"}
                 </p>
               </div>
             </div>

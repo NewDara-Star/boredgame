@@ -9,10 +9,14 @@ import { Field, Input } from "@/shared/ui/Field";
 import { isCorrect } from "@/shared/lib/normalise";
 import { SquareOffRoom } from "@/features/squareoff/SquareOffRoom";
 import { startSquareOff } from "@/features/squareoff/useTttRoom";
+import { TicTacToeRoom } from "@/features/tictactoe/TicTacToeRoom";
+import { Connect4Room } from "@/features/connect4/Connect4Room";
+import { startConnect4 } from "@/features/connect4/useC4Room";
 import { Lobby } from "./Lobby";
 import { InviteCard } from "./InviteCard";
 import { AuthCard } from "@/features/profile/AuthCard";
 import { Avatar } from "@/shared/ui/Avatar";
+import { ROOM_GAMES } from "@/features/play/registry";
 
 export function RoomsPage() {
   const { code } = useParams();
@@ -27,6 +31,14 @@ export function RoomsPage() {
     room, players, round, currentPuzzle, error, categories,
     join, startNextRound, claimWin, setup, setReady,
   } = useRoom(code, user?.id);
+
+  // Race deals a puzzle a round and scores in room_players. The board games own
+  // their own row and their own writer, so everything the race UI does below is
+  // gated on this one flag rather than on a growing list of mode names.
+  const BOARDS = {
+    squareoff: "3x3", tictactoe: "3x3", connect4: "c4", connect4trivia: "c4",
+  } as const;
+  const board = room ? BOARDS[room.mode as keyof typeof BOARDS] ?? null : null;
 
   const isHost = !!room && !!user && room.host_id === user.id;
   const everyoneReady = !!room && players.length === room.capacity && players.every((p) => p.ready);
@@ -46,14 +58,13 @@ export function RoomsPage() {
   // the same ready flags, so letting either start would race to deal twice.
   useEffect(() => {
     if (!room || !isHost || !everyoneReady || room.status !== "waiting") return;
-    if (room.mode === "squareoff") {
-      const guest = players.find((p) => p.user_id !== room.host_id);
-      if (guest) void startSquareOff(room.id, room.host_id, guest.user_id)
-        .then((msg) => { if (msg) setStartError(msg); });
-    } else {
-      void startNextRound();
-    }
-  }, [room, isHost, everyoneReady, players, startNextRound]);
+    if (!board) { void startNextRound(); return; }
+    const guest = players.find((p) => p.user_id !== room.host_id);
+    if (!guest) return;
+    const start = board === "c4" ? startConnect4 : startSquareOff;
+    void start(room.id, room.host_id, guest.user_id)
+      .then((msg) => { if (msg) setStartError(msg); });
+  }, [room, isHost, everyoneReady, players, startNextRound, board]);
 
   if (offline) {
     return (
@@ -150,7 +161,8 @@ export function RoomsPage() {
     <div className="space-y-5">
       <div className="flex items-baseline justify-between gap-3">
         <p className="font-display text-2xl font-semibold">
-          {waiting ? "Your room" : room.mode === "squareoff" ? "Square Off" : "Race"}
+          {waiting ? "Your room" : (ROOM_GAMES.find((g) => g.room.mode === room.mode
+            && (g.bank === null || g.bank === room.game))?.name ?? "Race")}
         </p>
         <p className="text-xs text-soft uppercase tracking-widest font-bold">{room.status}</p>
       </div>
@@ -186,6 +198,17 @@ export function RoomsPage() {
           categories={room.categories} players={players} userId={user.id} />
       )}
 
+      {iAmIn && !waiting && room.mode === "tictactoe" && (
+        <TicTacToeRoom roomId={room.id} code={room.code} status={room.status}
+          players={players} userId={user.id} />
+      )}
+
+      {iAmIn && !waiting && board === "c4" && (
+        <Connect4Room roomId={room.id} code={room.code} status={room.status}
+          categories={room.categories} players={players} userId={user.id}
+          plain={room.mode === "connect4"} />
+      )}
+
       {iAmIn && (
         <button onClick={() => nav("/rooms")}
           className="block mx-auto text-[11px] font-black uppercase tracking-wider
@@ -194,7 +217,7 @@ export function RoomsPage() {
         </button>
       )}
 
-      {room.mode !== "squareoff" && room.status === "finished" && (() => {
+      {!board && room.status === "finished" && (() => {
         const ranked = [...players].sort((a, b) => b.score - a.score);
         const drawn = ranked.length > 1 && ranked[0].score === ranked[1].score;
         return (
@@ -214,7 +237,7 @@ export function RoomsPage() {
         );
       })()}
 
-      {room.mode !== "squareoff" && !waiting && room.status !== "finished" && round && currentPuzzle && (
+      {!board && !waiting && room.status !== "finished" && round && currentPuzzle && (
         <>
           <div className="flex gap-2 flex-wrap">
             {players.map((p) => (

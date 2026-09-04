@@ -3,15 +3,16 @@ import type { GameKey } from "@/shared/types/db";
 import { PICTO_SEED } from "@/shared/data/picto";
 import { PictoRenderer } from "@/features/picto/PictoRenderer";
 
-export type RoomMode = "race" | "squareoff";
+export type RoomMode = "race" | "squareoff" | "tictactoe" | "connect4" | "connect4trivia";
 
 export interface GameDef {
   slug: string;
   name: string;
   tagline: string;
   badge: string;
-  /** which puzzle bank it draws on — decides whether it has any content live */
-  bank: GameKey;
+  /** Which puzzle bank it draws on, or null for a pure board game. A null bank
+      is not an empty bank: Tic Tac Toe is never waiting for content. */
+  bank: GameKey | null;
   path: string;
   /** a tailwind bg-* class for the badge */
   chip: string;
@@ -74,6 +75,66 @@ export const GAMES: GameDef[] = [
           <circle cx="50" cy="50" r="9" stroke="var(--color-trivia)" />
           <path d="M70 70 L82 82 M82 70 L70 82" stroke="var(--color-picto)" />
         </g>
+      </motion.svg>
+    ),
+  },
+  {
+    slug: "tictactoe", name: "Tic Tac Toe", tagline: "Three in a row. No questions asked.",
+    badge: "Board game", bank: null, path: "/rooms", chip: "bg-sand text-ink",
+    room: { mode: "tictactoe", blurb: "The plain game. Take a square, first to three in a row." },
+    Art: ({ size }) => (
+      <svg viewBox="0 0 100 100" width={size} height={size} className="shrink-0">
+        <g stroke="var(--color-ink)" strokeWidth="4" strokeLinecap="round">
+          <path d="M36 12 V88 M64 12 V88 M12 36 H88 M12 64 H88" />
+        </g>
+        <g strokeWidth="8" strokeLinecap="round" fill="none">
+          <path d="M18 18 L30 30 M30 18 L18 30" stroke="var(--color-picto)" />
+          <circle cx="50" cy="50" r="9" stroke="var(--color-trivia)" />
+          <path d="M70 18 L82 30 M82 18 L70 30" stroke="var(--color-picto)" />
+        </g>
+      </svg>
+    ),
+  },
+  {
+    slug: "connect4", name: "Connect 4", tagline: "Drop a disc, line up four.",
+    badge: "Board game", bank: null, path: "/rooms", chip: "bg-sand text-ink",
+    room: { mode: "connect4", blurb: "The plain game. Tap a column, the disc falls, four in a row wins." },
+    Art: ({ size }) => (
+      <svg viewBox="0 0 100 100" width={size} height={size} className="shrink-0">
+        <rect x="8" y="20" width="84" height="72" rx="10"
+          fill="none" stroke="var(--color-ink)" strokeWidth="4" />
+        {[0, 1, 2, 3].map((c) => [0, 1, 2].map((r) => {
+          const filled = (c === 1 && r === 2) || (c === 2 && r === 2) || (c === 2 && r === 1);
+          const mine = c === 2;
+          return (
+            <circle key={`${c}-${r}`} cx={20 + c * 20} cy={34 + r * 20} r="7.5"
+              stroke="var(--color-ink)" strokeWidth="3"
+              fill={filled ? (mine ? "var(--color-picto)" : "var(--color-trivia)") : "var(--color-surface)"} />
+          );
+        }))}
+      </svg>
+    ),
+  },
+  {
+    slug: "connect4trivia", name: "Connect 4 Trivia", tagline: "Answer right or the disc never drops.",
+    badge: "Board game", bank: "trivia", path: "/rooms", chip: "bg-hot text-surface",
+    room: { mode: "connect4trivia", blurb: "Name a column, answer a question. Get it wrong and you lose the turn — no second chances." },
+    Art: ({ size }) => (
+      <motion.svg viewBox="0 0 100 100" width={size} height={size} className="shrink-0"
+        animate={{ rotate: [0, 3, -3, 0] }}
+        transition={{ duration: 3.4, repeat: Infinity, repeatDelay: 2.2, ease: "easeInOut" }}>
+        <rect x="8" y="28" width="84" height="64" rx="10"
+          fill="none" stroke="var(--color-ink)" strokeWidth="4" />
+        {[0, 1, 2, 3].map((c) => [0, 1].map((r) => {
+          const filled = (c === 1 && r === 1) || (c === 2 && r === 1);
+          return (
+            <circle key={`${c}-${r}`} cx={20 + c * 20} cy={48 + r * 22} r="8"
+              stroke="var(--color-ink)" strokeWidth="3"
+              fill={filled ? (c === 2 ? "var(--color-picto)" : "var(--color-trivia)") : "var(--color-surface)"} />
+          );
+        }))}
+        <text x="60" y="22" textAnchor="middle" fontSize="30" fontWeight="700"
+          fill="var(--color-hot)" fontFamily="Fredoka, system-ui, sans-serif">?</text>
       </motion.svg>
     ),
   },

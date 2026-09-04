@@ -31,6 +31,11 @@ export function Lobby({
     ? categories.filter((c) => picked.includes(c.name)).reduce((n, c) => n + c.count, 0)
     : categories.reduce((n, c) => n + c.count, 0);
 
+  // Plain Tic Tac Toe and plain Connect 4 draw on nothing, so the category step
+  // is not "optional" for them, it is meaningless. Hide it rather than offer a
+  // choice that changes nothing.
+  const hasBank = ROOM_GAMES.some((g) => g.room.mode === room.mode && g.bank !== null);
+
   return (
     <motion.div variants={stagger(0.06)} initial="hidden" animate="show" className="space-y-4">
       <motion.section variants={riseIn}>
@@ -40,13 +45,15 @@ export function Lobby({
         <div className="grid gap-2">
           {ROOM_GAMES.map((g) => {
             const c = { mode: g.room.mode, game: g.bank, label: g.name, blurb: g.room.blurb };
-            const on = room.mode === c.mode && room.game === c.game;
+            // A bankless game is identified by its mode alone. rooms.game is NOT
+            // NULL, so it keeps whatever key was already there and ignores it.
+            const on = room.mode === c.mode && (c.game === null || room.game === c.game);
             return (
               // Categories belong to a bank. Square Off and Trivia race share
                 // one so a selection survives; switching to Picto race does not,
                 // and five of the categories have no trivia in them at all.
                 <button key={g.slug}
-                  onClick={() => onSetup(c.mode, c.game, c.game === room.game ? picked : [])}
+                  onClick={() => onSetup(c.mode, c.game ?? room.game, c.game === room.game ? picked : [])}
                 className={`piece press text-left p-3.5 ${on ? "bg-hot text-surface" : "bg-surface"}`}>
                 <span className="flex items-center gap-2">
                   <span className={`grid place-items-center h-5 w-5 rounded-full border-[3px] border-ink shrink-0
@@ -64,6 +71,7 @@ export function Lobby({
         </div>
       </motion.section>
 
+      {hasBank && (
       <motion.section variants={riseIn}>
         <p className="text-[10px] font-black uppercase tracking-widest text-soft mb-2">
           2 · Which categories? <span className="text-soft/60">optional</span>
@@ -99,10 +107,11 @@ export function Lobby({
           </div>
         </div>
       </motion.section>
+      )}
 
       <motion.section variants={riseIn}>
         <p className="text-[10px] font-black uppercase tracking-widest text-soft mb-2">
-          3 · Both of you happy?
+          {hasBank ? "3" : "2"} · Both of you happy?
         </p>
         <div className="grid gap-2">
           {players.map((p) => (

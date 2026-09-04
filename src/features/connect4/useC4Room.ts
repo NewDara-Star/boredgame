@@ -2,33 +2,33 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/shared/lib/supabase";
 import { loadContent, shuffle } from "@/features/play/content";
 import type { PlayItem } from "@/features/play/types";
-import { newGame, pick, place, answer, advance, type Game, type Mark } from "./rules";
-import { decode, encode, type TttRow } from "./wire";
+import { newGame, pick, drop, answer, advance, type Game, type Mark } from "./rules";
+import { decode, encode, type C4Row } from "./wire";
 import { deal } from "@/features/play/dealer";
 import { attempt } from "@/shared/lib/write";
 
 /**
- * Two browsers, one board. Both clients run the identical reducer from rules.ts
- * and Postgres carries the result — the same trick the race mode uses, so there
+ * Two browsers, one Connect 4 board. Same arrangement as Square Off: both
+ * clients run the identical reducer and Postgres carries the result, so there
  * is still no socket code anywhere in this app.
  *
- * Who writes: whoever owes the action. The picker writes the pick, the answerer
- * writes the answer, and the answerer also writes the move on from the reveal.
- * Any other arrangement has both clients racing to write the same transition.
+ * Who writes: whoever owes the action. The player whose turn it is writes the
+ * drop, the same player writes their own answer, and the player who answered
+ * writes the move on from the reveal. Any other arrangement has both clients
+ * racing to write the same row — see CLAUDE.md.
  */
-export function useTttRoom(
+export function useC4Room(
   roomId: number | null, userId: string | undefined,
   categories: string[] | null = null,
-  /** Plain Tic Tac Toe: same board, same table, no questions. Taking a square
-      is the whole move, so there is no asking phase and nothing to deal. */
+  /** Plain Connect 4: tapping a column drops the disc, no question attached. */
   plain = false,
 ) {
-  const [row, setRow] = useState<TttRow | null>(null);
+  const [row, setRow] = useState<C4Row | null>(null);
   // Mirrors `row` so `write` can revert a failed move without taking `row` as a
   // dependency — `write` has to keep a stable identity or the reveal timer,
   // which depends on it, restarts every time the row changes.
-  const rowRef = useRef<TttRow | null>(null);
-  const remember = useCallback((next: TttRow | null) => { rowRef.current = next; setRow(next); }, []);
+  const rowRef = useRef<C4Row | null>(null);
+  const remember = useCallback((next: C4Row | null) => { rowRef.current = next; setRow(next); }, []);
   const [pool, setPool] = useState<PlayItem[]>([]);
   const seen = useRef<Set<string>>(new Set());
   const lastServed = useRef<string | null>(null);
@@ -36,7 +36,7 @@ export function useTttRoom(
   const [writeError, setWriteError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (plain) return;                       // nothing to ask, nothing to fetch
+    if (plain) return;                        // nothing to ask, nothing to fetch
     void loadContent("trivia").then((all) =>
       setPool(shuffle(all.filter((i) => i.choices && i.choices.length >= 2 && /^\d+$/.test(i.id)))));
   }, [plain]);
@@ -46,14 +46,14 @@ export function useTttRoom(
     let channel: ReturnType<NonNullable<typeof supabase>["channel"]> | null = null;
     let cancelled = false;
     (async () => {
-      const { data } = await supabase!.from("ttt_games").select("*").eq("room_id", roomId).maybeSingle();
+      const { data } = await supabase!.from("c4_games").select("*").eq("room_id", roomId).maybeSingle();
       if (cancelled) return;
-      remember((data as TttRow | null) ?? null);
+      remember((data as C4Row | null) ?? null);
       channel = supabase!
-        .channel(`ttt:${roomId}`)
+        .channel(`c4:${roomId}`)
         .on("postgres_changes",
-          { event: "*", schema: "public", table: "ttt_games", filter: `room_id=eq.${roomId}` },
-          (p) => remember(p.new as TttRow))
+          { event: "*", schema: "public", table: "c4_games", filter: `room_id=eq.${roomId}` },
+          (p) => remember(p.new as C4Row))
         .subscribe();
     })();
     return () => { cancelled = true; if (channel) void supabase!.removeChannel(channel); };
@@ -67,9 +67,7 @@ export function useTttRoom(
     : null;
 
   const nextPuzzleId = useCallback(() => {
-    const scoped = categories?.length
-      ? pool.filter((i) => categories.includes(i.category))
-      : pool;
+    const scoped = categories?.length ? pool.filter((i) => categories.includes(i.category)) : pool;
     // An empty scope is a misconfigured room, not a reason to quietly serve from
     // the whole bank as if the filter had never been set.
     if (scoped.length === 0) {
@@ -79,88 +77,81 @@ export function useTttRoom(
       return null;
     }
     setPoolError(null);
-    const { item } = deal(scoped, (i) => i.id, seen.current, { avoid: lastServed.current });
-    if (!item) return null;
-    lastServed.current = item.id;
-    return Number(item.id);
+    const { item: q } = deal(scoped, (i) => i.id, seen.current, { avoid: lastServed.current });
+    if (!q) return null;
+    lastServed.current = q.id;
+    return Number(q.id);
   }, [pool, categories]);
 
-  /** Write a transition. `puzzle` is set whenever the new state needs a question. */
+  /** Write a transition. `withPuzzle` is set whenever the new state needs a question. */
   const write = useCallback(async (next: Game, withPuzzle: boolean) => {
     if (!supabase || !roomId) return;
     const patch: Record<string, unknown> = { ...encode(next), updated_at: new Date().toISOString() };
     if (withPuzzle) patch.puzzle_id = nextPuzzleId();
 
     // Apply it here first. Waiting for the write AND the realtime echo before
-    // showing your own move meant every tap cost a round trip plus a push before
-    // anything on your screen moved — and if realtime hiccupped, nothing moved
-    // at all. Realtime is the confirmation now, not the trigger.
+    // showing your own move cost a round trip plus a push before anything moved,
+    // and moved nothing at all if realtime hiccupped. Realtime is the
+    // confirmation now, not the trigger.
     const before = rowRef.current;
-    if (before) remember({ ...before, ...patch } as TttRow);
+    if (before) remember({ ...before, ...patch } as C4Row);
 
     const msg = await attempt("That move",
-      supabase.from("ttt_games").update(patch).eq("room_id", roomId));
+      supabase.from("c4_games").update(patch).eq("room_id", roomId));
     setWriteError(msg);
     // A refused move must not leave a board on screen that no one else can see.
     if (msg && before) remember(before);
   }, [roomId, nextPuzzleId, remember]);
 
-  /** The client that wrote the winning move books the win, so the tally moves
-      exactly once however many browsers are watching. Incremented in the
-      database rather than read-modify-written from this client's copy of the
-      players list, which can lag realtime across a rematch. */
+  /** Exactly one client books the win, so the tally moves once per game. */
   const bookWin = useCallback(async (next: Game) => {
     if (next.phase !== "over" || !next.winner || next.winner === "draw") return;
-    const row = rowRef.current;
-    if (!supabase || !row || !roomId) return;
-    const seat = next.winner === "x" ? row.x_player : row.o_player;
+    const r = rowRef.current;
+    if (!supabase || !r || !roomId) return;
+    const seat = next.winner === "x" ? r.x_player : r.o_player;
     if (!seat) return;
     setWriteError(await attempt("Recording the win",
       supabase.rpc("bump_room_score", { p_room: roomId, p_user: seat })));
   }, [roomId]);
 
-  const choose = useCallback((square: number) => {
+  const choose = useCallback((col: number) => {
     if (!game || myMark !== game.turn || game.phase !== "picking") return;
     if (plain) {
-      const next = place(game, square);
+      const next = drop(game, col);
+      if (next === game) return;                       // full column, nothing happened
       void (async () => { await write(next, false); await bookWin(next); })();
       return;
     }
-    void write(pick(game, square), true);
+    void write(pick(game, col), true);
   }, [game, myMark, write, plain, bookWin]);
 
   const submit = useCallback((correct: boolean) => {
-    if (!game || game.phase !== "asking" || game.answerer !== myMark) return;
+    if (!game || game.phase !== "asking" || game.turn !== myMark) return;
     const next = answer(game, correct);
     void (async () => { await write(next, false); await bookWin(next); })();
   }, [game, myMark, write, bookWin]);
 
   /** Move on now rather than sitting out the pause. The timer stays as the
-      fallback so an idle player cannot stall the board, but a pause you can
-      skip is the difference between a game that feels quick and one that
-      does not — a shorter fixed timer is not the same thing. */
+      fallback, but a pause you can skip is the difference between a game that
+      feels quick and one that does not. */
   const advanceNow = useCallback(() => {
     if (!game || game.phase !== "revealed" || !game.last || game.last.by !== myMark) return;
-    const next = advance(game);
-    void write(next, next.phase === "asking");
+    void write(advance(game), false);
   }, [game, myMark, write]);
 
-  /** Writes the miss for a question nobody answered — including when the person
+  /** Writes the miss for a question nobody answered, including when the person
       who owed it has closed the tab. Callers must check stallWriter() first. */
   const forceTimeout = useCallback(() => {
     if (!game || game.phase !== "asking") return;
     void write(answer(game, false), false);
   }, [game, write]);
 
-  /** Moves on from a reveal its owner never wrote. The pause below is a
-      setTimeout in the answerer's tab, so a locked phone, an app switch or a
-      backgrounded laptop suspends it and the board freezes for both players
-      with nothing else running anywhere. Unguarded on purpose — the caller is
-      whichever client stallWriter() named, which is not always the answerer. */
+  /** Moves on from a reveal its owner never wrote — their pause timer lives in
+      their tab, and a locked phone suspends it. Unguarded on purpose: the
+      caller is whichever client stallWriter() named, not always the answerer. */
   const forceAdvance = useCallback(() => {
     if (!game || game.phase !== "revealed" || !game.last) return;
-    const next = advance(game);
-    void write(next, next.phase === "asking");
+    void write(advance(game), false);
   }, [game, write]);
 
   /** Ends the session rather than the game. Rematch keeps the tally; this stops it. */
@@ -172,14 +163,13 @@ export function useTttRoom(
 
   // The player who just answered owns the move on, so exactly one client writes it.
   useEffect(() => {
-    if (!game || game.phase !== "revealed" || !game.last || game.last.by !== myMark) return;
-    const next = advance(game);
-    // A correct answer has nothing to read; a miss has the right answer and
-    // sometimes an explanation. One fixed pause served neither.
+    if (plain || !game || game.phase !== "revealed" || !game.last || game.last.by !== myMark) return;
+    // A right answer has nothing to read; a miss has the answer and sometimes an
+    // explanation. One fixed pause served neither.
     const pause = game.last.correct ? 1300 : item?.explanation ? 2900 : 2200;
-    const t = setTimeout(() => void write(next, next.phase === "asking"), pause);
+    const t = setTimeout(() => void write(advance(game), false), pause);
     return () => clearTimeout(t);
-  }, [game, myMark, write, item?.explanation]);
+  }, [plain, game, myMark, write, item?.explanation]);
 
   const rematch = useCallback(async () => {
     if (!supabase || !roomId || !row) return;
@@ -189,15 +179,14 @@ export function useTttRoom(
       : row.winner === "o" ? "x"
       : row.turn === "x" ? "o" : "x";
     setWriteError(await attempt("Starting the rematch",
-      supabase.from("ttt_games")
+      supabase.from("c4_games")
         .update({ ...encode(newGame(first)), puzzle_id: null }).eq("room_id", roomId)));
   }, [roomId, row]);
 
   return {
-    game, myMark, item, choose, submit, rematch, quit,
-    forceTimeout, forceAdvance, advanceNow,
+    game, myMark, item, choose, submit, rematch, quit, forceTimeout, forceAdvance, advanceNow,
     error: poolError ?? writeError,
-    ready: pool.length > 0,
+    ready: plain || pool.length > 0,
     /** when the current question went up, so both clients run the same clock */
     askedAt: row ? Date.parse(row.updated_at) : 0,
     seats: { x: row?.x_player ?? null, o: row?.o_player ?? null },
@@ -206,9 +195,9 @@ export function useTttRoom(
 
 /**
  * Dealing the board is not a hook — the lobby starts the game once both players
- * have agreed, and the lobby does not own a ttt subscription.
+ * have agreed, and the lobby does not own a c4 subscription.
  */
-export async function startSquareOff(roomId: number, xId: string, oId: string) {
+export async function startConnect4(roomId: number, xId: string, oId: string) {
   if (!supabase) return null;
   // The database decides who starts. A client-side "am I the host" guard holds
   // against two people but not against one client's effect firing twice, and a
@@ -216,7 +205,7 @@ export async function startSquareOff(roomId: number, xId: string, oId: string) {
   const { data: won, error } = await supabase.rpc("claim_room_start", { p_room: roomId });
   if (error) return await attempt("Starting the game", Promise.resolve({ error }));
   if (won !== true) return null;
-  return await attempt("Dealing the board", supabase.from("ttt_games").upsert({
+  return await attempt("Dealing the board", supabase.from("c4_games").upsert({
     room_id: roomId, ...encode(newGame("x")),
     puzzle_id: null, x_player: xId, o_player: oId,
   }));
