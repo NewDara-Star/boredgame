@@ -6,8 +6,11 @@ import { Button } from "@/shared/ui/Button";
 import { Field, Input } from "@/shared/ui/Field";
 
 export function ProfilePage() {
-  const { user, profile, offline, signIn, signOut } = useAuth();
+  const { user, profile, offline, signIn, signUp, signInWithLink, signOut } = useAuth();
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [busy, setBusy] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [authError, setAuthError] = useState<string | null>(null);
@@ -86,21 +89,60 @@ export function ProfilePage() {
             <Button variant="ghost" onClick={() => void signOut()}>Sign out</Button>
           </div>
         ) : sent ? (
-          <p className="text-sm text-good">Check your email for the sign-in link.</p>
+          <p className="piece bg-good text-surface p-4 font-semibold">
+            Check your email for the sign-in link.
+          </p>
         ) : (
           <form
             className="space-y-3"
             onSubmit={async (e) => {
               e.preventDefault();
-              const { error } = await signIn(email);
-              if (error) setError(error); else setSent(true);
+              setError(null); setBusy(true);
+              const fn = mode === "signin" ? signIn : signUp;
+              const { error } = await fn(email, password);
+              setBusy(false);
+              if (error) setError(error);
             }}
           >
-            <Field label="Sign in" hint="A one-time link, no password to remember" error={error}>
+            <div className="flex gap-2">
+              {(["signin", "signup"] as const).map((m) => (
+                <button key={m} type="button" onClick={() => { setMode(m); setError(null); }}
+                  className={`px-4 py-2 rounded-xl text-sm font-bold border-[2.5px] border-ink
+                    ${mode === m ? "bg-ink text-paper" : "bg-surface text-soft"}`}>
+                  {m === "signin" ? "Sign in" : "Create account"}
+                </button>
+              ))}
+            </div>
+
+            <Field label="Email" error={error}>
               <Input type="email" required value={email} placeholder="you@example.com"
-                onChange={(e) => setEmail(e.target.value)} />
+                autoComplete="email" onChange={(e) => setEmail(e.target.value)} />
             </Field>
-            <Button type="submit" className="w-full">Send me a link</Button>
+
+            <Field label="Password" hint={mode === "signup" ? "At least 6 characters" : undefined}>
+              <Input type="password" required minLength={6} value={password} placeholder="••••••••"
+                autoComplete={mode === "signin" ? "current-password" : "new-password"}
+                onChange={(e) => setPassword(e.target.value)} />
+            </Field>
+
+            <Button type="submit" disabled={busy} className="w-full">
+              {busy ? "Working…" : mode === "signin" ? "Sign in" : "Create account"}
+            </Button>
+
+            <button type="button"
+              onClick={async () => {
+                if (!email) { setError("Enter your email first."); return; }
+                setBusy(true);
+                const { error } = await signInWithLink(email);
+                setBusy(false);
+                if (error) setError(error); else setSent(true);
+              }}
+              className="w-full text-xs font-bold text-soft underline underline-offset-4 pt-1">
+              Email me a link instead
+            </button>
+            <p className="text-xs text-soft/70 font-semibold text-center">
+              Links are limited to about two an hour until custom email is set up.
+            </p>
           </form>
         )}
       </section>
