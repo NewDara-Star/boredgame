@@ -62,6 +62,21 @@ function star(c: CanvasRenderingContext2D, cx: number, cy: number, r: number, fi
   c.closePath(); c.fill(); c.restore();
 }
 
+/**
+ * The sparkles sit inside the headline's width, so a long name ran underneath
+ * them. Widening the gap would mean moving the sparkles, and shrinking the type
+ * far enough for a 20-character name puts the headline below the score labels —
+ * type squeezed to fit reads as a mistake, an elided name reads as a name.
+ * The full name is still printed under the mark, so nothing is actually lost.
+ */
+const HEADLINE_CHARS = 14;
+/** Clear of the left sparkle (ends at x=190) and the right one (starts at 918),
+    measured from the centre the headline is drawn on. */
+const HEADLINE_WIDTH = 700;
+
+const ellipsize = (text: string, n: number) =>
+  text.length <= n ? text : `${text.slice(0, n - 1).trimEnd()}…`;
+
 /** Shrinks the type until the name fits rather than letting it run off the card. */
 function fitSize(c: CanvasRenderingContext2D, text: string, max: number, start: number) {
   let size = start;
@@ -105,8 +120,8 @@ export async function drawMatchCard(code: string | null, a: Side, b: Side): Prom
   star(c, SIZE - 118, 196, 44, POP);
 
   const winner = a.score === b.score ? null : a.score > b.score ? a : b;
-  const headline = winner ? `${winner.name} wins` : "All square";
-  const hs = fitSize(c, headline, SIZE - 200, 96);
+  const headline = winner ? `${ellipsize(winner.name, HEADLINE_CHARS)} wins` : "All square";
+  const hs = fitSize(c, headline, HEADLINE_WIDTH, 96);
   sticker(c, headline, SIZE / 2, 200, hs, POP, 10);
 
   const panelW = 400, panelH = 400, gap = 40;

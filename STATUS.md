@@ -19,6 +19,7 @@ Each claim below was checked by running it, not by reading the code.
 | Type is the real Fredoka/Nunito | fonts substituted locally from `@fontsource-variable`, not the system fallback |
 | The match card renders with the real score | screenshot of the drawn PNG: dara_star wins, 3-1, winner panel highlighted |
 | Saving the card produces a real PNG file | headless Chromium: download event fires, `square-off-3avsxd.png`, 190,720 bytes, PNG magic `89 50 4e 47` |
+| A long name no longer runs under the sparkles | rendered names of 7, 9, 18, 19 and 20 chars with the keep-out columns (x=190, x=918) drawn on: every headline sits inside both |
 | The share sheet is feature-tested, not assumed | same run: `navigator.canShare({files})` false on desktop, so it took the link path — the branch that used to be the only one |
 | Guest sees an account first, not a dashboard | Playwright at 390x844, fresh and with 214 answered |
 | Category filter shows real counts and restarts the round | screenshot: chips with per-category counts |
