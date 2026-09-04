@@ -82,6 +82,22 @@ is that we copy nobody's picture.)
 **Phrase sources, all free:** idioms, proverbs, compound words, common
 expressions, film and song titles (titles aren't copyrightable), place names.
 
+### Generating layout
+
+Use `scripts/layout.mts` — `row()`, `stack()`, `solo()`. They tile the canvas
+arithmetically, so overlap is impossible by construction rather than caught
+afterwards. Two failures taught this:
+
+- Hand-computed x/w produced eleven colliding puzzles in the first batch.
+- A first version of `row()` divided the canvas *proportionally*, which gave a
+  one-character item the same slot share as its neighbours and left
+  `lengthAdjust` stretching the glyphs. "B 4" and "X L" came out visibly wide.
+  Widths now come from the text itself and the slack becomes margin.
+- Width is estimated **per character**, not by a flat average. A lone "I" given
+  the average width gets stretched into a solid bar, which is how "I C U" first
+  rendered. `textWidth()` in layout.mts is the shared estimate, used by the
+  generator and the gate alike.
+
 ### The mechanism catalogue
 
 Everything the renderer can express. Cross these with any phrase list and the

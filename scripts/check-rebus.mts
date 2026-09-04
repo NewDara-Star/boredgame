@@ -17,8 +17,7 @@
 import type { RebusItem } from "../src/shared/types/db.ts";
 import { PICTO_SEED } from "../src/shared/data/picto.ts";
 
-/** Bold condensed-ish sans, uppercase. Empirically ~0.62em per character. */
-const CHAR_W = 0.62;
+import { textWidth } from "./layout.mts";
 const MIN_SIZE = 5;
 const CANVAS = 100;
 
@@ -26,7 +25,7 @@ interface Box { x0: number; y0: number; x1: number; y1: number }
 
 function boxOf(it: RebusItem): Box {
   const size = it.size ?? 14;
-  const w = it.w ?? CHAR_W * size * it.text.length;
+  const w = it.w ?? textWidth(it.text, size);
   const h = size * 0.82;
   // A rotated item sweeps a larger area; approximate with the rotated AABB.
   const rad = ((it.rotate ?? 0) * Math.PI) / 180;
@@ -64,6 +63,15 @@ export function checkPuzzle(
       add("fail", `item ${i} ("${it.text}") runs off horizontally: ${b.x0.toFixed(0)}..${b.x1.toFixed(0)}`);
     if (b.y0 < -1 || b.y1 > CANVAS + 1)
       add("fail", `item ${i} ("${it.text}") runs off vertically: ${b.y0.toFixed(0)}..${b.y1.toFixed(0)}`);
+    // A declared width far from the natural one stretches or squashes glyphs.
+    // The first batch of generated puzzles shipped "B 4" and "X L" visibly
+    // distorted because nothing compared the two.
+    if (it.w !== undefined && it.text.trim()) {
+      const natural = textWidth(it.text, it.size ?? 14);
+      const ratio = it.w / natural;
+      if (ratio > 1.3 || ratio < 0.72)
+        add("warn", `item ${i} ("${it.text}") is set to w=${it.w.toFixed(0)} against a natural ${natural.toFixed(0)} — glyphs will be ${ratio > 1 ? "stretched" : "squashed"}`);
+    }
     // Anything sharing a row without a declared width is guesswork.
     const sharesRow = p.items.some((o, j) => j !== i && Math.abs((o.y ?? 50) - it.y) < (it.size ?? 14) * 0.7);
     if (sharesRow && it.w === undefined)

@@ -182,4 +182,154 @@ export const PICTO_SEED: PictoSeed[] = [
 
   { slug: "water-h-to-o", items: [t("H  I J K L M N  O", 50, 50, { size: 11, w: 86 })],
     answer: "water", alt_hint: "Read the first letter, then where the run ends", char_hint: "1 word · H to O", difficulty: "hard", category: "Food" },
+
+  { slug: "i-see-you", items: [t("I", 32.5, 50, { size: 17, w: 5.1 }), t("C", 47.3, 50, { size: 17, w: 10.5 }), t("U", 64.8, 50, { size: 17, w: 10.5 })],
+    answer: "i see you", alt_hint: "Say each letter out loud instead of reading it", char_hint: "3 words", difficulty: "easy", category: "Everyday" },
+
+  { slug: "before", items: [t("B", 41.2, 50, { size: 17, w: 10.5 }), t("4", 58.8, 50, { size: 17, w: 10.5 })],
+    answer: "before", alt_hint: "A letter and a number, both said aloud", char_hint: "1 word · 6 letters", difficulty: "easy", category: "Everyday" },
+
+  { slug: "cucumber", items: [t("Q", 12.7, 50, { size: 17, w: 10.5 }), t("CUMBER", 58.8, 50, { size: 17, w: 67.7 })],
+    answer: "cucumber", alt_hint: "The first letter is doing a syllable's work", char_hint: "1 word · a salad vegetable", difficulty: "medium", category: "Food" },
+
+  { slug: "excel", items: [t("X", 41.8, 50, { size: 17, w: 10.5 }), t("L", 58.8, 50, { size: 17, w: 9.4 })],
+    answer: "excel", alt_hint: "Two letters, said out loud", char_hint: "1 word · to do very well", difficulty: "medium", category: "Everyday" },
+
+  { slug: "envy", items: [t("N", 41.2, 50, { size: 17, w: 10.5 }), t("V", 58.8, 50, { size: 17, w: 10.5 })],
+    answer: "envy", alt_hint: "Two letters, said out loud", char_hint: "1 word · a deadly sin", difficulty: "medium", category: "Everyday" },
+
+  { slug: "empty", items: [t("M", 41.6, 50, { size: 17, w: 15 }), t("T", 61, 50, { size: 17, w: 9.9 })],
+    answer: "empty", alt_hint: "Two letters, said out loud", char_hint: "1 word · the opposite of full", difficulty: "medium", category: "Everyday" },
+
+  { slug: "enemy", items: [t("N", 30.3, 50, { size: 17, w: 10.5 }), t("M", 50, 50, { size: 17, w: 15 }), t("E", 69.7, 50, { size: 17, w: 10.5 })],
+    answer: "enemy", alt_hint: "Three letters, said out loud", char_hint: "1 word · not a friend", difficulty: "medium", category: "Everyday" },
+
+  { slug: "energy", items: [t("N", 32.5, 50, { size: 17, w: 10.5 }), t("R", 50, 50, { size: 17, w: 10.5 }), t("G", 67.5, 50, { size: 17, w: 10.5 })],
+    answer: "energy", alt_hint: "Three letters, said out loud", char_hint: "1 word · what you run on", difficulty: "medium", category: "Science" },
+
+  { slug: "tennis", items: [t("10", 41.2, 50, { size: 17, w: 17.3 }), t("S", 62.2, 50, { size: 17, w: 10.5 })],
+    answer: "tennis", alt_hint: "Say the number, then the letter", char_hint: "1 word · a racket sport", difficulty: "medium", category: "Sport" },
+
+  { slug: "wonderful", items: [t("1", 15.5, 50, { size: 17, w: 6.8 }), t("DERFUL", 56.9, 50, { size: 17, w: 62.1 })],
+    answer: "wonderful", alt_hint: "The number replaces a syllable", char_hint: "1 word · 9 letters", difficulty: "medium", category: "Everyday" },
+
+  { slug: "together", items: [t("2", 15.2, 50, { size: 17, w: 10.5 }), t("GETHER", 58.8, 50, { size: 17, w: 62.6 })],
+    answer: "together", alt_hint: "The number replaces a syllable", char_hint: "1 word · 8 letters", difficulty: "easy", category: "Everyday" },
+
+  { slug: "tooth", items: [t("2", 36.3, 50, { size: 17, w: 10.5 }), t("TH", 58.8, 50, { size: 17, w: 20.4 })],
+    answer: "tooth", alt_hint: "Say the number, then the letters", char_hint: "1 word · you have about 32", difficulty: "medium", category: "Everyday" },
+
+  { slug: "great", items: [t("GR", 41.2, 50, { size: 17, w: 21.1 }), t("8", 64, 50, { size: 17, w: 10.5 })],
+    answer: "great", alt_hint: "The number is the end of the word", char_hint: "1 word · 5 letters", difficulty: "easy", category: "Everyday" },
+
+  { slug: "pig-in-a-blanket", items: [t("BLAN", 20.9, 50, { size: 13.2, w: 31.7 }), t("PIG", 53.9, 50, { size: 13.2, w: 20.3 }), t("KET", 83, 50, { size: 13.2, w: 24 })],
+    answer: "pig in a blanket", alt_hint: "One word has been placed inside another", char_hint: "4 words · something wrapped", difficulty: "medium", category: "Food" },
+
+  { slug: "cat-in-the-bag", items: [t("B", 17, 50, { size: 17, w: 10.5 }), t("CAT", 44.7, 50, { size: 17, w: 30.9 }), t("AG", 77.7, 50, { size: 17, w: 21.1 })],
+    answer: "cat in the bag", alt_hint: "One word has been placed inside another", char_hint: "4 words · a secret, nearly out", difficulty: "medium", category: "Idioms" },
+
+  { slug: "fly-in-the-ointment", items: [t("OINT", 17.2, 50, { size: 11.5, w: 24.4 }), t("FLY", 46.7, 50, { size: 11.5, w: 20.6 }), t("MENT", 79.5, 50, { size: 11.5, w: 31 })],
+    answer: "fly in the ointment", alt_hint: "One word has been placed inside another", char_hint: "4 words · the one thing spoiling it", difficulty: "hard", category: "Idioms" },
+
+  { slug: "ace-in-the-hole", items: [t("H", 12, 50, { size: 17, w: 10.5 }), t("ACE", 40.1, 50, { size: 17, w: 31.6 }), t("OLE", 78.1, 50, { size: 17, w: 30.4 })],
+    answer: "ace in the hole", alt_hint: "One word has been placed inside another", char_hint: "4 words · a hidden advantage", difficulty: "medium", category: "Idioms" },
+
+  { slug: "bee-in-your-bonnet", items: [t("BON", 17.8, 50, { size: 13.7, w: 25.5 }), t("BEE", 50.3, 50, { size: 13.7, w: 25.5 }), t("NET", 82.5, 50, { size: 13.7, w: 25 })],
+    answer: "bee in your bonnet", alt_hint: "One word has been placed inside another", char_hint: "4 words · an obsession", difficulty: "hard", category: "Idioms" },
+
+  { slug: "stitch-in-time", items: [t("TI", 10.9, 50, { size: 13.3, w: 11.7 }), t("STITCH", 45.9, 50, { size: 13.3, w: 44.3 }), t("ME", 85, 50, { size: 13.3, w: 20 })],
+    answer: "a stitch in time", alt_hint: "One word has been placed inside another", char_hint: "4 words · saves nine", difficulty: "medium", category: "Idioms" },
+
+  { slug: "storm-in-a-teacup", items: [t("TEA", 14.9, 50, { size: 10.9, w: 19.8 }), t("STORM", 49.8, 50, { size: 10.9, w: 36 }), t("CUP", 84.9, 50, { size: 10.9, w: 20.2 })],
+    answer: "storm in a teacup", alt_hint: "One word has been placed inside another", char_hint: "4 words · a fuss over nothing", difficulty: "medium", category: "Idioms" },
+
+  { slug: "head-in-the-clouds", items: [t("CLO", 16.1, 50, { size: 12.4, w: 22.2 }), t("HEAD", 49.6, 50, { size: 12.4, w: 30.7 }), t("UDS", 83.5, 50, { size: 12.4, w: 23.1 })],
+    answer: "head in the clouds", alt_hint: "One word has been placed inside another", char_hint: "4 words · not paying attention", difficulty: "medium", category: "Idioms" },
+
+  { slug: "foot-in-mouth", items: [t("MO", 14.9, 50, { size: 13.2, w: 19.8 }), t("FOOT", 47.9, 50, { size: 13.2, w: 32.2 }), t("UTH", 83, 50, { size: 13.2, w: 24 })],
+    answer: "foot in mouth", alt_hint: "One word has been placed inside another", char_hint: "3 words · said the wrong thing", difficulty: "medium", category: "Idioms" },
+
+  { slug: "spanner-in-the-works", items: [t("WOR", 15.5, 50, { size: 9.9, w: 20.9 }), t("SPANNER", 54.3, 50, { size: 9.9, w: 42.8 }), t("KS", 88.9, 50, { size: 9.9, w: 12.2 })],
+    answer: "spanner in the works", alt_hint: "One word has been placed inside another", char_hint: "4 words · something that ruins the plan", difficulty: "hard", category: "Idioms" },
+
+  { slug: "feeling-blue", items: [t("FEELING", 50, 50, { size: 20, w: 79, color: "#4B5BD6" })],
+    answer: "feeling blue", alt_hint: "The colour is the clue, not the word", char_hint: "2 words · low spirits", difficulty: "easy", category: "Idioms" },
+
+  { slug: "green-with-envy", items: [t("ENVY", 50, 50, { size: 20, w: 49.6, color: "#17914B" })],
+    answer: "green with envy", alt_hint: "The colour is the clue", char_hint: "3 words · jealous", difficulty: "easy", category: "Idioms" },
+
+  { slug: "caught-red-handed", items: [t("HANDED", 50, 50, { size: 20, w: 74.4, color: "#D93A34" })],
+    answer: "caught red handed", alt_hint: "The colour is the clue", char_hint: "3 words · caught in the act", difficulty: "medium", category: "Idioms" },
+
+  { slug: "out-of-the-blue", items: [t("OUT", 50, 50, { size: 20, w: 36.4, color: "#4B5BD6" })],
+    answer: "out of the blue", alt_hint: "The colour is the clue", char_hint: "4 words · completely unexpected", difficulty: "medium", category: "Idioms" },
+
+  { slug: "black-sheep", items: [t("SHEEP", 50, 50, { size: 20, w: 62, color: "#191510" })],
+    answer: "black sheep", alt_hint: "The colour is the clue", char_hint: "2 words · the odd one in a family", difficulty: "easy", category: "Idioms" },
+
+  { slug: "red-tape", items: [t("TAPE", 50, 50, { size: 20, w: 48.8, color: "#D93A34" })],
+    answer: "red tape", alt_hint: "The colour is the clue", char_hint: "2 words · bureaucracy", difficulty: "easy", category: "Everyday" },
+
+  { slug: "green-thumb", items: [t("THUMB", 50, 50, { size: 20, w: 66.4, color: "#17914B" })],
+    answer: "green thumb", alt_hint: "The colour is the clue", char_hint: "2 words · a knack for plants", difficulty: "easy", category: "Everyday" },
+
+  { slug: "blueprint", items: [t("PRINT", 50, 50, { size: 20, w: 54.8, color: "#4B5BD6" })],
+    answer: "blueprint", alt_hint: "The colour is the clue", char_hint: "1 word · a technical drawing", difficulty: "easy", category: "Design" },
+
+  { slug: "green-light", items: [t("LIGHT", 50, 50, { size: 20, w: 53.4, color: "#17914B" })],
+    answer: "green light", alt_hint: "The colour is the clue", char_hint: "2 words · permission to go", difficulty: "easy", category: "Everyday" },
+
+  { slug: "red-alert", items: [t("ALERT", 50, 50, { size: 20, w: 59.8, color: "#D93A34" })],
+    answer: "red alert", alt_hint: "The colour is the clue", char_hint: "2 words · highest urgency", difficulty: "easy", category: "Everyday" },
+
+  { slug: "fading-memory", items: [t("MEMORY", 50, 50, { size: 20, w: 84.8, opacity: 0.25 })],
+    answer: "fading memory", alt_hint: "The word is barely there", char_hint: "2 words · what you can't quite recall", difficulty: "medium", category: "Everyday" },
+
+  { slug: "fade-away", items: [t("AWAY", 50, 50, { size: 20, w: 54.8, opacity: 0.25 })],
+    answer: "fade away", alt_hint: "The word is barely there", char_hint: "2 words · 4 then 4", difficulty: "medium", category: "Music" },
+
+  { slug: "noel", items: [t("J K M N O", 50, 50, { size: 16, w: 69.4 })],
+    answer: "noel", alt_hint: "Read the letters in order — one is missing", char_hint: "1 word · a Christmas carol", difficulty: "hard", category: "Music" },
+
+  { slug: "unfinished-business", items: [t("BUSINES", 50, 50, { size: 20, w: 80.4 })],
+    answer: "unfinished business", alt_hint: "Something is missing from the end", char_hint: "2 words · what you left undone", difficulty: "medium", category: "Everyday" },
+
+  { slug: "overtime", items: [t("TIME", 50, 14, { size: 15, w: 37 })],
+    answer: "overtime", alt_hint: "Where the word sits is the clue", char_hint: "1 word · extra hours", difficulty: "medium", category: "Everyday" },
+
+  { slug: "overhead", items: [t("HEAD", 50, 14, { size: 15, w: 37 })],
+    answer: "overhead", alt_hint: "Where the word sits is the clue", char_hint: "1 word · above you", difficulty: "medium", category: "Everyday" },
+
+  { slug: "underline", items: [t("LINE", 50, 86, { size: 15, w: 37 })],
+    answer: "underline", alt_hint: "Where the word sits is the clue", char_hint: "1 word · 9 letters", difficulty: "easy", category: "Design" },
+
+  { slug: "above-board", items: [t("BOARD", 50, 14, { size: 14, w: 43 })],
+    answer: "above board", alt_hint: "Where the word sits is the clue", char_hint: "2 words · honest and open", difficulty: "medium", category: "Idioms" },
+
+  { slug: "small-talk", items: [t("TALK", 50, 50, { size: 6, w: 14.2 })],
+    answer: "small talk", alt_hint: "The size of the word is the point", char_hint: "2 words · chat about nothing", difficulty: "easy", category: "Everyday" },
+
+  { slug: "big-deal", items: [t("DEAL", 50, 50, { size: 22, w: 53 })],
+    answer: "big deal", alt_hint: "The size of the word is the point", char_hint: "2 words · 3 then 4", difficulty: "easy", category: "Everyday" },
+
+  { slug: "small-print", items: [t("PRINT", 50, 50, { size: 6, w: 16.4 })],
+    answer: "small print", alt_hint: "The size of the word is the point", char_hint: "2 words · where the catch hides", difficulty: "easy", category: "Design" },
+
+  { slug: "big-bang", items: [t("BANG", 50, 50, { size: 22, w: 54.6 })],
+    answer: "big bang", alt_hint: "The size of the word is the point", char_hint: "2 words · how it all started", difficulty: "easy", category: "Science" },
+
+  { slug: "square-feet", items: [t("FEET", 50, 50, { size: 20, w: 48.8, sup: "2" })],
+    answer: "square feet", alt_hint: "A small number is doing the work", char_hint: "2 words · a unit of area", difficulty: "medium", category: "Maths" },
+
+  { slug: "square-meal", items: [t("MEAL", 50, 50, { size: 20, w: 53.4, sup: "2" })],
+    answer: "square meal", alt_hint: "A small number is doing the work", char_hint: "2 words · a proper dinner", difficulty: "medium", category: "Food" },
+
+  { slug: "chip-on-your-shoulder", items: [t("CHIP", 50, 34, { size: 15, w: 32.4 }), t("SHOULDER", 50, 66, { size: 15, w: 73.4 })],
+    answer: "chip on your shoulder", alt_hint: "The top word rests on the bottom one", char_hint: "4 words · a grudge", difficulty: "medium", category: "Idioms" },
+
+  { slug: "cards-on-the-table", items: [t("CARDS", 50, 34, { size: 15, w: 46.5 }), t("TABLE", 50, 66, { size: 15, w: 44.9 })],
+    answer: "cards on the table", alt_hint: "The top word rests on the bottom one", char_hint: "4 words · being open", difficulty: "easy", category: "Idioms" },
+
+  { slug: "grace-under-pressure", items: [t("PRESSURE", 50, 34, { size: 15, w: 74.4 }), t("GRACE", 50, 66, { size: 15, w: 46.5 })],
+    answer: "grace under pressure", alt_hint: "Read the lower word's position", char_hint: "3 words · composure when it's hard", difficulty: "medium", category: "Idioms" },
 ];
