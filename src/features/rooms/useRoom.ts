@@ -56,7 +56,7 @@ export function useRoom(code: string | undefined, userId: string | undefined) {
 
   const join = useCallback(async (username: string) => {
     if (!supabase || !room || !userId) return;
-    await supabase.from("room_players").upsert({ room_id: room.id, user_id: userId, username });
+    await supabase.from("room_players").upsert({ room_id: room.id, user_id: userId, username, ready: false });
   }, [room, userId]);
 
   const startNextRound = useCallback(async () => {
@@ -101,25 +101,47 @@ export function useRoom(code: string | undefined, userId: string | undefined) {
 
   const currentPuzzle = round ? pool.find((i) => i.id === String(round.puzzle_id)) ?? null : null;
 
-  return { room, players, round, currentPuzzle, error, join, startNextRound, claimWin };
+  /** Derived from the pool already loaded for this room's game, so the counts
+      always describe what this room can actually serve. */
+  const categories = (() => {
+    const tally = new Map<string, number>();
+    for (const i of pool) if (i.category) tally.set(i.category, (tally.get(i.category) ?? 0) + 1);
+    return [...tally].map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count);
+  })();
+
+  const setup = useCallback(async (mode: string, game: string, cats: string[]) => {
+    if (!supabase || !room) return;
+    await supabase.rpc("set_room_setup", {
+      p_room: room.id, p_mode: mode, p_game: game, p_categories: cats,
+    });
+  }, [room]);
+
+  const setReady = useCallback(async (ready: boolean) => {
+    if (!supabase || !room || !userId) return;
+    await supabase.from("room_players").update({ ready })
+      .eq("room_id", room.id).eq("user_id", userId);
+  }, [room, userId]);
+
+  return {
+    room, players, round, currentPuzzle, error, categories,
+    join, startNextRound, claimWin, setup, setReady,
+  };
 }
 
-export async function createRoom(
-  userId: string, game: "picto" | "trivia", username: string,
-  mode: "race" | "squareoff" = "race",
-  categories: string[] = [],
-): Promise<string | null> {
+/** Creates an empty room. What is played, and from which categories, is settled
+    in the lobby with the other person rather than guessed at before they arrive. */
+export async function createRoom(userId: string, username: string): Promise<string | null> {
   if (!supabase) return null;
   const code = Array.from({ length: 6 }, () =>
     "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"[Math.floor(Math.random() * 32)]).join("");
   const { data, error } = await supabase
     .from("rooms")
-    .insert({ code, host_id: userId, game, mode, status: "waiting", best_of: 5,
-              categories: categories.length ? categories : null })
+    .insert({ code, host_id: userId, game: "trivia", mode: "squareoff",
+              status: "waiting", best_of: 5, categories: null })
     .select().single();
   if (error || !data) return null;
   // Creating a room is joining it. Making the host click "Join this room" on a
   // room they just made is a step with no decision in it.
-  await supabase.from("room_players").insert({ room_id: data.id, user_id: userId, username });
+  await supabase.from("room_players").insert({ room_id: data.id, user_id: userId, username, ready: false });
   return code;
 }

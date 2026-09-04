@@ -103,6 +103,8 @@ export interface RoomPlayer {
   user_id: string;
   username: string;
   score: number;
+  /** agreed to the current setup; any settings change clears it */
+  ready: boolean;
   joined_at: string;
 }
 

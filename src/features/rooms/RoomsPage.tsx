@@ -8,33 +8,37 @@ import { Card } from "@/shared/ui/Card";
 import { Field, Input } from "@/shared/ui/Field";
 import { isCorrect } from "@/shared/lib/normalise";
 import { SquareOffRoom } from "@/features/squareoff/SquareOffRoom";
+import { startSquareOff } from "@/features/squareoff/useTttRoom";
+import { Lobby } from "./Lobby";
 import { InviteCard } from "./InviteCard";
-import { supabase } from "@/shared/lib/supabase";
-
-/** Names only. The room screen does not have a loaded pool to count against, and
-    a wrong count is worse than none. */
-function useCategoryNames() {
-  const [names, setNames] = useState<string[]>([]);
-  useEffect(() => {
-    if (!supabase) return;
-    void supabase.from("categories").select("name").order("name")
-      .then(({ data }) => setNames((data ?? []).map((c: { name: string }) => c.name)));
-  }, []);
-  return names;
-}
 
 export function RoomsPage() {
   const { code } = useParams();
   const nav = useNavigate();
   const { user, offline } = useAuth();
   const [joinCode, setJoinCode] = useState("");
-  const [picked, setPicked] = useState<string[]>([]);
-  const allCategories = useCategoryNames();
   const [guess, setGuess] = useState("");
   const uname = user?.email?.split("@")[0] ?? "player";
 
-  const { room, players, round, currentPuzzle, error, join, startNextRound, claimWin } =
-    useRoom(code, user?.id);
+  const {
+    room, players, round, currentPuzzle, error, categories,
+    join, startNextRound, claimWin, setup, setReady,
+  } = useRoom(code, user?.id);
+
+  const isHost = !!room && !!user && room.host_id === user.id;
+  const everyoneReady = players.length >= 2 && players.every((p) => p.ready);
+
+  // One writer: the host turns agreement into a started game. Both clients see
+  // the same ready flags, so letting either start would race to deal twice.
+  useEffect(() => {
+    if (!room || !isHost || !everyoneReady || room.status !== "waiting") return;
+    if (room.mode === "squareoff") {
+      const guest = players.find((p) => p.user_id !== room.host_id);
+      if (guest) void startSquareOff(room.id, room.host_id, guest.user_id);
+    } else {
+      void startNextRound();
+    }
+  }, [room, isHost, everyoneReady, players, startNextRound]);
 
   if (offline) {
     return (
@@ -55,84 +59,18 @@ export function RoomsPage() {
   if (!code) {
     return (
       <div className="space-y-5">
-        <h1 className="text-2xl font-bold">Head-to-head</h1>
+        <h1 className="font-display text-[32px] leading-none font-semibold">Head-to-head</h1>
+        <p className="text-sm text-soft font-semibold">
+          Make a room, send the code, then settle what you're playing together.
+        </p>
 
-        {/* Above the create buttons, not inside one of them. Buried in the Square
-            Off card it was unlabelled, applied to only one of the three modes,
-            and nobody found it. */}
-        <div className="piece p-4">
-          <p className="text-[10px] font-black uppercase tracking-widest text-soft">
-            Question pool · optional
-          </p>
-          <p className="text-sm font-semibold mt-1">
-            Every category unless you narrow it. Pick before you create — both players
-            share one pool, and it can't be changed once the room exists.
-          </p>
-          <div className="flex flex-wrap gap-1.5 mt-3">
-            {allCategories.map((n) => {
-              const on = picked.includes(n);
-              return (
-                <button key={n} type="button"
-                  onClick={() => setPicked(on ? picked.filter((x) => x !== n) : [...picked, n])}
-                  className={`border-2 border-ink rounded-full px-2.5 py-1 text-[12px] font-bold
-                    ${on ? "bg-ink text-paper" : "bg-surface text-ink"}`}>
-                  {n}
-                </button>
-              );
-            })}
-          </div>
-          <div className="flex items-center gap-2 mt-3">
-            <p className="text-[11px] font-black uppercase tracking-wider text-soft flex-1">
-              {picked.length === 0
-                ? "All categories"
-                : `${picked.length} selected`}
-            </p>
-            {picked.length > 0 && (
-              <button type="button" onClick={() => setPicked([])}
-                className="border-2 border-ink rounded-full px-2.5 py-1 text-[11px] font-black
-                  uppercase tracking-wider bg-pop">
-                Clear
-              </button>
-            )}
-          </div>
-        </div>
-
-        <div className="piece p-4">
-          <p className="text-[10px] font-black uppercase tracking-widest text-soft">Square Off</p>
-          <p className="text-sm font-semibold mt-1">
-            Tic-tac-toe where a square costs a right answer. Miss, and your opponent gets one shot at it.
-          </p>
-          <Button className="w-full mt-3"
-            onClick={async () => {
-              const c = await createRoom(user.id, "trivia", uname, "squareoff", picked);
-              if (c) nav(`/rooms/${c}`);
-            }}>
-            Create a Square Off room
-          </Button>
-        </div>
-
-        <div>
-          <p className="text-[10px] font-black uppercase tracking-widest text-soft mb-2">
-            Race — same puzzle, first correct answer takes the round
-          </p>
-          <div className="grid gap-2 sm:grid-cols-2">
-            <Button variant="ghost" onClick={async () => {
-              const c = await createRoom(user.id, "picto", uname, "race", picked);
-              if (c) nav(`/rooms/${c}`);
-            }}>
-              Picto race
-            </Button>
-            <Button variant="ghost" onClick={async () => {
-              const c = await createRoom(user.id, "trivia", uname, "race", picked);
-              if (c) nav(`/rooms/${c}`);
-            }}>
-              Trivia race
-            </Button>
-          </div>
-        </div>
+        <Button className="w-full"
+          onClick={async () => { const c = await createRoom(user.id, uname); if (c) nav(`/rooms/${c}`); }}>
+          Create a room
+        </Button>
 
         <form onSubmit={(e) => { e.preventDefault(); if (joinCode.trim()) nav(`/rooms/${joinCode.trim().toUpperCase()}`); }}>
-          <Field label="Join with a code">
+          <Field label="Or join with a code">
             <div className="flex gap-2">
               <Input value={joinCode} onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
                 placeholder="ABC123" maxLength={6} className="tracking-[0.3em] font-bold" />
@@ -144,58 +82,38 @@ export function RoomsPage() {
     );
   }
 
-  if (error) return <p className="text-sm text-bad">{error}</p>;
-  if (!room) return <p className="text-sm text-soft">Finding room {code}…</p>;
+  if (error) return <p className="text-sm text-bad font-bold">{error}</p>;
+  if (!room) return <p className="text-sm text-soft font-bold">Finding room {code}…</p>;
 
   const iAmIn = players.some((p) => p.user_id === user.id);
-  const isHost = room.host_id === user.id;
+  const waiting = room.status === "waiting";
   const won = round?.winner_id;
 
   return (
     <div className="space-y-5">
-      <div className="flex items-baseline justify-between">
-        <div>
-          {/* The invite card carries the code while you are waiting; showing it
-              twice on one screen just makes both look less like the thing to use. */}
-          {players.length < 2 && room.status !== "finished" ? (
-            <p className="font-display text-2xl font-semibold">Your room</p>
-          ) : (
-            <>
-              <p className="text-[10px] uppercase tracking-widest text-soft">Room code</p>
-              <p className="text-3xl font-bold tracking-[0.3em]">{room.code}</p>
-            </>
-          )}
-        </div>
-        <div className="text-right">
-          <p className="text-xs text-soft uppercase tracking-widest">{room.status}</p>
-          {!!room.categories?.length && (
-            <p className="text-[11px] font-bold text-soft mt-0.5 max-w-[180px]">
-              {room.categories.join(" · ")}
-            </p>
-          )}
-        </div>
-      </div>
-
-      <div className="flex gap-2 flex-wrap">
-        {players.map((p) => (
-          <span key={p.user_id} className="text-sm bg-surface border-[2.5px] border-ink rounded-full px-3 py-1.5">
-            {p.username} <b className="text-picto tabular-nums ml-1">{p.score}</b>
-          </span>
-        ))}
-        {players.length === 0 && <span className="text-sm text-soft">Nobody has joined yet</span>}
+      <div className="flex items-baseline justify-between gap-3">
+        <p className="font-display text-2xl font-semibold">
+          {waiting ? "Your room" : room.mode === "squareoff" ? "Square Off" : "Race"}
+        </p>
+        <p className="text-xs text-soft uppercase tracking-widest font-bold">{room.status}</p>
       </div>
 
       {!iAmIn && (
-        <Button onClick={() => void join(user.email?.split("@")[0] ?? "player")}>Join this room</Button>
+        <Button onClick={() => void join(uname)}>Join this room</Button>
       )}
 
-      {iAmIn && players.length < 2 && room.status !== "finished" && (
-        <InviteCard code={room.code} waiting />
+      {iAmIn && waiting && players.length < 2 && <InviteCard code={room.code} waiting />}
+
+      {iAmIn && waiting && (
+        <Lobby room={room} players={players} categories={categories} userId={user.id}
+          alone={players.length < 2}
+          onSetup={(m, g, c) => void setup(m, g, c)}
+          onReady={(r) => void setReady(r)} />
       )}
 
-      {iAmIn && room.mode === "squareoff" && (
+      {iAmIn && !waiting && room.mode === "squareoff" && (
         <SquareOffRoom roomId={room.id} code={room.code} status={room.status}
-          categories={room.categories} players={players} userId={user.id} isHost={isHost} />
+          categories={room.categories} players={players} userId={user.id} />
       )}
 
       {iAmIn && (
@@ -206,14 +124,6 @@ export function RoomsPage() {
         </button>
       )}
 
-      {room.mode !== "squareoff" && iAmIn && !round && isHost &&
-        <Button onClick={() => void startNextRound()}>Start the match</Button>}
-      {room.mode !== "squareoff" && iAmIn && !round && !isHost &&
-        <p className="text-sm text-soft">Waiting for the host to start…</p>}
-
-      {/* Race mode used to have no finished state at all: after the last round it
-          kept showing the final question with a Next round button that silently
-          did nothing, because startNextRound returns early past best_of. */}
       {room.mode !== "squareoff" && room.status === "finished" && (() => {
         const ranked = [...players].sort((a, b) => b.score - a.score);
         const drawn = ranked.length > 1 && ranked[0].score === ranked[1].score;
@@ -234,9 +144,18 @@ export function RoomsPage() {
         );
       })()}
 
-      {room.mode !== "squareoff" && room.status !== "finished" && round && currentPuzzle && (
+      {room.mode !== "squareoff" && !waiting && room.status !== "finished" && round && currentPuzzle && (
         <>
-          <p className="text-[10px] uppercase tracking-widest text-soft">Round {round.round_no} of {room.best_of}</p>
+          <div className="flex gap-2 flex-wrap">
+            {players.map((p) => (
+              <span key={p.user_id} className="piece text-sm px-3 py-1.5">
+                {p.username} <b className="text-picto tabular-nums ml-1">{p.score}</b>
+              </span>
+            ))}
+          </div>
+          <p className="text-[10px] uppercase tracking-widest text-soft font-black">
+            Round {round.round_no} of {room.best_of}
+          </p>
           <Card className="aspect-square max-h-[44vh] mx-auto w-full grid place-items-center p-6 text-ink">
             {currentPuzzle.spec
               ? <PictoRenderer spec={currentPuzzle.spec} />
@@ -244,16 +163,11 @@ export function RoomsPage() {
           </Card>
 
           {!won && currentPuzzle.choices ? (
-            // A trivia room previously rendered the same free-text box as picto,
-            // so the four options were never shown and answers like "Minutes
-            // played" were effectively untypeable. Round 2 of the first test
-            // was unwinnable for exactly this reason.
             <div className="grid gap-2.5">
               {currentPuzzle.choices.map((opt, i) => (
                 <button key={opt}
                   onClick={() => { if (opt === currentPuzzle.answer) void claimWin(); }}
-                  className="piece press flex items-center gap-3 text-left px-4 py-4 bg-surface"
-                  style={{ borderLeft: `4px solid ${["#FF5A1F","#2B4BFF","#FFD028","#10A04E"][i % 4]}` }}>
+                  className="piece press flex items-center gap-3 text-left px-4 py-4 bg-surface">
                   <span aria-hidden style={{ color: ["#FF5A1F","#2B4BFF","#FFD028","#10A04E"][i % 4] }}>
                     {["▲","◆","●","■"][i % 4]}
                   </span>
@@ -267,25 +181,24 @@ export function RoomsPage() {
                 {won === user.id ? "You took it" : `${players.find((p) => p.user_id === won)?.username ?? "They"} took it`}
               </p>
               <p className="text-lg font-semibold mt-1">{currentPuzzle.answer}</p>
+              {currentPuzzle.explanation && (
+                <p className="text-sm text-soft font-semibold mt-3 text-left">{currentPuzzle.explanation}</p>
+              )}
               {isHost && (
                 <Button className="mt-4 w-full" onClick={() => void startNextRound()}>
                   {round.round_no >= room.best_of ? "See the result" : "Next round"}
                 </Button>
               )}
-              {currentPuzzle.explanation && (
-                <p className="text-sm text-soft font-semibold mt-3 text-left">{currentPuzzle.explanation}</p>
-              )}
             </div>
           ) : (
-            <form
-              className="flex gap-2"
+            <form className="flex gap-2"
               onSubmit={(e) => {
                 e.preventDefault();
-                if (isCorrect(guess, currentPuzzle.answer)) { void claimWin(); setGuess(""); }
-                else setGuess("");
-              }}
-            >
-              <Input value={guess} onChange={(e) => setGuess(e.target.value)} placeholder="Answer first to win the round" />
+                if (isCorrect(guess, currentPuzzle.answer)) { void claimWin(); }
+                setGuess("");
+              }}>
+              <Input value={guess} onChange={(e) => setGuess(e.target.value)}
+                placeholder="Answer first to win the round" />
               <Button type="submit">Go</Button>
             </form>
           )}

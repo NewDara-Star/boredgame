@@ -3,7 +3,6 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import type { RoomPlayer, RoomStatus } from "@/shared/types/db";
 import { popIn } from "@/shared/ui/motion";
-import { Button } from "@/shared/ui/Button";
 import { Board } from "./Board";
 import { QuestionPanel, Timer } from "./QuestionPanel";
 import { describe, type Mark } from "./rules";
@@ -12,10 +11,10 @@ import { drawMatchCard, downloadCard } from "./matchCard";
 import { ASK_MS } from "./useSquareOff";
 
 export function SquareOffRoom({
-  roomId, code, status, categories, players, userId, isHost,
+  roomId, code, status, categories, players, userId,
 }: {
   roomId: number; code: string; status: RoomStatus; categories: string[] | null;
-  players: RoomPlayer[]; userId: string; isHost: boolean;
+  players: RoomPlayer[]; userId: string;
 }) {
   const t = useTttRoom(roomId, userId, categories);
   const [card, setCard] = useState<{ sig: string; url: string } | null>(null);
@@ -118,26 +117,7 @@ export function SquareOffRoom({
 
   if (!t.ready) return <p className="text-sm text-soft font-bold">Loading questions…</p>;
 
-  if (!g) {
-    const guest = players.find((p) => p.user_id !== userId);
-    return (
-      <div className="piece p-5 text-center">
-        <p className="font-display text-xl font-semibold">Square Off</p>
-        <p className="text-sm text-soft font-semibold mt-1">
-          Claim a square by answering right. Miss, and your opponent gets one shot at it.
-        </p>
-        {isHost ? (
-          guest
-            ? <Button className="w-full mt-4" onClick={() => void t.start(userId, guest.user_id)}>
-                Start against {guest.username}
-              </Button>
-            : <p className="text-sm text-soft mt-4 font-bold">Waiting for someone to join…</p>
-        ) : (
-          <p className="text-sm text-soft mt-4 font-bold">Waiting for the host to deal…</p>
-        )}
-      </div>
-    );
-  }
+  if (!g) return <p className="text-sm text-soft font-bold">Dealing the board…</p>;
 
   // Names come from the seat, not from "the other person in the list" — with a
   // spectator or a third join that guess puts the wrong name on the wrong mark.

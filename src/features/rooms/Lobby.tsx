@@ -1,0 +1,152 @@
+import { motion } from "framer-motion";
+import type { Room, RoomPlayer } from "@/shared/types/db";
+import { stagger, riseIn, SPRING } from "@/shared/ui/motion";
+import { Avatar } from "@/shared/ui/Avatar";
+
+interface Choice { mode: "race" | "squareoff"; game: "picto" | "trivia"; label: string; blurb: string }
+
+const CHOICES: Choice[] = [
+  { mode: "squareoff", game: "trivia", label: "Square Off",
+    blurb: "Tic-tac-toe. A square costs a right answer, and missing gives your opponent one shot at it." },
+  { mode: "race", game: "trivia", label: "Trivia race",
+    blurb: "Same question on both screens. First correct answer takes the round." },
+  { mode: "race", game: "picto", label: "Picto race",
+    blurb: "Same rebus on both screens. First correct answer takes the round." },
+];
+
+/**
+ * The settings used to be chosen by the host before the room existed, which
+ * meant the person joining had no say in what they had turned up to play. Now
+ * either of you can change any of it, and every change clears both ready flags
+ * — that is what makes "ready" mean "I agree to this" rather than "I agreed to
+ * whatever it was thirty seconds ago".
+ */
+export function Lobby({
+  room, players, categories, userId, alone, onSetup, onReady,
+}: {
+  room: Room;
+  players: RoomPlayer[];
+  categories: { name: string; count: number }[];
+  userId: string;
+  alone: boolean;
+  onSetup: (mode: string, game: string, cats: string[]) => void;
+  onReady: (ready: boolean) => void;
+}) {
+  const picked = room.categories ?? [];
+  const me = players.find((p) => p.user_id === userId);
+  const everyoneReady = players.length >= 2 && players.every((p) => p.ready);
+
+  const inPool = picked.length
+    ? categories.filter((c) => picked.includes(c.name)).reduce((n, c) => n + c.count, 0)
+    : categories.reduce((n, c) => n + c.count, 0);
+
+  return (
+    <motion.div variants={stagger(0.06)} initial="hidden" animate="show" className="space-y-4">
+      <motion.section variants={riseIn}>
+        <p className="text-[10px] font-black uppercase tracking-widest text-soft mb-2">
+          1 · What are you playing?
+        </p>
+        <div className="grid gap-2">
+          {CHOICES.map((c) => {
+            const on = room.mode === c.mode && room.game === c.game;
+            return (
+              <button key={c.label} onClick={() => onSetup(c.mode, c.game, picked)}
+                className={`piece press text-left p-3.5 ${on ? "bg-hot text-surface" : "bg-surface"}`}>
+                <span className="flex items-center gap-2">
+                  <span className={`grid place-items-center h-5 w-5 rounded-full border-[3px] border-ink shrink-0
+                    ${on ? "bg-surface" : "bg-sand"}`}>
+                    {on && <span className="h-2 w-2 rounded-full bg-ink" />}
+                  </span>
+                  <span className="font-display text-lg font-semibold">{c.label}</span>
+                </span>
+                <span className={`block text-[13px] font-semibold mt-1 ${on ? "opacity-90" : "text-soft"}`}>
+                  {c.blurb}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </motion.section>
+
+      <motion.section variants={riseIn}>
+        <p className="text-[10px] font-black uppercase tracking-widest text-soft mb-2">
+          2 · Which categories? <span className="text-soft/60">optional</span>
+        </p>
+        <div className="piece p-3.5">
+          <div className="flex flex-wrap gap-1.5">
+            {categories.length === 0 && (
+              <p className="text-sm font-bold text-soft">Loading this game's categories…</p>
+            )}
+            {categories.map((c) => {
+              const on = picked.includes(c.name);
+              return (
+                <button key={c.name}
+                  onClick={() => onSetup(room.mode, room.game,
+                    on ? picked.filter((n) => n !== c.name) : [...picked, c.name])}
+                  className={`border-2 border-ink rounded-full px-2.5 py-1 text-[12px] font-bold
+                    ${on ? "bg-ink text-paper" : "bg-surface text-ink"}`}>
+                  {c.name} <span className="opacity-60 tabular-nums">{c.count}</span>
+                </button>
+              );
+            })}
+          </div>
+          <div className="flex items-center gap-2 mt-3">
+            <p className="text-[11px] font-black uppercase tracking-wider text-soft flex-1">
+              {picked.length === 0 ? "All categories" : `${picked.length} selected`}
+              <span className="text-soft/60"> · {inPool} to draw from</span>
+            </p>
+            {picked.length > 0 && (
+              <button onClick={() => onSetup(room.mode, room.game, [])}
+                className="border-2 border-ink rounded-full px-2.5 py-1 text-[11px] font-black
+                  uppercase tracking-wider bg-pop">Clear</button>
+            )}
+          </div>
+        </div>
+      </motion.section>
+
+      <motion.section variants={riseIn}>
+        <p className="text-[10px] font-black uppercase tracking-widest text-soft mb-2">
+          3 · Both of you happy?
+        </p>
+        <div className="grid gap-2">
+          {players.map((p) => (
+            <motion.div key={p.user_id} layout transition={SPRING}
+              className={`piece flex items-center gap-3 px-3 py-2.5 ${p.ready ? "bg-good text-surface" : ""}`}>
+              <Avatar id={p.user_id} name={p.username} size={34} />
+              <span className="flex-1 font-bold text-[15px] truncate">
+                {p.username}{p.user_id === userId && <span className="opacity-60 text-[11px] font-black uppercase tracking-widest ml-1.5">you</span>}
+              </span>
+              <span className="text-[11px] font-black uppercase tracking-wider">
+                {p.ready ? "Ready" : "Deciding…"}
+              </span>
+            </motion.div>
+          ))}
+          {alone && (
+            <div className="piece px-3 py-2.5 bg-sand text-soft text-[13px] font-bold">
+              Waiting for someone to join — send them the code above.
+            </div>
+          )}
+        </div>
+
+        <button
+          disabled={alone}
+          onClick={() => onReady(!me?.ready)}
+          className={`piece press w-full mt-3 py-4 font-display text-lg font-semibold
+            ${me?.ready ? "bg-surface" : "bg-pop"}`}>
+          {alone ? "Waiting for a second player"
+            : me?.ready ? "Not ready after all" : "I'm ready"}
+        </button>
+
+        {everyoneReady && (
+          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+            className="text-center text-sm font-black uppercase tracking-widest text-good mt-3">
+            Both ready — starting…
+          </motion.p>
+        )}
+        <p className="text-[11px] font-bold text-soft text-center mt-2">
+          Changing anything above un-readies you both.
+        </p>
+      </motion.section>
+    </motion.div>
+  );
+}

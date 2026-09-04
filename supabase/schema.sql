@@ -331,3 +331,48 @@ do $$ begin
   alter publication supabase_realtime add table public.ttt_games;
   exception when duplicate_object then null;
 end $$;
+
+-- ============ the lobby ============
+alter table public.room_players
+  add column if not exists ready boolean not null default false;
+
+-- "update own score" let a player write any column of their own row, score
+-- included. bump_room_score() is the only thing that should move a score.
+revoke update on public.room_players from authenticated, anon;
+grant update (ready) on public.room_players to authenticated;
+
+create or replace function public.bump_room_score(p_room bigint, p_user uuid)
+returns int language plpgsql security definer set search_path to 'public' as $$
+declare new_score int;
+begin
+  if not exists (select 1 from public.room_players p
+                 where p.room_id = p_room and p.user_id = auth.uid()) then
+    raise exception 'not a member of room %', p_room;
+  end if;
+  update public.room_players set score = score + 1
+   where room_id = p_room and user_id = p_user returning score into new_score;
+  return coalesce(new_score, 0);
+end $$;
+revoke all on function public.bump_room_score(bigint, uuid) from public, anon;
+grant execute on function public.bump_room_score(bigint, uuid) to authenticated;
+
+-- Either member can change the setup, and doing so clears both ready flags —
+-- that is what makes "ready" mean "I agree to this".
+create or replace function public.set_room_setup(
+  p_room bigint, p_mode text, p_game text, p_categories text[]
+) returns void language plpgsql security definer set search_path to 'public' as $$
+begin
+  if not exists (select 1 from public.room_players p
+                 where p.room_id = p_room and p.user_id = auth.uid()) then
+    raise exception 'not a member of room %', p_room;
+  end if;
+  if p_mode not in ('race', 'squareoff') then
+    raise exception 'unknown mode %', p_mode;
+  end if;
+  update public.rooms r set
+    mode = p_mode, game = p_game::game_key, categories = nullif(p_categories, '{}')
+  where r.id = p_room and r.status = 'waiting';
+  update public.room_players p set ready = false where p.room_id = p_room;
+end $$;
+revoke all on function public.set_room_setup(bigint, text, text, text[]) from public, anon;
+grant execute on function public.set_room_setup(bigint, text, text, text[]) to authenticated;

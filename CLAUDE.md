@@ -252,6 +252,24 @@ login form assumes the app is not for them yet.
 The header shows a Sign up button when signed out rather than a rank badge, and
 Home offers an account only once there is progress worth keeping.
 
+## The lobby is where a match is agreed
+
+Creating a room decides nothing any more. `createRoom` makes an empty room and
+both people settle the game and the categories in the lobby, because the person
+joining used to arrive at a match someone else had already configured without
+them.
+
+- **Either member can change the setup**, through `set_room_setup()` — the
+  guest cannot update `rooms` directly and should not have to ask.
+- **Any change clears both ready flags.** That is the whole mechanism: without
+  it, "ready" means "I agreed to whatever this was thirty seconds ago", and the
+  host can silently swap the game after you have agreed.
+- **Both ready starts it, and only the host's client writes that.** Both
+  browsers see the same flags, so letting either start races to deal twice.
+- Categories are derived from the pool already loaded for the room's current
+  game, so switching from Trivia race to Picto race re-lists the categories that
+  game actually has, with counts that describe what this room can serve.
+
 ## A session is a run of games, everywhere
 
 Both Square Off modes keep a tally across games, and both can be ended to

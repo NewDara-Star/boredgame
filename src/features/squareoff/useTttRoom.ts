@@ -70,16 +70,6 @@ export function useTttRoom(
     await supabase.from("ttt_games").update(patch).eq("room_id", roomId);
   }, [roomId, nextPuzzleId]);
 
-  /** Host deals the board. Two rows can never exist — room_id is the primary key. */
-  const start = useCallback(async (hostId: string, guestId: string) => {
-    if (!supabase || !roomId || pool.length === 0) return;
-    const g = newGame("x");
-    await supabase.from("ttt_games").upsert({
-      room_id: roomId, ...encode(g),
-      puzzle_id: null, x_player: hostId, o_player: guestId,
-    });
-  }, [roomId, pool.length]);
-
   const choose = useCallback((square: number) => {
     if (!game || myMark !== game.turn || game.phase !== "picking") return;
     void write(pick(game, square), true);
@@ -128,10 +118,23 @@ export function useTttRoom(
   }, [roomId, row]);
 
   return {
-    game, myMark, item, start, choose, submit, rematch, quit,
+    game, myMark, item, choose, submit, rematch, quit,
     ready: pool.length > 0,
     /** when the current question went up, so both clients run the same clock */
     askedAt: row ? Date.parse(row.updated_at) : 0,
     seats: { x: row?.x_player ?? null, o: row?.o_player ?? null },
   };
+}
+
+/**
+ * Dealing the board is not a hook — the lobby starts the game once both players
+ * have agreed, and the lobby does not own a ttt subscription.
+ */
+export async function startSquareOff(roomId: number, xId: string, oId: string) {
+  if (!supabase) return;
+  await supabase.from("ttt_games").upsert({
+    room_id: roomId, ...encode(newGame("x")),
+    puzzle_id: null, x_player: xId, o_player: oId,
+  });
+  await supabase.from("rooms").update({ status: "playing" }).eq("id", roomId);
 }
