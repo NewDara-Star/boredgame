@@ -60,12 +60,63 @@ renderer never exposes. So the gate flags suspects — it is a filter, not a jud
 **Always render the contact sheet and look at it too.** The gate cannot tell you
 that six puzzles in a row use the same trick, which is its own quality problem.
 
-### Sourcing
+### Sourcing: generate, don't collect
 
-Use the traditional rebus canon — "head over heels", "man overboard". It is folk
-material, published everywhere, owned by nobody. **Do not lift puzzles from
-Reddit or puzzle apps**: those are usually someone's original work, and most are
-images that this renderer cannot use anyway.
+A rebus has three parts and only one of them can belong to anyone.
+
+| Part | Owned? |
+|---|---|
+| The phrase — "water under the bridge" | No. Idioms and compound words are common language. |
+| The mechanism — "above means *over*" | No. A method is not expression. |
+| A specific rendered image | **Yes** — that particular drawing is its author's. |
+
+Since puzzles here are generated from a spec in our own type and palette, we
+never touch the owned part. Two people can independently make a "head over
+heels" rebus; neither owes the other anything.
+
+So: **source phrases, then apply a mechanism.** Do not lift finished puzzles
+from Reddit or puzzle apps — those are someone's original work, and most are
+images this renderer cannot use anyway. (Not legal advice; the practical line
+is that we copy nobody's picture.)
+
+**Phrase sources, all free:** idioms, proverbs, compound words, common
+expressions, film and song titles (titles aren't copyrightable), place names.
+
+### The mechanism catalogue
+
+Everything the renderer can express. Cross these with any phrase list and the
+supply is effectively unlimited.
+
+| Mechanism | Spec | Reads as | Example |
+|---|---|---|---|
+| Vertical position | two items, differing `y` | over, under, on, above, below | MIND / MATTER |
+| Horizontal order | two items, differing `x` | after, before, by, to | DEATH LIFE → life after death |
+| Repetition | N copies | tri-, for(four)-, second, seven | CYCLE ×3 → tricycle |
+| Reversal | text written backwards | back, backward, about, return | ECAF → about face |
+| Size | very large or small `size` | big, small, large, little | tiny WORLD → small world |
+| Strike-through | `strike: true` | broken, crossed, no, cancelled | ~~PROMISE~~ |
+| Rotation | `rotate: 180` | upside down, turn around, flipped | AROUND rotated |
+| Superscript | `sup` | cube, square, to the power of | ICE³ → ice cube |
+| Nesting | short item between halves of a long one | in, inside, within | MO-MAN-ON → man in the moon |
+| Splitting | one word broken across two items | split, divided, apart | BAN ANA → banana split |
+| Omission | letters left off | unfinished, missing, incomplete | SYMPHON |
+| Letters as sounds | single letters | C=sea/see, Q=queue, X=ex, U=you, B=be, R=are, I=eye, T=tea | X Q Q Q ME |
+| Numbers as sounds | digits | 1=one/won, 2=two/to, 4=four/for, 8=ate | MIL 1 ION |
+| Canvas position | `y` near 0 or 100 | up, down, high, low, top, bottom | TOWN low → downtown |
+| Letter sequence | a run of the alphabet | "H to O" | H I J K L M N O → water |
+| Colour | `color` | blue, red, green, off-colour | blue MOOD → feeling blue |
+| Opacity | `opacity` low | fading, faint, disappearing | — |
+
+**Two rules the gate enforces, learned the hard way:**
+
+1. If the canvas spells the answer, it is not a rebus. `TOUCH` over `DOWN` for
+   "touchdown" is a word cut in half. The mechanism must *add* something the
+   letters do not already say.
+2. Any two items sharing a row need an explicit `w`. Without it, layout depends
+   on font metrics and words land on top of each other.
+
+And one rule the gate cannot enforce: **vary the mechanism.** Six puzzles in a
+row using "same word twice" is a quality problem even when each is fine alone.
 
 ## Realtime
 
