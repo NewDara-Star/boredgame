@@ -501,3 +501,38 @@ create policy "c4 written by members" on public.c4_games
 do $$ begin
   alter publication supabase_realtime add table public.c4_games;
 exception when duplicate_object then null; end $$;
+
+-- ============ a room outlives one game ============
+-- Rematch keeps the tally and replays the same game. This sends the room back
+-- to its lobby so the same two people can agree a DIFFERENT game without a new
+-- code. A new game is a new match: no score, no rounds, nobody ready.
+create or replace function public.reopen_room(p_room bigint)
+returns void language plpgsql security definer set search_path to 'public' as $$
+begin
+  if not exists (select 1 from public.room_players p
+                 where p.room_id = p_room and p.user_id = auth.uid()) then
+    raise exception 'not a member of room %', p_room;
+  end if;
+  update public.rooms set status = 'waiting' where id = p_room and status <> 'waiting';
+  update public.room_players set ready = false, score = 0 where room_id = p_room;
+  -- startNextRound derives the round number from the highest existing round, so
+  -- without this a reopened race room resumes at 6 of 5 and ends immediately.
+  delete from public.room_rounds where room_id = p_room;
+end $$;
+revoke all on function public.reopen_room(bigint) from public, anon;
+grant execute on function public.reopen_room(bigint) to authenticated;
+
+-- Ending a match was a direct update to rooms, and the UPDATE policy on rooms
+-- is host-only, so the guest's "end match" matched zero rows — which is not an
+-- error, so it failed in silence. Either player sitting in the room may end it.
+create or replace function public.end_match(p_room bigint)
+returns void language plpgsql security definer set search_path to 'public' as $$
+begin
+  if not exists (select 1 from public.room_players p
+                 where p.room_id = p_room and p.user_id = auth.uid()) then
+    raise exception 'not a member of room %', p_room;
+  end if;
+  update public.rooms set status = 'finished' where id = p_room;
+end $$;
+revoke all on function public.end_match(bigint) from public, anon;
+grant execute on function public.end_match(bigint) to authenticated;

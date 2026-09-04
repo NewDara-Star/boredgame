@@ -67,10 +67,12 @@ export function AwayNotice({ players, userId, now }: {
 }
 
 export function OverPanel({
-  headline, mine, draw, onRematch, onQuit,
+  headline, mine, draw, onRematch, onQuit, onChangeGame,
 }: {
   headline: string; mine: boolean; draw: boolean;
   onRematch: () => void; onQuit: () => void;
+  /** Back to the lobby, same code. Rematch keeps the tally; this starts a new one. */
+  onChangeGame: () => void;
 }) {
   return (
     <motion.div variants={popIn} initial="hidden" animate="show"
@@ -87,6 +89,14 @@ export function OverPanel({
           Quit match
         </button>
       </div>
+      <button onClick={onChangeGame}
+        className="piece press w-full mt-2.5 py-3 font-display text-base font-semibold
+          bg-surface text-ink">
+        Play something else
+      </button>
+      <p className="text-[11px] font-bold opacity-70 mt-2">
+        Same room, same code. The score starts again.
+      </p>
     </motion.div>
   );
 }

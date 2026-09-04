@@ -224,6 +224,14 @@ export function SquareOffRoom({
               Quit match
             </button>
           </div>
+          <button onClick={() => void t.changeGame()}
+            className="piece press w-full mt-2.5 py-3 font-display text-base font-semibold
+              bg-surface text-ink">
+            Play something else
+          </button>
+          <p className="text-[11px] font-bold opacity-70 mt-2">
+            Same room, same code. The score starts again.
+          </p>
         </motion.div>
       ) : t.item && (g.phase === "asking" || g.phase === "revealed") ? (
         <div className="space-y-3">

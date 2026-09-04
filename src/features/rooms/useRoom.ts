@@ -39,7 +39,6 @@ export function useRoom(code: string | undefined, userId: string | undefined) {
       const r = data as Room;
       setRoom(r);
       await refresh(r.id);
-      setPool(await loadContent(r.game));
 
       channel = supabase!
         .channel(`room:${r.id}`)
@@ -54,6 +53,18 @@ export function useRoom(code: string | undefined, userId: string | undefined) {
 
     return () => { cancelled = true; if (channel) void supabase!.removeChannel(channel); };
   }, [code, refresh]);
+
+  // The bank follows the room's game rather than being read once on arrival.
+  // Loading it with the room meant that changing the game in the lobby left the
+  // old bank in place: the category chips described the game you had just left,
+  // and a race dealt out of it. Only visible now that a room can be reopened and
+  // set to something else.
+  useEffect(() => {
+    if (!room) return;
+    let cancelled = false;
+    void loadContent(room.game).then((all) => { if (!cancelled) setPool(all); });
+    return () => { cancelled = true; };
+  }, [room?.game]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // A heartbeat on the row both players already subscribe to: the update itself
   // is what tells the other browser you are still here.

@@ -163,11 +163,22 @@ export function useTttRoom(
     void write(next, next.phase === "asking");
   }, [game, write]);
 
-  /** Ends the session rather than the game. Rematch keeps the tally; this stops it. */
+  /** Ends the session rather than the game. Rematch keeps the tally; this stops
+      it. Through an RPC because the UPDATE policy on rooms is host-only — as a
+      direct update this matched zero rows for the guest and said nothing. */
   const quit = useCallback(async () => {
     if (!supabase || !roomId) return;
     setWriteError(await attempt("Ending the match",
-      supabase.from("rooms").update({ status: "finished" }).eq("id", roomId)));
+      supabase.rpc("end_match", { p_room: roomId })));
+  }, [roomId]);
+
+  /** Back to the lobby with the same code and the same two people, so a
+      different game does not cost a new room. Clearing the other player's ready
+      flag is not something RLS lets a client do, hence the RPC. */
+  const changeGame = useCallback(async () => {
+    if (!supabase || !roomId) return;
+    setWriteError(await attempt("Reopening the room",
+      supabase.rpc("reopen_room", { p_room: roomId })));
   }, [roomId]);
 
   // The player who just answered owns the move on, so exactly one client writes it.
@@ -194,7 +205,7 @@ export function useTttRoom(
   }, [roomId, row]);
 
   return {
-    game, myMark, item, choose, submit, rematch, quit,
+    game, myMark, item, choose, submit, rematch, quit, changeGame,
     forceTimeout, forceAdvance, advanceNow,
     error: poolError ?? writeError,
     ready: pool.length > 0,

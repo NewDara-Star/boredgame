@@ -264,6 +264,27 @@ greyed out for want of questions, and the lobby hides the category step entirely
 without it, and the symptom is the worst kind: your own moves appear instantly
 and your opponent's board never changes.
 
+## A room outlives one game
+
+Rematch replays the same game and keeps the running tally. **Play something
+else** sends the room back to its lobby — same code, same two people, any game.
+That is `reopen_room`, and it clears the ready flags, zeroes the scores and
+deletes the room's rounds. Rounds because `startNextRound` derives the round
+number from the highest one already stored, so a reopened race room would
+resume at 6 of 5 and finish the instant it started. Scores because a rematch is
+what keeps a score running; changing the game is a new match.
+
+Both of those, and `end_match`, are SECURITY DEFINER for the same reason:
+`room_players` UPDATE is own-row only and `rooms` UPDATE is host-only, so no
+client can clear the other person's ready flag, and the guest's "end match" was
+a direct update matching zero rows — which is not an error, so it failed in
+silence for months.
+
+The room's bank follows `rooms.game` in an effect of its own. It used to be read
+once when the room was found, which meant changing the game in the lobby left
+the previous bank in place: the category chips described the game you had just
+left, and a race dealt out of it.
+
 ## Brand: sticker on neon, but only where you are not reading
 
 The references are logo boards and packaging — saturated grounds, white fills,

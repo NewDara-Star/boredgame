@@ -129,7 +129,8 @@ export function TicTacToeRoom({
           mine={g.winner === t.myMark}
           draw={g.winner === "draw"}
           onRematch={() => void t.rematch()}
-          onQuit={() => void t.quit()} />
+          onQuit={() => void t.quit()}
+          onChangeGame={() => void t.changeGame()} />
       )}
     </div>
   );

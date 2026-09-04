@@ -166,7 +166,8 @@ export function Connect4Room({
           mine={g.winner === t.myMark}
           draw={g.winner === "draw"}
           onRematch={() => void t.rematch()}
-          onQuit={() => void t.quit()} />
+          onQuit={() => void t.quit()}
+          onChangeGame={() => void t.changeGame()} />
       ) : !plain && t.item && (g.phase === "asking" || g.phase === "revealed") ? (
         <div className="space-y-3">
           {asking && <Timer fraction={Math.max(0, left / ASK_MS)} />}
