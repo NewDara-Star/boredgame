@@ -93,6 +93,7 @@ export function useDailyStatus() {
   const day = today();
   const [played, setPlayed] = useState<number | null>(null);
   const [players, setPlayers] = useState(0);
+  const [faces, setFaces] = useState<{ user_id: string; username: string }[]>([]);
 
   useEffect(() => {
     if (!supabase || !user) return;
@@ -100,14 +101,20 @@ export function useDailyStatus() {
     (async () => {
       const [mine, all] = await Promise.all([
         supabase!.from("daily_scores").select("correct").eq("day", day).eq("user_id", user.id).maybeSingle(),
-        supabase!.from("daily_scores").select("user_id", { count: "exact", head: true }).eq("day", day),
+        supabase!.from("daily_scores")
+          .select("user_id, profiles(username)", { count: "exact" })
+          .eq("day", day).order("correct", { ascending: false }).limit(4),
       ]);
       if (cancelled) return;
       setPlayed((mine.data as { correct: number } | null)?.correct ?? null);
       setPlayers(all.count ?? 0);
+      setFaces(((all.data ?? []) as Record<string, unknown>[]).map((r) => ({
+        user_id: r.user_id as string,
+        username: (r.profiles as { username?: string } | null)?.username ?? "?",
+      })));
     })();
     return () => { cancelled = true; };
   }, [day, user?.id]);
 
-  return { played, players, signedIn: !!user };
+  return { played, players, faces, signedIn: !!user };
 }

@@ -1,150 +1,159 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useAuth } from "@/app/providers/AuthProvider";
 import { useCounts } from "@/features/play/counts";
 import { GAMES } from "@/features/play/registry";
 import { useProgress } from "@/features/play/useProgress";
-import { useAuth } from "@/app/providers/AuthProvider";
 import { rankFor } from "@/features/play/rank";
 import { RankBadge } from "@/features/play/RankBadge";
-import { stagger, riseIn, popIn } from "@/shared/ui/motion";
-import { Starburst } from "@/shared/ui/Wordmark";
 import { useDailyStatus } from "@/features/daily/useDaily";
+import { Avatar } from "@/shared/ui/Avatar";
+import { Starburst } from "@/shared/ui/Wordmark";
+import { stagger, riseIn, popIn } from "@/shared/ui/motion";
+import { WeekStrip } from "./WeekStrip";
+import { StatCarousel, type Stat } from "./StatCarousel";
+
+const greeting = () => {
+  const h = new Date().getHours();
+  return h < 12 ? "Morning" : h < 18 ? "Afternoon" : "Evening";
+};
+
+/** A section title with a way through to the whole thing. */
+function Head({ title, to, cta = "View all" }: { title: string; to?: string; cta?: string }) {
+  return (
+    <div className="flex items-baseline justify-between mt-7 mb-3">
+      <h2 className="font-display text-[21px] font-semibold">{title}</h2>
+      {to && (
+        <Link to={to} className="text-[11px] font-black uppercase tracking-wider text-soft
+          underline underline-offset-4">{cta}</Link>
+      )}
+    </div>
+  );
+}
 
 export function HomePage() {
-  const { user, offline } = useAuth();
+  const { user, profile, offline } = useAuth();
   const p = useProgress();
   const counts = useCounts();
   const daily = useDailyStatus();
-  const { current, next, progress } = rankFor(p.answered);
+  const { current, next } = rankFor(p.answered);
+  const name = profile?.username ?? "there";
+
+  const stats: Stat[] = [
+    { label: "Day streak", value: p.streak, bg: p.streak > 0 ? "bg-pop" : "bg-surface",
+      note: p.streak === 0 ? "one round starts it" : p.playedToday ? "safe until tomorrow" : "play today to keep it" },
+    { label: "Answered", value: p.answered, bg: "bg-surface",
+      note: next ? `${next.min - p.answered} to ${next.name}` : "top rank" },
+    { label: "Accuracy", value: p.answered ? `${Math.round((p.correct / p.answered) * 100)}%` : "—",
+      bg: "bg-acid", note: `${p.correct} right` },
+    { label: "Rank", value: current.name, bg: "bg-trivia text-surface",
+      note: `${p.bestStreak}-day best run` },
+  ];
 
   return (
-    <motion.div variants={stagger(0.09)} initial="hidden" animate="show">
-      <motion.div variants={riseIn} className="relative">
-        <Starburst size={52} fill="var(--color-hot)"
-          className="absolute -top-3 right-1 rotate-12" />
-        <h1 className="text-[42px] leading-[0.95] font-semibold relative">
-          {GAMES.length === 3 ? "Three games." : `${GAMES.length} games.`}<br />
-          <span className="text-hot">Pick your poison.</span>
-        </h1>
+    <motion.div variants={stagger(0.07)} initial="hidden" animate="show" className="pb-4">
+      <motion.div variants={riseIn} className="flex items-center gap-3">
+        <div className="min-w-0 flex-1">
+          <p className="text-[13px] font-bold text-soft">
+            {new Date().toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" })}
+          </p>
+          <h1 className="font-display text-[32px] leading-[1.05] font-semibold truncate">
+            {greeting()}{user ? "," : ""}<br />
+            {user ? <span className="text-hot">{name}</span> : <span className="text-hot">stranger</span>}
+          </h1>
+        </div>
+        <Link to="/profile" aria-label="Profile" className="shrink-0">
+          {user ? <Avatar id={user.id} name={name} size={52} />
+                : <RankBadge rank={current.key} size={46} />}
+        </Link>
       </motion.div>
-      <motion.p variants={riseIn} className="text-soft mt-3 text-[15px] max-w-sm font-semibold">
-        Short rounds, no ads, no feed. Built to be opened for four minutes and closed again.
-      </motion.p>
 
-      {/* The one thing everyone is doing at the same time, so it goes first. */}
+      {/* The one thing everyone is doing at the same time. */}
       {daily.signedIn && (
-        <motion.div variants={popIn} className="mt-6">
-          <Link to="/daily" className={`piece press block p-5 ${daily.played === null ? "bg-hot text-surface" : ""}`}>
-            <div className="flex items-center gap-3">
-              <Starburst size={38} fill={daily.played === null ? "var(--color-pop)" : "var(--color-hot)"} />
-              <div className="min-w-0 flex-1">
-                <p className="font-display text-[22px] leading-tight font-semibold">
-                  {daily.played === null ? "Today's round" : `You got ${daily.played} out of 10 today`}
-                </p>
-                <p className={`text-[13px] font-semibold ${daily.played === null ? "opacity-90" : "text-soft"}`}>
-                  {daily.played === null
-                    ? "Ten questions. The same ten everyone else gets."
-                    : `${daily.players} ${daily.players === 1 ? "person has" : "people have"} played — see the board`}
-                </p>
+        <motion.div variants={popIn} className="mt-5">
+          <Link to="/daily"
+            className={`piece press block p-5 relative overflow-hidden
+              ${daily.played === null ? "bg-hot text-surface" : "bg-surface"}`}>
+            <Starburst size={82} fill={daily.played === null ? "rgba(255,255,255,.22)" : "var(--color-pop)"}
+              className="absolute -right-3 -top-3 rotate-12" />
+            <p className="relative text-[10px] font-black uppercase tracking-widest opacity-75">
+              Daily challenge
+            </p>
+            <p className="relative font-display text-[26px] leading-tight font-semibold mt-1">
+              {daily.played === null ? "Ten questions, same for everyone"
+                : `You got ${daily.played} out of 10`}
+            </p>
+            <div className="relative flex items-center gap-2 mt-3">
+              <div className="flex -space-x-2.5">
+                {daily.faces.slice(0, 4).map((f) => (
+                  <Avatar key={f.user_id} id={f.user_id} name={f.username} size={30} />
+                ))}
               </div>
-              <span className="font-display text-2xl font-semibold shrink-0">→</span>
+              {/* Never claim nobody has played while showing their faces: an
+                  exact count needs a header that can go missing. */}
+              {(() => {
+                const n = Math.max(daily.players, daily.faces.length);
+                return (
+                  <span className={`text-[12px] font-bold ${daily.played === null ? "opacity-90" : "text-soft"}`}>
+                    {n === 0 ? "Nobody has played yet — be first"
+                      : n === 1 ? "1 person has played"
+                      : `${n} have played`}
+                  </span>
+                );
+              })()}
+              <span className="flex-1" />
+              <span className="font-display text-xl font-semibold">→</span>
             </div>
           </Link>
         </motion.div>
       )}
 
-      <motion.div variants={stagger(0.07)} className="grid gap-4 mt-7 sm:grid-cols-3">
+      <motion.div variants={riseIn} className="mt-3">
+        <WeekStrip streak={p.streak} lastPlayed={p.lastPlayed} />
+      </motion.div>
+
+      <Head title="Your week" />
+      <StatCarousel stats={stats} />
+
+      <Head title="Games" to="/play" />
+      <motion.div variants={stagger(0.06)} className="grid gap-3 sm:grid-cols-3">
         {GAMES.slice(0, 3).map((g) => (
           <motion.div key={g.slug} variants={riseIn}>
-            <Link to={g.path} className="piece press block p-5 h-full">
-              <div className="mb-4 flex justify-center"><g.Art size={92} /></div>
-              <span className={`sticker inline-block text-[10px] font-black uppercase
-                tracking-widest px-2.5 py-1 ${g.chip}`}>{g.badge}</span>
-              <h2 className="text-2xl font-semibold mt-2">{g.name}</h2>
-              <p className="text-sm text-soft mt-1 font-semibold">{g.tagline}</p>
-              <p className="text-xs text-soft/70 mt-3 font-bold tabular-nums">
-                {counts[g.bank] ?? 0} in the bank
-              </p>
+            <Link to={g.path} className="piece press flex sm:block items-center gap-4 p-4 h-full">
+              <div className="shrink-0 sm:mb-3 sm:flex sm:justify-center"><g.Art size={56} /></div>
+              <div className="min-w-0">
+                <span className={`sticker inline-block text-[9px] font-black uppercase
+                  tracking-widest px-2 py-0.5 ${g.chip}`}>{g.badge}</span>
+                <h3 className="font-display text-lg font-semibold mt-1.5">{g.name}</h3>
+                <p className="text-[12px] text-soft font-semibold leading-snug">{g.tagline}</p>
+                <p className="text-[11px] text-soft/70 font-bold mt-1 tabular-nums">
+                  {counts[g.bank] ?? 0} in the bank
+                </p>
+              </div>
             </Link>
           </motion.div>
         ))}
       </motion.div>
 
-      {GAMES.length > 3 && (
-        <motion.div variants={riseIn} className="mt-3">
-          <Link to="/play"
-            className="piece press block p-3.5 text-center font-display font-semibold">
-            All {GAMES.length} games →
-          </Link>
-        </motion.div>
-      )}
-
-      <motion.div variants={riseIn} className="piece mt-4 p-5">
-        <div className="flex items-baseline justify-between">
-          <span className="text-[10px] font-black uppercase tracking-widest text-soft">Your rank</span>
-          <span className="text-xs font-bold text-soft tabular-nums">{p.answered} answered</span>
-        </div>
-        <div className="flex items-center gap-4 mt-2">
-          <RankBadge rank={current.key} size={56} animate />
-          <p className="font-display text-3xl font-semibold">{current.name}</p>
-        </div>
-        <div className="h-4 bg-sand rounded-full mt-3 overflow-hidden border-2 border-ink">
-          <motion.div className="h-full bg-pop"
-            initial={{ width: 0 }}
-            animate={{ width: `${Math.round(progress * 100)}%` }}
-            transition={{ type: "spring", stiffness: 90, damping: 18, delay: 0.4 }} />
-        </div>
-        <p className="text-xs text-soft mt-2 font-bold">
-          {next ? `${next.min - p.answered} more to ${next.name}` : "Top rank reached"}
-        </p>
-
-        {/* The streak line is the one that decides whether today gets a round,
-            so it sits under the rank rather than on a page nobody opens. */}
-        <div className="flex items-center gap-2.5 mt-4 pt-4 border-t-2 border-sand">
-          <span className={`grid place-items-center h-9 w-9 rounded-full border-[2.5px] border-ink
-            font-display font-semibold tabular-nums text-sm shrink-0
-            ${p.streak > 0 ? "bg-pop" : "bg-sand text-soft"}`}>
-            {p.streak}
-          </span>
-          <p className="text-xs font-bold text-soft">
-            {p.streak === 0
-              ? "No streak going. One round today starts one."
-              : p.playedToday
-                ? `${p.streak}-day streak, safe until tomorrow.`
-                : `${p.streak}-day streak — play today to keep it.`}
-          </p>
-        </div>
-      </motion.div>
-
-      {/* The moment someone has something to lose is the moment to mention an
-          account. Before that it is just a form in the way. */}
-      {!user && !offline && p.answered > 0 && (
-        <motion.div variants={popIn} className="mt-4">
+      {!user && !offline && (
+        <motion.div variants={popIn} className="mt-5">
           <Link to="/profile" className="piece press block bg-ink text-paper p-4">
             <p className="font-display text-lg font-semibold">
-              {p.answered} answered on this device
+              {p.answered > 0 ? `${p.answered} answered on this device` : "Playing as a guest"}
             </p>
             <p className="text-[13px] font-semibold opacity-80 mt-0.5">
-              Create an account to keep them, and to take a place on the leaderboard →
+              Make an account to keep your streak, play the daily and take a place on the board →
             </p>
           </Link>
         </motion.div>
       )}
 
-      <div className="grid gap-3 sm:grid-cols-2 mt-4">
-        <motion.div variants={popIn}>
-          <Link to="/rooms"
-            className="piece press block p-4 text-center font-display font-semibold bg-pop h-full">
-            Head-to-head →
-          </Link>
-        </motion.div>
-        <motion.div variants={popIn}>
-          <Link to="/ranks"
-            className="piece press block p-4 text-center font-display font-semibold h-full">
-            Leaderboard →
-          </Link>
-        </motion.div>
-      </div>
+      <Head title="Play someone" to="/ranks" cta="Leaderboard" />
+      <motion.div variants={popIn}>
+        <Link to="/rooms" className="piece press block p-4 text-center font-display font-semibold bg-pop">
+          Start a room →
+        </Link>
+      </motion.div>
     </motion.div>
   );
 }

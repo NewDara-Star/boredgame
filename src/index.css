@@ -81,6 +81,10 @@ h1, h2, h3, .display { font-family: var(--font-display); font-weight: 600; lette
     transform: rotate(-1.5deg);
   }
   .sticker-r { transform: rotate(1.5deg); }
+
+  /* Carousels are swiped, not scrolled with a bar. */
+  .no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
 }
 
 :focus-visible { outline: 3px solid var(--color-trivia); outline-offset: 3px; }

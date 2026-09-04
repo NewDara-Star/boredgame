@@ -271,6 +271,27 @@ centring container has no definite box to resolve against, and the first version
 of the catalogue rendered a 62px emblem at about 700px, squeezing the text to one
 character per line. Every `Art` takes an explicit `size`.
 
+## Home is an overview, not a second games list
+
+Greeting with the date · daily challenge with the faces of who has played · the
+week strip · a swipeable stat carousel · then games and rooms behind section
+headers. Games is the catalogue; Home is you.
+
+**The week strip is derived, not queried.** A streak of N ending on `lastPlayed`
+means exactly those N consecutive days were played, so the strip is true without
+another round trip. That stops being true the moment a streak can survive a
+missed day — don't let it.
+
+Two things that bit, both caught by looking at a screenshot:
+
+- **Normalise both sides to midnight.** Comparing a date parsed at `T00:00:00`
+  against a `new Date()` carrying the current time put every day out by one — at
+  14:30 the difference to today was −0.6 days, rounded to −1, so today read as
+  unplayed and the four days *before* it lit up instead.
+- **Never contradict your own data.** The card said "nobody has played yet" while
+  showing two avatars, because an exact count needs a `content-range` header that
+  can go missing. It takes the larger of the count and the faces it actually has.
+
 ## The daily round
 
 Ten questions, the same ten for everyone, once a day — the thing that makes a
