@@ -14,6 +14,7 @@ export function RoomsPage() {
   const { user, offline } = useAuth();
   const [joinCode, setJoinCode] = useState("");
   const [guess, setGuess] = useState("");
+  const uname = user?.email?.split("@")[0] ?? "player";
 
   const { room, players, round, currentPuzzle, error, join, startNextRound, claimWin } =
     useRoom(code, user?.id);
@@ -40,10 +41,10 @@ export function RoomsPage() {
         <h1 className="text-2xl font-bold">Head-to-head</h1>
         <p className="text-sm text-soft">Same puzzle, two players, first correct answer takes the round.</p>
         <div className="grid gap-2 sm:grid-cols-2">
-          <Button onClick={async () => { const c = await createRoom(user.id, "picto"); if (c) nav(`/rooms/${c}`); }}>
+          <Button onClick={async () => { const c = await createRoom(user.id, "picto", uname); if (c) nav(`/rooms/${c}`); }}>
             Create a Picto room
           </Button>
-          <Button variant="ghost" onClick={async () => { const c = await createRoom(user.id, "trivia"); if (c) nav(`/rooms/${c}`); }}>
+          <Button variant="ghost" onClick={async () => { const c = await createRoom(user.id, "trivia", uname); if (c) nav(`/rooms/${c}`); }}>
             Create a Trivia room
           </Button>
         </div>
@@ -102,13 +103,34 @@ export function RoomsPage() {
               : <p className="text-xl font-semibold text-center">{currentPuzzle.prompt}</p>}
           </Card>
 
-          {won ? (
+          {!won && currentPuzzle.choices ? (
+            // A trivia room previously rendered the same free-text box as picto,
+            // so the four options were never shown and answers like "Minutes
+            // played" were effectively untypeable. Round 2 of the first test
+            // was unwinnable for exactly this reason.
+            <div className="grid gap-2.5">
+              {currentPuzzle.choices.map((opt, i) => (
+                <button key={opt}
+                  onClick={() => { if (opt === currentPuzzle.answer) void claimWin(); }}
+                  className="piece press flex items-center gap-3 text-left px-4 py-4 bg-surface"
+                  style={{ borderLeft: `4px solid ${["#EF5A2A","#4B5BD6","#FFC93C","#17914B"][i % 4]}` }}>
+                  <span aria-hidden style={{ color: ["#EF5A2A","#4B5BD6","#FFC93C","#17914B"][i % 4] }}>
+                    {["▲","◆","●","■"][i % 4]}
+                  </span>
+                  <span className="text-[15px] font-bold">{opt}</span>
+                </button>
+              ))}
+            </div>
+          ) : won ? (
             <div className="text-center">
               <p className={`text-sm font-bold ${won === user.id ? "text-good" : "text-bad"}`}>
                 {won === user.id ? "You took it" : `${players.find((p) => p.user_id === won)?.username ?? "They"} took it`}
               </p>
               <p className="text-lg font-semibold mt-1">{currentPuzzle.answer}</p>
               {isHost && <Button className="mt-4 w-full" onClick={() => void startNextRound()}>Next round</Button>}
+              {currentPuzzle.explanation && (
+                <p className="text-sm text-soft font-semibold mt-3 text-left">{currentPuzzle.explanation}</p>
+              )}
             </div>
           ) : (
             <form

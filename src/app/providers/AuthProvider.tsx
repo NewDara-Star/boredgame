@@ -12,6 +12,7 @@ interface AuthValue {
   signIn(email: string, password: string): Promise<{ error: string | null }>;
   signUp(email: string, password: string): Promise<{ error: string | null }>;
   signInWithLink(email: string): Promise<{ error: string | null }>;
+  setPassword(password: string): Promise<{ error: string | null }>;
   signOut(): Promise<void>;
   refreshProfile(): Promise<void>;
 }
@@ -73,13 +74,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { error: error?.message ?? null };
   }
 
+  /**
+   * Accounts created by magic link have no password at all, so once password
+   * became the primary method those users were locked out with no route back.
+   * This is that route — chosen by them, never set on their behalf.
+   */
+  async function setPassword(password: string) {
+    if (!supabase) return { error: "Supabase is not configured yet." };
+    const { error } = await supabase.auth.updateUser({ password });
+    return { error: error?.message ?? null };
+  }
+
   async function signOut() {
     await supabase?.auth.signOut();
     setProfile(null);
   }
 
   return (
-    <Ctx.Provider value={{ user, profile, loading, offline: !isConfigured, signIn, signUp, signInWithLink, signOut, refreshProfile }}>
+    <Ctx.Provider value={{ user, profile, loading, offline: !isConfigured, signIn, signUp, signInWithLink, setPassword, signOut, refreshProfile }}>
       {children}
     </Ctx.Provider>
   );

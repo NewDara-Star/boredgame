@@ -6,12 +6,13 @@ import { Button } from "@/shared/ui/Button";
 import { Field, Input } from "@/shared/ui/Field";
 
 export function ProfilePage() {
-  const { user, profile, offline, signIn, signUp, signInWithLink, signOut } = useAuth();
+  const { user, profile, offline, signIn, signUp, signInWithLink, setPassword: savePassword, signOut } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [busy, setBusy] = useState(false);
   const [sent, setSent] = useState(false);
+  const [pwDone, setPassword2Done] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [authError, setAuthError] = useState<string | null>(null);
 
@@ -84,9 +85,29 @@ export function ProfilePage() {
             Progress is saved in this browser only. Connect Supabase to sync across devices and unlock head-to-head.
           </p>
         ) : user ? (
-          <div className="flex items-center justify-between gap-4">
-            <p className="text-sm text-soft truncate">Signed in as {user.email}</p>
-            <Button variant="ghost" onClick={() => void signOut()}>Sign out</Button>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between gap-4">
+              <p className="text-sm text-soft truncate font-semibold">Signed in as {user.email}</p>
+              <Button variant="ghost" onClick={() => void signOut()}>Sign out</Button>
+            </div>
+            <form className="space-y-3"
+              onSubmit={async (e) => {
+                e.preventDefault();
+                setError(null); setBusy(true);
+                const { error } = await savePassword(password);
+                setBusy(false);
+                if (error) setError(error); else { setPassword2Done(true); setPassword(""); }
+              }}>
+              <Field label="Set a password"
+                hint="Accounts made with a magic link have none. Set one and you can sign in without email."
+                error={error}>
+                <Input type="password" required minLength={6} value={password} placeholder="••••••••"
+                  autoComplete="new-password" onChange={(e) => setPassword(e.target.value)} />
+              </Field>
+              <Button type="submit" disabled={busy} variant="secondary" className="w-full">
+                {busy ? "Saving…" : pwDone ? "Password saved" : "Save password"}
+              </Button>
+            </form>
           </div>
         ) : sent ? (
           <p className="piece bg-good text-surface p-4 font-semibold">

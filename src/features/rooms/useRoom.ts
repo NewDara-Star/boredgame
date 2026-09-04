@@ -94,10 +94,19 @@ export function useRoom(code: string | undefined, userId: string | undefined) {
   return { room, players, round, currentPuzzle, error, join, startNextRound, claimWin };
 }
 
-export async function createRoom(userId: string, game: "picto" | "trivia"): Promise<string | null> {
+export async function createRoom(
+  userId: string, game: "picto" | "trivia", username: string
+): Promise<string | null> {
   if (!supabase) return null;
   const code = Array.from({ length: 6 }, () =>
     "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"[Math.floor(Math.random() * 32)]).join("");
-  const { error } = await supabase.from("rooms").insert({ code, host_id: userId, game, status: "waiting", best_of: 5 });
-  return error ? null : code;
+  const { data, error } = await supabase
+    .from("rooms")
+    .insert({ code, host_id: userId, game, status: "waiting", best_of: 5 })
+    .select().single();
+  if (error || !data) return null;
+  // Creating a room is joining it. Making the host click "Join this room" on a
+  // room they just made is a step with no decision in it.
+  await supabase.from("room_players").insert({ room_id: data.id, user_id: userId, username });
+  return code;
 }
