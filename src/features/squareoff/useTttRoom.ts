@@ -4,6 +4,7 @@ import { loadContent, shuffle } from "@/features/play/content";
 import type { PlayItem } from "@/features/play/types";
 import { newGame, pick, answer, advance, type Game, type Mark } from "./rules";
 import { decode, encode, type TttRow } from "./wire";
+import { deal } from "@/features/play/dealer";
 
 /**
  * Two browsers, one board. Both clients run the identical reducer from rules.ts
@@ -20,7 +21,9 @@ export function useTttRoom(
 ) {
   const [row, setRow] = useState<TttRow | null>(null);
   const [pool, setPool] = useState<PlayItem[]>([]);
-  const seen = useRef<Set<number>>(new Set());
+  const seen = useRef<Set<string>>(new Set());
+  const lastServed = useRef<string | null>(null);
+  const [poolError, setPoolError] = useState<string | null>(null);
 
   useEffect(() => {
     void loadContent("trivia").then((all) =>
@@ -56,10 +59,19 @@ export function useTttRoom(
     const scoped = categories?.length
       ? pool.filter((i) => categories.includes(i.category))
       : pool;
-    const fresh = scoped.find((i) => !seen.current.has(Number(i.id))) ?? scoped[0] ?? pool[0];
-    if (!fresh) return null;
-    seen.current.add(Number(fresh.id));
-    return Number(fresh.id);
+    // An empty scope is a misconfigured room, not a reason to quietly serve from
+    // the whole bank as if the filter had never been set.
+    if (scoped.length === 0) {
+      setPoolError(categories?.length
+        ? `Nothing live in ${categories.join(" or ")} for this game. End the match and set it up again.`
+        : "No questions are live for this game yet.");
+      return null;
+    }
+    setPoolError(null);
+    const { item } = deal(scoped, (i) => i.id, seen.current, { avoid: lastServed.current });
+    if (!item) return null;
+    lastServed.current = item.id;
+    return Number(item.id);
   }, [pool, categories]);
 
   /** Write a transition. `puzzle` is set whenever the new state needs a question. */
@@ -125,7 +137,7 @@ export function useTttRoom(
   }, [roomId, row]);
 
   return {
-    game, myMark, item, choose, submit, rematch, quit, forceTimeout,
+    game, myMark, item, choose, submit, rematch, quit, forceTimeout, poolError,
     ready: pool.length > 0,
     /** when the current question went up, so both clients run the same clock */
     askedAt: row ? Date.parse(row.updated_at) : 0,

@@ -271,6 +271,33 @@ centring container has no definite box to resolve against, and the first version
 of the catalogue rendered a 62px emblem at about 700px, squeezing the text to one
 character per line. Every `Art` takes an explicit `size`.
 
+## Dealing the next puzzle
+
+`deal()` in `features/play/dealer.ts` is the only place that picks one, and
+`npm run check:dealer` covers it. The inline version it replaced was:
+
+```
+pool.find(i => !seen.has(i.id)) ?? scoped[0] ?? pool[0]
+```
+
+Both fallbacks were bugs. Once everything had been served, `find` returned
+undefined and it handed back `scoped[0]` — **the same question every turn for the
+rest of the session**, which in a room means whoever saw the answer wins every
+square. And when the category filter matched nothing, the last fallback served
+from the whole bank, ignoring the filter with no message at all.
+
+So: exhaustion is normal and starts a fresh cycle (excluding the item just
+served, or the last of one cycle is the first of the next). An empty pool is a
+misconfiguration and is reported — `poolError` — never papered over.
+
+**Categories belong to a bank, not to a room.** Five categories are picto-only
+and have zero live trivia: Idioms, Everyday, Food, Places, Music. Picking Idioms
+for a Picto race and then switching to Square Off used to leave the room filtered
+to nothing. The lobby clears the selection when the bank changes, and
+`set_room_setup()` strips categories with no live puzzles for the chosen game so
+it holds whichever client is asking — the chips visibly un-select rather than
+the filter silently doing nothing.
+
 ## Starting, and leaving
 
 **Who starts is decided in the database.** `claim_room_start()` moves a room out

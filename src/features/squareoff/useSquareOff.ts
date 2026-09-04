@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useAuth } from "@/app/providers/AuthProvider";
 import { loadContent, shuffle } from "@/features/play/content";
 import { recordRound, type RoundOutcome } from "@/features/play/progress";
+import { deal } from "@/features/play/dealer";
 import type { PlayItem, RoundResult } from "@/features/play/types";
 import {
   newGame, pick, answer, advance, botSquare, botIsRight, type Game, type Mark,
@@ -49,10 +50,14 @@ export function useSquareOff() {
     });
   }, []);
 
-  const deal = useCallback(() => {
-    const next = poolRef.current.find((i) => !seen.current.has(i.id)) ?? poolRef.current[0];
+  const lastServed = useRef<string | null>(null);
+  const dealQuestion = useCallback(() => {
+    // Same fallback bug the room had: `?? pool[0]` served one identical question
+    // for the rest of a long session once everything had been seen.
+    const { item: next } = deal(poolRef.current, (i) => i.id, seen.current,
+      { avoid: lastServed.current });
     if (next) {
-      seen.current.add(next.id);
+      lastServed.current = next.id;
       setItem(next);
       setOptions(shuffle(next.choices!));
     }
@@ -63,9 +68,9 @@ export function useSquareOff() {
 
   /** The one door every state change goes through. */
   const commit = useCallback((next: Game) => {
-    if (next.phase === "asking" && game.phase !== "asking") deal();
+    if (next.phase === "asking" && game.phase !== "asking") dealQuestion();
     setGame(next);
-  }, [game.phase, deal]);
+  }, [game.phase, dealQuestion]);
 
   const choose = useCallback((square: number) => {
     if (game.phase !== "picking" || game.turn !== "x" || pool.length === 0) return;

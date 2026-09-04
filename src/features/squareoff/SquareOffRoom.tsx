@@ -166,6 +166,14 @@ export function SquareOffRoom({
         {describe(g, names, t.myMark)}
       </p>
 
+      {/* A room that cannot serve a question is broken, and saying so beats a
+          board that never advances. */}
+      {t.poolError && (
+        <div className="piece bg-bad text-surface p-3.5 text-center">
+          <p className="text-[13px] font-bold">{t.poolError}</p>
+        </div>
+      )}
+
       {(() => {
         const gone = players.find((p) =>
           p.user_id !== userId && now - Date.parse(p.last_seen) > AWAY_MS);

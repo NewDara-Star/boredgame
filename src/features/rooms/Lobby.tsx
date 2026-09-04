@@ -42,7 +42,11 @@ export function Lobby({
             const c = { mode: g.room.mode, game: g.bank, label: g.name, blurb: g.room.blurb };
             const on = room.mode === c.mode && room.game === c.game;
             return (
-              <button key={g.slug} onClick={() => onSetup(c.mode, c.game, picked)}
+              // Categories belong to a bank. Square Off and Trivia race share
+                // one so a selection survives; switching to Picto race does not,
+                // and five of the categories have no trivia in them at all.
+                <button key={g.slug}
+                  onClick={() => onSetup(c.mode, c.game, c.game === room.game ? picked : [])}
                 className={`piece press text-left p-3.5 ${on ? "bg-hot text-surface" : "bg-surface"}`}>
                 <span className="flex items-center gap-2">
                   <span className={`grid place-items-center h-5 w-5 rounded-full border-[3px] border-ink shrink-0
