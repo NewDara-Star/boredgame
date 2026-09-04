@@ -1,6 +1,6 @@
 # STATUS — BoredGame
 
-Last updated: 2026-09-04 (a stuck reveal can be unstuck)
+Last updated: 2026-09-04 (three more games, and the whole bank is live)
 
 ## Verified working
 
@@ -39,15 +39,21 @@ Each claim below was checked by running it, not by reading the code.
 | 1,517 new trivia questions loaded as draft | 1,787 trivia rows total: 270 live + 1,517 draft, every category at 197-200 |
 | The load is byte-identical to the source files | order-independent checksum over prompt + all four choices in stored order + answer + difficulty + category + explanation: 3,279,460,029,714 on both sides, 1,517 rows, 1,517 distinct |
 | Every loaded row is structurally sound | SQL over the drafts: 0 rows without exactly 4 choices, 0 rows whose answer is absent from its own choices |
+| Every trivia question is live | 1,787 trivia rows, all `live`: 713 easy, 714 medium, 360 hard. 0 draft |
+| Connect 4 and Tic Tac Toe rules hold | `check-connect4.mts` 53 assertions, `check-tictactoe.mts` — both pass, plus 31 on Square Off |
+| No reducer state can violate the c4_games CHECKs | 600 games played to completion through the real `rules.ts` + `wire.ts`: 201,925 assertions that every intermediate state satisfies `char_length(board)=42`, the phase enum, `target between 0 and 6` and the winner enum, and round-trips through `decode(encode(g))` unchanged |
+| c4_games is in the realtime publication | it was NOT — created outside `supabase_realtime`, which shows each player only their own moves. `pg_publication_tables` now lists it alongside `ttt_games`, both `relreplident = d` |
+| The database refuses an unknown room mode | `set_room_setup` and `rooms_mode_check` both list exactly the five modes, read back from `pg_get_functiondef` and `pg_get_constraintdef` |
+| All six games render on the catalogue | headless Chromium at 420x900 against the built bundle: six cards, the two bankless ones showing "Head-to-head" instead of a bank count, no page errors |
 | The answer is not parked at index 0 | 371 of 1,517 have the answer first — the seeded insert shuffle, matching the generator's own count exactly |
 
 ## Content
 
-**374 puzzles live in Supabase.** Square Off draws on the same trivia bank, so
-it needed no new content at all.
+**1,891 puzzles live in Supabase.** Square Off and Connect 4 Trivia draw on the
+same trivia bank, so neither needed new content.
 
 - 104 rebus — 39 easy, 51 medium, 14 hard
-- 270 trivia — 128 easy, 119 medium, 23 hard, all with explanations
+- 1,787 trivia — 713 easy, 714 medium, 360 hard, all with explanations
 
 `src/shared/data/*.ts` holds a smaller bundled starter set so the app is
 playable with no backend. It is a starter set, not a mirror of the database.
@@ -69,6 +75,10 @@ tabs do not fit 390px, and the header now carries status — streak and rank bad
 
 ## Not yet verified
 
+- **The three new games have never been played by two people.** The reducers are
+  unit-checked to exhaustion and the wiring typechecks and builds, but nothing
+  has driven a Connect 4 board through a browser, let alone two. This is the
+  next thing to prove, and it needs two devices — which is how you test anyway.
 - **Rooms now have one real two-player game behind them.** A Square Off room was
   played to completion by two people on 4 September — the first time any room
   has had two browsers in it. Seat assignment, the transition writer rule and
@@ -82,14 +92,17 @@ tabs do not fit 390px, and the header now carries status — streak and rank bad
 ## Next, in order
 
 1. Push the waiting commits, confirm the Vercel build.
-2. Test rooms with two browsers — a Square Off room is the best test, since it
-   exercises far more of the realtime path than the race mode does.
+2. Play a Connect 4 Trivia room on two devices. It is the newest code and the
+   only one whose realtime path has never carried a move.
 3. Come back tomorrow and check the streak reads 2, not 1.
 4. Decide the product name before pointing a domain at it.
 
 ## Known gaps
 
-- Trivia hard tier is thin: 23 of 270, about 8.5%.
+- Tapping Tic Tac Toe or Connect 4 in the catalogue lands on `/rooms` with
+  nothing preselected — you make a room and pick the game again in the lobby.
+- Neither plain game has a solo-versus-bot page. `botColumn` exists in
+  `connect4/rules.ts` and is unit-checked, but nothing calls it yet.
 - No image upload — the admin screen takes an image URL.
 - No round timer on screen. Scoring uses elapsed time but nothing counts down.
 - Rooms only serve puzzles that live in the database, not bundled ones.
