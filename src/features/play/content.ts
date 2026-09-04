@@ -33,7 +33,10 @@ function fromSeedTrivia(): PlayItem[] {
   }));
 }
 
-function fromRow(row: Puzzle): PlayItem {
+/** Rows come back with the joined category, which the bare Puzzle type doesn't carry. */
+type PuzzleRow = Puzzle & { categories?: { name: string } | null };
+
+function fromRow(row: PuzzleRow): PlayItem {
   return {
     id: String(row.id),
     game: row.game,
@@ -46,7 +49,10 @@ function fromRow(row: Puzzle): PlayItem {
     altHint: row.alt_hint,
     charHint: row.char_hint,
     difficulty: row.difficulty,
-    category: "",
+    // Joined, not blank: without this every database-backed puzzle loses its
+    // category label while bundled ones keep theirs — which is exactly how you
+    // spot that the app is reading the database.
+    category: row.categories?.name ?? "",
   };
 }
 
@@ -58,10 +64,10 @@ export async function loadContent(game: GameKey): Promise<PlayItem[]> {
   if (supabase) {
     const { data, error } = await supabase
       .from("puzzles")
-      .select("*")
+      .select("*, categories(name)")
       .eq("game", game)
       .eq("status", "live");
-    if (!error && data && data.length > 0) return (data as Puzzle[]).map(fromRow);
+    if (!error && data && data.length > 0) return (data as PuzzleRow[]).map(fromRow);
   }
   return game === "picto" ? fromSeedPicto() : fromSeedTrivia();
 }
