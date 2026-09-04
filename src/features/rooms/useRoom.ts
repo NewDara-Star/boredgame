@@ -23,9 +23,22 @@ export function useRoom(code: string | undefined, userId: string | undefined) {
       supabase.from("room_players").select("*").eq("room_id", roomId),
       supabase.from("room_rounds").select("*").eq("room_id", roomId).order("round_no", { ascending: false }).limit(1),
     ]);
-    setPlayers((p.data as RoomPlayer[]) ?? []);
+    let list = (p.data as RoomPlayer[]) ?? [];
+    // A room is no longer readable by strangers, so before you have joined,
+    // room_players comes back empty and the invite screen loses the "Ada and
+    // Tayo are waiting" that makes it worth joining. room_peek trades the code
+    // you already hold for names and nothing else.
+    if (list.length === 0 && code) {
+      const { data: peek } = await supabase.rpc("room_peek", { p_code: code });
+      list = ((peek as { user_id: string; username: string; ready: boolean }[]) ?? [])
+        .map((x) => ({
+          ...x, room_id: roomId, score: 0,
+          last_seen: new Date().toISOString(),
+        })) as RoomPlayer[];
+    }
+    setPlayers(list);
     setRound(((r.data as RoomRound[]) ?? [])[0] ?? null);
-  }, []);
+  }, [code]);
 
   // Find the room by its code, then subscribe to everything about it.
   useEffect(() => {
@@ -34,7 +47,10 @@ export function useRoom(code: string | undefined, userId: string | undefined) {
     let cancelled = false;
 
     (async () => {
-      const { data, error } = await supabase!.from("rooms").select("*").eq("code", code.toUpperCase()).single();
+      // Not a table read any more: `rooms` is readable only by the people in it,
+      // because SELECT USING (true) meant anyone holding the anon key could list
+      // every room and every code. Holding the code is what this trades on.
+      const { data, error } = await supabase!.rpc("find_room", { p_code: code }).maybeSingle();
       if (cancelled) return;
       if (error || !data) { setError("No room with that code."); return; }
       const r = data as Room;

@@ -638,3 +638,84 @@ begin
   return n;
 end $$;
 revoke all on function public.sweep_stale_guests(int) from public, anon, authenticated;
+
+-- ============ a room is not a public directory ============
+-- Anonymous sign-in turned two theoretical holes into free ones, because a
+-- stranger now costs nothing to create.
+--
+-- 1. rooms was SELECT USING (true): anyone with the anon key could list every
+--    room and read its code. A code should be the thing you share, not a row.
+-- 2. room_rounds had USING (member) but WITH CHECK (true), and USING does not
+--    gate INSERT — a stranger could deal a round into someone else's race.
+--
+-- Membership is answered by a definer function because a room_players policy
+-- that queries room_players is infinite recursion.
+create or replace function public.is_room_member(p_room bigint)
+returns boolean language sql stable security definer set search_path to 'public' as $$
+  select exists (select 1 from public.room_players p
+                 where p.room_id = p_room and p.user_id = auth.uid());
+$$;
+revoke all on function public.is_room_member(bigint) from public;
+grant execute on function public.is_room_member(bigint) to anon, authenticated;
+
+-- Holding the code still gets you in: these two are the only way to see a room
+-- you are not yet part of.
+create or replace function public.find_room(p_code text)
+returns public.rooms language sql stable security definer set search_path to 'public' as $$
+  select r.* from public.rooms r where r.code = upper(btrim(p_code));
+$$;
+revoke all on function public.find_room(text) from public;
+grant execute on function public.find_room(text) to anon, authenticated;
+
+-- Names only, so the invite screen can still say who is waiting.
+create or replace function public.room_peek(p_code text)
+returns table (user_id uuid, username text, ready boolean)
+language sql stable security definer set search_path to 'public' as $$
+  select p.user_id, p.username, p.ready
+  from public.room_players p join public.rooms r on r.id = p.room_id
+  where r.code = upper(btrim(p_code));
+$$;
+revoke all on function public.room_peek(text) from public;
+grant execute on function public.room_peek(text) to anon, authenticated;
+
+-- host_id is in the rooms policy because createRoom inserts and immediately
+-- selects the row back, and at that instant the host is not a player yet.
+drop policy if exists "rooms readable" on public.rooms;
+drop policy if exists "rooms readable by the people in them" on public.rooms;
+create policy "rooms readable by the people in them" on public.rooms
+  for select using (host_id = auth.uid() or public.is_room_member(rooms.id));
+
+drop policy if exists "players readable" on public.room_players;
+drop policy if exists "players readable by the people in the room" on public.room_players;
+create policy "players readable by the people in the room" on public.room_players
+  for select using (user_id = auth.uid() or public.is_room_member(room_players.room_id));
+
+drop policy if exists "members write rounds" on public.room_rounds;
+create policy "members write rounds" on public.room_rounds
+  for all using (public.is_room_member(room_rounds.room_id))
+      with check (public.is_room_member(room_rounds.room_id));
+
+drop policy if exists "rounds readable" on public.room_rounds;
+drop policy if exists "rounds readable by the people in the room" on public.room_rounds;
+create policy "rounds readable by the people in the room" on public.room_rounds
+  for select using (public.is_room_member(room_rounds.room_id));
+
+drop policy if exists "ttt readable by anyone with the code" on public.ttt_games;
+drop policy if exists "ttt readable by the people in the room" on public.ttt_games;
+create policy "ttt readable by the people in the room" on public.ttt_games
+  for select using (public.is_room_member(ttt_games.room_id));
+
+drop policy if exists "ttt written by members" on public.ttt_games;
+create policy "ttt written by members" on public.ttt_games
+  for all using (public.is_room_member(ttt_games.room_id))
+      with check (public.is_room_member(ttt_games.room_id));
+
+drop policy if exists "c4 readable by anyone with the code" on public.c4_games;
+drop policy if exists "c4 readable by the people in the room" on public.c4_games;
+create policy "c4 readable by the people in the room" on public.c4_games
+  for select using (public.is_room_member(c4_games.room_id));
+
+drop policy if exists "c4 written by members" on public.c4_games;
+create policy "c4 written by members" on public.c4_games
+  for all using (public.is_room_member(c4_games.room_id))
+      with check (public.is_room_member(c4_games.room_id));

@@ -307,6 +307,31 @@ a permanent row in `auth.users` that nothing removes, so
 days that never joined a room and never answered anything. Run by hand, read the
 number, then decide — it is deliberately not scheduled.
 
+### What a guest can and cannot do
+
+An anonymous user gets the `authenticated` role, so every policy written for
+"a signed-in person" now also describes someone who costs nothing to create.
+Audited by impersonating one with RLS actually enforced, not by reading the
+policies. Held: `admins` (RLS on, zero policies — nobody can read it or insert
+themselves), other people's profiles (own-row, and UPDATE granted only on
+`username` and `avatar`), other people's boards, and draft puzzles — 0 of 1,891
+rows visible.
+
+Two did not hold, and both pre-dated guests. `rooms` was `SELECT USING (true)`,
+so a stranger listed all 14 rooms and their codes in one query; and
+`room_rounds` had `USING (member)` with `WITH CHECK (true)`, so a stranger
+inserted a round into a room they were not in — the probe did exactly that
+before the fix. Rooms, players, rounds and both boards are now members-only,
+with `find_room(code)` and `room_peek(code)` as the deliberate way in for
+someone holding a code.
+
+Accepted, and worth knowing: every live puzzle's answer is downloadable by any
+client, so a determined person can win a race — that is inherent to a quiz that
+runs in the browser. And `attempts` lets an account inflate its own
+`total_answered`, so the leaderboard is honour-system; guests are excluded from
+it, but a guest who claims their account keeps whatever numbers they arrived
+with.
+
 ## Brand: sticker on neon, but only where you are not reading
 
 The references are logo boards and packaging — saturated grounds, white fills,
