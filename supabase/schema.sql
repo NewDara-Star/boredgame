@@ -536,3 +536,39 @@ begin
 end $$;
 revoke all on function public.end_match(bigint) from public, anon;
 grant execute on function public.end_match(bigint) to authenticated;
+
+-- ============ how hard? ============
+-- A room could narrow by category but not by difficulty, so every room dealt
+-- from the whole bank — 360 of the 1,787 trivia questions are hard, which is
+-- roughly one in five whoever is sitting there.
+alter table public.rooms add column if not exists difficulty text[];
+
+-- NOTE: p_difficulty is defaulted so a client that has not reloaded still
+-- resolves, but `create or replace` with a new defaulted argument creates a
+-- SECOND function rather than replacing the first, and four-argument calls then
+-- fail with "function is not unique". Drop the old signature explicitly.
+drop function if exists public.set_room_setup(bigint, text, text, text[]);
+
+create or replace function public.set_room_setup(
+  p_room bigint, p_mode text, p_game text, p_categories text[],
+  p_difficulty text[] default null)
+returns void language plpgsql security definer set search_path to 'public' as $$
+begin
+  if not exists (select 1 from public.room_players p
+                 where p.room_id = p_room and p.user_id = auth.uid()) then
+    raise exception 'not a member of room %', p_room;
+  end if;
+  if p_mode not in ('race','squareoff','tictactoe','connect4','connect4trivia') then
+    raise exception 'unknown mode %', p_mode;
+  end if;
+  if p_difficulty is not null and exists (
+       select 1 from unnest(p_difficulty) d where d not in ('easy','medium','hard')) then
+    raise exception 'unknown difficulty in %', p_difficulty;
+  end if;
+  update public.rooms r set
+    mode = p_mode, game = p_game::game_key,
+    categories = nullif(p_categories, '{}'),
+    difficulty = nullif(p_difficulty, '{}')
+  where r.id = p_room and r.status = 'waiting';
+  update public.room_players p set ready = false where p.room_id = p_room;
+end $$;

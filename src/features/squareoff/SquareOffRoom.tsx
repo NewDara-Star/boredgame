@@ -20,12 +20,13 @@ const REVEAL_MS = 4500;
 const AWAY_MS = 50_000;
 
 export function SquareOffRoom({
-  roomId, code, status, categories, players, userId,
+  roomId, code, status, categories, difficulty, players, userId,
 }: {
-  roomId: number; code: string; status: RoomStatus; categories: string[] | null;
+  roomId: number; code: string; status: RoomStatus;
+  categories: string[] | null; difficulty: string[] | null;
   players: RoomPlayer[]; userId: string;
 }) {
-  const t = useTttRoom(roomId, userId, categories);
+  const t = useTttRoom(roomId, userId, { categories, difficulty });
   const [card, setCard] = useState<(MatchCard & { sig: string }) | null>(null);
   const [chosen, setChosen] = useState<string | null>(null);
   const [now, setNow] = useState(Date.now());

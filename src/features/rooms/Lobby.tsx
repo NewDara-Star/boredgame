@@ -4,6 +4,7 @@ import { stagger, riseIn, SPRING } from "@/shared/ui/motion";
 import { Avatar } from "@/shared/ui/Avatar";
 
 import { ROOM_GAMES } from "@/features/play/registry";
+import { LEVELS, type Level } from "@/features/play/scope";
 
 /**
  * The settings used to be chosen by the host before the room existed, which
@@ -13,17 +14,20 @@ import { ROOM_GAMES } from "@/features/play/registry";
  * whatever it was thirty seconds ago".
  */
 export function Lobby({
-  room, players, categories, userId, alone, onSetup, onReady,
+  room, players, categories, levels, userId, alone, onSetup, onReady,
 }: {
   room: Room;
   players: RoomPlayer[];
   categories: { name: string; count: number }[];
+  /** how many questions sit at each level, inside the chosen categories */
+  levels: Record<Level, number>;
   userId: string;
   alone: boolean;
-  onSetup: (mode: string, game: string, cats: string[]) => void;
+  onSetup: (mode: string, game: string, cats: string[], levels: string[]) => void;
   onReady: (ready: boolean) => void;
 }) {
   const picked = room.categories ?? [];
+  const levelsOn = room.difficulty ?? [];
   const me = players.find((p) => p.user_id === userId);
   const everyoneReady = players.length === room.capacity && players.every((p) => p.ready);
 
@@ -53,7 +57,7 @@ export function Lobby({
                 // one so a selection survives; switching to Picto race does not,
                 // and five of the categories have no trivia in them at all.
                 <button key={g.slug}
-                  onClick={() => onSetup(c.mode, c.game ?? room.game, c.game === room.game ? picked : [])}
+                  onClick={() => onSetup(c.mode, c.game ?? room.game, c.game === room.game ? picked : [], levelsOn)}
                 className={`piece press text-left p-3.5 ${on ? "bg-hot text-surface" : "bg-surface"}`}>
                 <span className="flex items-center gap-2">
                   <span className={`grid place-items-center h-5 w-5 rounded-full border-[3px] border-ink shrink-0
@@ -84,10 +88,14 @@ export function Lobby({
             {categories.map((c) => {
               const on = picked.includes(c.name);
               return (
-                <button key={c.name}
+                // Counted at the chosen difficulty, so a category can read 0 —
+                // Design has no easy questions in it. Picking it anyway would
+                // start a game with nothing to deal.
+                <button key={c.name} disabled={c.count === 0 && !on}
                   onClick={() => onSetup(room.mode, room.game,
-                    on ? picked.filter((n) => n !== c.name) : [...picked, c.name])}
+                    on ? picked.filter((n) => n !== c.name) : [...picked, c.name], levelsOn)}
                   className={`border-2 border-ink rounded-full px-2.5 py-1 text-[12px] font-bold
+                    disabled:opacity-40
                     ${on ? "bg-ink text-paper" : "bg-surface text-ink"}`}>
                   {c.name} <span className="opacity-60 tabular-nums">{c.count}</span>
                 </button>
@@ -100,7 +108,7 @@ export function Lobby({
               <span className="text-soft/60"> · {inPool} to draw from</span>
             </p>
             {picked.length > 0 && (
-              <button onClick={() => onSetup(room.mode, room.game, [])}
+              <button onClick={() => onSetup(room.mode, room.game, [], levelsOn)}
                 className="border-2 border-ink rounded-full px-2.5 py-1 text-[11px] font-black
                   uppercase tracking-wider bg-pop">Clear</button>
             )}
@@ -109,9 +117,40 @@ export function Lobby({
       </motion.section>
       )}
 
+      {hasBank && (
       <motion.section variants={riseIn}>
         <p className="text-[10px] font-black uppercase tracking-widest text-soft mb-2">
-          {hasBank ? "3" : "2"} · Both of you happy?
+          3 · How hard? <span className="text-soft/60">optional</span>
+        </p>
+        <div className="piece p-3.5">
+          <div className="grid grid-cols-3 gap-2">
+            {LEVELS.map((l) => {
+              const on = levelsOn.includes(l);
+              const n = levels[l] ?? 0;
+              return (
+                <button key={l} disabled={n === 0}
+                  onClick={() => onSetup(room.mode, room.game, picked,
+                    on ? levelsOn.filter((x) => x !== l) : [...levelsOn, l])}
+                  className={`piece press py-2.5 disabled:opacity-40
+                    ${on ? "bg-hot text-surface" : "bg-surface"}`}>
+                  <span className="block font-display text-base font-semibold capitalize">{l}</span>
+                  <span className="block text-[11px] font-bold tabular-nums opacity-70">{n}</span>
+                </button>
+              );
+            })}
+          </div>
+          <p className="text-[11px] font-black uppercase tracking-wider text-soft mt-3">
+            {levelsOn.length === 0
+              ? "Every level — about one question in five is hard"
+              : `${levelsOn.join(" and ")} only`}
+          </p>
+        </div>
+      </motion.section>
+      )}
+
+      <motion.section variants={riseIn}>
+        <p className="text-[10px] font-black uppercase tracking-widest text-soft mb-2">
+          {hasBank ? "4" : "2"} · Both of you happy?
         </p>
         <div className="grid gap-2">
           {players.map((p) => (

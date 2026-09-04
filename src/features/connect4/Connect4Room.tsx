@@ -18,14 +18,15 @@ const GRACE_MS = 6000;
 const REVEAL_MS = 4500;
 
 export function Connect4Room({
-  roomId, code, status, categories, players, userId, plain,
+  roomId, code, status, categories, difficulty, players, userId, plain,
 }: {
-  roomId: number; code: string; status: RoomStatus; categories: string[] | null;
+  roomId: number; code: string; status: RoomStatus;
+  categories: string[] | null; difficulty: string[] | null;
   players: RoomPlayer[]; userId: string;
   /** Plain Connect 4 drops on tap. Otherwise a column costs a right answer. */
   plain: boolean;
 }) {
-  const t = useC4Room(roomId, userId, categories, plain);
+  const t = useC4Room(roomId, userId, { categories, difficulty }, plain);
   const [card, setCard] = useState<(MatchCard & { sig: string }) | null>(null);
   const [chosen, setChosen] = useState<string | null>(null);
   const [now, setNow] = useState(Date.now());

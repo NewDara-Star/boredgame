@@ -5,6 +5,7 @@ import type { PlayItem } from "@/features/play/types";
 import { newGame, pick, drop, answer, advance, type Game, type Mark } from "./rules";
 import { decode, encode, type C4Row } from "./wire";
 import { deal } from "@/features/play/dealer";
+import { scopePool, emptyReason, type Scope } from "@/features/play/scope";
 import { attempt } from "@/shared/lib/write";
 
 /**
@@ -19,7 +20,11 @@ import { attempt } from "@/shared/lib/write";
  */
 export function useC4Room(
   roomId: number | null, userId: string | undefined,
-  categories: string[] | null = null,
+  /** What the room may deal from — categories and difficulty together. One
+      object rather than one parameter per axis, which is how this grew a
+      difficulty bug: the lobby had a category filter and the dealer had no
+      idea a level filter was even meant to exist. */
+  scope: Scope | null = null,
   /** Plain Connect 4: tapping a column drops the disc, no question attached. */
   plain = false,
 ) {
@@ -66,14 +71,18 @@ export function useC4Room(
     ? pool.find((i) => i.id === String(row.puzzle_id)) ?? null
     : null;
 
+  // Memoised on the scope's CONTENT, not its identity. The room row is replaced
+  // on every realtime tick, so a `{categories, difficulty}` built in the parent
+  // is a new object each render — and a changing nextPuzzleId changes `write`,
+  // which restarts the reveal timer that depends on it, forever.
+  const scopeKey = JSON.stringify([scope?.categories ?? null, scope?.difficulty ?? null]);
+
   const nextPuzzleId = useCallback(() => {
-    const scoped = categories?.length ? pool.filter((i) => categories.includes(i.category)) : pool;
+    const scoped = scopePool(pool, scope ?? {});
     // An empty scope is a misconfigured room, not a reason to quietly serve from
     // the whole bank as if the filter had never been set.
     if (scoped.length === 0) {
-      setPoolError(categories?.length
-        ? `Nothing live in ${categories.join(" or ")} for this game. End the match and set it up again.`
-        : "No questions are live for this game yet.");
+      setPoolError(emptyReason(scope ?? {}, pool.length === 0));
       return null;
     }
     setPoolError(null);
@@ -81,7 +90,7 @@ export function useC4Room(
     if (!q) return null;
     lastServed.current = q.id;
     return Number(q.id);
-  }, [pool, categories]);
+  }, [pool, scopeKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   /** Write a transition. `withPuzzle` is set whenever the new state needs a question. */
   const write = useCallback(async (next: Game, withPuzzle: boolean) => {

@@ -95,6 +95,9 @@ export interface Room {
   mode: "race" | "squareoff" | "tictactoe" | "connect4" | "connect4trivia";
   /** null means every category; stored on the room so both players share a pool */
   categories: string[] | null;
+  /** null means every level. Rooms drew from the whole bank before this existed,
+      so one trivia question in five was hard whoever was sitting there. */
+  difficulty: string[] | null;
   status: RoomStatus;
   best_of: number;
   /** seats. Both game modes are two-player, but the cap is data, not an assumption. */

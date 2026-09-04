@@ -28,7 +28,7 @@ export function RoomsPage() {
   const uname = profile?.username ?? user?.email?.split("@")[0] ?? "player";
 
   const {
-    room, players, round, currentPuzzle, error, categories,
+    room, players, round, currentPuzzle, error, categories, levels,
     join, startNextRound, claimWin, setup, setReady,
   } = useRoom(code, user?.id);
 
@@ -187,15 +187,17 @@ export function RoomsPage() {
       {iAmIn && waiting && players.length < room.capacity && <InviteCard code={room.code} waiting />}
 
       {iAmIn && waiting && (
-        <Lobby room={room} players={players} categories={categories} userId={user.id}
+        <Lobby room={room} players={players} categories={categories} levels={levels}
+          userId={user.id}
           alone={players.length < room.capacity}
-          onSetup={(m, g, c) => void setup(m, g, c)}
+          onSetup={(m, g, c, d) => void setup(m, g, c, d)}
           onReady={(r) => void setReady(r)} />
       )}
 
       {iAmIn && !waiting && room.mode === "squareoff" && (
         <SquareOffRoom roomId={room.id} code={room.code} status={room.status}
-          categories={room.categories} players={players} userId={user.id} />
+          categories={room.categories} difficulty={room.difficulty}
+          players={players} userId={user.id} />
       )}
 
       {iAmIn && !waiting && room.mode === "tictactoe" && (
@@ -205,7 +207,8 @@ export function RoomsPage() {
 
       {iAmIn && !waiting && board === "c4" && (
         <Connect4Room roomId={room.id} code={room.code} status={room.status}
-          categories={room.categories} players={players} userId={user.id}
+          categories={room.categories} difficulty={room.difficulty}
+          players={players} userId={user.id}
           plain={room.mode === "connect4"} />
       )}
 

@@ -3,6 +3,7 @@ import { supabase } from "@/shared/lib/supabase";
 import { attempt } from "@/shared/lib/write";
 import type { Room, RoomPlayer, RoomRound } from "@/shared/types/db";
 import { loadContent, shuffle } from "@/features/play/content";
+import { scopePool, emptyReason, levelCounts } from "@/features/play/scope";
 import type { PlayItem } from "@/features/play/types";
 
 /**
@@ -95,16 +96,14 @@ export function useRoom(code: string | undefined, userId: string | undefined) {
         supabase.from("rooms").update({ status: "finished" }).eq("id", room.id)));
       return;
     }
-    const scoped = room.categories?.length
-      ? pool.filter((i) => room.categories!.includes(i.category))
-      : pool;
+    const scoped = scopePool(pool, room);
     const pick = shuffle(scoped).find((i) => /^\d+$/.test(i.id));
     if (!pick) {
       // Two very different causes, and telling someone their database is empty
       // when they simply picked Music and Places is not a useful thing to say.
-      setError(room.categories?.length
-        ? `Nothing live in ${room.categories.join(" or ")} — make a room with a wider pool.`
-        : "Multiplayer needs puzzles stored in the database, not bundled ones.");
+      setError(pool.length === 0
+        ? "Multiplayer needs puzzles stored in the database, not bundled ones."
+        : emptyReason(room, false));
       return;
     }
     setError(await attempt("Starting the round",
@@ -132,17 +131,26 @@ export function useRoom(code: string | undefined, userId: string | undefined) {
   /** Derived from the pool already loaded for this room's game, so the counts
       always describe what this room can actually serve. */
   const categories = (() => {
+    // Counted at the room's chosen difficulty, not over the whole bank: a chip
+    // reading "Maths 198" beside an Easy-only room is a lie about what it deals.
     const tally = new Map<string, number>();
-    for (const i of pool) if (i.category) tally.set(i.category, (tally.get(i.category) ?? 0) + 1);
+    for (const i of scopePool(pool, { difficulty: room?.difficulty }))
+      if (i.category) tally.set(i.category, (tally.get(i.category) ?? 0) + 1);
     return [...tally].map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count);
   })();
 
-  const setup = useCallback(async (mode: string, game: string, cats: string[]) => {
-    if (!supabase || !room) return;
-    setError(await attempt("Changing the setup", supabase.rpc("set_room_setup", {
-      p_room: room.id, p_mode: mode, p_game: game, p_categories: cats,
-    })));
-  }, [room]);
+  /** Counted the other way round, so each pair of numbers describes the pool
+      you get by adding that one filter to what is already chosen. */
+  const levels = levelCounts(pool, room?.categories);
+
+  const setup = useCallback(
+    async (mode: string, game: string, cats: string[], levels: string[]) => {
+      if (!supabase || !room) return;
+      setError(await attempt("Changing the setup", supabase.rpc("set_room_setup", {
+        p_room: room.id, p_mode: mode, p_game: game,
+        p_categories: cats, p_difficulty: levels,
+      })));
+    }, [room]);
 
   const setReady = useCallback(async (ready: boolean) => {
     if (!supabase || !room || !userId) return;
@@ -151,7 +159,7 @@ export function useRoom(code: string | undefined, userId: string | undefined) {
   }, [room, userId]);
 
   return {
-    room, players, round, currentPuzzle, error, categories,
+    room, players, round, currentPuzzle, error, categories, levels,
     join, startNextRound, claimWin, setup, setReady,
   };
 }
@@ -165,7 +173,7 @@ export async function createRoom(userId: string, username: string): Promise<stri
   const { data, error } = await supabase
     .from("rooms")
     .insert({ code, host_id: userId, game: "trivia", mode: "squareoff",
-              status: "waiting", best_of: 5, categories: null })
+              status: "waiting", best_of: 5, categories: null, difficulty: null })
     .select().single();
   if (error || !data) return null;
   // Creating a room is joining it. Making the host click "Join this room" on a
