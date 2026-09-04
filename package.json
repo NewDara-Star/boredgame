@@ -8,7 +8,8 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-    "check:squareoff": "node --experimental-strip-types scripts/check-squareoff.mts"
+    "check:squareoff": "node --experimental-strip-types scripts/check-squareoff.mts",
+    "check:options": "node --experimental-strip-types scripts/check-options.mts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.0",

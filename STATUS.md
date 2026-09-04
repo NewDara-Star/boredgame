@@ -1,6 +1,6 @@
 # STATUS — BoredGame
 
-Last updated: 2026-09-04 (Square Off)
+Last updated: 2026-09-04 (option-order fix)
 
 ## Verified working
 
@@ -17,6 +17,7 @@ Each claim below was checked by running it, not by reading the code.
 | Leaderboard podium, list and sticky row render | stubbed 8 players; podium, rows 4–8 and the signed-out CTA all correct |
 | Locked vs unlocked ranks read differently | profile screenshot: 5 unlocked in colour, 5 greyed with "n to go" |
 | Type is the real Fredoka/Nunito | fonts substituted locally from `@fontsource-variable`, not the system fallback |
+| Options are not guessable by position | `npm run check:options` — seeded shuffle spreads answer-first input 25.1/25.5/24.9/24.5 over 2000 ids |
 | Square Off rules hold | `npm run check:squareoff` — 22 assertions, including the steal and turn order |
 | A full solo Square Off game plays | Playwright drove 60 turns to "The bot wins", no console errors |
 | The steal fires and is narrated correctly | screenshot: "You miss. The bot gets one shot at it." |
@@ -51,11 +52,11 @@ tabs do not fit 390px, and the header now carries status — streak and rank bad
 
 ## Not yet verified
 
-- **Head-to-head rooms — both modes.** The realtime code is written and
-  typechecks, and Square Off's rules are unit-checked and proven in solo play,
-  but no room has ever had two browsers in it. The parts that only exist in the
-  two-player path — seat assignment, who writes which transition, the shared
-  clock — are reasoned about, not observed. Treat as unproven.
+- **Rooms now have one real two-player game behind them.** A Square Off room was
+  played to completion by two people on 4 September — the first time any room
+  has had two browsers in it. Seat assignment, the transition writer rule and
+  the shared clock all held. The race mode still has not been played by two
+  people, and no room has been tested across a disconnect.
 - **The streak across a real day boundary.** `touch_streak` is unit-obvious and
   the same-day path is exercised, but nothing has yet played on two consecutive
   real days. Worth checking tomorrow.

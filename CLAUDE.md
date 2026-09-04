@@ -220,6 +220,28 @@ Rooms carry a `mode` (`race` | `squareoff`) rather than there being a second
 room system. Board state lives in `ttt_games`, one row per room, nine characters
 of text for the board.
 
+## Option order is never storage order
+
+Every trivia question was authored and stored with the correct answer in
+`choices[1]`. Solo Trivia and solo Square Off shuffle on render, so it looked
+fine; the room screens rendered the stored order, and the top option was the
+answer 100% of the time. A player found it in about ten minutes.
+
+Two fixes, and the second is the one that matters:
+
+1. The stored arrays were permuted once in the database, so the systematic bias
+   is gone from the data.
+2. `loadContent` now permutes with `shuffleSeeded(choices, puzzleId)` on the way
+   out, so **no screen can depend on storage order again**. It is seeded rather
+   than random because two browsers in a room have to see the same arrangement —
+   a per-client random shuffle means the players are not looking at the same
+   thing. Solo screens shuffle again on top of that, so a repeated question does
+   not sit in the same place twice.
+
+Never render `choices` straight from a row you fetched yourself, and never
+shuffle again inside a room screen. `npm run check:options` asserts the seeded
+permutation spreads a worst-case answer-first input across all four slots.
+
 ## Status, streaks and the leaderboard
 
 `profiles` carries `streak`, `best_streak` and `last_played`. None of them are

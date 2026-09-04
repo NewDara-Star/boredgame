@@ -1,4 +1,5 @@
 import { supabase } from "@/shared/lib/supabase";
+import { shuffleSeeded } from "@/shared/lib/shuffle";
 import { PICTO_SEED } from "@/shared/data/picto";
 import { TRIVIA_SEED } from "@/shared/data/trivia";
 import type { Puzzle, GameKey } from "@/shared/types/db";
@@ -24,7 +25,7 @@ function fromSeedTrivia(): PlayItem[] {
     game: "trivia" as const,
     render: "text" as const,
     prompt: q.prompt,
-    choices: q.choices.slice(),
+    choices: shuffleSeeded(q.choices, q.slug),
     answer: q.choices[0],
     altHint: q.alt_hint,
     charHint: q.char_hint,
@@ -44,7 +45,13 @@ function fromRow(row: PuzzleRow): PlayItem {
     spec: row.spec ?? undefined,
     imageUrl: row.image_url ?? undefined,
     prompt: row.prompt ?? undefined,
-    choices: row.choices ?? undefined,
+    // Seeded on the puzzle id, so the order is stable for everyone. Every
+    // authored question was stored with the answer in position 1, which any
+    // screen rendering the stored order turned into a 100% tell — that is what
+    // happened in rooms. Permuting here means no screen can depend on storage
+    // order again, and two browsers in a room still see the same arrangement,
+    // which a per-client random shuffle would not give them.
+    choices: row.choices ? shuffleSeeded(row.choices, String(row.id)) : undefined,
     answer: row.answer,
     altHint: row.alt_hint ?? undefined,
     charHint: row.char_hint ?? undefined,
@@ -73,11 +80,5 @@ export async function loadContent(game: GameKey): Promise<PlayItem[]> {
   return game === "picto" ? fromSeedPicto() : fromSeedTrivia();
 }
 
-export function shuffle<T>(arr: T[]): T[] {
-  const a = arr.slice();
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
+// Re-exported so the many call sites that reach for `shuffle` here keep working.
+export { shuffle, shuffleSeeded } from "@/shared/lib/shuffle";

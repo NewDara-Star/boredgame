@@ -113,6 +113,8 @@ export function SquareOffRoom({
         <div className="space-y-3">
           {asking && <Timer fraction={Math.max(0, left / ASK_MS)} />}
           <QuestionPanel
+            // Already permuted by loadContent, seeded on the puzzle id — do NOT
+            // shuffle again here, or the two players see different orders.
             item={t.item} options={t.item.choices ?? []} chosen={chosen}
             revealed={revealed} locked={!mine || revealed}
             onAnswer={(opt) => { setChosen(opt); t.submit(opt === t.item!.answer); }} />
