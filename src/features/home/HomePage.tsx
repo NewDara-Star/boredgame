@@ -8,6 +8,7 @@ import { useAuth } from "@/app/providers/AuthProvider";
 import { rankFor } from "@/features/play/rank";
 import { RankBadge } from "@/features/play/RankBadge";
 import { stagger, riseIn, popIn } from "@/shared/ui/motion";
+import { Starburst } from "@/shared/ui/Wordmark";
 
 export function HomePage() {
   const { user, offline } = useAuth();
@@ -18,10 +19,14 @@ export function HomePage() {
 
   return (
     <motion.div variants={stagger(0.09)} initial="hidden" animate="show">
-      <motion.h1 variants={riseIn} className="text-[42px] leading-[0.95] font-semibold">
-        Two games.<br />
-        <span className="text-picto">Pick your poison.</span>
-      </motion.h1>
+      <motion.div variants={riseIn} className="relative">
+        <Starburst size={52} fill="var(--color-hot)"
+          className="absolute -top-3 right-1 rotate-12" />
+        <h1 className="text-[42px] leading-[0.95] font-semibold relative">
+          Three games.<br />
+          <span className="text-hot">Pick your poison.</span>
+        </h1>
+      </motion.div>
       <motion.p variants={riseIn} className="text-soft mt-3 text-[15px] max-w-sm font-semibold">
         Short rounds, no ads, no feed. Built to be opened for four minutes and closed again.
       </motion.p>
@@ -32,8 +37,8 @@ export function HomePage() {
             <div className="h-24 text-picto mb-4">
               <PictoRenderer spec={{ items: teaser.items }} animate seed={teaser.slug} />
             </div>
-            <span className="inline-block text-[10px] font-black uppercase tracking-widest
-              bg-picto text-surface rounded-full px-2.5 py-1">Word puzzle</span>
+            <span className="sticker inline-block text-[10px] font-black uppercase tracking-widest
+              bg-picto text-surface px-2.5 py-1">Word puzzle</span>
             <h2 className="text-2xl font-semibold mt-2">Picto Phrase</h2>
             <p className="text-sm text-soft mt-1 font-semibold">Read the picture, name the phrase.</p>
             <p className="text-xs text-soft/70 mt-3 font-bold">{counts.picto} puzzles</p>
@@ -49,8 +54,8 @@ export function HomePage() {
                 transition={{ duration: 2.4, repeat: Infinity, repeatDelay: 2.5, ease: "easeInOut" }}
               >★</motion.span>
             </div>
-            <span className="inline-block text-[10px] font-black uppercase tracking-widest
-              bg-trivia text-surface rounded-full px-2.5 py-1">Quiz</span>
+            <span className="sticker sticker-r inline-block text-[10px] font-black uppercase tracking-widest
+              bg-trivia text-surface px-2.5 py-1">Quiz</span>
             <h2 className="text-2xl font-semibold mt-2">Star Trivia</h2>
             <p className="text-sm text-soft mt-1 font-semibold">Four options, one right, ten questions.</p>
             <p className="text-xs text-soft/70 mt-3 font-bold">{counts.trivia} questions</p>
@@ -73,8 +78,8 @@ export function HomePage() {
                 </g>
               </motion.svg>
             </div>
-            <span className="inline-block text-[10px] font-black uppercase tracking-widest
-              bg-ink text-paper rounded-full px-2.5 py-1">Board game</span>
+            <span className="sticker inline-block text-[10px] font-black uppercase tracking-widest
+              bg-hot text-surface px-2.5 py-1">Board game</span>
             <h2 className="text-2xl font-semibold mt-2">Square Off</h2>
             <p className="text-sm text-soft mt-1 font-semibold">Answer right to claim a square.</p>
             <p className="text-xs text-soft/70 mt-3 font-bold">Solo or head-to-head</p>

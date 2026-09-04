@@ -11,16 +11,23 @@
    Deliberately light-only. A toy in a dark room is a different product.
 --------------------------------------------------------------------------- */
 @theme {
-  --color-paper:    #F3EDE3;
+  /* Light enough to read four minutes of questions on, hot enough that the
+     brand moments — header, nav, celebrations, the share card — carry the
+     sticker energy. The references are logo boards and packaging; a saturated
+     page under 15px option text is a different and worse product. */
+  --color-paper:    #FBF4E6;
   --color-surface:  #FFFFFF;
-  --color-sand:     #E7DFD1;
-  --color-ink:      #191510;
-  --color-soft:     #6B6154;
-  --color-picto:    #EF5A2A;
-  --color-trivia:   #4B5BD6;
-  --color-pop:      #FFC93C;
-  --color-good:     #17914B;
-  --color-bad:      #D93A34;
+  --color-sand:     #EFE3CB;
+  --color-ink:      #14100D;
+  --color-soft:     #6A6155;
+
+  --color-hot:      #FF2E88;
+  --color-acid:     #C8F831;
+  --color-pop:      #FFD028;
+  --color-picto:    #FF5A1F;
+  --color-trivia:   #2B4BFF;
+  --color-good:     #10A04E;
+  --color-bad:      #E31B33;
 
   --font-display: "Fredoka", system-ui, sans-serif;
   --font-sans: "Nunito", system-ui, -apple-system, sans-serif;
@@ -63,6 +70,17 @@ h1, h2, h3, .display { font-family: var(--font-display); font-weight: 600; lette
   .press:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 7px 0 var(--color-ink); }
   .press:active:not(:disabled) { transform: translateY(5px); box-shadow: 0 0 0 var(--color-ink); }
   .press:disabled { opacity: .45; }
+
+  /* The reference boards are all the same move: white fill, heavy dark outline,
+     hard offset shadow, sitting slightly off-square. This is that, for anything
+     that should read as a stuck-on sticker rather than a UI element. */
+  .sticker {
+    border: 3px solid var(--color-ink);
+    border-radius: 999px;
+    box-shadow: 3px 4px 0 var(--color-ink);
+    transform: rotate(-1.5deg);
+  }
+  .sticker-r { transform: rotate(1.5deg); }
 }
 
 :focus-visible { outline: 3px solid var(--color-trivia); outline-offset: 3px; }

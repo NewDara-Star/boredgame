@@ -5,12 +5,11 @@
  * phone it was played on.
  */
 
-const PAPER = "#F3EDE3";
-const INK = "#191510";
-const SAND = "#E7DFD1";
-const POP = "#FFC93C";
-const PICTO = "#EF5A2A";
-const TRIVIA = "#4B5BD6";
+const HOT = "#FF2E88";
+const INK = "#14100D";
+const POP = "#FFD028";
+const PICTO = "#FF5A1F";
+const TRIVIA = "#2B4BFF";
 const SIZE = 1080;
 
 function rounded(c: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
@@ -25,13 +24,23 @@ function rounded(c: CanvasRenderingContext2D, x: number, y: number, w: number, h
 
 /** Outline plus a hard offset shadow — the same primitive as `.piece` in CSS. */
 function piece(c: CanvasRenderingContext2D, x: number, y: number, w: number, h: number,
-               r: number, fill: string, drop = 12) {
+               r: number, fill: string, drop = 14) {
   c.fillStyle = INK;
   rounded(c, x, y + drop, w, h, r); c.fill();
   c.fillStyle = fill;
   rounded(c, x, y, w, h, r); c.fill();
-  c.lineWidth = 7; c.strokeStyle = INK;
+  c.lineWidth = 8; c.strokeStyle = INK;
   rounded(c, x, y, w, h, r); c.stroke();
+}
+
+/** White fill, heavy ink outline, hard offset shadow. The whole brand in one call. */
+function sticker(c: CanvasRenderingContext2D, text: string, x: number, y: number,
+                 size: number, fill = "#FFFFFF", drop = 8) {
+  c.font = `600 ${size}px Fredoka, system-ui, sans-serif`;
+  c.lineJoin = "round"; c.miterLimit = 2;
+  c.lineWidth = size * 0.26; c.strokeStyle = INK;
+  c.strokeText(text, x, y + drop); c.fillStyle = INK; c.fillText(text, x, y + drop);
+  c.strokeText(text, x, y); c.fillStyle = fill; c.fillText(text, x, y);
 }
 
 function mark(c: CanvasRenderingContext2D, kind: "x" | "o", cx: number, cy: number, s: number) {
@@ -46,14 +55,21 @@ function mark(c: CanvasRenderingContext2D, kind: "x" | "o", cx: number, cy: numb
   c.stroke();
 }
 
+function star(c: CanvasRenderingContext2D, cx: number, cy: number, r: number, fill: string) {
+  c.save(); c.translate(cx, cy); c.fillStyle = fill; c.beginPath();
+  const pts = [[0, -1], [0.2, -0.2], [1, 0], [0.2, 0.2], [0, 1], [-0.2, 0.2], [-1, 0], [-0.2, -0.2]];
+  pts.forEach(([px, py], i) => (i ? c.lineTo(px * r, py * r) : c.moveTo(px * r, py * r)));
+  c.closePath(); c.fill(); c.restore();
+}
+
 /** Shrinks the type until the name fits rather than letting it run off the card. */
-function fitText(c: CanvasRenderingContext2D, text: string, max: number, start: number) {
+function fitSize(c: CanvasRenderingContext2D, text: string, max: number, start: number) {
   let size = start;
   do {
     c.font = `600 ${size}px Fredoka, system-ui, sans-serif`;
     size -= 2;
   } while (c.measureText(text).width > max && size > 20);
-  return text;
+  return size;
 }
 
 export interface Side { name: string; score: number; mark: "x" | "o" }
@@ -67,50 +83,51 @@ export async function drawMatchCard(code: string, a: Side, b: Side): Promise<str
   const c = canvas.getContext("2d");
   if (!c) throw new Error("canvas unavailable");
 
-  c.fillStyle = PAPER; c.fillRect(0, 0, SIZE, SIZE);
-  c.fillStyle = SAND;
-  for (let y = 30; y < SIZE; y += 46) {
-    for (let x = 30; x < SIZE; x += 46) { c.beginPath(); c.arc(x, y, 3.2, 0, Math.PI * 2); c.fill(); }
+  c.fillStyle = HOT; c.fillRect(0, 0, SIZE, SIZE);
+
+  // The tonal repeat behind everything, lifted straight off the reference boards.
+  c.save();
+  c.globalAlpha = 0.09; c.fillStyle = "#FFFFFF";
+  c.font = "600 132px Fredoka, system-ui, sans-serif";
+  c.textAlign = "left"; c.textBaseline = "alphabetic";
+  for (let row = 0, y = 120; y < SIZE + 140; y += 128, row++) {
+    c.fillText("SQUARE OFF  SQUARE OFF", -160 + (row % 2) * 130, y);
   }
+  c.restore();
 
   c.textAlign = "center"; c.textBaseline = "middle";
-  c.fillStyle = INK;
-  c.font = "800 30px Nunito, system-ui, sans-serif";
-  c.fillText("S Q U A R E   O F F", SIZE / 2, 110);
+  star(c, 128, 150, 62, POP);
+  star(c, SIZE - 118, 196, 44, POP);
 
   const winner = a.score === b.score ? null : a.score > b.score ? a : b;
-  c.font = "600 62px Fredoka, system-ui, sans-serif";
-  c.fillText(winner ? `${winner.name} wins the session` : "All square", SIZE / 2, 186);
+  const headline = winner ? `${winner.name} wins` : "All square";
+  const hs = fitSize(c, headline, SIZE - 200, 96);
+  sticker(c, headline, SIZE / 2, 200, hs, POP, 10);
 
-  // Two panels, the winner's in yellow.
   const panelW = 400, panelH = 400, gap = 40;
   const left = (SIZE - panelW * 2 - gap) / 2;
   [a, b].forEach((side, i) => {
     const x = left + i * (panelW + gap);
-    const y = 270;
-    const won = winner === side;
-    piece(c, x, y, panelW, panelH, 46, won ? POP : "#FFFFFF");
-    mark(c, side.mark, x + panelW / 2, y + 108, 96);
+    const y = 300;
+    piece(c, x, y, panelW, panelH, 48, winner === side ? POP : "#FFFFFF");
+    mark(c, side.mark, x + panelW / 2, y + 110, 96);
     c.fillStyle = INK;
-    fitText(c, side.name, panelW - 60, 46);
-    c.fillText(side.name, x + panelW / 2, y + 218);
-    c.font = "600 150px Fredoka, system-ui, sans-serif";
-    c.fillText(String(side.score), x + panelW / 2, y + 320);
+    c.font = `600 ${fitSize(c, side.name, panelW - 60, 46)}px Fredoka, system-ui, sans-serif`;
+    c.fillText(side.name, x + panelW / 2, y + 222);
+    c.font = "600 152px Fredoka, system-ui, sans-serif";
+    c.fillText(String(side.score), x + panelW / 2, y + 322);
   });
 
-  piece(c, left, 740, panelW * 2 + gap, 132, 38, "#FFFFFF");
+  piece(c, left, 772, panelW * 2 + gap, 118, 40, "#FFFFFF");
   c.fillStyle = INK;
-  c.font = "800 26px Nunito, system-ui, sans-serif";
-  c.fillText(`ROOM ${code}`, SIZE / 2, 786);
-  c.fillStyle = "#6B6154";
+  c.font = "800 27px Nunito, system-ui, sans-serif";
+  c.fillText(`ROOM ${code}`, SIZE / 2, 812);
+  c.fillStyle = "#6A6155";
   c.font = "700 24px Nunito, system-ui, sans-serif";
   c.fillText(new Date().toLocaleDateString(undefined,
-    { day: "numeric", month: "long", year: "numeric" }), SIZE / 2, 830);
+    { day: "numeric", month: "long", year: "numeric" }), SIZE / 2, 852);
 
-  c.font = "600 34px Fredoka, system-ui, sans-serif";
-  c.fillStyle = INK; c.fillText("Bored", SIZE / 2 - 42, 970);
-  c.fillStyle = PICTO; c.fillText("Game", SIZE / 2 + 46, 970);
-
+  sticker(c, "BoredGame", SIZE / 2, 990, 58, "#FFFFFF", 8);
   return canvas.toDataURL("image/png");
 }
 

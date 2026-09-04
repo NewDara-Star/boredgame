@@ -209,8 +209,8 @@ export function RoomsPage() {
                 <button key={opt}
                   onClick={() => { if (opt === currentPuzzle.answer) void claimWin(); }}
                   className="piece press flex items-center gap-3 text-left px-4 py-4 bg-surface"
-                  style={{ borderLeft: `4px solid ${["#EF5A2A","#4B5BD6","#FFC93C","#17914B"][i % 4]}` }}>
-                  <span aria-hidden style={{ color: ["#EF5A2A","#4B5BD6","#FFC93C","#17914B"][i % 4] }}>
+                  style={{ borderLeft: `4px solid ${["#FF5A1F","#2B4BFF","#FFD028","#10A04E"][i % 4]}` }}>
+                  <span aria-hidden style={{ color: ["#FF5A1F","#2B4BFF","#FFD028","#10A04E"][i % 4] }}>
                     {["▲","◆","●","■"][i % 4]}
                   </span>
                   <span className="text-[15px] font-bold">{opt}</span>

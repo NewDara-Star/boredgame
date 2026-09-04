@@ -1,4 +1,4 @@
-const HUES = ["#EF5A2A", "#4B5BD6", "#FFC93C", "#17914B", "#D93A34", "#6B6154"];
+const HUES = ["#FF5A1F", "#2B4BFF", "#FFD028", "#10A04E", "#FF2E88", "#C8F831"];
 
 /** Same id, same colour, forever — including across devices, so it reads as identity. */
 function hue(seed: string) {
@@ -12,7 +12,7 @@ export function Avatar({
 }: { id: string; name: string; size?: number; className?: string }) {
   const bg = hue(id);
   // Yellow is the one colour in the palette that ink reads better on than paper.
-  const fg = bg === "#FFC93C" ? "#191510" : "#FFFFFF";
+  const fg = bg === "#FFD028" || bg === "#C8F831" ? "#14100D" : "#FFFFFF";
   return (
     <span
       className={`piece grid place-items-center shrink-0 font-display font-semibold ${className}`}

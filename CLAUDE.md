@@ -220,6 +220,26 @@ Rooms carry a `mode` (`race` | `squareoff`) rather than there being a second
 room system. Board state lives in `ttt_games`, one row per room, nine characters
 of text for the board.
 
+## Brand: sticker on neon, but only where you are not reading
+
+The references are logo boards and packaging — saturated grounds, white fills,
+heavy ink outlines, hard offset shadows. Translated literally that would be a
+hot pink page under 15px option text, which is a worse product. So the split is:
+
+- **Reading surfaces stay light.** Paper `#FBF4E6`, dot grid, questions and
+  options on white pieces. Nothing changed about legibility.
+- **Brand moments carry the neon.** Header is `--color-hot` (#FF2E88), the phone
+  nav bar is ink with a hot active pill, and the share card is a full pink board.
+
+`--color-hot` and `--color-acid` are the new pair; picto orange and trivia blue
+were pushed hotter (#FF5A1F, #2B4BFF) rather than replaced, because they are the
+two games' identities and people already associate them.
+
+The logo is now `Wordmark` — real SVG, not two styled spans, so it can go on the
+share card and the favicon as well as the DOM. `textLength` pins its width so it
+is the same shape before and after the webfont loads, the same trick the rebus
+renderer uses. `.sticker` in index.css is the reusable version of the treatment.
+
 ## The signed-out player is a different screen
 
 Profile used to render the full dashboard for guests with the sign-in form

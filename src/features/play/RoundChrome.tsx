@@ -15,7 +15,7 @@ export function Hud({ index, total, score, streak, accent }:
           <motion.span key={i}
             className="h-2.5 flex-1 rounded-full border-2 border-ink"
             initial={false}
-            animate={{ backgroundColor: i <= index ? accent : "#E7DFD1" }}
+            animate={{ backgroundColor: i <= index ? accent : "#EFE3CB" }}
             transition={{ duration: 0.25 }} />
         ))}
       </div>
@@ -67,7 +67,7 @@ export function HintBar({ item, used, onUse }:
 export function Burst({ show }: { show: boolean }) {
   const still = useReducedMotion();
   if (still) return null;
-  const bits = ["#EF5A2A", "#4B5BD6", "#FFC93C", "#17914B", "#EF5A2A", "#FFC93C", "#4B5BD6", "#17914B"];
+  const bits = ["#FF5A1F", "#2B4BFF", "#FFD028", "#10A04E", "#FF5A1F", "#FFD028", "#2B4BFF", "#10A04E"];
   return (
     <AnimatePresence>
       {show && (

@@ -28,7 +28,7 @@ export function unlockFrom(o: RoundOutcome | null): Unlock | null {
   return null;
 }
 
-const BITS = ["#EF5A2A", "#4B5BD6", "#FFC93C", "#17914B"];
+const BITS = ["#FF5A1F", "#2B4BFF", "#FFD028", "#10A04E"];
 
 /** Paper confetti: flat squares on an ink outline, same as every other piece. */
 function Confetti() {

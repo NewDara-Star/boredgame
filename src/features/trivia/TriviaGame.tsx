@@ -8,7 +8,7 @@ import { Hud, Reveal, Summary, Burst } from "@/features/play/RoundChrome";
 import { SPRING, stagger, riseIn } from "@/shared/ui/motion";
 
 const SHAPES = ["▲", "◆", "●", "■"];
-const HUES = ["#EF5A2A", "#4B5BD6", "#FFC93C", "#17914B"];
+const HUES = ["#FF5A1F", "#2B4BFF", "#FFD028", "#10A04E"];
 
 export function TriviaGame() {
   const [cats, setCats] = useState<string[]>(() => readFilter("trivia"));
@@ -72,7 +72,7 @@ export function TriviaGame() {
   return (
     <div>
       {filterBar}
-      <Hud index={r.index} total={r.items.length} score={r.score} streak={r.streak} accent="#4B5BD6" />
+      <Hud index={r.index} total={r.items.length} score={r.score} streak={r.streak} accent="#2B4BFF" />
 
       <AnimatePresence mode="wait">
         <motion.div key={item.id}

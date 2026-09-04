@@ -3,7 +3,7 @@ import { stagger, riseIn } from "@/shared/ui/motion";
 import type { PlayItem } from "@/features/play/types";
 
 const SHAPES = ["▲", "◆", "●", "■"];
-const HUES = ["#EF5A2A", "#4B5BD6", "#FFC93C", "#17914B"];
+const HUES = ["#FF5A1F", "#2B4BFF", "#FFD028", "#10A04E"];
 
 export function Timer({ fraction }: { fraction: number }) {
   return (

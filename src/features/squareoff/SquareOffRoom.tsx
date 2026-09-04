@@ -18,7 +18,7 @@ export function SquareOffRoom({
   players: RoomPlayer[]; userId: string; isHost: boolean;
 }) {
   const t = useTttRoom(roomId, userId, players, categories);
-  const [saving, setSaving] = useState(false);
+  const [card, setCard] = useState<{ sig: string; url: string } | null>(null);
   const [chosen, setChosen] = useState<string | null>(null);
   const [now, setNow] = useState(Date.now());
 
@@ -51,6 +51,27 @@ export function SquareOffRoom({
     score: players.find((p) => p.user_id === t.seats[m])?.score ?? 0,
   }));
 
+  // Drawn as soon as the match ends and shown on screen, not hidden behind a
+  // download. A file you have to save before you can look at it is a file most
+  // people never see — and `<a download>` is unreliable on iOS anyway, where the
+  // image opens instead of saving. On screen you can always long-press it.
+  const done = status === "finished";
+  // Seats come from the ttt row and scores from room_players, both of which
+  // arrive after the first render. Drawing on "finished" alone produced a card
+  // that said Host 0 / Guest 0 while the panel above it read 3-1, and then
+  // never redrew. The signature also means a rematch redraws rather than
+  // showing a stale scoreline.
+  const seated = !!t.seats.x && !!t.seats.o && players.length >= 2;
+  const sig = `${code}|${sides[0].name}:${sides[0].score}|${sides[1].name}:${sides[1].score}`;
+  useEffect(() => {
+    if (!done || !seated || card?.sig === sig) return;
+    let cancelled = false;
+    void drawMatchCard(code, sides[0], sides[1])
+      .then((url) => { if (!cancelled) setCard({ sig, url }); })
+      .catch(() => { /* canvas unavailable; the score is still on screen */ });
+    return () => { cancelled = true; };
+  }, [done, seated, sig, card?.sig, code, sides]);
+
   // Quitting ends the session, not the game — the tally survives the rematches
   // that came before it, which is the only reason to keep score at all.
   if (status === "finished") {
@@ -70,16 +91,23 @@ export function SquareOffRoom({
           <p className="text-xs font-bold opacity-70 mt-1">{a.name} v {b.name}</p>
         </div>
 
-        <button
-          disabled={saving}
-          onClick={async () => {
-            setSaving(true);
-            try { downloadCard(await drawMatchCard(code, a, b), code); }
-            finally { setSaving(false); }
-          }}
-          className="piece press w-full py-4 font-display text-lg font-semibold bg-pop">
-          {saving ? "Drawing…" : "Save the result as an image"}
-        </button>
+        {card ? (
+          <>
+            <img src={card.url} alt={`Square Off result: ${a.name} ${a.score}, ${b.name} ${b.score}`}
+              className="w-full rounded-2xl border-[3px] border-ink" />
+            <button onClick={() => downloadCard(card.url, code)}
+              className="piece press w-full py-4 font-display text-lg font-semibold bg-pop">
+              Save the image
+            </button>
+            <p className="text-[11px] font-bold text-soft text-center">
+              On a phone you can also press and hold the picture to save or share it.
+            </p>
+          </>
+        ) : (
+          <div className="piece grid place-items-center aspect-square bg-surface">
+            <p className="text-sm font-bold text-soft">Drawing the result…</p>
+          </div>
+        )}
 
         <Link to="/rooms" className="piece press block w-full py-3.5 text-center font-display font-semibold">
           New room
@@ -147,6 +175,16 @@ export function SquareOffRoom({
       <p className="text-center text-[15px] font-bold text-soft min-h-[24px]">
         {describe(g, names, t.myMark)}
       </p>
+
+      {/* Reachable at any point. Offering "quit" only after a game ends means a
+          match abandoned mid-board can never produce a result card. */}
+      {g.phase !== "over" && (
+        <button onClick={() => void t.quit()}
+          className="block mx-auto text-[11px] font-black uppercase tracking-wider
+            text-soft underline underline-offset-4">
+          End match and see the score
+        </button>
+      )}
 
       {g.phase === "over" ? (
         <motion.div variants={popIn} initial="hidden" animate="show"
