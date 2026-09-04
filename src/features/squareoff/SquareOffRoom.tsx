@@ -5,10 +5,16 @@ import type { RoomPlayer, RoomStatus } from "@/shared/types/db";
 import { popIn } from "@/shared/ui/motion";
 import { Board } from "./Board";
 import { QuestionPanel, Timer } from "./QuestionPanel";
-import { describe, type Mark } from "./rules";
+import { describe, timeoutWriter, type Mark } from "./rules";
 import { useTttRoom } from "./useTttRoom";
 import { drawMatchCard, downloadCard } from "./matchCard";
 import { ASK_MS } from "./useSquareOff";
+
+/** How long after the clock runs out before the other player takes over. Long
+    enough that a slow network is not mistaken for someone leaving. */
+const GRACE_MS = 6000;
+/** No heartbeat for this long and we say so on screen. */
+const AWAY_MS = 50_000;
 
 export function SquareOffRoom({
   roomId, code, status, categories, players, userId,
@@ -26,23 +32,27 @@ export function SquareOffRoom({
   const mine = asking && g.answerer === t.myMark;
 
   // One clock, derived from when the question was written, so both screens agree.
+  // It runs outside a question too, or the "they have gone" notice never appears
+  // on the screen most likely to be stuck.
   useEffect(() => {
-    if (!asking) return;
-    const id = setInterval(() => setNow(Date.now()), 120);
+    const id = setInterval(() => setNow(Date.now()), asking ? 120 : 1000);
     return () => clearInterval(id);
-  }, [asking, t.askedAt]);
+  }, [asking]);
 
   useEffect(() => { setChosen(null); }, [t.item?.id, g?.steal]);
 
-  // Whoever owes the answer also owes the timeout, or nobody does. The ref stops
-  // the tick firing it again in every frame between the write and the echo back.
-  const left = ASK_MS - (now - t.askedAt);
-  const timedOut = useRef<number>(-1);
+  // The answerer enforces their own clock; if they have gone, the opponent takes
+  // over after a grace period so the game cannot hang on a question forever.
+  // timeoutWriter names exactly one of them at any instant — unit-checked.
+  const elapsed = now - t.askedAt;
+  const left = ASK_MS - elapsed;
+  const writer = g ? timeoutWriter(g, elapsed, ASK_MS, GRACE_MS) : null;
+  const fired = useRef<number>(-1);
   useEffect(() => {
-    if (!mine || left > 0 || !t.item || timedOut.current === t.askedAt) return;
-    timedOut.current = t.askedAt;
-    t.submit(false);
-  }, [mine, left, t]);
+    if (!writer || writer !== t.myMark || !t.item || fired.current === t.askedAt) return;
+    fired.current = t.askedAt;
+    t.forceTimeout();
+  }, [writer, t]);
 
   const sides = (["x", "o"] as Mark[]).map((m) => ({
     mark: m,
@@ -155,6 +165,21 @@ export function SquareOffRoom({
       <p className="text-center text-[15px] font-bold text-soft min-h-[24px]">
         {describe(g, names, t.myMark)}
       </p>
+
+      {(() => {
+        const gone = players.find((p) =>
+          p.user_id !== userId && now - Date.parse(p.last_seen) > AWAY_MS);
+        if (!gone) return null;
+        const mins = Math.floor((now - Date.parse(gone.last_seen)) / 60_000);
+        return (
+          <div className="piece bg-pop p-3.5 text-center">
+            <p className="text-[13px] font-bold">
+              {gone.username} hasn't been seen for {mins < 1 ? "a minute" : `${mins} minutes`}.
+              Play carries on without them, or end the match and take the score.
+            </p>
+          </div>
+        );
+      })()}
 
       {/* Reachable at any point. Offering "quit" only after a game ends means a
           match abandoned mid-board can never produce a result card. */}

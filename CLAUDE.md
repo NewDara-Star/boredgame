@@ -271,6 +271,27 @@ centring container has no definite box to resolve against, and the first version
 of the catalogue rendered a 62px emblem at about 700px, squeezing the text to one
 character per line. Every `Art` takes an explicit `size`.
 
+## Starting, and leaving
+
+**Who starts is decided in the database.** `claim_room_start()` moves a room out
+of `waiting` and reports whether this caller was the one that moved it; only the
+winner deals the board. The old client-side host check held against two people
+but not against one client's effect firing twice — and a second deal upserts a
+fresh board over one already in play. Verified: first claim updates 1 row,
+second updates 0, and `ttt_games`' primary key refuses a duplicate board.
+
+**A question can no longer hang.** The clock used to be enforced only by whoever
+owed the answer, so if they closed the tab the other player sat on a question
+that could never resolve. `timeoutWriter()` names exactly one enforcer at any
+instant — the answerer while the clock runs out, the opponent once a grace
+period is up — and it is unit-checked across the whole timeline, because two
+enforcers means the round jumps two questions at once.
+
+**Presence is a heartbeat on a row both players already subscribe to.**
+`touch_presence()` every 20s; the update itself is what tells the other browser
+you are still there. Past 50s of silence the room says so, rather than leaving
+someone staring at a screen that will never change.
+
 ## The lobby is where a match is agreed
 
 Creating a room decides nothing any more. `createRoom` makes an empty room and

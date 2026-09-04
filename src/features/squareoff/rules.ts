@@ -145,6 +145,26 @@ export function describe(g: Game, names: Record<Mark, string>, you: Mark | null 
   return second(g.turn) ? "Your pick — take a square." : `${names[g.turn]} is picking.`;
 }
 
+/* ------------------------------------------------------- abandonment */
+
+/**
+ * Who should write the timeout for a question nobody has answered.
+ *
+ * The clock used to be enforced only by the person who owed the answer, so if
+ * they closed the tab the other player sat on a question that could never
+ * resolve. After a grace period the opponent takes over — but exactly one of
+ * them is the writer at any instant, or they both write and the round jumps.
+ */
+export function timeoutWriter(
+  g: Pick<Game, "phase" | "answerer">,
+  elapsed: number, askMs: number, graceMs: number,
+): Mark | null {
+  if (g.phase !== "asking" || !g.answerer) return null;
+  if (elapsed >= askMs + graceMs) return other(g.answerer);
+  if (elapsed >= askMs) return g.answerer;
+  return null;
+}
+
 /* ------------------------------------------------------------------ the bot */
 
 /**

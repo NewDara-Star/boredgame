@@ -54,6 +54,16 @@ export function useRoom(code: string | undefined, userId: string | undefined) {
     return () => { cancelled = true; if (channel) void supabase!.removeChannel(channel); };
   }, [code, refresh]);
 
+  // A heartbeat on the row both players already subscribe to: the update itself
+  // is what tells the other browser you are still here.
+  useEffect(() => {
+    if (!supabase || !room || !userId) return;
+    const beat = () => void supabase!.rpc("touch_presence", { p_room: room.id });
+    beat();
+    const id = setInterval(beat, 20_000);
+    return () => clearInterval(id);
+  }, [room?.id, userId]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const join = useCallback(async (username: string) => {
     if (!supabase || !room || !userId) return;
     await supabase.from("room_players").upsert({ room_id: room.id, user_id: userId, username, ready: false });

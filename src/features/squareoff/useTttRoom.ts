@@ -92,6 +92,13 @@ export function useTttRoom(
     })();
   }, [game, myMark, write, row, roomId]);
 
+  /** Writes the miss for a question nobody answered — including when the person
+      who owed it has closed the tab. Callers must check timeoutWriter() first. */
+  const forceTimeout = useCallback(() => {
+    if (!game || game.phase !== "asking") return;
+    void write(answer(game, false), false);
+  }, [game, write]);
+
   /** Ends the session rather than the game. Rematch keeps the tally; this stops it. */
   const quit = useCallback(async () => {
     if (!supabase || !roomId) return;
@@ -118,7 +125,7 @@ export function useTttRoom(
   }, [roomId, row]);
 
   return {
-    game, myMark, item, choose, submit, rematch, quit,
+    game, myMark, item, choose, submit, rematch, quit, forceTimeout,
     ready: pool.length > 0,
     /** when the current question went up, so both clients run the same clock */
     askedAt: row ? Date.parse(row.updated_at) : 0,
@@ -132,9 +139,13 @@ export function useTttRoom(
  */
 export async function startSquareOff(roomId: number, xId: string, oId: string) {
   if (!supabase) return;
+  // The database decides who starts. A client-side "am I the host" guard holds
+  // against two people but not against one client's effect firing twice, and a
+  // second upsert here wipes a board that is already in play.
+  const { data: won } = await supabase.rpc("claim_room_start", { p_room: roomId });
+  if (won !== true) return;
   await supabase.from("ttt_games").upsert({
     room_id: roomId, ...encode(newGame("x")),
     puzzle_id: null, x_player: xId, o_player: oId,
   });
-  await supabase.from("rooms").update({ status: "playing" }).eq("id", roomId);
 }

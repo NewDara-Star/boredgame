@@ -3,7 +3,7 @@
  * rather than eyeballed. Run: node --experimental-strip-types scripts/check-squareoff.mts
  */
 import {
-  newGame, pick, answer, advance, winnerOf, botSquare, other,
+  newGame, pick, answer, advance, winnerOf, botSquare, other, timeoutWriter,
   type Game, type Mark, type Cell,
 } from "../src/features/squareoff/rules.ts";
 
@@ -89,6 +89,33 @@ console.log("\nthe bot");
     for (let i = 0; i < 50; i++) if (botSquare(board, "x") !== 4) return false;
     return true;
   })());
+}
+
+console.log("\nabandonment: exactly one writer at any instant");
+{
+  const ASK = 15000, GRACE = 5000;
+  const asking = pick(newGame("x"), 0);              // x owes the answer
+  const stolen = advance(answer(asking, false));      // o owes the steal
+  ok("nobody writes while the clock runs",
+     timeoutWriter(asking, 0, ASK, GRACE) === null &&
+     timeoutWriter(asking, ASK - 1, ASK, GRACE) === null);
+  ok("the answerer writes their own timeout",
+     timeoutWriter(asking, ASK, ASK, GRACE) === "x");
+  ok("the opponent takes over once the grace is up",
+     timeoutWriter(asking, ASK + GRACE, ASK, GRACE) === "o");
+  ok("it is the stealer who owes a stolen question",
+     timeoutWriter(stolen, ASK, ASK, GRACE) === "o" &&
+     timeoutWriter(stolen, ASK + GRACE, ASK, GRACE) === "x");
+  ok("never two writers at once", (() => {
+    for (let t = 0; t <= ASK + GRACE * 3; t += 137) {
+      const w = timeoutWriter(asking, t, ASK, GRACE);
+      if (w !== null && w !== "x" && w !== "o") return false;
+    }
+    return true;
+  })());
+  ok("no writer outside a question",
+     timeoutWriter(newGame("x"), 99999, ASK, GRACE) === null &&
+     timeoutWriter(advance(answer(pick(newGame("x"), 0), true)), 99999, ASK, GRACE) === null);
 }
 
 console.log("\nmisc");

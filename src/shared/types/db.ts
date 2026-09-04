@@ -105,6 +105,8 @@ export interface RoomPlayer {
   score: number;
   /** agreed to the current setup; any settings change clears it */
   ready: boolean;
+  /** heartbeat, so "they have gone" is knowable rather than inferred */
+  last_seen: string;
   joined_at: string;
 }
 

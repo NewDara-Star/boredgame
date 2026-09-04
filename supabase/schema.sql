@@ -376,3 +376,36 @@ begin
 end $$;
 revoke all on function public.set_room_setup(bigint, text, text, text[]) from public, anon;
 grant execute on function public.set_room_setup(bigint, text, text, text[]) to authenticated;
+
+-- ============ starting, and leaving ============
+-- Starting was guarded only by "am I the host" in React. That holds against two
+-- people but not against one client's effect firing twice, and a second deal
+-- wipes a board already in play. The database decides who starts.
+create or replace function public.claim_room_start(p_room bigint)
+returns boolean language plpgsql security definer set search_path to 'public' as $$
+declare moved int;
+begin
+  if not exists (select 1 from public.room_players p
+                 where p.room_id = p_room and p.user_id = auth.uid()) then
+    raise exception 'not a member of room %', p_room;
+  end if;
+  -- The predicate is the lock: a second caller blocks, re-reads 'playing',
+  -- and updates nothing.
+  update public.rooms set status = 'playing' where id = p_room and status = 'waiting';
+  get diagnostics moved = row_count;
+  return moved = 1;
+end $$;
+revoke all on function public.claim_room_start(bigint) from public, anon;
+grant execute on function public.claim_room_start(bigint) to authenticated;
+
+alter table public.room_players
+  add column if not exists last_seen timestamptz not null default now();
+grant update (ready, last_seen) on public.room_players to authenticated;
+
+create or replace function public.touch_presence(p_room bigint)
+returns void language sql security definer set search_path to 'public' as $$
+  update public.room_players set last_seen = now()
+   where room_id = p_room and user_id = auth.uid();
+$$;
+revoke all on function public.touch_presence(bigint) from public, anon;
+grant execute on function public.touch_presence(bigint) to authenticated;
