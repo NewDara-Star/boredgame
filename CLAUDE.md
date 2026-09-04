@@ -134,6 +134,25 @@ supply is effectively unlimited.
 And one rule the gate cannot enforce: **vary the mechanism.** Six puzzles in a
 row using "same word twice" is a quality problem even when each is fine alone.
 
+## Where the content actually lives
+
+The database is the content. `src/shared/data/` is a **small offline starter
+set**, not a mirror — the bank is 374 puzzles and bundling all of it would ship
+a few hundred KB of JSON to every visitor for a fallback most will never hit.
+
+So the counts on the home page query the database, and `loadContent()` reaches
+for the seed only when Supabase is absent or empty. Do not try to keep the two
+in sync; that is not what the seed is for.
+
+### Flags
+
+Flag questions are written **as descriptions**, not images. Emoji flags (🇳🇬)
+render on Apple and Android but Microsoft ships no flag glyphs at all, so
+Windows players would see two grey letters. An SVG set would mean ~200 assets
+for one category. Describing the flag works everywhere, needs nothing, and asks
+a better question — whether you know the flag, not whether you recognise a
+picture of it.
+
 ## Realtime
 
 There is no socket code. Both browsers subscribe to `rooms`, `room_players` and
