@@ -1,0 +1,89 @@
+import { useCallback, useEffect, useRef, useState } from "react";
+import type { GameKey } from "@/shared/types/db";
+import { isCorrect, closeness } from "@/shared/lib/normalise";
+import { loadContent, shuffle } from "./content";
+import { readLocal, recordRound } from "./progress";
+import { scoreAnswer } from "./scoring";
+import type { PlayItem, RoundResult } from "./types";
+
+export type Phase = "loading" | "empty" | "playing" | "revealed" | "done";
+
+export function useRound(game: GameKey, size: number, userId?: string) {
+  const [items, setItems] = useState<PlayItem[]>([]);
+  const [index, setIndex] = useState(0);
+  const [phase, setPhase] = useState<Phase>("loading");
+  const [score, setScore] = useState(0);
+  const [streak, setStreak] = useState(0);
+  const [bestStreak, setBestStreak] = useState(0);
+  const [hintsUsed, setHintsUsed] = useState(0);
+  const [results, setResults] = useState<RoundResult[]>([]);
+  const [last, setLast] = useState<{ correct: boolean; given: string; gained: number; near: boolean } | null>(null);
+  const startedAt = useRef(Date.now());
+
+  const build = useCallback(async () => {
+    setPhase("loading");
+    const all = await loadContent(game);
+    if (all.length === 0) { setPhase("empty"); return; }
+    // Prefer things this browser hasn't seen; fall back to everything once exhausted.
+    const seen = new Set(readLocal().seen);
+    const fresh = all.filter((i) => !seen.has(i.id));
+    const pool = fresh.length >= size ? fresh : all;
+    setItems(shuffle(pool).slice(0, Math.min(size, pool.length)));
+    setIndex(0); setScore(0); setStreak(0); setBestStreak(0);
+    setResults([]); setLast(null); setHintsUsed(0);
+    startedAt.current = Date.now();
+    setPhase("playing");
+  }, [game, size]);
+
+  useEffect(() => { void build(); }, [build]);
+
+  const current = items[index];
+
+  const submit = useCallback((given: string) => {
+    if (phase !== "playing" || !current) return;
+    const ms = Date.now() - startedAt.current;
+    const ok = current.choices
+      ? given === current.answer
+      : isCorrect(given, current.answer);
+    const gained = ok ? scoreAnswer(ms, streak, hintsUsed) : 0;
+    const near = !ok && closeness(given, current.answer) > 0.7;
+
+    setScore((s) => s + gained);
+    setStreak((s) => {
+      const n = ok ? s + 1 : 0;
+      setBestStreak((b) => Math.max(b, n));
+      return n;
+    });
+    setResults((r) => [...r, { item: current, correct: ok, given, msTaken: ms, hintsUsed }]);
+    setLast({ correct: ok, given, gained, near });
+    setPhase("revealed");
+  }, [phase, current, streak, hintsUsed]);
+
+  const next = useCallback(() => {
+    if (index + 1 >= items.length) {
+      setPhase("done");
+      return;
+    }
+    setIndex((i) => i + 1);
+    setHintsUsed(0);
+    setLast(null);
+    startedAt.current = Date.now();
+    setPhase("playing");
+  }, [index, items.length]);
+
+  // Persist once, when the round actually ends.
+  const saved = useRef(false);
+  useEffect(() => {
+    if (phase === "done" && !saved.current) {
+      saved.current = true;
+      void recordRound(game, results, score, userId);
+    }
+    if (phase === "playing") saved.current = false;
+  }, [phase, game, results, score, userId]);
+
+  return {
+    items, current, index, phase, score, streak, bestStreak, results, last,
+    hintsUsed, useHint: () => setHintsUsed((h) => h + 1),
+    submit, next, restart: build,
+  };
+}

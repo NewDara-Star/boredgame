@@ -1,0 +1,205 @@
+-- BoredGame — Supabase schema
+-- Paste into Supabase → SQL Editor → Run. Safe to re-run.
+-- Single-player works without any of this; accounts, sync and head-to-head need it.
+
+-- ============ helpers ============
+-- Mirrors normalise() in src/shared/lib/normalise.ts. Change one, change the other.
+create or replace function normalise_answer(t text)
+returns text language sql immutable as $$
+  select regexp_replace(lower(coalesce(t,'')), '[^a-z0-9]', '', 'g');
+$$;
+
+-- ============ admins ============
+-- Its own table, not a boolean on profiles: a boolean is one loose policy away
+-- from a user promoting themselves. Add rows from the Supabase dashboard only.
+create table if not exists admins (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  created_at timestamptz default now()
+);
+alter table admins enable row level security;
+
+create or replace function is_admin()
+returns boolean language sql stable security definer set search_path = public as $$
+  select exists (select 1 from admins where user_id = auth.uid());
+$$;
+
+-- ============ profiles ============
+create table if not exists profiles (
+  id uuid primary key references auth.users(id) on delete cascade,
+  username text unique not null,
+  avatar text,
+  total_answered int not null default 0,
+  total_correct int not null default 0,
+  created_at timestamptz default now()
+);
+alter table profiles enable row level security;
+drop policy if exists "profiles are public" on profiles;
+create policy "profiles are public" on profiles for select using (true);
+drop policy if exists "own profile insert" on profiles;
+create policy "own profile insert" on profiles for insert with check (auth.uid() = id);
+drop policy if exists "own profile update" on profiles;
+create policy "own profile update" on profiles for update using (auth.uid() = id);
+
+create or replace function handle_new_user()
+returns trigger language plpgsql security definer set search_path = public as $$
+begin
+  insert into profiles (id, username)
+  values (new.id, split_part(new.email, '@', 1) || '_' || substr(new.id::text, 1, 4))
+  on conflict do nothing;
+  return new;
+end; $$;
+drop trigger if exists on_auth_user_created on auth.users;
+create trigger on_auth_user_created after insert on auth.users
+  for each row execute function handle_new_user();
+
+-- ============ content ============
+do $$ begin create type game_key   as enum ('picto','trivia');            exception when duplicate_object then null; end $$;
+do $$ begin create type render_kind as enum ('text','image');             exception when duplicate_object then null; end $$;
+do $$ begin create type difficulty as enum ('easy','medium','hard');      exception when duplicate_object then null; end $$;
+do $$ begin create type pub_status as enum ('draft','live','rejected');   exception when duplicate_object then null; end $$;
+
+create table if not exists categories (
+  id bigserial primary key,
+  name text not null,
+  slug text unique not null,
+  game game_key
+);
+alter table categories enable row level security;
+drop policy if exists "categories are public" on categories;
+create policy "categories are public" on categories for select using (true);
+
+insert into categories (name, slug) values
+  ('Idioms','idioms'),('Food','food'),('Places','places'),('Everyday','everyday'),
+  ('Music','music'),('Sport','sport'),('Science','science'),('Maths','maths'),
+  ('Design','design'),('Film & TV','film-tv'),('Tech','tech'),('World','world')
+on conflict (slug) do nothing;
+
+-- One table for both games. `game` is what makes this one product rather than two
+-- codebases; `render` is what lets a rebus be data instead of a design job.
+create table if not exists puzzles (
+  id bigserial primary key,
+  game game_key not null default 'picto',
+  render render_kind not null default 'text',
+  spec jsonb,
+  image_url text,
+  prompt text,
+  choices text[],
+  answer text not null,
+  answer_normalised text generated always as (normalise_answer(answer)) stored,
+  alt_hint text not null,
+  char_hint text not null,
+  difficulty difficulty not null default 'easy',
+  category_id bigint references categories(id),
+  status pub_status not null default 'draft',
+  created_by uuid references auth.users(id),
+  created_at timestamptz default now(),
+
+  -- The junk that reached the 2025 database cannot reach this one.
+  constraint answer_has_substance    check (length(trim(answer))    >= 2),
+  constraint alt_hint_has_substance  check (length(trim(alt_hint))  >= 8),
+  constraint char_hint_has_substance check (length(trim(char_hint)) >= 3),
+  constraint picto_text_needs_spec   check (game <> 'picto' or render <> 'text'  or spec is not null),
+  constraint picto_image_needs_url   check (game <> 'picto' or render <> 'image' or image_url is not null),
+  constraint trivia_needs_prompt     check (game <> 'trivia' or (prompt is not null and array_length(choices,1) = 4))
+);
+create index if not exists puzzles_live_idx on puzzles (status, game, difficulty);
+
+alter table puzzles enable row level security;
+drop policy if exists "live puzzles are public" on puzzles;
+create policy "live puzzles are public" on puzzles for select using (status = 'live' or is_admin());
+drop policy if exists "admins write puzzles" on puzzles;
+create policy "admins write puzzles" on puzzles for all using (is_admin()) with check (is_admin());
+
+-- ============ attempts ============
+create table if not exists attempts (
+  id bigserial primary key,
+  user_id uuid not null references auth.users(id) on delete cascade,
+  puzzle_id bigint not null references puzzles(id) on delete cascade,
+  correct boolean not null,
+  ms_taken int,
+  created_at timestamptz default now()
+);
+create index if not exists attempts_user_idx on attempts (user_id, created_at desc);
+alter table attempts enable row level security;
+drop policy if exists "own attempts readable" on attempts;
+create policy "own attempts readable" on attempts for select using (auth.uid() = user_id);
+drop policy if exists "own attempts insert" on attempts;
+create policy "own attempts insert" on attempts for insert with check (auth.uid() = user_id);
+
+create or replace function bump_profile_counters()
+returns trigger language plpgsql security definer set search_path = public as $$
+begin
+  update profiles set
+    total_answered = total_answered + 1,
+    total_correct  = total_correct + (case when new.correct then 1 else 0 end)
+  where id = new.user_id;
+  return new;
+end; $$;
+drop trigger if exists on_attempt_created on attempts;
+create trigger on_attempt_created after insert on attempts
+  for each row execute function bump_profile_counters();
+
+-- ============ head-to-head ============
+do $$ begin create type room_status as enum ('waiting','playing','finished','abandoned'); exception when duplicate_object then null; end $$;
+
+create table if not exists rooms (
+  id bigserial primary key,
+  code text unique not null,
+  host_id uuid not null references auth.users(id) on delete cascade,
+  game game_key not null default 'picto',
+  status room_status not null default 'waiting',
+  best_of int not null default 5,
+  created_at timestamptz default now()
+);
+create table if not exists room_players (
+  room_id bigint references rooms(id) on delete cascade,
+  user_id uuid references auth.users(id) on delete cascade,
+  username text not null,
+  score int not null default 0,
+  joined_at timestamptz default now(),
+  primary key (room_id, user_id)
+);
+create table if not exists room_rounds (
+  id bigserial primary key,
+  room_id bigint not null references rooms(id) on delete cascade,
+  puzzle_id bigint not null references puzzles(id),
+  round_no int not null,
+  winner_id uuid references auth.users(id),
+  started_at timestamptz default now(),
+  ended_at timestamptz,
+  unique (room_id, round_no)
+);
+
+alter table rooms        enable row level security;
+alter table room_players enable row level security;
+alter table room_rounds  enable row level security;
+
+drop policy if exists "rooms readable" on rooms;
+create policy "rooms readable" on rooms for select using (true);
+drop policy if exists "create own room" on rooms;
+create policy "create own room" on rooms for insert with check (host_id = auth.uid());
+drop policy if exists "host updates room" on rooms;
+create policy "host updates room" on rooms for update using (host_id = auth.uid());
+
+drop policy if exists "players readable" on room_players;
+create policy "players readable" on room_players for select using (true);
+drop policy if exists "join a room" on room_players;
+create policy "join a room" on room_players for insert with check (user_id = auth.uid());
+drop policy if exists "update own score" on room_players;
+create policy "update own score" on room_players for update using (user_id = auth.uid());
+
+drop policy if exists "rounds readable" on room_rounds;
+create policy "rounds readable" on room_rounds for select using (true);
+drop policy if exists "members write rounds" on room_rounds;
+create policy "members write rounds" on room_rounds for all
+  using (exists (select 1 from room_players p where p.room_id = room_rounds.room_id and p.user_id = auth.uid()))
+  with check (true);
+
+-- This is the entire "websocket" implementation. Both browsers subscribe;
+-- Postgres pushes the changes. No socket code exists in the app.
+do $$ begin
+  alter publication supabase_realtime add table rooms;        exception when duplicate_object then null; end $$;
+do $$ begin
+  alter publication supabase_realtime add table room_players; exception when duplicate_object then null; end $$;
+do $$ begin
+  alter publication supabase_realtime add table room_rounds;  exception when duplicate_object then null; end $$;

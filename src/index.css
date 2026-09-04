@@ -1,0 +1,33 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ink:        #0B0F12;
+  --color-panel:      #141B20;
+  --color-panel-2:    #1B242A;
+  --color-line:       #263239;
+  --color-chalk:      #E8EEEC;
+  --color-dim:        #8DA2AB;
+  --color-faint:      #5C7178;
+
+  /* one accent per game, so the two never blur into each other */
+  --color-picto:      #F0B429;
+  --color-trivia:     #7C6BF0;
+
+  --color-good:       #4FB07C;
+  --color-bad:        #D2544A;
+
+  --font-display: "Fraunces", Georgia, serif;
+  --font-sans: "Archivo", system-ui, -apple-system, "Helvetica Neue", sans-serif;
+}
+
+html, body, #root { height: 100%; }
+body {
+  margin: 0;
+  background: var(--color-ink);
+  color: var(--color-chalk);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior-y: none;
+}
+:focus-visible { outline: 2px solid var(--color-picto); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } }
