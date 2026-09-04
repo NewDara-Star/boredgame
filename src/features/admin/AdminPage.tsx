@@ -59,7 +59,7 @@ export function AdminPage() {
       <div className="flex gap-2">
         {(["picto", "trivia"] as const).map((g) => (
           <button key={g} onClick={() => set("game", g)}
-            className={`px-4 py-2 rounded-xl text-sm font-semibold border ${d.game === g ? "bg-panel-2 border-picto" : "border-line text-dim"}`}>
+            className={`px-4 py-2 rounded-xl text-sm font-semibold border ${d.game === g ? "bg-sand border-ink" : "border-ink text-soft"}`}>
             {g === "picto" ? "Picto Phrase" : "Star Trivia"}
           </button>
         ))}
@@ -70,7 +70,7 @@ export function AdminPage() {
           <div className="flex gap-2">
             {(["text", "image"] as const).map((rd) => (
               <button key={rd} onClick={() => set("render", rd)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold border ${d.render === rd ? "bg-panel-2 border-picto" : "border-line text-dim"}`}>
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold border ${d.render === rd ? "bg-sand border-ink" : "border-ink text-soft"}`}>
                 {rd === "text" ? "Drawn from text" : "Uploaded image"}
               </button>
             ))}
@@ -78,10 +78,10 @@ export function AdminPage() {
 
           {d.render === "text" ? (
             <>
-              <Card className="aspect-square max-h-72 mx-auto w-full grid place-items-center p-6 text-chalk">
+              <Card className="aspect-square max-h-72 mx-auto w-full grid place-items-center p-6 text-ink">
                 <PictoRenderer spec={{ items: d.items.filter((i) => i.text.trim()) }} />
               </Card>
-              <p className="text-[10px] uppercase tracking-widest text-faint">Canvas is 100 × 100</p>
+              <p className="text-[10px] uppercase tracking-widest text-soft">Canvas is 100 × 100</p>
               {d.items.map((it, i) => (
                 <div key={i} className="grid grid-cols-[1fr_56px_56px_56px_56px_auto] gap-1.5 items-center">
                   <Input value={it.text} placeholder="text"
@@ -144,13 +144,13 @@ export function AdminPage() {
       <div className="grid grid-cols-2 gap-3">
         <Field label="Difficulty">
           <select value={d.difficulty} onChange={(e) => set("difficulty", e.target.value as DraftPuzzle["difficulty"])}
-            className="w-full bg-ink border border-line rounded-xl px-3 py-2.5 text-chalk">
+            className="w-full bg-surface border-[2.5px] border-ink rounded-2xl px-3 py-2.5 text-ink">
             <option value="easy">Easy</option><option value="medium">Medium</option><option value="hard">Hard</option>
           </select>
         </Field>
         <Field label="Category" error={touched ? errors.category : null}>
           <select value={d.category} onChange={(e) => set("category", e.target.value)}
-            className="w-full bg-ink border border-line rounded-xl px-3 py-2.5 text-chalk">
+            className="w-full bg-surface border-[2.5px] border-ink rounded-2xl px-3 py-2.5 text-ink">
             <option value="">Select…</option>
             {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
           </select>

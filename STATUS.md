@@ -1,6 +1,6 @@
 # STATUS — BoredGame
 
-Last updated: 2026-09-04
+Last updated: 2026-09-04 (design pass)
 
 ## Verified working
 
@@ -14,7 +14,10 @@ Each claim below was checked by running it, not by reading the code.
 | Picto play loop works end to end | submitted a wrong answer, got the reveal + correct answer |
 | Trivia options shuffle | correct answer was not in first position on screen |
 | All 36 rebus puzzles render legibly | contact sheet screenshot of every puzzle, inspected |
-| No console errors | Playwright console listener — clean after the favicon was added |
+| No console errors | Playwright console listener |
+| Rebus letters animate into place | screenshot captured mid-assembly, letters in flight |
+| Coloured states render correctly | wrong-answer panel screenshot — red, not white |
+| Header fits at 420px | screenshot at phone width, nothing clipped |
 
 ## Content
 
@@ -22,6 +25,22 @@ Each claim below was checked by running it, not by reading the code.
 - 51 trivia questions (`src/shared/data/trivia.ts`)
 
 Both bundled into the app, so it is playable with no backend at all.
+
+## Design
+
+Identity is "playful toy": ink outlines with hard offset shadows, saturated flat
+colour, rounded heavy type, everything presses down onto its own shadow.
+Deliberately light-only — a toy in a dark room is a different product.
+
+Motion is choreographed with framer-motion. One spring (`src/shared/ui/motion.ts`)
+is used everywhere so the whole app moves with the same weight. The signature
+move: **rebus letters fly in and assemble**, so the puzzle builds in front of you.
+Correct answers burst; wrong answers shake; scores count up rather than jumping.
+All of it respects `prefers-reduced-motion`.
+
+**One thing not verified:** Fredoka and Nunito load from Google Fonts, which my
+sandbox blocks — every screenshot above is the system-font fallback. The layout
+and colour are confirmed; the *typography* is not. Check it locally first.
 
 ## Not yet verified
 

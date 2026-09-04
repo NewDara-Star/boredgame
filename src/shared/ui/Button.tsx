@@ -1,22 +1,21 @@
 import type { ButtonHTMLAttributes } from "react";
 
-type Variant = "primary" | "ghost" | "danger";
+type Variant = "primary" | "secondary" | "ghost";
 
 const styles: Record<Variant, string> = {
-  primary: "bg-picto text-ink hover:brightness-110",
-  ghost: "bg-panel border border-line text-chalk hover:bg-panel-2",
-  danger: "bg-bad text-white hover:brightness-110",
+  primary: "bg-picto text-surface",
+  secondary: "bg-trivia text-surface",
+  ghost: "bg-surface text-ink",
 };
 
 export function Button({
-  variant = "primary",
-  className = "",
-  ...rest
+  variant = "primary", className = "", ...rest
 }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: Variant }) {
   return (
     <button
       {...rest}
-      className={`rounded-xl px-4 py-3 font-semibold text-sm transition disabled:opacity-40 disabled:cursor-not-allowed ${styles[variant]} ${className}`}
+      className={`piece press font-display text-[15px] font-semibold px-5 py-3.5 rounded-2xl
+        disabled:cursor-not-allowed ${styles[variant]} ${className}`}
     />
   );
 }

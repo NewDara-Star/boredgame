@@ -1,33 +1,72 @@
 @import "tailwindcss";
 
+/* ---------------------------------------------------------------------------
+   BoredGame — "playful toy".
+   The rules that make it read as a toy rather than a dashboard:
+     · everything sits on a solid ink outline with a hard offset shadow, so
+       objects look like physical pieces you could pick up
+     · pressing a thing moves it down onto its own shadow
+     · type is rounded and heavy; nothing is thin
+     · colour is saturated and flat — no gradients, no glass, no glow
+   Deliberately light-only. A toy in a dark room is a different product.
+--------------------------------------------------------------------------- */
 @theme {
-  --color-ink:        #0B0F12;
-  --color-panel:      #141B20;
-  --color-panel-2:    #1B242A;
-  --color-line:       #263239;
-  --color-chalk:      #E8EEEC;
-  --color-dim:        #8DA2AB;
-  --color-faint:      #5C7178;
+  --color-paper:    #F3EDE3;
+  --color-surface:  #FFFFFF;
+  --color-sand:     #E7DFD1;
+  --color-ink:      #191510;
+  --color-soft:     #6B6154;
+  --color-picto:    #EF5A2A;
+  --color-trivia:   #4B5BD6;
+  --color-pop:      #FFC93C;
+  --color-good:     #17914B;
+  --color-bad:      #D93A34;
 
-  /* one accent per game, so the two never blur into each other */
-  --color-picto:      #F0B429;
-  --color-trivia:     #7C6BF0;
-
-  --color-good:       #4FB07C;
-  --color-bad:        #D2544A;
-
-  --font-display: "Fraunces", Georgia, serif;
-  --font-sans: "Archivo", system-ui, -apple-system, "Helvetica Neue", sans-serif;
+  --font-display: "Fredoka", system-ui, sans-serif;
+  --font-sans: "Nunito", system-ui, -apple-system, sans-serif;
 }
 
 html, body, #root { height: 100%; }
 body {
   margin: 0;
-  background: var(--color-ink);
-  color: var(--color-chalk);
+  background: var(--color-paper);
+  color: var(--color-ink);
   font-family: var(--font-sans);
+  font-weight: 600;
   -webkit-font-smoothing: antialiased;
   overscroll-behavior-y: none;
 }
-:focus-visible { outline: 2px solid var(--color-picto); outline-offset: 2px; }
-@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } }
+
+/* The dot grid is what stops a flat cream page reading as "unstyled". */
+body::before {
+  content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background-image: radial-gradient(var(--color-sand) 1.5px, transparent 1.5px);
+  background-size: 22px 22px;
+}
+
+h1, h2, h3, .display { font-family: var(--font-display); font-weight: 600; letter-spacing: -0.015em; }
+
+/* --- the toy primitive: outline + hard shadow + press ---
+   These live in @layer components so Tailwind's utilities still win. Without the
+   layer, .piece's background beats every bg-* class and each coloured state —
+   the reveal panel, correct/wrong options, the yellow CTA — renders white. */
+@layer components {
+  .piece {
+    border: 2.5px solid var(--color-ink);
+    border-radius: 22px;
+    background-color: var(--color-surface);
+    box-shadow: 0 5px 0 var(--color-ink);
+  }
+  .press {
+    transition: transform .12s cubic-bezier(.34,1.56,.64,1), box-shadow .12s ease;
+  }
+  .press:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 7px 0 var(--color-ink); }
+  .press:active:not(:disabled) { transform: translateY(5px); box-shadow: 0 0 0 var(--color-ink); }
+  .press:disabled { opacity: .45; }
+}
+
+:focus-visible { outline: 3px solid var(--color-trivia); outline-offset: 3px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .press, .press:hover, .press:active { transition: none; transform: none; }
+}

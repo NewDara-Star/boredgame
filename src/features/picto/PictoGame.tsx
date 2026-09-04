@@ -1,11 +1,10 @@
 import { useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { useAuth } from "@/app/providers/AuthProvider";
 import { useRound } from "@/features/play/useRound";
-import { Hud, HintBar, Reveal, Summary } from "@/features/play/RoundChrome";
+import { Hud, HintBar, Reveal, Summary, Burst } from "@/features/play/RoundChrome";
 import { PictoRenderer } from "./PictoRenderer";
-import { Card } from "@/shared/ui/Card";
-
-const ACCENT = "var(--color-picto)";
+import { SPRING, shake } from "@/shared/ui/motion";
 
 export function PictoGame() {
   const { user } = useAuth();
@@ -17,28 +16,29 @@ export function PictoGame() {
     if (r.phase === "playing") { setGuess(""); inputRef.current?.focus(); }
   }, [r.phase, r.index]);
 
-  if (r.phase === "loading") return <p className="text-dim text-sm">Loading puzzles…</p>;
-  if (r.phase === "empty") return <p className="text-dim text-sm">No picto puzzles are live yet.</p>;
+  if (r.phase === "loading") return <p className="text-soft font-bold">Loading puzzles…</p>;
+  if (r.phase === "empty") return <p className="text-soft font-bold">No picto puzzles are live yet.</p>;
 
   if (r.phase === "done") {
     return (
       <Summary score={r.score} results={r.results} onAgain={r.restart}>
-        <div className="divide-y divide-line border border-line rounded-2xl overflow-hidden">
+        <div className="grid gap-2.5">
           {r.results.map((res, i) => (
-            <div key={i} className="p-3 flex items-center gap-3 bg-panel">
-              <div className="w-14 h-14 shrink-0 bg-ink rounded-lg text-chalk p-1">
+            <motion.div key={i}
+              initial={{ opacity: 0, x: -14 }} animate={{ opacity: 1, x: 0 }}
+              transition={{ ...SPRING, delay: 0.3 + i * 0.05 }}
+              className="piece p-3 flex items-center gap-3">
+              <div className={`w-14 h-14 shrink-0 rounded-xl border-2 border-ink p-1
+                ${res.correct ? "bg-good text-surface" : "bg-sand text-ink"}`}>
                 {res.item.spec && <PictoRenderer spec={res.item.spec} />}
               </div>
               <div className="min-w-0">
-                <p className="font-semibold text-sm truncate">{res.item.answer}</p>
+                <p className="font-display font-semibold truncate">{res.item.answer}</p>
                 {!res.correct && (
-                  <p className="text-xs text-bad truncate">you said: {res.given || "—"}</p>
+                  <p className="text-xs text-bad font-bold truncate">you said: {res.given || "—"}</p>
                 )}
               </div>
-              <span className={`ml-auto text-xs font-bold ${res.correct ? "text-good" : "text-bad"}`}>
-                {res.correct ? "✓" : "✗"}
-              </span>
-            </div>
+            </motion.div>
           ))}
         </div>
       </Summary>
@@ -47,52 +47,53 @@ export function PictoGame() {
 
   const item = r.current;
   if (!item) return null;
+  const wrong = r.phase === "revealed" && !r.last?.correct;
 
   return (
     <div>
-      <Hud index={r.index} total={r.items.length} score={r.score} streak={r.streak} accent={ACCENT} />
+      <Hud index={r.index} total={r.items.length} score={r.score} streak={r.streak} accent="#EF5A2A" />
 
-      <Card className="mt-4 aspect-square max-h-[52vh] mx-auto w-full grid place-items-center p-6 text-chalk">
-        {item.render === "image" && item.imageUrl
-          ? <img src={item.imageUrl} alt={item.altHint} className="max-h-full object-contain rounded-xl" />
-          : item.spec && <PictoRenderer spec={item.spec} />}
-      </Card>
+      <div className="relative mt-5">
+        <Burst show={r.phase === "revealed" && !!r.last?.correct} />
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={item.id}
+            initial={{ opacity: 0, scale: 0.9, rotate: -1.5 }}
+            animate={wrong ? { opacity: 1, scale: 1, rotate: 0, ...shake } : { opacity: 1, scale: 1, rotate: 0 }}
+            exit={{ opacity: 0, scale: 0.94, y: -12 }}
+            transition={SPRING}
+            className="piece aspect-square max-h-[46vh] mx-auto w-full grid place-items-center p-7 text-picto"
+          >
+            {item.render === "image" && item.imageUrl
+              ? <img src={item.imageUrl} alt={item.altHint} className="max-h-full object-contain rounded-xl" />
+              : item.spec && <PictoRenderer spec={item.spec} animate seed={item.id} />}
+          </motion.div>
+        </AnimatePresence>
+      </div>
 
-      <p className="mt-3 text-[10px] uppercase tracking-widest text-faint text-center">
+      <p className="mt-3 text-[10px] font-black uppercase tracking-widest text-soft text-center">
         {item.difficulty}{item.category ? ` · ${item.category}` : ""}
       </p>
 
       {r.phase === "playing" ? (
         <>
-          <form
-            onSubmit={(e) => { e.preventDefault(); if (guess.trim()) r.submit(guess); }}
-            className="mt-5 flex gap-2"
-          >
-            <input
-              ref={inputRef}
-              value={guess}
-              onChange={(e) => setGuess(e.target.value)}
-              placeholder="What phrase is this?"
-              autoComplete="off"
-              autoCapitalize="none"
-              className="flex-1 bg-panel border border-line rounded-xl px-4 py-3.5 text-chalk placeholder:text-faint focus:border-picto outline-none"
-            />
+          <form onSubmit={(e) => { e.preventDefault(); if (guess.trim()) r.submit(guess); }}
+            className="mt-4 flex gap-2.5">
+            <input ref={inputRef} value={guess} onChange={(e) => setGuess(e.target.value)}
+              placeholder="What phrase is this?" autoComplete="off" autoCapitalize="none"
+              className="flex-1 bg-surface border-[2.5px] border-ink rounded-2xl px-4 py-3.5
+                font-bold text-ink placeholder:text-soft/60 outline-none
+                focus:shadow-[0_5px_0_var(--color-ink)] transition-shadow" />
             <button type="submit" disabled={!guess.trim()}
-              className="rounded-xl bg-picto text-ink font-semibold px-5 disabled:opacity-40">
+              className="piece press bg-picto text-surface font-display text-lg font-semibold px-6">
               Go
             </button>
           </form>
-          <HintBar item={item} used={r.hintsUsed} onUse={r.useHint} accent={ACCENT} />
+          <HintBar item={item} used={r.hintsUsed} onUse={r.useHint} />
         </>
       ) : (
-        <Reveal
-          correct={r.last!.correct}
-          near={r.last!.near}
-          answer={item.answer}
-          gained={r.last!.gained}
-          onNext={r.next}
-          isLast={r.index + 1 >= r.items.length}
-        />
+        <Reveal correct={r.last!.correct} near={r.last!.near} answer={item.answer}
+          gained={r.last!.gained} onNext={r.next} isLast={r.index + 1 >= r.items.length} />
       )}
     </div>
   );

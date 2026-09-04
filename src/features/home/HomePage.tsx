@@ -1,9 +1,11 @@
 import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
 import { PICTO_SEED } from "@/shared/data/picto";
 import { TRIVIA_SEED } from "@/shared/data/trivia";
 import { PictoRenderer } from "@/features/picto/PictoRenderer";
 import { readLocal } from "@/features/play/progress";
 import { rankFor } from "@/features/play/rank";
+import { stagger, riseIn, popIn } from "@/shared/ui/motion";
 
 export function HomePage() {
   const p = readLocal();
@@ -11,52 +13,70 @@ export function HomePage() {
   const teaser = PICTO_SEED[Math.floor(Math.random() * PICTO_SEED.length)];
 
   return (
-    <div>
-      <h1 className="text-4xl font-bold tracking-tight">Two games.<br />Pick your poison.</h1>
-      <p className="text-dim mt-3 text-sm max-w-md">
+    <motion.div variants={stagger(0.09)} initial="hidden" animate="show">
+      <motion.h1 variants={riseIn} className="text-[42px] leading-[0.95] font-semibold">
+        Two games.<br />
+        <span className="text-picto">Pick your poison.</span>
+      </motion.h1>
+      <motion.p variants={riseIn} className="text-soft mt-3 text-[15px] max-w-sm font-semibold">
         Short rounds, no ads, no feed. Built to be opened for four minutes and closed again.
-      </p>
+      </motion.p>
 
-      <div className="grid gap-3 mt-7 sm:grid-cols-2">
-        <Link to="/picto"
-          className="group border border-line rounded-2xl p-5 bg-panel hover:border-picto transition block">
-          <div className="h-24 text-picto mb-4"><PictoRenderer spec={{ items: teaser.items }} /></div>
-          <p className="text-[10px] uppercase tracking-widest text-faint">Word puzzle</p>
-          <h2 className="text-xl font-bold mt-1">Picto Phrase</h2>
-          <p className="text-sm text-dim mt-1">Read the picture, name the phrase.</p>
-          <p className="text-xs text-faint mt-3">{PICTO_SEED.length} puzzles</p>
-        </Link>
+      <div className="grid gap-4 mt-7 sm:grid-cols-2">
+        <motion.div variants={riseIn}>
+          <Link to="/picto" className="piece press block p-5 h-full">
+            <div className="h-28 text-picto mb-4">
+              <PictoRenderer spec={{ items: teaser.items }} animate seed={teaser.slug} />
+            </div>
+            <span className="inline-block text-[10px] font-black uppercase tracking-widest
+              bg-picto text-surface rounded-full px-2.5 py-1">Word puzzle</span>
+            <h2 className="text-2xl font-semibold mt-2">Picto Phrase</h2>
+            <p className="text-sm text-soft mt-1 font-semibold">Read the picture, name the phrase.</p>
+            <p className="text-xs text-soft/70 mt-3 font-bold">{PICTO_SEED.length} puzzles</p>
+          </Link>
+        </motion.div>
 
-        <Link to="/trivia"
-          className="group border border-line rounded-2xl p-5 bg-panel hover:border-trivia transition block">
-          <div className="h-24 mb-4 grid place-items-center">
-            <span className="text-5xl" style={{ color: "var(--color-trivia)" }}>★</span>
-          </div>
-          <p className="text-[10px] uppercase tracking-widest text-faint">Quiz</p>
-          <h2 className="text-xl font-bold mt-1">Star Trivia</h2>
-          <p className="text-sm text-dim mt-1">Four options, one right, ten questions.</p>
-          <p className="text-xs text-faint mt-3">{TRIVIA_SEED.length} questions</p>
-        </Link>
+        <motion.div variants={riseIn}>
+          <Link to="/trivia" className="piece press block p-5 h-full">
+            <div className="h-28 mb-4 grid place-items-center">
+              <motion.span
+                className="text-6xl leading-none text-trivia"
+                animate={{ rotate: [0, -8, 8, 0], scale: [1, 1.08, 1] }}
+                transition={{ duration: 2.4, repeat: Infinity, repeatDelay: 2.5, ease: "easeInOut" }}
+              >★</motion.span>
+            </div>
+            <span className="inline-block text-[10px] font-black uppercase tracking-widest
+              bg-trivia text-surface rounded-full px-2.5 py-1">Quiz</span>
+            <h2 className="text-2xl font-semibold mt-2">Star Trivia</h2>
+            <p className="text-sm text-soft mt-1 font-semibold">Four options, one right, ten questions.</p>
+            <p className="text-xs text-soft/70 mt-3 font-bold">{TRIVIA_SEED.length} questions</p>
+          </Link>
+        </motion.div>
       </div>
 
-      <div className="mt-7 border border-line rounded-2xl p-5 bg-panel">
+      <motion.div variants={riseIn} className="piece mt-4 p-5">
         <div className="flex items-baseline justify-between">
-          <p className="text-[10px] uppercase tracking-widest text-faint">Your rank</p>
-          <p className="text-xs text-faint tabular-nums">{p.answered} answered</p>
+          <span className="text-[10px] font-black uppercase tracking-widest text-soft">Your rank</span>
+          <span className="text-xs font-bold text-soft tabular-nums">{p.answered} answered</span>
         </div>
-        <p className="text-2xl font-bold mt-1">{current.name}</p>
-        <div className="h-1.5 bg-ink rounded-full mt-3 overflow-hidden">
-          <div className="h-full bg-picto rounded-full transition-all"
-            style={{ width: `${Math.round(progress * 100)}%` }} />
+        <p className="font-display text-3xl font-semibold mt-1">{current.name}</p>
+        <div className="h-4 bg-sand rounded-full mt-3 overflow-hidden border-2 border-ink">
+          <motion.div className="h-full bg-pop"
+            initial={{ width: 0 }}
+            animate={{ width: `${Math.round(progress * 100)}%` }}
+            transition={{ type: "spring", stiffness: 90, damping: 18, delay: 0.4 }} />
         </div>
-        <p className="text-xs text-faint mt-2">
+        <p className="text-xs text-soft mt-2 font-bold">
           {next ? `${next.min - p.answered} more to ${next.name}` : "Top rank reached"}
         </p>
-      </div>
+      </motion.div>
 
-      <Link to="/rooms" className="block mt-3 border border-dashed border-line rounded-2xl p-4 text-center text-sm text-dim hover:text-chalk hover:border-picto transition">
-        Head-to-head — race someone on the same puzzle →
-      </Link>
-    </div>
+      <motion.div variants={popIn} className="mt-4">
+        <Link to="/rooms"
+          className="piece press block p-4 text-center font-display font-semibold bg-pop">
+          Head-to-head — race someone on the same puzzle →
+        </Link>
+      </motion.div>
+    </motion.div>
   );
 }

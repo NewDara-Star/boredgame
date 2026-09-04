@@ -22,7 +22,7 @@ export function RoomsPage() {
     return (
       <Card className="p-6">
         <h1 className="text-xl font-bold">Head-to-head needs a database</h1>
-        <p className="text-sm text-dim mt-2">
+        <p className="text-sm text-soft mt-2">
           Two browsers have to see the same room. Add your Supabase URL and anon key to <code>.env</code>,
           run <code>supabase/schema.sql</code>, and this page comes alive. Single-player works without it.
         </p>
@@ -31,14 +31,14 @@ export function RoomsPage() {
   }
 
   if (!user) {
-    return <p className="text-sm text-dim">Sign in on the Profile tab first — rooms need to know who you are.</p>;
+    return <p className="text-sm text-soft">Sign in on the Profile tab first — rooms need to know who you are.</p>;
   }
 
   if (!code) {
     return (
       <div className="space-y-5">
         <h1 className="text-2xl font-bold">Head-to-head</h1>
-        <p className="text-sm text-dim">Same puzzle, two players, first correct answer takes the round.</p>
+        <p className="text-sm text-soft">Same puzzle, two players, first correct answer takes the round.</p>
         <div className="grid gap-2 sm:grid-cols-2">
           <Button onClick={async () => { const c = await createRoom(user.id, "picto"); if (c) nav(`/rooms/${c}`); }}>
             Create a Picto room
@@ -61,7 +61,7 @@ export function RoomsPage() {
   }
 
   if (error) return <p className="text-sm text-bad">{error}</p>;
-  if (!room) return <p className="text-sm text-dim">Finding room {code}…</p>;
+  if (!room) return <p className="text-sm text-soft">Finding room {code}…</p>;
 
   const iAmIn = players.some((p) => p.user_id === user.id);
   const isHost = room.host_id === user.id;
@@ -71,19 +71,19 @@ export function RoomsPage() {
     <div className="space-y-5">
       <div className="flex items-baseline justify-between">
         <div>
-          <p className="text-[10px] uppercase tracking-widest text-faint">Room code</p>
+          <p className="text-[10px] uppercase tracking-widest text-soft">Room code</p>
           <p className="text-3xl font-bold tracking-[0.3em]">{room.code}</p>
         </div>
-        <p className="text-xs text-faint uppercase tracking-widest">{room.status}</p>
+        <p className="text-xs text-soft uppercase tracking-widest">{room.status}</p>
       </div>
 
       <div className="flex gap-2 flex-wrap">
         {players.map((p) => (
-          <span key={p.user_id} className="text-sm bg-panel border border-line rounded-full px-3 py-1.5">
+          <span key={p.user_id} className="text-sm bg-surface border-[2.5px] border-ink rounded-full px-3 py-1.5">
             {p.username} <b className="text-picto tabular-nums ml-1">{p.score}</b>
           </span>
         ))}
-        {players.length === 0 && <span className="text-sm text-faint">Nobody has joined yet</span>}
+        {players.length === 0 && <span className="text-sm text-soft">Nobody has joined yet</span>}
       </div>
 
       {!iAmIn && (
@@ -91,12 +91,12 @@ export function RoomsPage() {
       )}
 
       {iAmIn && !round && isHost && <Button onClick={() => void startNextRound()}>Start the match</Button>}
-      {iAmIn && !round && !isHost && <p className="text-sm text-dim">Waiting for the host to start…</p>}
+      {iAmIn && !round && !isHost && <p className="text-sm text-soft">Waiting for the host to start…</p>}
 
       {round && currentPuzzle && (
         <>
-          <p className="text-[10px] uppercase tracking-widest text-faint">Round {round.round_no} of {room.best_of}</p>
-          <Card className="aspect-square max-h-[44vh] mx-auto w-full grid place-items-center p-6 text-chalk">
+          <p className="text-[10px] uppercase tracking-widest text-soft">Round {round.round_no} of {room.best_of}</p>
+          <Card className="aspect-square max-h-[44vh] mx-auto w-full grid place-items-center p-6 text-ink">
             {currentPuzzle.spec
               ? <PictoRenderer spec={currentPuzzle.spec} />
               : <p className="text-xl font-semibold text-center">{currentPuzzle.prompt}</p>}

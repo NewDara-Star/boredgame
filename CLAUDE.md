@@ -45,6 +45,26 @@ There is no socket code. Both browsers subscribe to `rooms`, `room_players` and
 `room_rounds`; Postgres pushes changes. `claimWin()` updates `winner_id` with an
 `is("winner_id", null)` filter, so only the first correct answer can land.
 
+## Installing dependencies — read this before running npm
+
+**`npm install` must be run on macOS, in a normal Terminal.**
+
+When Claude installs through the remote-device bridge, that shell is Linux. npm
+only fetches the platform binary for the machine it is running on, so the tree
+ends up with `@esbuild/linux-arm64` and no `@esbuild/darwin-arm64`. The build
+then dies with "Host version does not match binary version", which looks like a
+version conflict and is actually a platform mismatch.
+
+If that happens:
+
+```
+rm -rf node_modules package-lock.json
+npm install
+```
+
+Claude can edit files, typecheck and run the dev server through the bridge.
+Dependency installs and production builds belong in your own Terminal.
+
 ## Commands
 
 ```
