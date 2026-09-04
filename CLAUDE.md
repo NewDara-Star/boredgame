@@ -352,6 +352,21 @@ The signup trigger had to be fixed in the same migration — it was producing na
 longer than the new shape rule, which would have turned every new signup into a
 failed insert.
 
+## An invite link is the whole growth loop
+
+Arriving on `/rooms/CODE` signed out used to render one sentence — "Sign in on
+the Profile tab first" — with the code nowhere on screen and no way back. Someone
+shared a link and their friend read the code out of the URL by hand to get in.
+
+Now that screen shows what they were invited to (the code, who is waiting) with
+the sign-up card **inline**. No redirect, so nothing has to remember where they
+were headed. And following an invite IS the intent to join, so joining happens on
+arrival rather than behind one more button — `join_room` refuses a full or
+started room, and that refusal now has somewhere to show.
+
+The rule this is an instance of: never send someone to another screen to do the
+thing the current screen is for.
+
 ## Seats, and writes that report themselves
 
 **Rooms have a capacity** (`rooms.capacity`, default 2) and joining goes through

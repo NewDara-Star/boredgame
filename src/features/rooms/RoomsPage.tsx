@@ -11,15 +11,17 @@ import { SquareOffRoom } from "@/features/squareoff/SquareOffRoom";
 import { startSquareOff } from "@/features/squareoff/useTttRoom";
 import { Lobby } from "./Lobby";
 import { InviteCard } from "./InviteCard";
+import { AuthCard } from "@/features/profile/AuthCard";
+import { Avatar } from "@/shared/ui/Avatar";
 
 export function RoomsPage() {
   const { code } = useParams();
   const nav = useNavigate();
-  const { user, offline } = useAuth();
+  const { user, profile, offline } = useAuth();
   const [joinCode, setJoinCode] = useState("");
   const [guess, setGuess] = useState("");
   const [startError, setStartError] = useState<string | null>(null);
-  const uname = user?.email?.split("@")[0] ?? "player";
+  const uname = profile?.username ?? user?.email?.split("@")[0] ?? "player";
 
   const {
     room, players, round, currentPuzzle, error, categories,
@@ -28,6 +30,17 @@ export function RoomsPage() {
 
   const isHost = !!room && !!user && room.host_id === user.id;
   const everyoneReady = !!room && players.length === room.capacity && players.every((p) => p.ready);
+
+  // Following an invite IS the intent to join, so do not make them find a
+  // button for it after signing in. join_room refuses a full or started room,
+  // and that refusal now has somewhere to show.
+  useEffect(() => {
+    if (!user || !room || !code) return;
+    if (room.status !== "waiting") return;
+    if (players.some((pl) => pl.user_id === user.id)) return;
+    if (players.length >= room.capacity) return;
+    void join(uname);
+  }, [user, room, code, players, uname, join]);
 
   // One writer: the host turns agreement into a started game. Both clients see
   // the same ready flags, so letting either start would race to deal twice.
@@ -55,7 +68,45 @@ export function RoomsPage() {
   }
 
   if (!user) {
-    return <p className="text-sm text-soft">Sign in on the Profile tab first — rooms need to know who you are.</p>;
+    // Arriving on a room link signed out used to be a dead end: one sentence
+    // pointing at another tab, with the code nowhere on screen. Someone shared a
+    // link and their friend had to read the code out of the URL by hand.
+    if (code) {
+      return (
+        <div className="space-y-4">
+          <div>
+            <p className="text-[10px] font-black uppercase tracking-widest text-soft">
+              You've been invited
+            </p>
+            <h1 className="font-display text-[30px] leading-none font-semibold mt-1">
+              Room {code.toUpperCase()}
+            </h1>
+            {players.length > 0 && (
+              <div className="flex items-center gap-2 mt-3">
+                <div className="flex -space-x-2.5">
+                  {players.map((p) => (
+                    <Avatar key={p.user_id} id={p.user_id} name={p.username} size={30} />
+                  ))}
+                </div>
+                <p className="text-[13px] font-bold text-soft">
+                  {players.map((p) => p.username).join(" and ")} {players.length === 1 ? "is" : "are"} waiting
+                </p>
+              </div>
+            )}
+          </div>
+          <AuthCard kept="Pick a name and you're straight into the room — it takes a second." />
+        </div>
+      );
+    }
+    return (
+      <div className="space-y-4">
+        <h1 className="font-display text-[30px] leading-none font-semibold">Head-to-head</h1>
+        <p className="text-sm text-soft font-semibold">
+          Rooms need to know who you are, so they can tell you apart.
+        </p>
+        <AuthCard />
+      </div>
+    );
   }
 
   if (!code) {
