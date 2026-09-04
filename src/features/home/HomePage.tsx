@@ -4,11 +4,13 @@ import { PICTO_SEED } from "@/shared/data/picto";
 import { useCounts } from "@/features/play/counts";
 import { PictoRenderer } from "@/features/picto/PictoRenderer";
 import { useProgress } from "@/features/play/useProgress";
+import { useAuth } from "@/app/providers/AuthProvider";
 import { rankFor } from "@/features/play/rank";
 import { RankBadge } from "@/features/play/RankBadge";
 import { stagger, riseIn, popIn } from "@/shared/ui/motion";
 
 export function HomePage() {
+  const { user, offline } = useAuth();
   const p = useProgress();
   const counts = useCounts();
   const { current, next, progress } = rankFor(p.answered);
@@ -116,6 +118,21 @@ export function HomePage() {
           </p>
         </div>
       </motion.div>
+
+      {/* The moment someone has something to lose is the moment to mention an
+          account. Before that it is just a form in the way. */}
+      {!user && !offline && p.answered > 0 && (
+        <motion.div variants={popIn} className="mt-4">
+          <Link to="/profile" className="piece press block bg-ink text-paper p-4">
+            <p className="font-display text-lg font-semibold">
+              {p.answered} answered on this device
+            </p>
+            <p className="text-[13px] font-semibold opacity-80 mt-0.5">
+              Create an account to keep them, and to take a place on the leaderboard →
+            </p>
+          </Link>
+        </motion.div>
+      )}
 
       <div className="grid gap-3 sm:grid-cols-2 mt-4">
         <motion.div variants={popIn}>

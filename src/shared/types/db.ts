@@ -91,6 +91,8 @@ export interface Room {
   game: GameKey;
   /** 'race' is the original first-correct-answer-wins; 'squareoff' is the board. */
   mode: "race" | "squareoff";
+  /** null means every category; stored on the room so both players share a pool */
+  categories: string[] | null;
   status: RoomStatus;
   best_of: number;
   created_at: string;

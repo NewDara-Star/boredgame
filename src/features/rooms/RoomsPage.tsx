@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "@/app/providers/AuthProvider";
 import { useRoom, createRoom } from "./useRoom";
@@ -8,12 +8,27 @@ import { Card } from "@/shared/ui/Card";
 import { Field, Input } from "@/shared/ui/Field";
 import { isCorrect } from "@/shared/lib/normalise";
 import { SquareOffRoom } from "@/features/squareoff/SquareOffRoom";
+import { supabase } from "@/shared/lib/supabase";
+
+/** Names only. The room screen does not have a loaded pool to count against, and
+    a wrong count is worse than none. */
+function useCategoryNames() {
+  const [names, setNames] = useState<string[]>([]);
+  useEffect(() => {
+    if (!supabase) return;
+    void supabase.from("categories").select("name").order("name")
+      .then(({ data }) => setNames((data ?? []).map((c: { name: string }) => c.name)));
+  }, []);
+  return names;
+}
 
 export function RoomsPage() {
   const { code } = useParams();
   const nav = useNavigate();
   const { user, offline } = useAuth();
   const [joinCode, setJoinCode] = useState("");
+  const [picked, setPicked] = useState<string[]>([]);
+  const allCategories = useCategoryNames();
   const [guess, setGuess] = useState("");
   const uname = user?.email?.split("@")[0] ?? "player";
 
@@ -41,6 +56,46 @@ export function RoomsPage() {
       <div className="space-y-5">
         <h1 className="text-2xl font-bold">Head-to-head</h1>
 
+        {/* Above the create buttons, not inside one of them. Buried in the Square
+            Off card it was unlabelled, applied to only one of the three modes,
+            and nobody found it. */}
+        <div className="piece p-4">
+          <p className="text-[10px] font-black uppercase tracking-widest text-soft">
+            Question pool · optional
+          </p>
+          <p className="text-sm font-semibold mt-1">
+            Every category unless you narrow it. Pick before you create — both players
+            share one pool, and it can't be changed once the room exists.
+          </p>
+          <div className="flex flex-wrap gap-1.5 mt-3">
+            {allCategories.map((n) => {
+              const on = picked.includes(n);
+              return (
+                <button key={n} type="button"
+                  onClick={() => setPicked(on ? picked.filter((x) => x !== n) : [...picked, n])}
+                  className={`border-2 border-ink rounded-full px-2.5 py-1 text-[12px] font-bold
+                    ${on ? "bg-ink text-paper" : "bg-surface text-ink"}`}>
+                  {n}
+                </button>
+              );
+            })}
+          </div>
+          <div className="flex items-center gap-2 mt-3">
+            <p className="text-[11px] font-black uppercase tracking-wider text-soft flex-1">
+              {picked.length === 0
+                ? "All categories"
+                : `${picked.length} selected`}
+            </p>
+            {picked.length > 0 && (
+              <button type="button" onClick={() => setPicked([])}
+                className="border-2 border-ink rounded-full px-2.5 py-1 text-[11px] font-black
+                  uppercase tracking-wider bg-pop">
+                Clear
+              </button>
+            )}
+          </div>
+        </div>
+
         <div className="piece p-4">
           <p className="text-[10px] font-black uppercase tracking-widest text-soft">Square Off</p>
           <p className="text-sm font-semibold mt-1">
@@ -48,7 +103,7 @@ export function RoomsPage() {
           </p>
           <Button className="w-full mt-3"
             onClick={async () => {
-              const c = await createRoom(user.id, "trivia", uname, "squareoff");
+              const c = await createRoom(user.id, "trivia", uname, "squareoff", picked);
               if (c) nav(`/rooms/${c}`);
             }}>
             Create a Square Off room
@@ -60,14 +115,21 @@ export function RoomsPage() {
             Race — same puzzle, first correct answer takes the round
           </p>
           <div className="grid gap-2 sm:grid-cols-2">
-            <Button variant="ghost" onClick={async () => { const c = await createRoom(user.id, "picto", uname); if (c) nav(`/rooms/${c}`); }}>
+            <Button variant="ghost" onClick={async () => {
+              const c = await createRoom(user.id, "picto", uname, "race", picked);
+              if (c) nav(`/rooms/${c}`);
+            }}>
               Picto race
             </Button>
-            <Button variant="ghost" onClick={async () => { const c = await createRoom(user.id, "trivia", uname); if (c) nav(`/rooms/${c}`); }}>
+            <Button variant="ghost" onClick={async () => {
+              const c = await createRoom(user.id, "trivia", uname, "race", picked);
+              if (c) nav(`/rooms/${c}`);
+            }}>
               Trivia race
             </Button>
           </div>
         </div>
+
         <form onSubmit={(e) => { e.preventDefault(); if (joinCode.trim()) nav(`/rooms/${joinCode.trim().toUpperCase()}`); }}>
           <Field label="Join with a code">
             <div className="flex gap-2">
@@ -95,7 +157,14 @@ export function RoomsPage() {
           <p className="text-[10px] uppercase tracking-widest text-soft">Room code</p>
           <p className="text-3xl font-bold tracking-[0.3em]">{room.code}</p>
         </div>
-        <p className="text-xs text-soft uppercase tracking-widest">{room.status}</p>
+        <div className="text-right">
+          <p className="text-xs text-soft uppercase tracking-widest">{room.status}</p>
+          {!!room.categories?.length && (
+            <p className="text-[11px] font-bold text-soft mt-0.5 max-w-[180px]">
+              {room.categories.join(" · ")}
+            </p>
+          )}
+        </div>
       </div>
 
       <div className="flex gap-2 flex-wrap">
@@ -112,7 +181,8 @@ export function RoomsPage() {
       )}
 
       {iAmIn && room.mode === "squareoff" && (
-        <SquareOffRoom roomId={room.id} players={players} userId={user.id} isHost={isHost} />
+        <SquareOffRoom roomId={room.id} code={room.code} status={room.status}
+          categories={room.categories} players={players} userId={user.id} isHost={isHost} />
       )}
 
       {room.mode !== "squareoff" && iAmIn && !round && isHost &&

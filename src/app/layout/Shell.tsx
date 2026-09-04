@@ -18,7 +18,7 @@ const isActive = (pathname: string, to: string, exact?: boolean) =>
   exact ? pathname === to : pathname.startsWith(to);
 
 export function Shell() {
-  const { offline } = useAuth();
+  const { offline, user } = useAuth();
   const { pathname } = useLocation();
   const p = useProgress();
   const rank = rankFor(p.answered).current;
@@ -62,10 +62,21 @@ export function Shell() {
               {p.streak}
             </motion.span>
           )}
-          <NavLink to="/profile" aria-label="Profile"
-            className="shrink-0 grid place-items-center h-9 w-9 ml-1">
-            <RankBadge rank={rank.key} size={30} />
-          </NavLink>
+          {/* A badge is not a call to action. Signed out, the only thing in the
+              header should be the way in — the previous build showed a rank
+              badge, which read as "you are already logged in". */}
+          {user || offline ? (
+            <NavLink to="/profile" aria-label="Profile"
+              className="shrink-0 grid place-items-center h-9 w-9 ml-1">
+              <RankBadge rank={rank.key} size={30} />
+            </NavLink>
+          ) : (
+            <NavLink to="/profile"
+              className="piece press shrink-0 ml-1.5 bg-ink text-paper px-3 py-1.5
+                text-[12px] font-black uppercase tracking-wider rounded-xl">
+              Sign up
+            </NavLink>
+          )}
         </nav>
       </header>
 

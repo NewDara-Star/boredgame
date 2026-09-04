@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/shared/lib/supabase";
+import type { RoomPlayer } from "@/shared/types/db";
 import { loadContent, shuffle } from "@/features/play/content";
 import type { PlayItem } from "@/features/play/types";
 import { newGame, pick, answer, advance, type Game, type Mark } from "./rules";
@@ -14,7 +15,10 @@ import { decode, encode, type TttRow } from "./wire";
  * writes the answer, and the answerer also writes the move on from the reveal.
  * Any other arrangement has both clients racing to write the same transition.
  */
-export function useTttRoom(roomId: number | null, userId: string | undefined) {
+export function useTttRoom(
+  roomId: number | null, userId: string | undefined, players: RoomPlayer[] = [],
+  categories: string[] | null = null,
+) {
   const [row, setRow] = useState<TttRow | null>(null);
   const [pool, setPool] = useState<PlayItem[]>([]);
   const seen = useRef<Set<number>>(new Set());
@@ -50,11 +54,14 @@ export function useTttRoom(roomId: number | null, userId: string | undefined) {
     : null;
 
   const nextPuzzleId = useCallback(() => {
-    const fresh = pool.find((i) => !seen.current.has(Number(i.id))) ?? pool[0];
+    const scoped = categories?.length
+      ? pool.filter((i) => categories.includes(i.category))
+      : pool;
+    const fresh = scoped.find((i) => !seen.current.has(Number(i.id))) ?? scoped[0] ?? pool[0];
     if (!fresh) return null;
     seen.current.add(Number(fresh.id));
     return Number(fresh.id);
-  }, [pool]);
+  }, [pool, categories]);
 
   /** Write a transition. `puzzle` is set whenever the new state needs a question. */
   const write = useCallback(async (next: Game, withPuzzle: boolean) => {
@@ -81,8 +88,26 @@ export function useTttRoom(roomId: number | null, userId: string | undefined) {
 
   const submit = useCallback((correct: boolean) => {
     if (!game || game.phase !== "asking" || game.answerer !== myMark) return;
-    void write(answer(game, correct), false);
-  }, [game, myMark, write]);
+    const next = answer(game, correct);
+    void (async () => {
+      await write(next, false);
+      // The client that wrote the winning move also books the win, so the tally
+      // is incremented exactly once no matter how many browsers are watching.
+      if (next.phase !== "over" || !next.winner || next.winner === "draw" || !row) return;
+      const seat = next.winner === "x" ? row.x_player : row.o_player;
+      const me = players.find((p) => p.user_id === seat);
+      if (!supabase || !seat || !roomId) return;
+      await supabase.from("room_players")
+        .update({ score: (me?.score ?? 0) + 1 })
+        .eq("room_id", roomId).eq("user_id", seat);
+    })();
+  }, [game, myMark, write, row, players, roomId]);
+
+  /** Ends the session rather than the game. Rematch keeps the tally; this stops it. */
+  const quit = useCallback(async () => {
+    if (!supabase || !roomId) return;
+    await supabase.from("rooms").update({ status: "finished" }).eq("id", roomId);
+  }, [roomId]);
 
   // The player who just answered owns the move on, so exactly one client writes it.
   useEffect(() => {
@@ -101,7 +126,7 @@ export function useTttRoom(roomId: number | null, userId: string | undefined) {
   }, [roomId, row]);
 
   return {
-    game, myMark, item, start, choose, submit, rematch,
+    game, myMark, item, start, choose, submit, rematch, quit,
     ready: pool.length > 0,
     /** when the current question went up, so both clients run the same clock */
     askedAt: row ? Date.parse(row.updated_at) : 0,

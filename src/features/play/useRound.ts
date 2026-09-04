@@ -9,7 +9,7 @@ import type { PlayItem, RoundResult } from "./types";
 
 export type Phase = "loading" | "empty" | "playing" | "revealed" | "done";
 
-export function useRound(game: GameKey, size: number) {
+export function useRound(game: GameKey, size: number, categories: string[] = []) {
   const { user, applyProfile } = useAuth();
   const userId = user?.id;
   const [items, setItems] = useState<PlayItem[]>([]);
@@ -21,12 +21,23 @@ export function useRound(game: GameKey, size: number) {
   const [hintsUsed, setHintsUsed] = useState(0);
   const [results, setResults] = useState<RoundResult[]>([]);
   const [outcome, setOutcome] = useState<RoundOutcome | null>(null);
+  const [available, setAvailable] = useState<{ name: string; count: number }[]>([]);
   const [last, setLast] = useState<{ correct: boolean; given: string; gained: number; near: boolean } | null>(null);
   const startedAt = useRef(Date.now());
 
   const build = useCallback(async () => {
     setPhase("loading");
-    const all = await loadContent(game);
+    const everything = await loadContent(game);
+    // Derived from the pool we already have rather than a second query, so the
+    // counts can never disagree with what the round can actually serve.
+    const tally = new Map<string, number>();
+    for (const i of everything) if (i.category) tally.set(i.category, (tally.get(i.category) ?? 0) + 1);
+    setAvailable([...tally].map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count));
+
+    const all = categories.length
+      ? everything.filter((i) => categories.includes(i.category))
+      : everything;
     if (all.length === 0) { setPhase("empty"); return; }
     // Scoped to the account, not the browser: an unscoped seen-list meant one
     // account's history quietly suppressed questions for another on the same machine.
@@ -38,7 +49,7 @@ export function useRound(game: GameKey, size: number) {
     setResults([]); setLast(null); setHintsUsed(0); setOutcome(null);
     startedAt.current = Date.now();
     setPhase("playing");
-  }, [game, size, userId]);
+  }, [game, size, userId, categories.join("|")]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => { void build(); }, [build]);
 
@@ -91,6 +102,7 @@ export function useRound(game: GameKey, size: number) {
 
   return {
     items, current, index, phase, score, streak, bestStreak, results, last, outcome,
+    categories: available,
     hintsUsed, useHint: () => setHintsUsed((h) => h + 1),
     submit, next, restart: build,
   };

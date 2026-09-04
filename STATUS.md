@@ -1,6 +1,6 @@
 # STATUS — BoredGame
 
-Last updated: 2026-09-04 (option-order fix)
+Last updated: 2026-09-04 (guest flow, match tally, categories)
 
 ## Verified working
 
@@ -17,6 +17,8 @@ Each claim below was checked by running it, not by reading the code.
 | Leaderboard podium, list and sticky row render | stubbed 8 players; podium, rows 4–8 and the signed-out CTA all correct |
 | Locked vs unlocked ranks read differently | profile screenshot: 5 unlocked in colour, 5 greyed with "n to go" |
 | Type is the real Fredoka/Nunito | fonts substituted locally from `@fontsource-variable`, not the system fallback |
+| Guest sees an account first, not a dashboard | Playwright at 390x844, fresh and with 214 answered |
+| Category filter shows real counts and restarts the round | screenshot: chips with per-category counts |
 | Options are not guessable by position | `npm run check:options` — seeded shuffle spreads answer-first input 25.1/25.5/24.9/24.5 over 2000 ids |
 | Square Off rules hold | `npm run check:squareoff` — 22 assertions, including the steal and turn order |
 | A full solo Square Off game plays | Playwright drove 60 turns to "The bot wins", no console errors |

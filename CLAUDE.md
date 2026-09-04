@@ -220,6 +220,34 @@ Rooms carry a `mode` (`race` | `squareoff`) rather than there being a second
 room system. Board state lives in `ttt_games`, one row per room, nine characters
 of text for the board.
 
+## The signed-out player is a different screen
+
+Profile used to render the full dashboard for guests with the sign-in form
+below four sections of it — which reads as "you are already logged in" and hides
+the only action on the page. There are now two views: `GuestView` leads with the
+auth card, `MemberView` is the dashboard. Signing UP is the default mode; a
+returning user knows to look for the other tab, a first-timer who lands on a
+login form assumes the app is not for them yet.
+
+The header shows a Sign up button when signed out rather than a rank badge, and
+Home offers an account only once there is progress worth keeping.
+
+## Rooms keep a session tally
+
+`room_players.score` counts games won in that room across rematches. The client
+that writes the winning transition also books the win, so it increments exactly
+once however many browsers are watching. Rematch keeps the tally; Quit match
+sets `rooms.status = 'finished'`, which is what turns a rally of games into a
+result — and that result draws to a 1080px PNG in `matchCard.ts`, straight onto
+a canvas rather than screenshotting the DOM.
+
+## Categories
+
+Solo rounds filter client-side; the picker is built from the pool `useRound`
+already loaded, so counts can never disagree with what a round can serve. Rooms
+store `rooms.categories` instead, because a per-client filter lets one browser
+be served a puzzle the other has filtered out and cannot render.
+
 ## Option order is never storage order
 
 Every trivia question was authored and stored with the correct answer in

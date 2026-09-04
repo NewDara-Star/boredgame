@@ -1,6 +1,8 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useRound } from "@/features/play/useRound";
+import { CategoryBar } from "@/features/play/CategoryBar";
+import { readFilter, writeFilter } from "@/features/play/filters";
 import { shuffle } from "@/features/play/content";
 import { Hud, Reveal, Summary, Burst } from "@/features/play/RoundChrome";
 import { SPRING, stagger, riseIn } from "@/shared/ui/motion";
@@ -9,7 +11,12 @@ const SHAPES = ["▲", "◆", "●", "■"];
 const HUES = ["#EF5A2A", "#4B5BD6", "#FFC93C", "#17914B"];
 
 export function TriviaGame() {
-  const r = useRound("trivia", 10);
+  const [cats, setCats] = useState<string[]>(() => readFilter("trivia"));
+  const r = useRound("trivia", 10, cats);
+  const chooseCats = (next: string[]) => { setCats(next); writeFilter("trivia", next); };
+  const filterBar = (
+    <CategoryBar categories={r.categories} selected={cats} onChange={chooseCats} />
+  );
 
   // Shuffle once per question, not per render, or the options jump around.
   const options = useMemo(
@@ -28,8 +35,12 @@ export function TriviaGame() {
     return new Set(shuffle(wrong).slice(0, 2));
   }, [r.current?.id, r.hintsUsed]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (r.phase === "loading") return <p className="text-soft font-bold">Loading questions…</p>;
-  if (r.phase === "empty") return <p className="text-soft font-bold">No trivia is live yet.</p>;
+  if (r.phase === "loading") return <>{filterBar}<p className="text-soft font-bold">Loading questions…</p></>;
+  if (r.phase === "empty") return (
+    <>{filterBar}<p className="text-soft font-bold">
+      {cats.length ? "Nothing live in those categories yet — widen the filter." : "No trivia is live yet."}
+    </p></>
+  );
 
   if (r.phase === "done") {
     return (
@@ -60,6 +71,7 @@ export function TriviaGame() {
 
   return (
     <div>
+      {filterBar}
       <Hud index={r.index} total={r.items.length} score={r.score} streak={r.streak} accent="#4B5BD6" />
 
       <AnimatePresence mode="wait">

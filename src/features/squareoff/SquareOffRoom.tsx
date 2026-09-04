@@ -1,18 +1,24 @@
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import type { RoomPlayer } from "@/shared/types/db";
+import { Link } from "react-router-dom";
+import type { RoomPlayer, RoomStatus } from "@/shared/types/db";
 import { popIn } from "@/shared/ui/motion";
 import { Button } from "@/shared/ui/Button";
 import { Board } from "./Board";
 import { QuestionPanel, Timer } from "./QuestionPanel";
 import { describe, type Mark } from "./rules";
 import { useTttRoom } from "./useTttRoom";
+import { drawMatchCard, downloadCard } from "./matchCard";
 import { ASK_MS } from "./useSquareOff";
 
 export function SquareOffRoom({
-  roomId, players, userId, isHost,
-}: { roomId: number; players: RoomPlayer[]; userId: string; isHost: boolean }) {
-  const t = useTttRoom(roomId, userId);
+  roomId, code, status, categories, players, userId, isHost,
+}: {
+  roomId: number; code: string; status: RoomStatus; categories: string[] | null;
+  players: RoomPlayer[]; userId: string; isHost: boolean;
+}) {
+  const t = useTttRoom(roomId, userId, players, categories);
+  const [saving, setSaving] = useState(false);
   const [chosen, setChosen] = useState<string | null>(null);
   const [now, setNow] = useState(Date.now());
 
@@ -38,6 +44,49 @@ export function SquareOffRoom({
     timedOut.current = t.askedAt;
     t.submit(false);
   }, [mine, left, t]);
+
+  const sides = (["x", "o"] as Mark[]).map((m) => ({
+    mark: m,
+    name: players.find((p) => p.user_id === t.seats[m])?.username ?? (m === "x" ? "Host" : "Guest"),
+    score: players.find((p) => p.user_id === t.seats[m])?.score ?? 0,
+  }));
+
+  // Quitting ends the session, not the game — the tally survives the rematches
+  // that came before it, which is the only reason to keep score at all.
+  if (status === "finished") {
+    const [a, b] = sides;
+    const winner = a.score === b.score ? null : a.score > b.score ? a : b;
+    return (
+      <motion.div variants={popIn} initial="hidden" animate="show" className="space-y-4">
+        <div className={`piece p-6 text-center ${
+          !winner ? "bg-sand" : winner.mark === t.myMark ? "bg-good text-surface" : "bg-surface"}`}>
+          <p className="text-[10px] font-black uppercase tracking-widest opacity-70">Match over</p>
+          <p className="font-display text-3xl font-semibold mt-1">
+            {!winner ? "All square" : `${winner.name} takes it`}
+          </p>
+          <p className="font-display text-6xl font-semibold tabular-nums mt-3">
+            {a.score} <span className="opacity-40">—</span> {b.score}
+          </p>
+          <p className="text-xs font-bold opacity-70 mt-1">{a.name} v {b.name}</p>
+        </div>
+
+        <button
+          disabled={saving}
+          onClick={async () => {
+            setSaving(true);
+            try { downloadCard(await drawMatchCard(code, a, b), code); }
+            finally { setSaving(false); }
+          }}
+          className="piece press w-full py-4 font-display text-lg font-semibold bg-pop">
+          {saving ? "Drawing…" : "Save the result as an image"}
+        </button>
+
+        <Link to="/rooms" className="piece press block w-full py-3.5 text-center font-display font-semibold">
+          New room
+        </Link>
+      </motion.div>
+    );
+  }
 
   if (!t.ready) return <p className="text-sm text-soft font-bold">Loading questions…</p>;
 
@@ -82,6 +131,9 @@ export function SquareOffRoom({
                 {m === "x" ? "✕" : "◯"}
               </span>
               <span className="text-[13px] font-black uppercase tracking-wide">{names[m]}</span>
+              <span className="font-display text-lg font-semibold tabular-nums leading-none">
+                {players.find((p) => p.user_id === t.seats[m])?.score ?? 0}
+              </span>
             </motion.div>
           );
         })}
@@ -104,10 +156,16 @@ export function SquareOffRoom({
           <p className="font-display text-3xl font-semibold">
             {g.winner === "draw" ? "Draw" : g.winner === t.myMark ? "You win" : `${names[g.winner as Mark]} wins`}
           </p>
-          <button onClick={() => void t.rematch()}
-            className="piece press w-full mt-5 py-3.5 font-display text-lg font-semibold bg-surface text-ink">
-            Rematch
-          </button>
+          <div className="grid grid-cols-2 gap-2.5 mt-5">
+            <button onClick={() => void t.rematch()}
+              className="piece press py-3.5 font-display text-lg font-semibold bg-surface text-ink">
+              Rematch
+            </button>
+            <button onClick={() => void t.quit()}
+              className="piece press py-3.5 font-display text-lg font-semibold bg-surface text-ink">
+              Quit match
+            </button>
+          </div>
         </motion.div>
       ) : t.item && (g.phase === "asking" || g.phase === "revealed") ? (
         <div className="space-y-3">

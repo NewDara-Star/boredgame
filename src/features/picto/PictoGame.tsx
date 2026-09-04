@@ -1,12 +1,19 @@
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useRound } from "@/features/play/useRound";
+import { CategoryBar } from "@/features/play/CategoryBar";
+import { readFilter, writeFilter } from "@/features/play/filters";
 import { Hud, HintBar, Reveal, Summary, Burst } from "@/features/play/RoundChrome";
 import { PictoRenderer } from "./PictoRenderer";
 import { SPRING, shake } from "@/shared/ui/motion";
 
 export function PictoGame() {
-  const r = useRound("picto", 8);
+  const [cats, setCats] = useState<string[]>(() => readFilter("picto"));
+  const r = useRound("picto", 8, cats);
+  const chooseCats = (next: string[]) => { setCats(next); writeFilter("picto", next); };
+  const filterBar = (
+    <CategoryBar categories={r.categories} selected={cats} onChange={chooseCats} />
+  );
   const [guess, setGuess] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -14,8 +21,12 @@ export function PictoGame() {
     if (r.phase === "playing") { setGuess(""); inputRef.current?.focus(); }
   }, [r.phase, r.index]);
 
-  if (r.phase === "loading") return <p className="text-soft font-bold">Loading puzzles…</p>;
-  if (r.phase === "empty") return <p className="text-soft font-bold">No picto puzzles are live yet.</p>;
+  if (r.phase === "loading") return <>{filterBar}<p className="text-soft font-bold">Loading puzzles…</p></>;
+  if (r.phase === "empty") return (
+    <>{filterBar}<p className="text-soft font-bold">
+      {cats.length ? "Nothing live in those categories yet — widen the filter." : "No picto puzzles are live yet."}
+    </p></>
+  );
 
   if (r.phase === "done") {
     return (
@@ -49,6 +60,7 @@ export function PictoGame() {
 
   return (
     <div>
+      {filterBar}
       <Hud index={r.index} total={r.items.length} score={r.score} streak={r.streak} accent="#EF5A2A" />
 
       <div className="relative mt-5">
