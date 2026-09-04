@@ -271,6 +271,27 @@ centring container has no definite box to resolve against, and the first version
 of the catalogue rendered a 62px emblem at about 700px, squeezing the text to one
 character per line. Every `Art` takes an explicit `size`.
 
+## Seats, and writes that report themselves
+
+**Rooms have a capacity** (`rooms.capacity`, default 2) and joining goes through
+`join_room()`, which locks the room row so two people reaching for the last seat
+are serialised rather than both counting one and both inserting. It also refuses
+anyone once `status` has left `waiting`. The open INSERT policy is gone — that is
+what let a third person walk in, and starting needs EVERY player ready, so one
+extra person who never tapped Ready blocked the lobby permanently. Creating a
+room seats the host through the same function.
+
+**Every room write goes through `attempt()`** in `shared/lib/write.ts`. Before
+that, every `await supabase.from(...)` discarded its result, so a refused write
+and a hang looked identical — the board simply never moved. An expired session
+in particular was indistinguishable from a broken game. `attempt` returns null on
+success or a sentence to put on screen, and it names the common cases: expired
+sign-in, RLS refusal, and no network.
+
+A failed write no longer blanks the screen either. The room used to early-return
+on `error`, so one bad write replaced the game you were in the middle of with a
+line of red text.
+
 ## Dealing the next puzzle
 
 `deal()` in `features/play/dealer.ts` is the only place that picks one, and

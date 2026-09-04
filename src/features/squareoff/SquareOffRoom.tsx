@@ -168,9 +168,9 @@ export function SquareOffRoom({
 
       {/* A room that cannot serve a question is broken, and saying so beats a
           board that never advances. */}
-      {t.poolError && (
+      {t.error && (
         <div className="piece bg-bad text-surface p-3.5 text-center">
-          <p className="text-[13px] font-bold">{t.poolError}</p>
+          <p className="text-[13px] font-bold">{t.error}</p>
         </div>
       )}
 

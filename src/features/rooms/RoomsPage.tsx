@@ -18,6 +18,7 @@ export function RoomsPage() {
   const { user, offline } = useAuth();
   const [joinCode, setJoinCode] = useState("");
   const [guess, setGuess] = useState("");
+  const [startError, setStartError] = useState<string | null>(null);
   const uname = user?.email?.split("@")[0] ?? "player";
 
   const {
@@ -26,7 +27,7 @@ export function RoomsPage() {
   } = useRoom(code, user?.id);
 
   const isHost = !!room && !!user && room.host_id === user.id;
-  const everyoneReady = players.length >= 2 && players.every((p) => p.ready);
+  const everyoneReady = !!room && players.length === room.capacity && players.every((p) => p.ready);
 
   // One writer: the host turns agreement into a started game. Both clients see
   // the same ready flags, so letting either start would race to deal twice.
@@ -34,7 +35,8 @@ export function RoomsPage() {
     if (!room || !isHost || !everyoneReady || room.status !== "waiting") return;
     if (room.mode === "squareoff") {
       const guest = players.find((p) => p.user_id !== room.host_id);
-      if (guest) void startSquareOff(room.id, room.host_id, guest.user_id);
+      if (guest) void startSquareOff(room.id, room.host_id, guest.user_id)
+        .then((msg) => { if (msg) setStartError(msg); });
     } else {
       void startNextRound();
     }
@@ -82,8 +84,12 @@ export function RoomsPage() {
     );
   }
 
-  if (error) return <p className="text-sm text-bad font-bold">{error}</p>;
-  if (!room) return <p className="text-sm text-soft font-bold">Finding room {code}…</p>;
+  if (!room) return (
+    <div className="space-y-3">
+      <p className="text-sm text-soft font-bold">Finding room {code}…</p>
+      {error && <p className="text-sm text-bad font-bold">{error}</p>}
+    </div>
+  );
 
   const iAmIn = players.some((p) => p.user_id === user.id);
   const waiting = room.status === "waiting";
@@ -98,15 +104,28 @@ export function RoomsPage() {
         <p className="text-xs text-soft uppercase tracking-widest font-bold">{room.status}</p>
       </div>
 
-      {!iAmIn && (
-        <Button onClick={() => void join(uname)}>Join this room</Button>
+      {(error || startError) && (
+        <div className="piece bg-bad text-surface p-3.5 text-center">
+          <p className="text-[13px] font-bold">{error ?? startError}</p>
+        </div>
       )}
 
-      {iAmIn && waiting && players.length < 2 && <InviteCard code={room.code} waiting />}
+      {!iAmIn && (
+        <div className="space-y-2">
+          <Button className="w-full" onClick={() => void join(uname)}>Join this room</Button>
+          {players.length >= room.capacity && (
+            <p className="text-[13px] font-bold text-soft text-center">
+              This one looks full — {players.map((p) => p.username).join(" and ")} are already in it.
+            </p>
+          )}
+        </div>
+      )}
+
+      {iAmIn && waiting && players.length < room.capacity && <InviteCard code={room.code} waiting />}
 
       {iAmIn && waiting && (
         <Lobby room={room} players={players} categories={categories} userId={user.id}
-          alone={players.length < 2}
+          alone={players.length < room.capacity}
           onSetup={(m, g, c) => void setup(m, g, c)}
           onReady={(r) => void setReady(r)} />
       )}

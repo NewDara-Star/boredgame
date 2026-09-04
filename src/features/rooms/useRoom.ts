@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/shared/lib/supabase";
+import { attempt } from "@/shared/lib/write";
 import type { Room, RoomPlayer, RoomRound } from "@/shared/types/db";
 import { loadContent, shuffle } from "@/features/play/content";
 import type { PlayItem } from "@/features/play/types";
@@ -66,14 +67,21 @@ export function useRoom(code: string | undefined, userId: string | undefined) {
 
   const join = useCallback(async (username: string) => {
     if (!supabase || !room || !userId) return;
-    await supabase.from("room_players").upsert({ room_id: room.id, user_id: userId, username, ready: false });
-  }, [room, userId]);
+    const { data, error: e } = await supabase.rpc("join_room",
+      { p_room: room.id, p_username: username });
+    if (e) { setError(`Joining didn't go through: ${e.message}`); return; }
+    if (data === "full") setError("This room already has two players in it.");
+    else if (data === "started") setError("That match has already started — ask them for a new room.");
+    else if (data === "missing") setError("No room with that code.");
+    else { setError(null); await refresh(room.id); }
+  }, [room, userId, refresh]);
 
   const startNextRound = useCallback(async () => {
     if (!supabase || !room || pool.length === 0) return;
     const used = round?.round_no ?? 0;
     if (used >= room.best_of) {
-      await supabase.from("rooms").update({ status: "finished" }).eq("id", room.id);
+      setError(await attempt("Finishing the match",
+        supabase.from("rooms").update({ status: "finished" }).eq("id", room.id)));
       return;
     }
     const scoped = room.categories?.length
@@ -88,10 +96,11 @@ export function useRoom(code: string | undefined, userId: string | undefined) {
         : "Multiplayer needs puzzles stored in the database, not bundled ones.");
       return;
     }
-    await supabase.from("rooms").update({ status: "playing" }).eq("id", room.id);
-    await supabase.from("room_rounds").insert({
+    setError(await attempt("Starting the round",
+      supabase.from("rooms").update({ status: "playing" }).eq("id", room.id)));
+    setError(await attempt("Dealing the round", supabase.from("room_rounds").insert({
       room_id: room.id, puzzle_id: Number(pick.id), round_no: used + 1,
-    });
+    })));
   }, [room, round, pool]);
 
   /** First correct answer wins: the null filter means only one update can land. */
@@ -102,10 +111,8 @@ export function useRoom(code: string | undefined, userId: string | undefined) {
       .update({ winner_id: userId, ended_at: new Date().toISOString() })
       .eq("id", round.id).is("winner_id", null).select();
     if (data && data.length > 0) {
-      const me = players.find((p) => p.user_id === userId);
-      await supabase.from("room_players")
-        .update({ score: (me?.score ?? 0) + 1 })
-        .eq("room_id", room.id).eq("user_id", userId);
+      setError(await attempt("Recording the point",
+        supabase.rpc("bump_room_score", { p_room: room.id, p_user: userId })));
     }
   }, [round, userId, room, players]);
 
@@ -121,15 +128,15 @@ export function useRoom(code: string | undefined, userId: string | undefined) {
 
   const setup = useCallback(async (mode: string, game: string, cats: string[]) => {
     if (!supabase || !room) return;
-    await supabase.rpc("set_room_setup", {
+    setError(await attempt("Changing the setup", supabase.rpc("set_room_setup", {
       p_room: room.id, p_mode: mode, p_game: game, p_categories: cats,
-    });
+    })));
   }, [room]);
 
   const setReady = useCallback(async (ready: boolean) => {
     if (!supabase || !room || !userId) return;
-    await supabase.from("room_players").update({ ready })
-      .eq("room_id", room.id).eq("user_id", userId);
+    setError(await attempt("Marking you ready", supabase.from("room_players")
+      .update({ ready }).eq("room_id", room.id).eq("user_id", userId)));
   }, [room, userId]);
 
   return {
@@ -151,7 +158,9 @@ export async function createRoom(userId: string, username: string): Promise<stri
     .select().single();
   if (error || !data) return null;
   // Creating a room is joining it. Making the host click "Join this room" on a
-  // room they just made is a step with no decision in it.
-  await supabase.from("room_players").insert({ room_id: data.id, user_id: userId, username, ready: false });
+  // room they just made is a step with no decision in it. It goes through
+  // join_room like everyone else — the open insert policy is gone, because that
+  // is what let a third person walk in.
+  await supabase.rpc("join_room", { p_room: data.id, p_username: username });
   return code;
 }

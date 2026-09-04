@@ -5,6 +5,7 @@ import type { PlayItem } from "@/features/play/types";
 import { newGame, pick, answer, advance, type Game, type Mark } from "./rules";
 import { decode, encode, type TttRow } from "./wire";
 import { deal } from "@/features/play/dealer";
+import { attempt } from "@/shared/lib/write";
 
 /**
  * Two browsers, one board. Both clients run the identical reducer from rules.ts
@@ -24,6 +25,7 @@ export function useTttRoom(
   const seen = useRef<Set<string>>(new Set());
   const lastServed = useRef<string | null>(null);
   const [poolError, setPoolError] = useState<string | null>(null);
+  const [writeError, setWriteError] = useState<string | null>(null);
 
   useEffect(() => {
     void loadContent("trivia").then((all) =>
@@ -79,7 +81,8 @@ export function useTttRoom(
     if (!supabase || !roomId) return;
     const patch: Record<string, unknown> = { ...encode(next), updated_at: new Date().toISOString() };
     if (withPuzzle) patch.puzzle_id = nextPuzzleId();
-    await supabase.from("ttt_games").update(patch).eq("room_id", roomId);
+    setWriteError(await attempt("That move",
+      supabase.from("ttt_games").update(patch).eq("room_id", roomId)));
   }, [roomId, nextPuzzleId]);
 
   const choose = useCallback((square: number) => {
@@ -100,7 +103,8 @@ export function useTttRoom(
       // Incremented in the database, not read-modify-written from this client's
       // copy of the players list — across a rematch that copy can lag behind
       // realtime, and the next win then writes (stale + 1) over the real score.
-      await supabase.rpc("bump_room_score", { p_room: roomId, p_user: seat });
+      setWriteError(await attempt("Recording the win",
+        supabase.rpc("bump_room_score", { p_room: roomId, p_user: seat })));
     })();
   }, [game, myMark, write, row, roomId]);
 
@@ -114,7 +118,8 @@ export function useTttRoom(
   /** Ends the session rather than the game. Rematch keeps the tally; this stops it. */
   const quit = useCallback(async () => {
     if (!supabase || !roomId) return;
-    await supabase.from("rooms").update({ status: "finished" }).eq("id", roomId);
+    setWriteError(await attempt("Ending the match",
+      supabase.from("rooms").update({ status: "finished" }).eq("id", roomId)));
   }, [roomId]);
 
   // The player who just answered owns the move on, so exactly one client writes it.
@@ -132,12 +137,14 @@ export function useTttRoom(
     const first: Mark = row.winner === "x" ? "o"
       : row.winner === "o" ? "x"
       : row.turn === "x" ? "o" : "x";
-    await supabase.from("ttt_games")
-      .update({ ...encode(newGame(first)), puzzle_id: null }).eq("room_id", roomId);
+    setWriteError(await attempt("Starting the rematch",
+      supabase.from("ttt_games")
+        .update({ ...encode(newGame(first)), puzzle_id: null }).eq("room_id", roomId)));
   }, [roomId, row]);
 
   return {
-    game, myMark, item, choose, submit, rematch, quit, forceTimeout, poolError,
+    game, myMark, item, choose, submit, rematch, quit, forceTimeout,
+    error: poolError ?? writeError,
     ready: pool.length > 0,
     /** when the current question went up, so both clients run the same clock */
     askedAt: row ? Date.parse(row.updated_at) : 0,
@@ -150,14 +157,15 @@ export function useTttRoom(
  * have agreed, and the lobby does not own a ttt subscription.
  */
 export async function startSquareOff(roomId: number, xId: string, oId: string) {
-  if (!supabase) return;
+  if (!supabase) return null;
   // The database decides who starts. A client-side "am I the host" guard holds
   // against two people but not against one client's effect firing twice, and a
   // second upsert here wipes a board that is already in play.
-  const { data: won } = await supabase.rpc("claim_room_start", { p_room: roomId });
-  if (won !== true) return;
-  await supabase.from("ttt_games").upsert({
+  const { data: won, error } = await supabase.rpc("claim_room_start", { p_room: roomId });
+  if (error) return await attempt("Starting the game", Promise.resolve({ error }));
+  if (won !== true) return null;
+  return await attempt("Dealing the board", supabase.from("ttt_games").upsert({
     room_id: roomId, ...encode(newGame("x")),
     puzzle_id: null, x_player: xId, o_player: oId,
-  });
+  }));
 }

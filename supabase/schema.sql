@@ -409,3 +409,34 @@ returns void language sql security definer set search_path to 'public' as $$
 $$;
 revoke all on function public.touch_presence(bigint) from public, anon;
 grant execute on function public.touch_presence(bigint) to authenticated;
+
+-- ============ seats ============
+alter table public.rooms
+  add column if not exists capacity int not null default 2
+  check (capacity between 2 and 8);
+
+-- Joining was an open INSERT policy: anyone with the code could add themselves,
+-- at any point. A third player who never tapped Ready blocked the lobby forever,
+-- because starting needs EVERY player ready.
+drop policy if exists "join a room" on public.room_players;
+
+create or replace function public.join_room(p_room bigint, p_username text)
+returns text language plpgsql security definer set search_path to 'public' as $$
+declare uid uuid := auth.uid(); seats int; taken int;
+begin
+  if uid is null then raise exception 'sign in first'; end if;
+  -- Locks the room row, so two people reaching for the last seat are serialised
+  -- rather than both counting 1 and both inserting.
+  select capacity into seats from public.rooms where id = p_room for update;
+  if seats is null then return 'missing'; end if;
+  if exists (select 1 from public.room_players p
+             where p.room_id = p_room and p.user_id = uid) then return 'already'; end if;
+  if (select status from public.rooms where id = p_room) <> 'waiting' then return 'started'; end if;
+  select count(*) into taken from public.room_players where room_id = p_room;
+  if taken >= seats then return 'full'; end if;
+  insert into public.room_players(room_id, user_id, username, ready)
+  values (p_room, uid, p_username, false);
+  return 'joined';
+end $$;
+revoke all on function public.join_room(bigint, text) from public, anon;
+grant execute on function public.join_room(bigint, text) to authenticated;

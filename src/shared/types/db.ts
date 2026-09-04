@@ -95,6 +95,8 @@ export interface Room {
   categories: string[] | null;
   status: RoomStatus;
   best_of: number;
+  /** seats. Both game modes are two-player, but the cap is data, not an assumption. */
+  capacity: number;
   created_at: string;
 }
 

@@ -25,7 +25,7 @@ export function Lobby({
 }) {
   const picked = room.categories ?? [];
   const me = players.find((p) => p.user_id === userId);
-  const everyoneReady = players.length >= 2 && players.every((p) => p.ready);
+  const everyoneReady = players.length === room.capacity && players.every((p) => p.ready);
 
   const inPool = picked.length
     ? categories.filter((c) => picked.includes(c.name)).reduce((n, c) => n + c.count, 0)
