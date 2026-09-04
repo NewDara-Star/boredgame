@@ -12,6 +12,7 @@ import { Starburst } from "@/shared/ui/Wordmark";
 import { stagger, riseIn, popIn } from "@/shared/ui/motion";
 import { WeekStrip } from "./WeekStrip";
 import { StatCarousel, type Stat } from "./StatCarousel";
+import { Carousel } from "@/shared/ui/Carousel";
 
 const greeting = () => {
   const h = new Date().getHours();
@@ -116,23 +117,37 @@ export function HomePage() {
       <StatCarousel stats={stats} />
 
       <Head title="Games" to="/play" />
-      <motion.div variants={stagger(0.06)} className="grid gap-3 sm:grid-cols-3">
-        {GAMES.slice(0, 3).map((g) => (
-          <motion.div key={g.slug} variants={riseIn}>
-            <Link to={g.path} className="piece press flex sm:block items-center gap-4 p-4 h-full">
-              <div className="shrink-0 sm:mb-3 sm:flex sm:justify-center"><g.Art size={56} /></div>
-              <div className="min-w-0">
-                <span className={`sticker inline-block text-[9px] font-black uppercase
+      <motion.div variants={stagger(0.06)}>
+        <Carousel>
+          {GAMES.map((g) => (
+            <motion.div key={g.slug} variants={riseIn} className="snap-start shrink-0 w-[168px]">
+              <Link to={g.path} className="piece press flex flex-col h-full p-4">
+                <div className="h-[72px] grid place-items-center mb-3"><g.Art size={68} /></div>
+                <span className={`sticker inline-block self-start text-[9px] font-black uppercase
                   tracking-widest px-2 py-0.5 ${g.chip}`}>{g.badge}</span>
-                <h3 className="font-display text-lg font-semibold mt-1.5">{g.name}</h3>
-                <p className="text-[12px] text-soft font-semibold leading-snug">{g.tagline}</p>
-                <p className="text-[11px] text-soft/70 font-bold mt-1 tabular-nums">
+                <h3 className="font-display text-[17px] leading-tight font-semibold mt-2">{g.name}</h3>
+                <p className="text-[12px] text-soft font-semibold leading-snug line-clamp-3 mt-0.5">
+                  {g.tagline}
+                </p>
+                <span className="flex-1" />
+                <p className="text-[11px] text-soft/70 font-bold mt-2 tabular-nums">
                   {counts[g.bank] ?? 0} in the bank
                 </p>
-              </div>
+              </Link>
+            </motion.div>
+          ))}
+
+          {/* Swiping to the end lands somewhere, rather than stopping dead. */}
+          <motion.div variants={riseIn} className="snap-start shrink-0 w-[132px]">
+            <Link to="/play"
+              className="piece press flex flex-col items-center justify-center h-full p-4 bg-sand text-center">
+              <span className="font-display text-3xl font-semibold leading-none">→</span>
+              <span className="font-display text-[15px] font-semibold mt-2 leading-tight">
+                All {GAMES.length} games
+              </span>
             </Link>
           </motion.div>
-        ))}
+        </Carousel>
       </motion.div>
 
       {!user && !offline && (

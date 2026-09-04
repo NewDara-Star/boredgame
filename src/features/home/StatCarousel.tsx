@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { riseIn, stagger } from "@/shared/ui/motion";
+import { Carousel } from "@/shared/ui/Carousel";
 
 export interface Stat {
   label: string;
@@ -13,8 +14,8 @@ export interface Stat {
     everything below it further down the page. */
 export function StatCarousel({ stats }: { stats: Stat[] }) {
   return (
-    <motion.div variants={stagger(0.05)}
-      className="no-scrollbar flex gap-3 overflow-x-auto snap-x snap-mandatory -mx-4 px-4 pb-1">
+    <motion.div variants={stagger(0.05)}>
+      <Carousel>
       {stats.map((s) => (
         <motion.div key={s.label} variants={riseIn}
           className={`piece snap-start shrink-0 w-[148px] p-4 ${s.bg} ${s.fg ?? ""}`}>
@@ -29,6 +30,7 @@ export function StatCarousel({ stats }: { stats: Stat[] }) {
           )}
         </motion.div>
       ))}
+      </Carousel>
     </motion.div>
   );
 }

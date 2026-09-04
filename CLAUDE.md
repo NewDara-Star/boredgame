@@ -277,6 +277,12 @@ Greeting with the date · daily challenge with the faces of who has played · th
 week strip · a swipeable stat carousel · then games and rooms behind section
 headers. Games is the catalogue; Home is you.
 
+Both the stats and the games rows are `Carousel` — the negative margin plus
+matching padding is the whole trick, letting cards run off the screen edge
+rather than stopping at the page gutter, which is what reads as "there is more
+over there". The games row ends on a card through to the catalogue, so swiping
+to the end lands somewhere instead of stopping dead.
+
 **The week strip is derived, not queried.** A streak of N ending on `lastPlayed`
 means exactly those N consecutive days were played, so the strip is true without
 another round trip. That stops being true the moment a streak can survive a
