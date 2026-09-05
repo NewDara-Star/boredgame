@@ -46,11 +46,18 @@ export interface Puzzle {
   line: Move[];
 }
 
+/** one ball's journey, and when it happened — milliseconds since the first lift */
+export interface LogMove { from: number; to: number; at: number }
+
 export interface Game {
   tubes: Tube[];
   cap: number;
   moves: number;
+  /** the moves that stand — what undo takes from, and what the referee replays */
   history: { from: number; to: number }[];
+  /** every ball that moved, take-backs included, in order and in time: the
+      replay. A take-back is a ball going home, and the film shows it. */
+  log: LogMove[];
 }
 
 export const CAP = 4;
@@ -74,20 +81,28 @@ export const canPour = (tubes: Tube[], cap: number, from: number, to: number) =>
 
 /** One ball, poured. Returns the same game when the move is illegal, so a
     caller can test by identity and a stray tap changes nothing. */
-export function pour(g: Game, from: number, to: number): Game {
+export function pour(g: Game, from: number, to: number, at = 0): Game {
   if (!canPour(g.tubes, g.cap, from, to)) return g;
   const tubes = g.tubes.map((t) => t.slice());
   tubes[to].push(tubes[from].pop()!);
-  return { ...g, tubes, moves: g.moves + 1, history: [...g.history, { from, to }] };
+  return {
+    ...g, tubes, moves: g.moves + 1,
+    history: [...g.history, { from, to }],
+    log: [...g.log, { from, to, at }],
+  };
 }
 
 /** Take the last move back. Undo is not free in a race — it still cost a move. */
-export function undo(g: Game): Game {
+export function undo(g: Game, at = 0): Game {
   const last = g.history[g.history.length - 1];
   if (!last) return g;
   const tubes = g.tubes.map((t) => t.slice());
   tubes[last.from].push(tubes[last.to].pop()!);
-  return { ...g, tubes, history: g.history.slice(0, -1) };
+  return {
+    ...g, tubes,
+    history: g.history.slice(0, -1),
+    log: [...g.log, { from: last.to, to: last.from, at }],
+  };
 }
 
 export const isSolved = (tubes: Tube[], cap: number) =>
@@ -118,7 +133,30 @@ export const decodeLine = (s: string): Move[] => {
 };
 
 export const newGame = (p: Puzzle): Game =>
-  ({ tubes: p.tubes.map((t) => t.slice()), cap: p.cap, moves: 0, history: [] });
+  ({ tubes: p.tubes.map((t) => t.slice()), cap: p.cap, moves: 0, history: [], log: [] });
+
+/**
+ * The replay on the wire: "05@1200,12@1850" — from, to, and milliseconds since
+ * the first lift, one entry per ball that moved. Stored on the attempt so a
+ * time on the ladder can be watched, not just read.
+ */
+export const encodeLog = (log: LogMove[]) => log.map((m) => `${m.from}${m.to}@${m.at}`).join(",");
+export const decodeLog = (s: string): LogMove[] =>
+  s ? s.split(",").map((e) => ({ from: Number(e[0]), to: Number(e[1]), at: Number(e.slice(3)) })) : [];
+
+/** A log is only a replay if it is a legal line that finishes the board, in
+    order in time. The referee checks this before storing one. */
+export function logSolves(p: Puzzle, log: LogMove[]): boolean {
+  let g = newGame(p), last = -1;
+  for (const m of log) {
+    if (!Number.isFinite(m.at) || m.at < last) return false;
+    last = m.at;
+    const next = pour(g, m.from, m.to, m.at);
+    if (next === g) return false;
+    g = next;
+  }
+  return isSolved(g.tubes, g.cap);
+}
 
 /**
  * A stream of numbers from one seed. Both phones derive the puzzle from the
@@ -165,3 +203,70 @@ export function dailySeed(day: string, level: Level): number {
   return h >>> 0;
 }
 export const dailyPuzzle = (day: string, level: Level) => puzzleFor(dailySeed(day, level), level);
+
+/**
+ * A solve, watched back.
+ *
+ * The log is every ball that moved and when. Played at its own pace a long
+ * solve is a long film, so playback is scaled to fit FIT_MS and then holds
+ * the sorted board for a beat; the clock in the frame shows RUN time, not
+ * playback time, so what it counts to is the time on the ladder. Each ball
+ * is in the air for FLIGHT_MS of playback, landing at the moment its tap
+ * happened. Pure functions of (replay, playback time), so the on-screen
+ * player and the GIF encoder draw exactly the same frames.
+ */
+export interface Replay {
+  tubes: Tube[];
+  cap: number;
+  log: LogMove[];
+  /** the time that counts — the server's, or the phone's in practice */
+  ms: number;
+  moves: number;
+  par: number;
+  name: string;
+  level: Level;
+  /** the footer's first line: "TODAY'S TUBES" or "PRACTICE" */
+  where: string;
+  rank?: number | null;
+}
+
+/** One ball in the air, between two tubes: which colour, where from, where
+    to, and how far along (0 lifted, 1 landed). */
+export interface Flight { colour: number; from: number; to: number; k: number }
+
+export const FIT_MS = 13_000;
+export const HOLD_MS = 2_000;
+export const FLIGHT_MS = 240;
+
+/** how much faster than life the film runs — never slower */
+export const speedOf = (r: Replay) => Math.max(1, r.ms / FIT_MS);
+/** the film's length in playback milliseconds */
+export const durationOf = (r: Replay) => r.ms / speedOf(r) + HOLD_MS;
+
+export interface Frame { tubes: Tube[]; flight: Flight | null; runMs: number; done: boolean }
+
+/** The board at playback time `t`: moves landed so far applied, the one in
+    the air (if any) lifted out of its tube, and the run clock. */
+export function frameAt(r: Replay, t: number): Frame {
+  const speed = speedOf(r);
+  const tubes = r.tubes.map((x) => x.slice());
+  let flight: Flight | null = null;
+  for (const m of r.log) {
+    const lands = m.at / speed;
+    if (lands <= t) { tubes[m.to].push(tubes[m.from].pop()!); continue; }
+    if (lands - FLIGHT_MS < t) {
+      const colour = tubes[m.from].pop()!;
+      flight = { colour, from: m.from, to: m.to, k: (t - (lands - FLIGHT_MS)) / FLIGHT_MS };
+    }
+    break;
+  }
+  const runMs = Math.min(r.ms, Math.max(0, t * speed));
+  return { tubes, flight, runMs, done: t * speed >= r.ms };
+}
+
+/** 0:41.2 — tenths, because a time attack is decided in them. */
+export const clock = (ms: number, tenths = true) => {
+  const s = Math.floor(ms / 1000);
+  const t = tenths ? `.${Math.floor((ms % 1000) / 100)}` : "";
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}${t}`;
+};

@@ -1,13 +1,18 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/shared/lib/supabase";
 import { today } from "@/features/play/streak";
-import { dailyPuzzle, isSolved, newGame, pour, puzzleFor, solvedCount, undo, whyNot, type Game, type Level } from "./rules";
+import {
+  dailyPuzzle, encodeLog, isSolved, newGame, pour, puzzleFor, solvedCount, undo, whyNot,
+  type Game, type Level,
+} from "./rules";
 import type { Refusal } from "./Board";
 
 export interface Standing {
   user_id: string; username: string; ms: number; moves: number;
   /** 1-based, on today's board for this level */
   position: number;
+  /** the replay, when the referee kept one */
+  log: string | null;
 }
 
 /**
@@ -55,7 +60,7 @@ export function useSortSolo(level: Level, userId: string | undefined, practice =
   const loadBoard = useCallback(async () => {
     if (!supabase || practice) { setBoard([]); setMine(null); return; }
     const { data } = await supabase.from("sort_daily_best")
-      .select("user_id, username, ms, moves")
+      .select("user_id, username, ms, moves, log")
       .eq("day", day).eq("level", level)
       .order("ms", { ascending: true }).order("moves", { ascending: true }).limit(20);
     const rows: Standing[] = (data ?? []).map((r, i) => ({ ...r, position: i + 1 }));
@@ -64,7 +69,7 @@ export function useSortSolo(level: Level, userId: string | undefined, practice =
     const onPage = rows.find((r) => r.user_id === userId);
     if (onPage) { setMine(onPage); return; }
     const { data: own } = await supabase.from("sort_daily_best")
-      .select("user_id, username, ms, moves").eq("day", day).eq("level", level).eq("user_id", userId).maybeSingle();
+      .select("user_id, username, ms, moves, log").eq("day", day).eq("level", level).eq("user_id", userId).maybeSingle();
     if (!own) { setMine(null); return; }
     const { count } = await supabase.from("sort_daily_best")
       .select("user_id", { count: "exact", head: true }).eq("day", day).eq("level", level).lt("ms", own.ms);
@@ -93,7 +98,7 @@ export function useSortSolo(level: Level, userId: string | undefined, practice =
       return;
     }
     const { data, error: e } = await supabase.functions.invoke("sort-finish", {
-      body: { solo: id, moves: g.history.map((h) => [h.from, h.to]), claimed: g.moves },
+      body: { solo: id, moves: g.history.map((h) => [h.from, h.to]), claimed: g.moves, log: encodeLog(g.log) },
     });
     if (e || !data?.ms) {
       setError("That finish did not reach the board — your time here is your own.");
@@ -117,17 +122,19 @@ export function useSortSolo(level: Level, userId: string | undefined, practice =
     }
     if (selected === i) { setSelected(null); return; }
     if (whyNot(me.tubes, me.cap, selected, i)) { setRefused({ tube: i, at: Date.now() }); return; }
-    const next = pour(me, selected, i);
+    const now = Date.now();
+    const next = pour(me, selected, i, now - (startedAt ?? now));
     setSelected(null);
     setMe(next);
-    if (isSolved(next.tubes, next.cap)) void finish(next, Date.now() - (startedAt ?? Date.now()));
+    if (isSolved(next.tubes, next.cap)) void finish(next, now - (startedAt ?? now));
   }, [me, selected, result, finishing, startedAt, start, finish]);
 
   const takeBack = useCallback(() => {
     if (result || finishing) return;
     setSelected(null);
-    setMe((g) => undo(g));
-  }, [result, finishing]);
+    const now = Date.now();
+    setMe((g) => undo(g, now - (startedAt ?? now)));
+  }, [result, finishing, startedAt]);
 
   const shuffle = useCallback(() => setRandomSeed(Date.now()), []);
 

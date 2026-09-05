@@ -589,6 +589,25 @@ an independent iterative-deepening search re-solving the first two boards of
 each shelf. `supabase/functions/sort-finish/` carries byte copies of `rules.ts`
 AND `bank.ts`; the check fails if either drifts.
 
+**The film.** Every ball that moves is logged with its time (`Game.log`,
+take-backs included as the ball going home; `history` stays the undo stack).
+The referee stores the log on the attempt only if it is itself a legal line
+that finishes the board (`logSolves`), so a film on the ladder is always of a
+real solve. `frameAt(replay, t)` in rules.ts is the whole playback model —
+moves landed, the one in the air, the run clock — scaled so a long solve fits
+FIT_MS and holds the sorted board for HOLD_MS; the on-screen player
+(`ReplayPlayer`) and the GIF are the same frames. The GIF writer is ours
+(`src/shared/card/gif.ts`): one median-cut palette from the first frame so
+nothing flickers, only changed pixels per frame, plain LZW. It exists because
+the only moving picture every chat app plays without asking the browser for a
+codec is a GIF; MediaRecorder gives MP4 on Safari and WebM on Chrome and
+neither sends everywhere. Two things bit while writing it: the LZW code width
+must widen one code LATER than counting your own dictionary suggests (the
+decoder is one entry behind), and a median cut that splits at the weighted
+median must let the median be the last entry, or a box whose popular colour
+sorts last is peeled one shade at a time and the palette fills with greens.
+Both are caught by decoding the output with Pillow, not by looking at it.
+
 The line in the bundle is the one honest cheat left: a script could read
 `BANK` and play a board in a second. `sort_solo_finish` refuses a time under
 150ms a move — two taps faster than a thumb — so the script gets no rank, but

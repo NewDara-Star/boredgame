@@ -20,7 +20,7 @@
  */
 import { createClient } from "jsr:@supabase/supabase-js@2";
 import {
-  dailyPuzzle, decodeTubes, encodeTubes, isSolved, newGame, pour, puzzleFor,
+  dailyPuzzle, decodeLog, decodeTubes, encodeTubes, isSolved, logSolves, newGame, pour, puzzleFor,
   type Level, type Puzzle,
 } from "./rules.ts";
 
@@ -51,7 +51,7 @@ Deno.serve(async (req: Request) => {
 
   // Two kinds of finish: a room race (`room`) or a solo attempt at today's
   // board (`solo`, the attempt id). Same replay, different settle.
-  let body: { room?: number; solo?: number; moves?: [number, number][]; claimed?: number };
+  let body: { room?: number; solo?: number; moves?: [number, number][]; claimed?: number; log?: string };
   try { body = await req.json(); } catch { return json({ error: "bad body" }, 400); }
   const room = Number(body.room), solo = Number(body.solo);
   const moves = body.moves;
@@ -107,11 +107,17 @@ Deno.serve(async (req: Request) => {
     if (settleError) return json({ error: settleError.message }, 400);
     return json({ winner, moves: settled, par: race.par, tubes: encodeTubes(g.tubes) });
   }
+  // The replay, if one came: every ball that moved, with its time. Stored
+  // only if it is itself a legal line that finishes this board — a film of
+  // a different solve is not this attempt's film. Missing or bent, it is
+  // dropped; the time still counts.
+  const log = typeof body.log === "string" && body.log.length <= 6000 && /^[0-5][0-5]@\d+(,[0-5][0-5]@\d+)*$/.test(body.log)
+    && logSolves(puzzle, decodeLog(body.log)) ? body.log : null;
   // The time is the database's — now() against the row's started_at — and it
   // refuses one too fast for a thumb, so a script playing the stored line is
   // told no rather than given a rank.
   const { data: ms, error: settleError } = await admin.rpc("sort_solo_finish", {
-    p_id: solo, p_user: user.id, p_moves: settled,
+    p_id: solo, p_user: user.id, p_moves: settled, p_log: log,
   });
   if (settleError) return json({ error: settleError.message }, 400);
   return json({ ms, moves: settled, par: puzzle.par });

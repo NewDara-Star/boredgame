@@ -5,7 +5,8 @@
 import {
   CAP, COLOURS, whyNot, canPour, pour, undo, isSolved, solvedCount, newGame, puzzleFor, fromBank,
   dailySeed, dailyPuzzle, encodeTubes, decodeTubes, decodeLine,
-  type Level, type Tube, type Move,
+  encodeLog, decodeLog, logSolves, frameAt, speedOf, durationOf, clock, FIT_MS, HOLD_MS, FLIGHT_MS,
+  type Level, type Tube, type Move, type Replay,
 } from "../src/features/sort/rules.ts";
 import { BANK } from "../src/features/sort/bank.ts";
 import { BANDS } from "./sort-bank.mts";
@@ -214,6 +215,69 @@ function shortest(start: Tube[], claimed: number): number {
      "the three levels of one day are three different draws");
   ok(dailySeed("2026-09-05", "medium") !== dailySeed("2026-09-06", "medium"), "consecutive days are different draws");
   ok(dailySeed("2026-09-05", "medium") !== dailySeed("2026-05-09", "medium"), "a swapped day and month is a different draw");
+}
+
+// --- the replay ----------------------------------------------------------------
+// Every ball that moved, take-backs included, with its time — what "Watch"
+// plays and the GIF is made of. The referee keeps one only if it is a legal
+// line that finishes the board, so a film is always of a real solve.
+{
+  const p = puzzleFor(77, "easy");
+  let g = newGame(p);
+  const line = p.line;
+  g = pour(g, line[0][0], line[0][1], 900);
+  g = pour(g, line[1][0], line[1][1], 1700);
+  ok(g.log.length === 2 && g.log[1].at === 1700, "each pour is logged with its time");
+  g = undo(g, 2300);
+  ok(g.history.length === 1 && g.log.length === 3, "a take-back leaves the history but joins the log");
+  ok(g.log[2].from === line[1][1] && g.log[2].to === line[1][0], "as the ball going home");
+  ok(g.moves === 2, "and the move count still counts it");
+  g = pour(g, line[1][0], line[1][1], 2900);
+  for (let i = 2; i < line.length; i++) g = pour(g, line[i][0], line[i][1], 3000 + i * 500);
+  ok(isSolved(g.tubes, CAP), "the run finishes");
+  const wire = encodeLog(g.log);
+  ok(/^([0-5][0-5]@\d+)(,[0-5][0-5]@\d+)*$/.test(wire), `the log's wire form is from-to@ms (${wire.slice(0, 24)}…)`);
+  ok(JSON.stringify(decodeLog(wire)) === JSON.stringify(g.log), "and round-trips exactly");
+  ok(decodeLog("").length === 0, "an empty log is no moves");
+  ok(logSolves(p, g.log), "the referee accepts the log, take-back and all");
+  ok(!logSolves(p, g.log.slice(0, -1)), "but not one that stops short");
+  ok(!logSolves(p, [{ from: 0, to: 0, at: 1 }, ...g.log]), "nor one with an illegal move in it");
+  const late = g.log.map((m, i) => (i === 3 ? { ...m, at: m.at - 5000 } : m));
+  ok(!logSolves(p, late), "nor one whose clock runs backwards");
+  ok(!logSolves(puzzleFor(78, "easy"), g.log), "and a film of another board is not this board's");
+  // for a log the game's own history replays to the same board
+  const net = g.history;
+  let h = newGame(p); for (const m of net) h = pour(h, m.from, m.to);
+  ok(isSolved(h.tubes, CAP) && JSON.stringify(h.tubes) === JSON.stringify(g.tubes), "the history and the log end on the same board");
+
+  // playback: a short run plays in real time, a long one is squeezed to fit
+  const short: Replay = { tubes: p.tubes, cap: CAP, log: g.log, ms: g.log[g.log.length - 1].at + 400, moves: g.moves, par: p.par, name: "dara", level: "easy", where: "PRACTICE" };
+  ok(speedOf(short) === 1, "a run under the fit time plays at its own pace");
+  ok(durationOf(short) === short.ms + HOLD_MS, "and holds the sorted board after it");
+  const long: Replay = { ...short, ms: FIT_MS * 3 };
+  ok(Math.abs(speedOf(long) - 3) < 1e-9 && Math.abs(durationOf(long) - (FIT_MS + HOLD_MS)) < 1e-6, "a run three times the fit time plays three times as fast, to the same length");
+  // frames: nothing has moved at 0, everything has at the end, and between
+  // landings a ball is in the air out of its tube
+  const f0 = frameAt(short, 0);
+  ok(JSON.stringify(f0.tubes) === JSON.stringify(p.tubes) && f0.flight === null && f0.runMs === 0, "at t=0 the board is the start");
+  const fEnd = frameAt(short, durationOf(short));
+  ok(isSolved(fEnd.tubes, CAP) && fEnd.flight === null && fEnd.done && fEnd.runMs === short.ms, "at the end it is sorted, still, and the clock reads the time");
+  const mid = frameAt(short, 900 - FLIGHT_MS / 2);
+  ok(!!mid.flight && mid.flight.from === line[0][0] && mid.flight.to === line[0][1], "half-way to the first landing, the first ball is in the air");
+  ok(mid.tubes.flat().length === 19, "and it is not in any tube");
+  ok(mid.flight!.k > 0.45 && mid.flight!.k < 0.55, `about half-way along its arc (${mid.flight!.k.toFixed(2)})`);
+  ok(frameAt(short, 900).tubes.flat().length === 20 && frameAt(short, 900).flight === null, "and at the landing it is home");
+  ok(!frameAt(short, 899.9).done, "the clock is not done a hair before the finish");
+  // under speed, the run clock still counts run time
+  ok(Math.abs(frameAt(long, 1000).runMs - 3000) < 1e-6, "at 3× the clock shows three run seconds per playback second");
+  // every frame of a whole film is a legal board: 20 balls, 4 of each colour
+  for (let t = 0; t <= durationOf(short); t += 37) {
+    const f = frameAt(short, t);
+    const balls = [...f.tubes.flat(), ...(f.flight ? [f.flight.colour] : [])];
+    ok(balls.length === 20, `t=${t}: twenty balls on screen`);
+    ok(f.tubes.every((tube) => tube.length <= CAP), `t=${t}: no tube over capacity`);
+  }
+  ok(clock(41230) === "0:41.2" && clock(61000) === "1:01.0" && clock(999) === "0:00.9" && clock(61000, false) === "1:01", "the clock reads minutes, seconds and tenths");
 }
 
 // --- the wire format -----------------------------------------------------------

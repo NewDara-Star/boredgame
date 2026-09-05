@@ -1,22 +1,18 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/app/providers/AuthProvider";
+import { ReplayPlayer } from "./ReplayPlayer";
+import type { Replay } from "./replay";
+import { clock, decodeLog, type Level } from "./rules";
 import { Avatar } from "@/shared/ui/Avatar";
 import { stagger, riseIn, popIn } from "@/shared/ui/motion";
 import { drawCard, saveCard, type MatchCard } from "@/shared/card/frame";
 import { Board } from "./Board";
 import { sortHero } from "./card";
 import { useSortSolo, type Standing } from "./useSortSolo";
-import type { Level } from "./rules";
+
 
 const LEVELS: Level[] = ["easy", "medium", "hard"];
-
-/** 0:41.2 — tenths, because a time attack is decided in them. */
-export const clock = (ms: number, tenths = true) => {
-  const s = Math.floor(ms / 1000);
-  const t = tenths ? `.${Math.floor((ms % 1000) / 100)}` : "";
-  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}${t}`;
-};
 
 /**
  * Today's tubes, against the clock.
@@ -27,7 +23,7 @@ export const clock = (ms: number, tenths = true) => {
  * when the page opens, so looking at the board costs nothing.
  */
 export function SortSoloPage() {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [level, setLevel] = useState<Level>("medium");
   const [practice, setPractice] = useState(false);
   const r = useSortSolo(level, user?.id, practice);
@@ -60,6 +56,11 @@ export function SortSoloPage() {
 
   const leader = r.board[0] ?? null;
   const overPar = r.me.moves - r.puzzle.par;
+  const where = practice ? "PRACTICE" : "TODAY'S TUBES";
+  const film: Replay | null = r.result ? {
+    tubes: r.puzzle.tubes, cap: r.puzzle.cap, log: r.me.log, ms: r.result.ms, moves: r.result.moves,
+    par: r.puzzle.par, name: profile?.username ?? "You", level, where, rank,
+  } : null;
 
   return (
     <motion.div variants={stagger(0.07)} initial="hidden" animate="show" className="space-y-4">
@@ -132,19 +133,12 @@ export function SortSoloPage() {
               {practice ? "Same board again, or a new one." : "Same board. Your best time stands."}
             </p>
           </div>
-          {card ? (
-            <>
-              <img src={card.url} alt={`Ball Sort: ${clock(r.result.ms)}, ${r.result.moves} moves`}
-                className="w-full rounded-2xl border-[3px] border-ink" />
-              <button onClick={() => saveCard(card.file)}
-                className="piece press w-full py-4 font-display text-lg font-semibold bg-pop">
-                Save the image
-              </button>
-            </>
-          ) : (
-            <div className="piece grid place-items-center aspect-square bg-surface">
-              <p className="text-sm font-bold text-soft">Drawing the result…</p>
-            </div>
+          {film && <ReplayPlayer replay={film} />}
+          {card && (
+            <button onClick={() => saveCard(card.file)}
+              className="block mx-auto text-[13px] font-black uppercase tracking-wider text-soft underline underline-offset-4">
+              Or save a still image
+            </button>
           )}
         </motion.div>
       ) : (
@@ -175,16 +169,28 @@ export function SortSoloPage() {
           </button>
         </motion.div>
       ) : (
-        <Ladder rows={r.board} mine={r.mine} meId={user?.id} level={level} />
+        <Ladder rows={r.board} mine={r.mine} meId={user?.id} level={level}
+          film={(s) => ({
+            tubes: r.puzzle.tubes, cap: r.puzzle.cap, log: decodeLog(s.log ?? ""), ms: s.ms, moves: s.moves,
+            par: r.puzzle.par, name: s.username, level, where: "TODAY'S TUBES", rank: s.position,
+          })} />
       )}
     </motion.div>
   );
 }
 
-/** Today's board for this level: the top twenty, and you if you are below them. */
-function Ladder({ rows, mine, meId, level }:
-  { rows: Standing[]; mine: Standing | null; meId?: string; level: Level }) {
+/** Today's board for this level: the top twenty, and you if you are below
+    them. A row with a replay opens on a tap, and the film plays. */
+function Ladder({ rows, mine, meId, level, film }:
+  { rows: Standing[]; mine: Standing | null; meId?: string; level: Level; film: (s: Standing) => Replay }) {
   const offPage = mine && !rows.some((r) => r.user_id === meId);
+  const [open, setOpen] = useState<string | null>(null);
+  const row = (s: Standing) => (
+    <Row key={s.user_id} s={s} me={s.user_id === meId} open={open === s.user_id}
+      onOpen={s.log ? () => setOpen(open === s.user_id ? null : s.user_id) : undefined}>
+      {open === s.user_id && s.log && <ReplayPlayer replay={film(s)} />}
+    </Row>
+  );
   return (
     <motion.div variants={riseIn} className="piece bg-surface p-3">
       <p className="text-[12px] font-black uppercase tracking-widest text-soft mb-2">
@@ -194,23 +200,29 @@ function Ladder({ rows, mine, meId, level }:
         <p className="text-sm font-bold text-soft">Be the first on the board.</p>
       ) : (
         <ol className="grid gap-1.5">
-          {rows.map((s) => <Row key={s.user_id} s={s} me={s.user_id === meId} />)}
+          {rows.map(row)}
           {offPage && <li className="text-center text-[12px] font-black text-soft">···</li>}
-          {offPage && <Row s={mine!} me />}
+          {offPage && row(mine!)}
         </ol>
       )}
     </motion.div>
   );
 }
 
-function Row({ s, me }: { s: Standing; me: boolean }) {
+function Row({ s, me, open, onOpen, children }:
+  { s: Standing; me: boolean; open: boolean; onOpen?: () => void; children?: ReactNode }) {
   return (
-    <li className={`flex items-center gap-2.5 rounded-xl px-2 py-1.5 ${me ? "bg-pop" : ""}`}>
-      <span className="w-6 text-[13px] font-black tabular-nums text-soft">{s.position}</span>
-      <Avatar id={s.user_id} name={s.username} size={26} />
-      <span className={`flex-1 truncate text-sm font-bold ${me ? "" : ""}`}>{s.username}</span>
-      <span className="text-[12px] font-bold text-soft tabular-nums">{s.moves} mv</span>
-      <span className="font-display text-base font-semibold tabular-nums">{clock(s.ms)}</span>
+    <li className={`rounded-xl ${me ? "bg-pop" : ""}`}>
+      <button onClick={onOpen} disabled={!onOpen} aria-expanded={open}
+        className="flex w-full items-center gap-2.5 px-2 py-1.5 text-left disabled:cursor-default">
+        <span className="w-6 text-[13px] font-black tabular-nums text-soft">{s.position}</span>
+        <Avatar id={s.user_id} name={s.username} size={26} />
+        <span className="flex-1 truncate text-sm font-bold">{s.username}</span>
+        {onOpen && <span className="text-[12px] font-black uppercase tracking-wider text-soft">{open ? "close" : "watch"}</span>}
+        <span className="text-[12px] font-bold text-soft tabular-nums">{s.moves} mv</span>
+        <span className="font-display text-base font-semibold tabular-nums">{clock(s.ms)}</span>
+      </button>
+      {children && <div className="px-1 pb-2">{children}</div>}
     </li>
   );
 }

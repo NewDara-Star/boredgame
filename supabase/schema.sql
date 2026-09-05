@@ -1122,7 +1122,11 @@ create table if not exists public.sort_solo (
   started_at  timestamptz not null default now(),
   finished_at timestamptz,
   moves       int check (moves >= 0),
-  ms          int check (ms > 0)
+  ms          int check (ms > 0),
+  -- the replay: "05@1200,12@1850" — every ball that moved, take-backs
+  -- included, and when. Checked by the edge function to be a legal line that
+  -- finishes the board before it is stored. What "Watch" on the ladder plays.
+  log         text check (char_length(log) <= 6000)
 );
 create index if not exists sort_solo_board on public.sort_solo (day, level, ms) where ms is not null;
 alter table public.sort_solo enable row level security;
@@ -1150,7 +1154,7 @@ grant execute on function public.sort_solo_start(date, text) to authenticated;
 -- Service role only, called by the edge function after the replay. The time
 -- is measured here. The floor is a thumb's: two taps a move faster than 150ms
 -- each is a script playing the bank's stored line, and it does not get a time.
-create or replace function public.sort_solo_finish(p_id bigint, p_user uuid, p_moves int)
+create or replace function public.sort_solo_finish(p_id bigint, p_user uuid, p_moves int, p_log text default null)
 returns int language plpgsql security definer set search_path to 'public' as $$
 declare v public.sort_solo; v_ms int;
 begin
@@ -1159,17 +1163,17 @@ begin
   if v.finished_at is not null then return v.ms; end if;
   v_ms := greatest(1, (extract(epoch from (now() - v.started_at)) * 1000)::int);
   if v_ms < p_moves * 150 then raise exception 'too fast to have been played'; end if;
-  update public.sort_solo set finished_at = now(), moves = p_moves, ms = v_ms where id = p_id;
+  update public.sort_solo set finished_at = now(), moves = p_moves, ms = v_ms, log = p_log where id = p_id;
   return v_ms;
 end $$;
-revoke all on function public.sort_solo_finish(bigint, uuid, int) from public, anon, authenticated;
-grant execute on function public.sort_solo_finish(bigint, uuid, int) to service_role;
+revoke all on function public.sort_solo_finish(bigint, uuid, int, text) from public, anon, authenticated;
+grant execute on function public.sort_solo_finish(bigint, uuid, int, text) to service_role;
 
 -- Each player's best finished attempt on a day's level. security_invoker so
 -- the caller's own read rights on sort_solo and profiles apply.
 create or replace view public.sort_daily_best with (security_invoker = true) as
   select distinct on (s.day, s.level, s.user_id)
-         s.day, s.level, s.user_id, p.username, s.ms, s.moves, s.finished_at
+         s.day, s.level, s.user_id, p.username, s.ms, s.moves, s.finished_at, s.id, s.log
     from public.sort_solo s
     join public.profiles p on p.id = s.user_id
    where s.ms is not null

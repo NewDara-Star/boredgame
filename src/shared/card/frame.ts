@@ -132,6 +132,8 @@ export interface CardSpec {
   /** the line under the picture — "Solved in 22 · par 21", "7 of 10 correct" */
   caption?: string;
   code: string | null;
+  /** the footer's first line when it is not a room or the bot — "TODAY'S TUBES" */
+  where?: string;
 }
 
 /** `url` is for putting it on screen, `file` is for getting it off the screen.
@@ -142,14 +144,37 @@ export interface MatchCard { url: string; file: File }
 /** Where the hero goes: a white piece across the middle of the card. */
 export const HERO: Box = { x: 100, y: 250, w: 880, h: 400 };
 
-export async function drawCard(spec: CardSpec): Promise<MatchCard> {
-  // Without this the first render falls back to a system font mid-draw.
+/** Waits for the card's fonts, once. Without this the first card of a
+    session comes out in the system fallback mid-draw. */
+export async function fontsReady() {
   if (document.fonts?.ready) { try { await document.fonts.ready; } catch { /* older browsers */ } }
+}
 
+export async function drawCard(spec: CardSpec): Promise<MatchCard> {
+  await fontsReady();
   const canvas = document.createElement("canvas");
   canvas.width = SIZE; canvas.height = SIZE;
   const c = canvas.getContext("2d");
   if (!c) throw new Error("canvas unavailable");
+  paintCard(c, spec);
+  return toCard(canvas, spec.title, spec.code, "png");
+}
+
+/** The card as a file: `url` for the screen, `file` for the share sheet. */
+export async function toCard(canvas: HTMLCanvasElement, title: string, code: string | null,
+                             ext: "png" | "gif", blobIn?: Blob): Promise<MatchCard> {
+  const name = `${title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${(code ?? "solo").toLowerCase()}.${ext}`;
+  const blob = blobIn ?? await new Promise<Blob | null>((done) => canvas.toBlob(done, "image/png"));
+  const type = ext === "gif" ? "image/gif" : "image/png";
+  return {
+    url: blobIn ? URL.createObjectURL(blobIn) : canvas.toDataURL("image/png"),
+    file: new File([blob ?? new Blob([], { type })], name, { type }),
+  };
+}
+
+/** Paints the whole card onto a 1080² context. Synchronous, so a replay can
+    paint it sixty times a second and a GIF encoder can paint it frame by frame. */
+export function paintCard(c: Ctx, spec: CardSpec) {
   const { title, code } = spec;
 
   c.fillStyle = HOT; c.fillRect(0, 0, SIZE, SIZE);
@@ -216,7 +241,7 @@ export async function drawCard(spec: CardSpec): Promise<MatchCard> {
 
   // the footer: the caption when the game has one, then where and when
   piece(c, 100, 840, 880, 96, 32, "#FFFFFF", 10, 7);
-  const where = code ? `ROOM ${code}` : spec.sides ? "SOLO v THE BOT" : "SOLO ROUND";
+  const where = spec.where ?? (code ? `ROOM ${code}` : spec.sides ? "SOLO v THE BOT" : "SOLO ROUND");
   const date = new Date().toLocaleDateString(undefined, { day: "numeric", month: "long", year: "numeric" });
   const withSides = !!spec.sides && !!spec.caption;
   c.fillStyle = INK;
@@ -227,13 +252,6 @@ export async function drawCard(spec: CardSpec): Promise<MatchCard> {
   c.fillText(withSides ? `${where} · ${date}` : date, SIZE / 2, 908);
 
   sticker(c, "BoredGame", SIZE / 2, 1004, 54, "#FFFFFF", 8);
-
-  const name = `${title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${(code ?? "solo").toLowerCase()}.png`;
-  const blob = await new Promise<Blob | null>((done) => canvas.toBlob(done, "image/png"));
-  return {
-    url: canvas.toDataURL("image/png"),
-    file: new File([blob ?? new Blob([], { type: "image/png" })], name, { type: "image/png" }),
-  };
 }
 
 function viaLink(file: File) {
