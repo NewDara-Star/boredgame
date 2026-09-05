@@ -22,3 +22,6 @@ dist4/
 dist5/
 dist6/
 dist7/
+
+# FUSE leaves these behind when a file is rewritten while open
+.fuse_hidden*
