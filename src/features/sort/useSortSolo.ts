@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/shared/lib/supabase";
 import { today } from "@/features/play/streak";
-import { dailyPuzzle, isSolved, newGame, pour, solvedCount, undo, whyNot, type Game, type Level } from "./rules";
+import { dailyPuzzle, isSolved, newGame, pour, puzzleFor, solvedCount, undo, whyNot, type Game, type Level } from "./rules";
 import type { Refusal } from "./Board";
 
 export interface Standing {
@@ -20,10 +20,17 @@ export interface Standing {
  * moves, so the time on the board is never a number this phone chose.
  *
  * Going again is a fresh attempt at the same board. Your best stands.
+ *
+ * Practice is the same game off the record: a random board from the bank,
+ * timed here only, no attempt row, no ladder. `shuffle()` deals another.
  */
-export function useSortSolo(level: Level, userId: string | undefined) {
+export function useSortSolo(level: Level, userId: string | undefined, practice = false) {
   const day = today();
-  const puzzle = useMemo(() => dailyPuzzle(day, level), [day, level]);
+  const [randomSeed, setRandomSeed] = useState(() => Date.now());
+  const puzzle = useMemo(
+    () => (practice ? puzzleFor(randomSeed, level) : dailyPuzzle(day, level)),
+    [practice, randomSeed, day, level],
+  );
 
   const [me, setMe] = useState<Game>(() => newGame(puzzle));
   const [selected, setSelected] = useState<number | null>(null);
@@ -46,7 +53,7 @@ export function useSortSolo(level: Level, userId: string | undefined) {
 
   /** Everyone's best on this board, and where you stand — even off the page. */
   const loadBoard = useCallback(async () => {
-    if (!supabase) return;
+    if (!supabase || practice) { setBoard([]); setMine(null); return; }
     const { data } = await supabase.from("sort_daily_best")
       .select("user_id, username, ms, moves")
       .eq("day", day).eq("level", level)
@@ -62,19 +69,19 @@ export function useSortSolo(level: Level, userId: string | undefined) {
     const { count } = await supabase.from("sort_daily_best")
       .select("user_id", { count: "exact", head: true }).eq("day", day).eq("level", level).lt("ms", own.ms);
     setMine({ ...own, position: (count ?? 0) + 1 });
-  }, [day, level, userId]);
+  }, [day, level, userId, practice]);
   useEffect(() => { void loadBoard(); }, [loadBoard]);
 
   /** The first lift starts the clock — here, and as a row on the server. */
   const start = useCallback(() => {
     setStartedAt(Date.now());
-    if (!supabase || !userId) { attempt.current = Promise.resolve(null); return; }
+    if (!supabase || !userId || practice) { attempt.current = Promise.resolve(null); return; }
     attempt.current = Promise.resolve(supabase.rpc("sort_solo_start", { p_day: day, p_level: level }))
       .then(({ data, error: e }) => {
         if (e) { setError("The clock could not start on the server — this run will not be ranked."); return null; }
         return Number(data);
       });
-  }, [day, level, userId]);
+  }, [day, level, userId, practice]);
 
   /** Sorted. The moves go to the referee; the time comes back from it. */
   const finish = useCallback(async (g: Game, localMs: number) => {
@@ -122,10 +129,12 @@ export function useSortSolo(level: Level, userId: string | undefined) {
     setMe((g) => undo(g));
   }, [result, finishing]);
 
+  const shuffle = useCallback(() => setRandomSeed(Date.now()), []);
+
   return {
     day, puzzle, me, selected, refused, startedAt, result, error, finishing,
-    board, mine,
+    board, mine, practice,
     progress: solvedCount(me.tubes, me.cap),
-    pick, takeBack, again: reset,
+    pick, takeBack, again: reset, shuffle,
   };
 }

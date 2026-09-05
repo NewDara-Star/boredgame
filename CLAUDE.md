@@ -578,7 +578,8 @@ first lift; the phone shows its own stopwatch but the number that ranks is
 by the edge function after it has replayed the moves. `sort_daily_best` is each
 player's best finished attempt per day and level; the page shows the top
 twenty and your own row if you are below them. Going again is a new attempt
-at the same board.
+at the same board. Practice is the same page off the record: a random bank
+board, timed on the phone only, no attempt row, no ladder.
 
 The board does not hint. Nothing lights up to say where a ball can go; the one
 thing it says is NO, by shaking a full tube, because a silent refusal reads as
