@@ -29,8 +29,12 @@ const SquareOffCatapultPage = lazy(() => import("@/features/squareoff/SquareOffC
 const MemorySoloPage = lazy(() => import("@/features/memory/MemorySoloPage").then((m) => ({ default: m.MemorySoloPage })));
 const RoomsPage = lazy(() => import("@/features/rooms/RoomsPage").then((m) => ({ default: m.RoomsPage })));
 
-/** Deliberately plain. A spinner that appears for 80ms on a fast connection is
-    worse than nothing; this only ever shows on a slow one. */
+/**
+ * Deliberately plain, and deliberately NOT the shared `Dealing` note — that one
+ * means "the content is on its way". This one means the screen itself has not
+ * arrived yet, which is a different thing and lasts about 80ms on a fast
+ * connection. A spinner for that is worse than nothing.
+ */
 function Loading() {
   return <p className="text-[13px] font-bold text-soft">Loading…</p>;
 }

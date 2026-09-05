@@ -19,6 +19,7 @@ import { InviteCard } from "./InviteCard";
 import { AuthCard } from "@/features/profile/AuthCard";
 import { GuestCard, ClaimCard } from "@/features/profile/GuestCard";
 import { Avatar } from "@/shared/ui/Avatar";
+import { Note, Dealing } from "@/shared/ui/Note";
 import { ROOM_GAMES } from "@/features/play/registry";
 
 export function RoomsPage() {
@@ -168,8 +169,8 @@ export function RoomsPage() {
 
   if (!room) return (
     <div className="space-y-3">
-      <p className="text-sm text-soft font-bold">Finding room {code}…</p>
-      {error && <p className="text-sm text-bad font-bold">{error}</p>}
+      <Dealing what={`room ${code}`} />
+      <Note>{error}</Note>
     </div>
   );
 
@@ -187,11 +188,7 @@ export function RoomsPage() {
         <p className="text-xs text-soft uppercase tracking-widest font-bold">{room.status}</p>
       </div>
 
-      {(error || startError) && (
-        <div className="piece bg-bad text-surface p-3.5 text-center">
-          <p className="text-[13px] font-bold">{error ?? startError}</p>
-        </div>
-      )}
+      <Note>{error ?? startError}</Note>
 
       {!iAmIn && (
         <div className="space-y-2">

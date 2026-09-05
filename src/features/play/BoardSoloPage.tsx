@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Dealing } from "@/shared/ui/Note";
 import { motion } from "framer-motion";
 import { stagger, riseIn, popIn, SPRING } from "@/shared/ui/motion";
 import { UnlockGate } from "@/features/play/Unlock";
@@ -120,7 +121,7 @@ export function BoardSoloPage<G extends BoardState & { target: number | null; li
     );
   }
 
-  if (s.loading) return <p className="text-soft font-bold">Dealing questions…</p>;
+  if (s.loading) return <Dealing what="the questions" />;
 
   const live = score ? score(g) : s.wins;
   const answerer = engine.answerer(g);

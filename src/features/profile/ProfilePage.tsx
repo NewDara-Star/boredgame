@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { useAuth, isSynthetic } from "@/app/providers/AuthProvider";
 import { useProgress } from "@/features/play/useProgress";
 import { rankFor, RANKS } from "@/features/play/rank";
+import { Note } from "@/shared/ui/Note";
 import { RankBadge } from "@/features/play/RankBadge";
 import { MILESTONES } from "@/features/play/streak";
 import { Avatar } from "@/shared/ui/Avatar";
@@ -62,10 +63,7 @@ function GuestView({ authError }: { authError: string | null }) {
       </motion.div>
 
       {authError && (
-        <motion.div variants={riseIn} className="piece bg-bad text-surface p-4">
-          <p className="font-display font-semibold">Sign-in didn't complete</p>
-          <p className="text-sm mt-1 font-semibold">{authError}</p>
-        </motion.div>
+        <Note animate title="Sign-in didn't complete">{authError}</Note>
       )}
 
       <motion.div variants={riseIn}>

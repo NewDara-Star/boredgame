@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { Dealing } from "@/shared/ui/Note";
 import { AnimatePresence, motion } from "framer-motion";
 import { useRound } from "@/features/play/useRound";
 import { CategoryBar } from "@/features/play/CategoryBar";
@@ -21,7 +22,7 @@ export function PictoGame() {
     if (r.phase === "playing") { setGuess(""); inputRef.current?.focus(); }
   }, [r.phase, r.index]);
 
-  if (r.phase === "loading") return <>{filterBar}<p className="text-soft font-bold">Loading puzzles…</p></>;
+  if (r.phase === "loading") return <>{filterBar}<Dealing what="the puzzles" /></>;
   if (r.phase === "empty") return (
     <>{filterBar}<p className="text-soft font-bold">
       {cats.length ? "Nothing live in those categories yet — widen the filter." : "No picto puzzles are live yet."}

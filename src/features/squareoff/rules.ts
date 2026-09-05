@@ -1,3 +1,10 @@
+import {
+  other, speaker, stallWriter as stall,
+  type Mark, type Cell, type Stall,
+} from "../play/board.ts";
+
+export { other, type Mark, type Cell, type Stall };
+
 /**
  * Square Off — tic-tac-toe where a square costs a right answer.
  *
@@ -18,8 +25,6 @@
  * can be guaranteed to match on both sides of a network.
  */
 
-export type Mark = "x" | "o";
-export type Cell = Mark | null;
 export type Phase = "picking" | "asking" | "revealed" | "over";
 
 export interface Game {
@@ -45,7 +50,6 @@ export const LINES = [
   [0, 4, 8], [2, 4, 6],
 ];
 
-export const other = (m: Mark): Mark => (m === "x" ? "o" : "x");
 
 export const newGame = (first: Mark = "x"): Game => ({
   board: Array(9).fill(null),
@@ -150,12 +154,7 @@ export function advance(g: Game): Game {
  * same room — one sentence, conjugated, rather than two copies of the logic.
  */
 export function describe(g: Game, names: Record<Mark, string>, you: Mark | null = null): string {
-  const second = (m: Mark) => m === you;
-  const who = (m: Mark) => (second(m) ? "You" : names[m]);
-  // "miss" + "s" is "misss", and "go" + "s" is "gos". English adds -es after a
-  // sibilant or an o, and this helper is handed both on the most-seen lines.
-  const s = (m: Mark, verb: string) =>
-    second(m) ? verb : /(s|sh|ch|x|z|o)$/.test(verb) ? `${verb}es` : `${verb}s`;
+  const { mine: second, who, verb: s } = speaker(names, you);
   const sq = (n: number) => `square ${n + 1}`;
 
   if (g.phase === "over") {
@@ -182,7 +181,6 @@ export function describe(g: Game, names: Record<Mark, string>, you: Mark | null 
 /* ------------------------------------------------------- abandonment */
 
 /** What a stalled board needs, and which client owes it. */
-export type Stall = { mark: Mark; action: "timeout" | "advance" };
 
 /**
  * Who should unstick a board that has stopped moving, and how.
@@ -212,21 +210,11 @@ export function stallWriter(
   elapsed: number,
   ms: { ask: number; reveal: number; grace: number },
 ): Stall | null {
-  if (g.phase === "asking" && g.answerer) {
-    if (elapsed >= ms.ask + ms.grace) return { mark: other(g.answerer), action: "timeout" };
-    if (elapsed >= ms.ask) return { mark: g.answerer, action: "timeout" };
-    return null;
-  }
-  if (g.phase === "revealed" && g.last) {
-    const owner = g.last.by;
-    if (elapsed >= ms.reveal + ms.grace) return { mark: other(owner), action: "advance" };
-    if (elapsed >= ms.reveal) return { mark: owner, action: "advance" };
-    return null;
-  }
-  // A pick has no deadline: there is no correct square to choose on someone
-  // else's behalf, so an abandoned pick ends the match rather than resolving.
-  return null;
+  // The steal is the difference: a missed question is owed by the opponent,
+  // not by whoever's turn it is. Everything else about a deadline is shared.
+  return stall(g, g.phase === "asking" ? g.answerer : null, elapsed, ms);
 }
+
 
 /* ------------------------------------------------------------------ the bot */
 

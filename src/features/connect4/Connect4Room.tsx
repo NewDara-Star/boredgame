@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import type { Challenge, RoomPlayer, RoomStatus } from "@/shared/types/db";
+import { Note, Dealing } from "@/shared/ui/Note";
 import { QuestionPanel, Timer } from "@/features/squareoff/QuestionPanel";
 import { askMs } from "@/features/play/clock";
 import { Catapult } from "@/features/challenge/Catapult";
@@ -68,8 +69,8 @@ export function Connect4Room({
 
   if (done) return <MatchOver sides={sides} myMark={t.myMark} card={card} />;
 
-  if (!t.ready) return <p className="text-sm text-soft font-bold">Loading questions…</p>;
-  if (!g) return <p className="text-sm text-soft font-bold">Dealing the board…</p>;
+  if (!t.ready) return <Dealing what="the questions" />;
+  if (!g) return <Dealing what="the board" />;
 
   const other: Mark = g.turn === "x" ? "o" : "x";
   const revealed = g.phase === "revealed" || g.phase === "over";
@@ -92,11 +93,7 @@ export function Connect4Room({
         {describe(g, names, t.myMark)}
       </p>
 
-      {t.error && (
-        <div className="piece bg-bad text-surface p-3.5 text-center">
-          <p className="text-[13px] font-bold">{t.error}</p>
-        </div>
-      )}
+      <Note>{t.error}</Note>
 
       <AwayNotice players={players} userId={userId} now={now} />
 

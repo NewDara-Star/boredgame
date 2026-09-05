@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import type { Challenge, RoomPlayer, RoomStatus } from "@/shared/types/db";
+import { Note, Dealing } from "@/shared/ui/Note";
 import { Board } from "./Board";
 import { QuestionPanel, Timer } from "./QuestionPanel";
 import { describe, stallWriter, type Mark } from "./rules";
@@ -74,9 +75,9 @@ export function SquareOffRoom({
   // that came before it, which is the only reason to keep score at all.
   if (done) return <MatchOver sides={sides} myMark={t.myMark} card={card} />;
 
-  if (!t.ready) return <p className="text-sm text-soft font-bold">Loading questions…</p>;
+  if (!t.ready) return <Dealing what="the questions" />;
 
-  if (!g) return <p className="text-sm text-soft font-bold">Dealing the board…</p>;
+  if (!g) return <Dealing what="the board" />;
 
   const other: Mark = (g.answerer ?? g.turn) === "x" ? "o" : "x";
   const revealed = g.phase === "revealed" || g.phase === "over";
@@ -101,11 +102,7 @@ export function SquareOffRoom({
 
       {/* A room that cannot serve a question is broken, and saying so beats a
           board that never advances. */}
-      {t.error && (
-        <div className="piece bg-bad text-surface p-3.5 text-center">
-          <p className="text-[13px] font-bold">{t.error}</p>
-        </div>
-      )}
+      <Note>{t.error}</Note>
 
       <AwayNotice players={players} userId={userId} now={now} />
 

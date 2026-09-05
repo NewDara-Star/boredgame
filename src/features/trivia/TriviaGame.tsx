@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { Dealing } from "@/shared/ui/Note";
 import { AnimatePresence, motion } from "framer-motion";
 import { useRound } from "@/features/play/useRound";
 import { CategoryBar } from "@/features/play/CategoryBar";
@@ -35,7 +36,7 @@ export function TriviaGame() {
     return new Set(shuffle(wrong).slice(0, 2));
   }, [r.current?.id, r.hintsUsed]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (r.phase === "loading") return <>{filterBar}<p className="text-soft font-bold">Loading questions…</p></>;
+  if (r.phase === "loading") return <>{filterBar}<Dealing what="the questions" /></>;
   if (r.phase === "empty") return (
     <>{filterBar}<p className="text-soft font-bold">
       {cats.length ? "Nothing live in those categories yet — widen the filter." : "No trivia is live yet."}

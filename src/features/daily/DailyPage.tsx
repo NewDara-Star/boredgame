@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { Dealing } from "@/shared/ui/Note";
 import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/app/providers/AuthProvider";
@@ -74,7 +75,7 @@ export function DailyPage() {
       </div>
     );
   }
-  if (d.loading) return <p className="text-sm text-soft font-bold">Fetching today's round…</p>;
+  if (d.loading) return <Dealing what="today's round" />;
   if (d.error) return <p className="text-sm text-bad font-bold">{d.error}</p>;
 
   // Already played, or just finished: the board is the screen.
@@ -98,7 +99,7 @@ export function DailyPage() {
     );
   }
 
-  if (r.phase === "loading") return <p className="text-sm text-soft font-bold">Dealing…</p>;
+  if (r.phase === "loading") return <Dealing what="the round" />;
   if (r.phase === "empty") return <p className="text-sm text-soft font-bold">No round today.</p>;
 
   const item = r.current;

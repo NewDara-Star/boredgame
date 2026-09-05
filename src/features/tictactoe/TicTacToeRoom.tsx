@@ -1,4 +1,5 @@
 import type { RoomPlayer, RoomStatus } from "@/shared/types/db";
+import { Note, Dealing } from "@/shared/ui/Note";
 import { Board } from "@/features/squareoff/Board";
 import { describe, type Mark } from "@/features/squareoff/rules";
 import { useTttRoom } from "@/features/squareoff/useTttRoom";
@@ -26,7 +27,7 @@ export function TicTacToeRoom({
 
   if (done) return <MatchOver sides={sides} myMark={t.myMark} card={card} />;
 
-  if (!g) return <p className="text-sm text-soft font-bold">Dealing the board…</p>;
+  if (!g) return <Dealing what="the board" />;
 
 
   return (
@@ -46,11 +47,7 @@ export function TicTacToeRoom({
         {describe(g, names, t.myMark)}
       </p>
 
-      {t.error && (
-        <div className="piece bg-bad text-surface p-3.5 text-center">
-          <p className="text-[13px] font-bold">{t.error}</p>
-        </div>
-      )}
+      <Note>{t.error}</Note>
 
       <AwayNotice players={players} userId={userId} now={now} />
 

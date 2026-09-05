@@ -1,4 +1,5 @@
 import type { Challenge, RoomPlayer, RoomStatus } from "@/shared/types/db";
+import { Note, Dealing } from "@/shared/ui/Note";
 import {
   Seats, AwayNotice, OverPanel, EndMatchLink,
   MatchOver, useMatchChrome,
@@ -26,7 +27,7 @@ export function MemoryRoom({
     useMatchChrome(code, "MEMORY MATCH", status, players, t.seats);
 
   if (done) return <MatchOver sides={sides} myMark={t.myMark} card={card} />;
-  if (!g) return <p className="text-sm text-soft font-bold">Dealing the tiles…</p>;
+  if (!g) return <Dealing what="the tiles" />;
 
   const mine = g.turn === t.myMark;
 
@@ -46,11 +47,7 @@ export function MemoryRoom({
         {describe(g, names, t.myMark)}
       </p>
 
-      {t.error && (
-        <div className="piece bg-bad text-surface p-3.5 text-center">
-          <p className="text-[13px] font-bold">{t.error}</p>
-        </div>
-      )}
+      <Note>{t.error}</Note>
 
       <AwayNotice players={players} userId={userId} now={now} />
 
