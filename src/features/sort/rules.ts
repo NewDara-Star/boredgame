@@ -7,11 +7,13 @@
  * real set of tubes does not stop you parking a red on a blue to dig out the
  * green underneath, and that parking is half the plan.
  *
- * Played as a race rather than a solitaire: the same puzzle on two phones,
- * Dublin and Manchester, first to sort it wins. Under these rules every board
+ * Played against the clock, not a bot. Solo is today's board — one per level
+ * per day, everyone on the same one, ranked by time; in a room it is the same
+ * board on two phones, first to sort it wins. Under these rules every board
  * is solvable and there is no dead end (a move can always be taken back, so
  * the position graph is undirected), which makes it exactly a speed contest —
- * seeing the shortest route and executing it. That is the game.
+ * seeing the shortest route and executing it. That is the game, and the reason
+ * there is no bot: a bot in a race against time is furniture.
  *
  * What a phone CANNOT do under these rules is solve a board: the state space
  * runs to millions of positions and A* takes seconds at the tail. So nothing
@@ -20,9 +22,9 @@
  * only picks from it by seed. Difficulty is the length of that shortest line.
  *
  * Everything here is a pure function of its arguments, so the component draws
- * it, the bot plays it, both phones agree on the puzzle from one seed, the
- * edge function replays a finish with it, and scripts/check-sort.mts holds all
- * of that to account. bank.ts is its only import.
+ * it, both phones agree on the puzzle from one seed, the edge function replays
+ * a finish with it, and scripts/check-sort.mts holds all of that to account.
+ * bank.ts is its only import.
  */
 import { BANK, type BankEntry } from "./bank.ts";
 
@@ -39,9 +41,8 @@ export interface Puzzle {
   colours: number;
   /** the fewest moves it can be solved in — A*'s answer, not a guess */
   par: number;
-  /** one shortest line, for the bot. Not the only one: most boards have
-      hundreds of equally short routes, so a player is not being asked to
-      find THIS one. */
+  /** one shortest line — the proof behind `par`, replayed by check-sort. Not
+      the only one: most boards have hundreds of equally short routes. */
   line: Move[];
 }
 
@@ -152,47 +153,15 @@ export function puzzleFor(seed: number, level: Level = "medium"): Puzzle {
 }
 
 /**
- * The bot.
- *
- * It cannot solve the board any more than the phone can, so it plays the
- * stored shortest line — and is made beatable not by playing worse moves but
- * by HESITATING: with probability 1 − skill it makes a move that is not on
- * the line, sees it, and takes it back, which costs it two moves and two
- * beats of its clock. That is what a person who lost the thread does, and it
- * shows on the other phone as a ball going out and coming home.
+ * Today's tubes: one board per level per day, the same for everyone, so a
+ * time on it means something next to somebody else's. The day is the
+ * player's own calendar day, as it is for streaks (see play/streak.ts); the
+ * server accepts a day within one of its own. Hashed from the text so that
+ * consecutive days are unrelated draws rather than neighbours in the bank.
  */
-export const BOT_SKILL: Record<Level, number> = { easy: 0.75, medium: 0.85, hard: 0.93 };
-/** Milliseconds between the bot's moves — its thinking time, before jitter. */
-export const BOT_PACE: Record<Level, number> = { easy: 1900, medium: 1500, hard: 1100 };
-
-export interface BotState {
-  /** how far along the line it is */
-  step: number;
-  /** the move it is currently regretting, to be taken back next */
-  regret: Move | null;
+export function dailySeed(day: string, level: Level): number {
+  let h = 2166136261;
+  for (const ch of `${day}:${level}`) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); }
+  return h >>> 0;
 }
-export const botStart = (): BotState => ({ step: 0, regret: null });
-
-export function botMove(g: Game, line: Move[], st: BotState, level: Level, rand: () => number):
-  { move: Move; st: BotState } | null {
-  if (st.regret) return { move: [st.regret[1], st.regret[0]], st: { ...st, regret: null } };
-  const planned = line[st.step];
-  if (!planned) return null;
-  if (rand() >= BOT_SKILL[level]) {
-    const wrong: Move[] = [];
-    for (let f = 0; f < g.tubes.length; f++) for (let t = 0; t < g.tubes.length; t++) {
-      if (f === planned[0] && t === planned[1]) continue;
-      if (g.tubes[f].length === g.cap && isUniform(g.tubes[f])) continue; // it would not touch a finished tube
-      if (canPour(g.tubes, g.cap, f, t)) wrong.push([f, t]);
-    }
-    if (wrong.length) {
-      const move = wrong[Math.floor(rand() * wrong.length)];
-      return { move, st: { ...st, regret: move } };
-    }
-  }
-  return { move: planned, st: { ...st, step: st.step + 1 } };
-}
-
-/** The bot's next thinking time: its pace, ±40%, so it does not tick like a clock. */
-export const botDelay = (level: Level, rand: () => number) =>
-  Math.round(BOT_PACE[level] * (0.6 + rand() * 0.8));
+export const dailyPuzzle = (day: string, level: Level) => puzzleFor(dailySeed(day, level), level);

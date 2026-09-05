@@ -56,6 +56,9 @@ Each claim below was checked by running it, not by reading the code.
 | The referee replays the same bank | `sort-finish` v2 deployed with `rules.ts` and `bank.ts` beside `index.ts`; sha256 of both copies equals the played files (b225675d… for the bank) |
 | Every game ends with its own card | `src/shared/card/frame.ts` draws the frame; session cards carry the game's artwork (hash, Connect 4 frame, tiles, tubes, each with its name as a sticker), result cards carry the result (the finished tubes; ten right/wrong dots over the score). All six rendered at 1080² under the real Fredoka/Nunito and checked by eye; then driven for real — a Ball Sort race to session end and a Tic Tac Toe session to "The bot wins" — both screens show the card and the save button |
 | A 21-character name cannot run under its score | rendered "Bartholomew_the_third": the headline elides at 14 characters, the strip shrinks to 30px then elides — "Bartholome…" beside "12", nothing overlapping |
+| Ball Sort solo is a time attack on today's board | `useSortSolo`: `dailyPuzzle(today(), level)`; check-sort holds 60 days × 3 levels to the same seed → same board, distinct across days and levels, spread across the shelf; the bot is gone from `rules.ts` |
+| The solo clock cannot be faked | impersonation probes on the live database: a player can start an attempt (row 3), cannot insert one directly (RLS), cannot call `sort_solo_finish` (permission denied), cannot start one for a stale day; the service role's finish refuses a 20-move solve in under a second, stamps 41000ms on a row started 41s earlier, returns the same time on a second call, refuses another user, and `sort_daily_best` lists it — then the probe row was deleted |
+| The solo page plays end to end | headless Chromium, server stubbed: the board matched the medium shelf, the clock read 0:00.0 until the first lift and ran after it, the level chips locked during a run, the finish showed "Sorted 0:04.5 · 20 moves — par 20", the result card and save button appeared, and the ladder rendered two stubbed rows |
 | The answer is not parked at index 0 | 371 of 1,517 have the answer first — the seeded insert shuffle, matching the generator's own count exactly |
 
 ## Content
@@ -95,10 +98,11 @@ tabs do not fit 390px, and the header now carries status — streak and rank bad
   has had two browsers in it. Seat assignment, the transition writer rule and
   the shared clock all held. The race mode still has not been played by two
   people, and no room has been tested across a disconnect.
-- **A Ball Sort room across two phones, through the edge function.** The
-  function is deployed and its files are byte-checked, but no finish has been
-  posted to it from a real room yet — neither shell here can reach the Supabase
-  host. Dublin vs Manchester is the test.
+- **A Ball Sort finish through the edge function, room or solo.** `sort-finish`
+  v3 is deployed with the solo path, and its files are byte-checked, but no
+  finish has been posted to it from a real phone yet — neither shell here can
+  reach the Supabase host. One signed-in solo run on today's board is the test:
+  the time on the ladder should be the server's, within a second of the phone's.
 - **The streak across a real day boundary.** `touch_streak` is unit-obvious and
   the same-day path is exercised, but nothing has yet played on two consecutive
   real days. Worth checking tomorrow.

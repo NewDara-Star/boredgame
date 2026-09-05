@@ -548,8 +548,11 @@ Six tubes, five colours, four of each, one tube empty, and the PHYSICAL rules:
 the top ball of any tube goes onto any tube with room. The "same colour only"
 rule every app clone uses is not in the game — a real set of tubes lets you
 park a red on a blue to dig out the green underneath, and that parking is half
-the plan. It is played as a race: the same board on two phones (or against the
-bot), first to sort it wins, so the skill is seeing the shortest route.
+the plan. The opponent is time. Solo is TODAY'S TUBES: one board per level per
+day (`dailySeed(day, level)`, hashed from the player's own calendar day like
+streaks are), everyone on the same one, ranked by the server's stopwatch. In a
+room it is the same board on two phones, first to sort it wins. There is no
+bot: a bot in a race against the clock is furniture, and it was removed.
 
 Measured consequences of the physical rules, on 205 random boards:
 
@@ -566,9 +569,16 @@ So `src/features/sort/rules.ts` contains no solver. `scripts/sort-bank.mts`
 runs A* offline (minutes; run several workers, then `emit`) and writes
 `bank.ts`: 100 boards per band with one shortest line each, sorted so the
 cheapest-to-verify come first. `puzzleFor(seed, level)` is one seeded pick from
-a shelf; both phones and the edge function make the same pick. The bot plays
-the stored line and is made beatable by hesitating — an off-line move it takes
-straight back, two moves and two beats of its clock — not by playing worse.
+a shelf; both phones and the edge function make the same pick. The line is the
+proof behind `par` — check-sort replays every one — and nothing else uses it.
+
+The solo clock is the server's. `sort_solo_start` writes an attempt row at the
+first lift; the phone shows its own stopwatch but the number that ranks is
+`now() - started_at` stamped by `sort_solo_finish`, service-role only, called
+by the edge function after it has replayed the moves. `sort_daily_best` is each
+player's best finished attempt per day and level; the page shows the top
+twenty and your own row if you are below them. Going again is a new attempt
+at the same board.
 
 The board does not hint. Nothing lights up to say where a ball can go; the one
 thing it says is NO, by shaking a full tube, because a silent refusal reads as
@@ -579,8 +589,10 @@ each shelf. `supabase/functions/sort-finish/` carries byte copies of `rules.ts`
 AND `bank.ts`; the check fails if either drifts.
 
 The line in the bundle is the one honest cheat left: a script could read
-`BANK` and play a board in a second. The referee cannot tell that from a fast
-thumb, and nothing here tries to.
+`BANK` and play a board in a second. `sort_solo_finish` refuses a time under
+150ms a move — two taps faster than a thumb — so the script gets no rank, but
+a script that sleeps between moves would. Nothing here tries to tell that
+from a person.
 
 ## The result card is the game's own picture
 

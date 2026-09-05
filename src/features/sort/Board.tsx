@@ -32,6 +32,9 @@ const TW = 40, GAP = 9, R = 14.5, SLOT = 31.5;
 const LIFT = 44;                               // headroom for the lifted ball
 const PAD_X = 8, PAD_BOTTOM = 10;
 
+/** the tube that just refused a ball, and when — a new stamp shakes it again */
+export interface Refusal { tube: number; at: number }
+
 export function tubeGeometry(n: number, cap: number) {
   const tubeH = cap * SLOT + 12;
   const w = PAD_X * 2 + n * TW + (n - 1) * GAP;
@@ -47,7 +50,7 @@ export function Board({
   /** the tube whose top ball is lifted, waiting for a destination */
   selected?: number | null;
   /** the tube that just refused a ball, and when — a new stamp shakes it */
-  refused?: { tube: number; at: number } | null;
+  refused?: Refusal | null;
   onPick?: (i: number) => void;
   size?: "full" | "mini";
   disabled?: boolean;

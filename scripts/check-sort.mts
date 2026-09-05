@@ -4,7 +4,7 @@
  */
 import {
   CAP, COLOURS, whyNot, canPour, pour, undo, isSolved, solvedCount, newGame, puzzleFor, fromBank,
-  botMove, botStart, botDelay, BOT_SKILL, BOT_PACE, encodeTubes, decodeTubes, decodeLine,
+  dailySeed, dailyPuzzle, encodeTubes, decodeTubes, decodeLine,
   type Level, type Tube, type Move,
 } from "../src/features/sort/rules.ts";
 import { BANK } from "../src/features/sort/bank.ts";
@@ -185,51 +185,35 @@ function shortest(start: Tube[], claimed: number): number {
      "different seeds are different puzzles");
 }
 
-// --- the bot ---------------------------------------------------------------------
+// --- today's tubes -----------------------------------------------------------------
+// Solo is one board per level per day for everyone, so the pick has to be a
+// pure function of the day and the level — and the edge function makes the
+// same pick from the attempt row's day when it replays a finish.
 {
+  const days = Array.from({ length: 60 }, (_, i) => {
+    const d = new Date(Date.UTC(2026, 8, 1 + i));
+    return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}-${String(d.getUTCDate()).padStart(2, "0")}`;
+  });
   for (const level of LEVELS) {
-    let totalMoves = 0, hesitations = 0;
-    for (let s = 0; s < 20; s++) {
-      const p = puzzleFor(9_000_000 + s * 7919, level);
-      let g = newGame(p), st = botStart(), steps = 0;
-      while (!isSolved(g.tubes, g.cap) && steps < 400) {
-        const before = JSON.stringify(g.tubes);
-        const r = botMove(g, p.line, st, level, rand);
-        ok(!!r, `${level} ${s}: the bot always has a move until it is done`);
-        const g2 = pour(g, r!.move[0], r!.move[1]);
-        ok(g2 !== g, `${level} ${s}: the bot only ever makes a legal move`);
-        if (r!.st.regret) {
-          hesitations++;
-          const back = botMove(g2, p.line, r!.st, level, rand)!;
-          ok(back.move[0] === r!.move[1] && back.move[1] === r!.move[0], `${level} ${s}: a hesitation is taken straight back`);
-          ok(!back.st.regret && back.st.step === st.step, `${level} ${s}: and the line is where it was`);
-          g = pour(g2, back.move[0], back.move[1]); st = back.st; steps += 2;
-          ok(JSON.stringify(g.tubes) === before, `${level} ${s}: the board is as it was before the hesitation`);
-          continue;
-        }
-        g = g2; st = r!.st; steps++;
-      }
-      ok(isSolved(g.tubes, g.cap), `${level} ${s}: the bot finishes every race`);
-      ok(g.moves >= p.par, `${level} ${s}: never under par`);
-      ok(botMove(g, p.line, st, level, rand) === null, `${level} ${s}: and stops when it is done`);
-      totalMoves += g.moves;
+    const seen = new Set<string>();
+    let picks = new Set<number>();
+    for (const day of days) {
+      const a = dailyPuzzle(day, level), b = dailyPuzzle(day, level);
+      ok(JSON.stringify(a) === JSON.stringify(b), `${day} ${level}: the same day is the same board`);
+      ok(JSON.stringify(a) === JSON.stringify(puzzleFor(dailySeed(day, level), level)),
+         `${day} ${level}: the day's board is the bank pick for the day's seed`);
+      const seed = dailySeed(day, level);
+      ok(Number.isInteger(seed) && seed >= 0 && seed <= 0xffffffff, `${day} ${level}: the seed is a uint32`);
+      seen.add(encodeTubes(a.tubes));
+      picks.add(BANK[level].findIndex((e) => e[0] === encodeTubes(a.tubes)));
     }
-    ok(hesitations > 0, `${level}: it does hesitate`);
-    ok(BOT_SKILL[level] > 0 && BOT_SKILL[level] < 1, `${level}: skill is a probability`);
-    ok(BOT_PACE[level] >= 900, `${level}: the bot takes most of a second to think`);
-    for (let k = 0; k < 200; k++) {
-      const d = botDelay(level, rand);
-      ok(d >= BOT_PACE[level] * 0.6 - 1 && d <= BOT_PACE[level] * 1.4 + 1, `${level}: jitter stays within ±40%`);
-    }
-    console.log(`  bot ${level}: ${(totalMoves / 20).toFixed(1)} moves a race, ${hesitations} hesitations in 20`);
+    ok(picks.size > 30, `${level}: sixty days spread across the shelf (${picks.size} distinct boards)`);
   }
-  ok(BOT_SKILL.easy < BOT_SKILL.hard && BOT_PACE.easy > BOT_PACE.hard, "harder is sharper and faster");
-  // a finished tube is never the bot's mistake
-  const p = { tubes: [[0, 0, 0, 0], [1, 1, 2], [2, 1, 2], [], [], []] as Tube[], cap: CAP, colours: 3, par: 4, line: [[1, 3], [2, 4], [1, 4], [2, 3]] as Move[] };
-  for (let k = 0; k < 200; k++) {
-    const r = botMove(newGame(p), p.line, botStart(), "easy", rand)!;
-    ok(r.move[0] !== 0, "the bot never breaks up a tube that is home");
-  }
+  const d = "2026-09-05";
+  ok(dailySeed(d, "easy") !== dailySeed(d, "medium") && dailySeed(d, "medium") !== dailySeed(d, "hard"),
+     "the three levels of one day are three different draws");
+  ok(dailySeed("2026-09-05", "medium") !== dailySeed("2026-09-06", "medium"), "consecutive days are different draws");
+  ok(dailySeed("2026-09-05", "medium") !== dailySeed("2026-05-09", "medium"), "a swapped day and month is a different draw");
 }
 
 // --- the wire format -----------------------------------------------------------

@@ -1103,3 +1103,75 @@ grant execute on function public.sort_finish(bigint, uuid, text, int) to service
 do $$ begin
   alter publication supabase_realtime add table public.sort_races;
 exception when duplicate_object then null; end $$;
+
+-- ---------------------------------------------------------------------------
+-- Ball Sort, solo: today's tubes against the clock.
+--
+-- One board per level per day, the same for everyone, so a time on it means
+-- something next to somebody else's. A row is an ATTEMPT: started when the
+-- first ball is lifted, finished by the edge function after it has replayed
+-- the moves — and the time is the server's, now() minus started_at, never a
+-- number the phone sent. The board is each player's best finished attempt.
+-- ---------------------------------------------------------------------------
+create table if not exists public.sort_solo (
+  id          bigint generated always as identity primary key,
+  user_id     uuid not null references auth.users(id) on delete cascade,
+  -- the player's own calendar day, as for streaks; checked to within a day
+  day         date not null,
+  level       text not null check (level in ('easy','medium','hard')),
+  started_at  timestamptz not null default now(),
+  finished_at timestamptz,
+  moves       int check (moves >= 0),
+  ms          int check (ms > 0)
+);
+create index if not exists sort_solo_board on public.sort_solo (day, level, ms) where ms is not null;
+alter table public.sort_solo enable row level security;
+
+drop policy if exists "solo times readable by everyone signed in" on public.sort_solo;
+create policy "solo times readable by everyone signed in" on public.sort_solo
+  for select to authenticated using (true);
+-- no insert or update policy: the two functions below are the only writers
+
+create or replace function public.sort_solo_start(p_day date, p_level text)
+returns bigint language plpgsql security definer set search_path to 'public' as $$
+declare v_id bigint;
+begin
+  if auth.uid() is null then raise exception 'sign in first'; end if;
+  if p_day not between current_date - 1 and current_date + 1 then
+    raise exception 'that is not today';
+  end if;
+  if p_level not in ('easy','medium','hard') then raise exception 'no such level'; end if;
+  insert into public.sort_solo (user_id, day, level)
+    values (auth.uid(), p_day, p_level) returning id into v_id;
+  return v_id;
+end $$;
+grant execute on function public.sort_solo_start(date, text) to authenticated;
+
+-- Service role only, called by the edge function after the replay. The time
+-- is measured here. The floor is a thumb's: two taps a move faster than 150ms
+-- each is a script playing the bank's stored line, and it does not get a time.
+create or replace function public.sort_solo_finish(p_id bigint, p_user uuid, p_moves int)
+returns int language plpgsql security definer set search_path to 'public' as $$
+declare v public.sort_solo; v_ms int;
+begin
+  select * into v from public.sort_solo where id = p_id for update;
+  if v.id is null or v.user_id <> p_user then raise exception 'not your attempt'; end if;
+  if v.finished_at is not null then return v.ms; end if;
+  v_ms := greatest(1, (extract(epoch from (now() - v.started_at)) * 1000)::int);
+  if v_ms < p_moves * 150 then raise exception 'too fast to have been played'; end if;
+  update public.sort_solo set finished_at = now(), moves = p_moves, ms = v_ms where id = p_id;
+  return v_ms;
+end $$;
+revoke all on function public.sort_solo_finish(bigint, uuid, int) from public, anon, authenticated;
+grant execute on function public.sort_solo_finish(bigint, uuid, int) to service_role;
+
+-- Each player's best finished attempt on a day's level. security_invoker so
+-- the caller's own read rights on sort_solo and profiles apply.
+create or replace view public.sort_daily_best with (security_invoker = true) as
+  select distinct on (s.day, s.level, s.user_id)
+         s.day, s.level, s.user_id, p.username, s.ms, s.moves, s.finished_at
+    from public.sort_solo s
+    join public.profiles p on p.id = s.user_id
+   where s.ms is not null
+   order by s.day, s.level, s.user_id, s.ms asc, s.moves asc;
+grant select on public.sort_daily_best to authenticated;

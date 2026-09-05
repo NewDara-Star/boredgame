@@ -27,7 +27,7 @@ const Connect4TriviaSoloPage = lazy(() => import("@/features/connect4/Connect4So
 const Connect4CatapultSoloPage = lazy(() => import("@/features/connect4/Connect4SoloPage").then((m) => ({ default: m.Connect4CatapultSoloPage })));
 const SquareOffCatapultPage = lazy(() => import("@/features/squareoff/SquareOffCatapultPage").then((m) => ({ default: m.SquareOffCatapultPage })));
 const MemorySoloPage = lazy(() => import("@/features/memory/MemorySoloPage").then((m) => ({ default: m.MemorySoloPage })));
-const SortRacePage = lazy(() => import("@/features/sort/SortRacePage").then((m) => ({ default: m.SortRacePage })));
+const SortSoloPage = lazy(() => import("@/features/sort/SortSoloPage").then((m) => ({ default: m.SortSoloPage })));
 const RoomsPage = lazy(() => import("@/features/rooms/RoomsPage").then((m) => ({ default: m.RoomsPage })));
 
 /**
@@ -59,7 +59,7 @@ export function App() {
               <Route path="/connect4catapult" element={<Connect4CatapultSoloPage />} />
               <Route path="/catapultsquares" element={<SquareOffCatapultPage />} />
               <Route path="/memory" element={<MemorySoloPage />} />
-              <Route path="/ballsort" element={<SortRacePage />} />
+              <Route path="/ballsort" element={<SortSoloPage />} />
               <Route path="/ranks" element={<LeaderboardPage />} />
               <Route path="/profile" element={<ProfilePage />} />
               <Route path="/admin" element={<AdminPage />} />

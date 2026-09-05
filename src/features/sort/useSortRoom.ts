@@ -5,7 +5,7 @@ import {
   decodeTubes, encodeTubes, isSolved, newGame, pour, puzzleFor, solvedCount, undo, whyNot,
   type Game, type Level, type Tube,
 } from "./rules";
-import type { Refusal } from "./useSortRace";
+import type { Refusal } from "./Board";
 
 export type Seat = "x" | "o";
 

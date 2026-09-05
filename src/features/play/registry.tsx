@@ -135,8 +135,8 @@ export const GAMES: GameDef[] = [
     ),
   },
   {
-    slug: "ballsort", name: "Ball Sort Race",
-    tagline: "Same tubes, two boards. First to sort wins.",
+    slug: "ballsort", name: "Ball Sort",
+    tagline: "Today's tubes, against the clock. Or race a friend.",
     badge: "Puzzle", bank: null, path: "/ballsort", chip: "bg-hot text-surface",
     room: { mode: "ballsort",
       blurb: "The same tubes on both screens, both of you at once. First to sort wins." },

@@ -20,7 +20,8 @@
  */
 import { createClient } from "jsr:@supabase/supabase-js@2";
 import {
-  decodeTubes, encodeTubes, isSolved, newGame, pour, puzzleFor, type Level,
+  dailyPuzzle, decodeTubes, encodeTubes, isSolved, newGame, pour, puzzleFor,
+  type Level, type Puzzle,
 } from "./rules.ts";
 
 const URL_ = Deno.env.get("SUPABASE_URL")!;
@@ -48,23 +49,37 @@ Deno.serve(async (req: Request) => {
   const user = who?.user;
   if (!user) return json({ error: "not signed in" }, 401);
 
-  let body: { room?: number; moves?: [number, number][]; claimed?: number };
+  // Two kinds of finish: a room race (`room`) or a solo attempt at today's
+  // board (`solo`, the attempt id). Same replay, different settle.
+  let body: { room?: number; solo?: number; moves?: [number, number][]; claimed?: number };
   try { body = await req.json(); } catch { return json({ error: "bad body" }, 400); }
-  const room = Number(body.room);
+  const room = Number(body.room), solo = Number(body.solo);
   const moves = body.moves;
-  if (!Number.isFinite(room) || !Array.isArray(moves)) {
-    return json({ error: "room and moves are required" }, 400);
+  if ((!Number.isFinite(room) && !Number.isFinite(solo)) || !Array.isArray(moves)) {
+    return json({ error: "room or solo, and moves, are required" }, 400);
   }
   // A race is a few dozen pours. Anything near this is someone probing.
   if (moves.length > 2000) return json({ error: "too many moves" }, 400);
 
-  const { data: race, error } = await asPlayer
-    .from("sort_races").select("*").eq("room_id", room).maybeSingle();
-  if (error || !race) return json({ error: "no race you can see there" }, 403);
-  if (race.winner) return json({ winner: race.winner, already: true });
-
-  // The same call both phones made to lay the puzzle out: one pick from the bank.
-  const puzzle = puzzleFor(Number(race.seed), race.level as Level);
+  let puzzle: Puzzle;
+  let race: { winner: string | null; par: number; seed: number; level: string } | null = null;
+  if (Number.isFinite(room)) {
+    const { data, error } = await asPlayer
+      .from("sort_races").select("*").eq("room_id", room).maybeSingle();
+    if (error || !data) return json({ error: "no race you can see there" }, 403);
+    race = data;
+    if (data.winner) return json({ winner: data.winner, already: true });
+    // The same call both phones made to lay the puzzle out: one pick from the bank.
+    puzzle = puzzleFor(Number(data.seed), data.level as Level);
+  } else {
+    const { data, error } = await asPlayer
+      .from("sort_solo").select("id, user_id, day, level, ms").eq("id", solo).maybeSingle();
+    if (error || !data) return json({ error: "no attempt you can see there" }, 403);
+    if (data.user_id !== user.id) return json({ error: "not your attempt" }, 403);
+    if (data.ms) return json({ ms: data.ms, already: true });
+    // The board the day dealt, from the day the attempt was started on.
+    puzzle = dailyPuzzle(String(data.day), data.level as Level);
+  }
   let g = newGame(puzzle);
   for (let i = 0; i < moves.length; i++) {
     const mv = moves[i];
@@ -85,12 +100,21 @@ Deno.serve(async (req: Request) => {
   const settled = Math.max(g.moves, Number.isFinite(claimed) ? claimed : 0);
 
   const admin = createClient(URL_, SERVICE, { auth: { persistSession: false } });
-  const { data: winner, error: settleError } = await admin.rpc("sort_finish", {
-    p_room: room, p_user: user.id, p_tubes: encodeTubes(g.tubes), p_moves: settled,
+  if (race) {
+    const { data: winner, error: settleError } = await admin.rpc("sort_finish", {
+      p_room: room, p_user: user.id, p_tubes: encodeTubes(g.tubes), p_moves: settled,
+    });
+    if (settleError) return json({ error: settleError.message }, 400);
+    return json({ winner, moves: settled, par: race.par, tubes: encodeTubes(g.tubes) });
+  }
+  // The time is the database's — now() against the row's started_at — and it
+  // refuses one too fast for a thumb, so a script playing the stored line is
+  // told no rather than given a rank.
+  const { data: ms, error: settleError } = await admin.rpc("sort_solo_finish", {
+    p_id: solo, p_user: user.id, p_moves: settled,
   });
   if (settleError) return json({ error: settleError.message }, 400);
-
-  return json({ winner, moves: settled, par: race.par, tubes: encodeTubes(g.tubes) });
+  return json({ ms, moves: settled, par: puzzle.par });
 });
 
 // decodeTubes is exported by rules.ts and unused here; referenced so a future
