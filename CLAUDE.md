@@ -472,6 +472,17 @@ you. The dots are spaced by a fixed distance ALONG THE GROUND rather than by
 equal slices of time, because equal time bunches them at the top of the arc
 where the shot is slowest and least informative.
 
+**The pull is a vector, not a position.** It used to be measured from the
+launcher to your finger, and the launcher sits near the left edge where it
+belongs — you are shooting rightwards across the field. That left nothing
+behind it to pull from: reaching full power meant dragging your thumb off the
+side of the phone, so most of the power range was physically unreachable and
+every shot came out weak. The drag now starts wherever you touch and only the
+delta matters, so the whole range is available from anywhere on the field. The
+arm still draws at the catapult, and the gesture draws a faint line back to
+where the finger went down, so the thing you are aiming and the thing you are
+touching stay visibly connected.
+
 **Both axes are drawn at one scale.** They were not: the vertical was squashed
 40% so a steep lob would fit, which meant the arc you watched was not the arc
 the ball flew and there was nothing to learn from watching it. The angle is

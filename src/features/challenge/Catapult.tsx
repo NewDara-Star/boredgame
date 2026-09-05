@@ -4,6 +4,8 @@ import {
   type Shot, type Target,
 } from "./rules";
 
+interface Pt { x: number; y: number }
+
 /*
  * The picture is 100 wide and 40 tall, and BOTH axes use the same scale.
  *
@@ -14,13 +16,11 @@ import {
  */
 const W = 100, H = 40;
 const GROUND = 34;
-const LAUNCH_X = 8;
+const LAUNCH_X = 12;
 /** One world unit of distance is this many svg units, horizontally AND up. */
-const SCALE = 86;
-/** A full-power pull, in svg units. About a third of the width — a thumb drag,
-    and drawn as a ring so you can see where full power is instead of finding
-    out by missing. */
-const MAX_PULL = 26;
+const SCALE = 84;
+/** A full-power pull, in svg units — about a quarter of the width. */
+const MAX_PULL = 24;
 const FLIGHT_MS = 820;
 
 const sx = (x: number) => LAUNCH_X + x * SCALE;
@@ -45,7 +45,20 @@ export function Catapult({
   note?: string;
 }) {
   const svgRef = useRef<SVGSVGElement>(null);
-  const [pull, setPull] = useState<{ dx: number; dy: number } | null>(null);
+  /**
+   * Where the finger went down, and where it is now — because the pull is
+   * measured from WHERE YOU STARTED, not from the catapult.
+   *
+   * It used to be measured from the launcher, which sits near the left edge
+   * where it belongs: you are shooting rightwards across the field. That left
+   * no room behind it. To pull back at full power you had to drag your thumb
+   * off the side of the phone, so most of the power range was physically
+   * unreachable and every shot came out weak.
+   *
+   * Now the gesture is a vector, not a position: start anywhere, pull in any
+   * direction, and the full travel is always available.
+   */
+  const [drag, setDrag] = useState<{ from: Pt; to: Pt } | null>(null);
   const [flying, setFlying] = useState<Shot | null>(null);
   const [t, setT] = useState(0);
   const [landed, setLanded] = useState<Shot | null>(null);
@@ -53,7 +66,7 @@ export function Catapult({
   useEffect(() => { if (shot) launch(shot, false); /* eslint-disable-next-line */ }, [shot]);
 
   function launch(s: Shot, report: boolean) {
-    setPull(null);
+    setDrag(null);
     setLanded(null);
     setFlying(s);
     const start = performance.now();
@@ -70,26 +83,27 @@ export function Catapult({
     requestAnimationFrame(step);
   }
 
-  function pointToPull(e: React.PointerEvent) {
-    const box = svgRef.current?.getBoundingClientRect();
-    if (!box) return null;
-    const px = ((e.clientX - box.left) / box.width) * W;
-    const py = ((e.clientY - box.top) / box.height) * H;
-    // The pull runs from the pointer back to the launcher, so dragging down and
-    // left fires up and right. A slingshot needs no explaining.
-    return { dx: LAUNCH_X - px, dy: py - GROUND };
+  function at(e: React.PointerEvent): Pt {
+    const box = svgRef.current!.getBoundingClientRect();
+    return {
+      x: ((e.clientX - box.left) / box.width) * W,
+      y: ((e.clientY - box.top) / box.height) * H,
+    };
   }
 
-  const shotFromPull = (p: { dx: number; dy: number }): Shot => {
-    const len = Math.hypot(p.dx, p.dy);
-    const raw = Math.atan2(Math.max(0, p.dy), Math.max(0.0001, p.dx));
+  /** Drag down and left, fire up and right — a slingshot needs no explaining. */
+  const shotFromDrag = (d: { from: Pt; to: Pt }): Shot => {
+    const dx = d.from.x - d.to.x;
+    const dy = d.to.y - d.from.y;
+    const len = Math.hypot(dx, dy);
+    const raw = Math.atan2(Math.max(0, dy), Math.max(0.0001, dx));
     return {
       angle: clamp(raw, MIN_ANGLE, MAX_ANGLE),
       power: clamp(len / MAX_PULL, 0, 1),
     };
   };
 
-  const live = pull ? shotFromPull(pull) : null;
+  const live = drag ? shotFromDrag(drag) : null;
   const drawn = flying ?? landed;
   const path = drawn ? arc(drawn, 40) : [];
   const ball = flying
@@ -100,8 +114,11 @@ export function Catapult({
   const canAim = !locked && !busy && !shot;
   const dots = live ? previewDots(live) : [];
 
-  const armX = live ? LAUNCH_X - live.power * MAX_PULL * Math.cos(live.angle) : 0;
-  const armY = live ? GROUND - 3 + live.power * MAX_PULL * Math.sin(live.angle) : 0;
+  // The arm is drawn at the catapult whatever the finger is doing, so the thing
+  // you are aiming and the thing you are touching stay visibly connected.
+  const ARM = 16;
+  const armX = live ? LAUNCH_X - live.power * ARM * Math.cos(live.angle) : 0;
+  const armY = live ? GROUND - 3 + live.power * ARM * Math.sin(live.angle) : 0;
 
   return (
     <div className="space-y-2">
@@ -113,18 +130,19 @@ export function Catapult({
           // Captured on the svg, not on whichever shape was under the finger,
           // so the pull keeps tracking once the drag leaves the picture.
           svgRef.current?.setPointerCapture?.(e.pointerId);
-          setPull(pointToPull(e));
+          const p0 = at(e);
+          setDrag({ from: p0, to: p0 });
         }}
-        onPointerMove={(e) => { if (pull) setPull(pointToPull(e)); }}
+        onPointerMove={(e) => { if (drag) setDrag({ ...drag, to: at(e) }); }}
         onPointerUp={() => {
-          if (!pull) return;
-          const s = shotFromPull(pull);
-          setPull(null);
+          if (!drag) return;
+          const s = shotFromDrag(drag);
+          setDrag(null);
           if (s.power > 0.04) launch(s, true);
         }}
         // No onPointerLeave: a pull that wanders outside the box is still a
         // pull, and cancelling on leave meant a shot that never happened.
-        onPointerCancel={() => setPull(null)}>
+        onPointerCancel={() => setDrag(null)}>
 
         <defs>
           {/* The arm is drawn by pulling DOWN from a launcher that sits on the
@@ -149,13 +167,6 @@ export function Catapult({
             fill="var(--color-paper)" stroke="var(--color-ink)" strokeWidth="1.2" />
         </g>
 
-        {/* how far back full power is — visible rather than discovered */}
-        {canAim && (
-          <circle cx={LAUNCH_X} cy={GROUND - 3} r={MAX_PULL}
-            fill="none" stroke="var(--color-ink)" strokeWidth="0.6"
-            strokeDasharray="2 3" opacity="0.28" />
-        )}
-
         <rect x={LAUNCH_X - 3.5} y={GROUND - 6} width="7" height="6" rx="1.5"
           fill="var(--color-surface)" stroke="var(--color-ink)" strokeWidth="1.5" />
 
@@ -166,6 +177,18 @@ export function Catapult({
             <circle cx={armX} cy={armY} r="2.4"
               fill="var(--color-picto)" stroke="var(--color-ink)" strokeWidth="1.2" />
             {/* the opening of the real flight path, fading out */}
+            {/* the gesture itself, so it is obvious the drag is being read and
+                where full power sits */}
+            <line x1={drag!.from.x} y1={drag!.from.y} x2={drag!.to.x} y2={drag!.to.y}
+              stroke="var(--color-ink)" strokeWidth="0.7" strokeDasharray="2 2" opacity="0.4" />
+            <circle cx={drag!.from.x} cy={drag!.from.y} r="1.6"
+              fill="none" stroke="var(--color-ink)" strokeWidth="0.8" opacity="0.45" />
+            <g opacity="0.9">
+              <rect x="6" y="4" width="30" height="3" rx="1.5"
+                fill="var(--color-surface)" stroke="var(--color-ink)" strokeWidth="0.8" />
+              <rect x="6" y="4" width={30 * live.power} height="3" rx="1.5"
+                fill={live.power > 0.97 ? "var(--color-hot)" : "var(--color-picto)"} />
+            </g>
             {dots.map((p, i) => (
               <circle key={i} cx={sx(p.x)} cy={sy(p.y)}
                 r={1.5 - (i / Math.max(1, dots.length)) * 0.7}
@@ -193,7 +216,7 @@ export function Catapult({
         {note ??
           (landed ? describeShot(landed, target)
             : busy ? "…"
-            : canAim ? "Pull back from the catapult and let go"
+            : canAim ? "Drag back anywhere and let go"
             : "Waiting for their shot")}
       </p>
     </div>

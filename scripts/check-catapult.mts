@@ -177,7 +177,7 @@ ok(previewDots({ angle: Math.PI / 4, power: 0 }).length === 0, "no power preview
 // than the field is tall, the arc leaves the picture and the honesty is gone.
 // Height of a shot landing at x is x·tan(angle)/4.
 {
-  const FIELD = 34 / 86;      // GROUND / SCALE, from Catapult.tsx
+  const FIELD = 34 / 84;      // GROUND / SCALE, from Catapult.tsx
   let worst = 0;
   for (let i = 0; i < 2000; i++) {
     const angle = MIN_ANGLE + rnd() * (MAX_ANGLE - MIN_ANGLE);
