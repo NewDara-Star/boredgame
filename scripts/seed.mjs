@@ -27,7 +27,7 @@ const catId = (n) => cats?.find((c) => c.name === n)?.id ?? null;
 const rows = [
   ...PICTO_SEED.map((p) => ({
     game: "picto", render: "text", spec: { items: p.items },
-    answer: p.answer, alt_hint: p.alt_hint, char_hint: p.char_hint,
+    answer: p.answer, accept: p.accept ?? null, alt_hint: p.alt_hint, char_hint: p.char_hint,
     difficulty: p.difficulty, category_id: catId(p.category), status: "live",
   })),
   ...TRIVIA_SEED.map((q) => ({
@@ -37,10 +37,28 @@ const rows = [
   })),
 ];
 
-const { data: existing } = await db.from("puzzles").select("answer,prompt");
-const seen = new Set((existing ?? []).map((r) => `${r.prompt ?? ""}|${r.answer}`));
-const fresh = rows.filter((r) => !seen.has(`${r.prompt ?? ""}|${r.answer}`));
+const { data: existing } = await db.from("puzzles").select("id,answer,prompt");
+const byKey = new Map((existing ?? []).map((r) => [`${r.prompt ?? ""}|${r.answer}`, r.id]));
+const fresh = rows.filter((r) => !byKey.has(`${r.prompt ?? ""}|${r.answer}`));
 
-if (fresh.length === 0) { console.log("Nothing new to insert."); process.exit(0); }
-const { error } = await db.from("puzzles").insert(fresh);
-console.log(error ? `Failed: ${error.message}` : `Inserted ${fresh.length} rows.`);
+// Insert what is new.
+if (fresh.length) {
+  const { error } = await db.from("puzzles").insert(fresh);
+  if (error) { console.error(`Insert failed: ${error.message}`); process.exit(1); }
+}
+
+// Then push the fields that get EDITED in the repo rather than added. Without
+// this the accept lists and redrawn specs only ever existed in the database,
+// which is how they drifted out of the repo in the first place.
+let edited = 0;
+for (const r of rows) {
+  const id = byKey.get(`${r.prompt ?? ""}|${r.answer}`);
+  if (!id) continue;
+  const { error } = await db.from("puzzles")
+    .update({ spec: r.spec, accept: r.accept, alt_hint: r.alt_hint, char_hint: r.char_hint,
+              choices: r.choices ?? null, difficulty: r.difficulty })
+    .eq("id", id);
+  if (error) { console.error(`Update ${id} failed: ${error.message}`); process.exit(1); }
+  edited++;
+}
+console.log(`Inserted ${fresh.length} rows, refreshed ${edited}.`);

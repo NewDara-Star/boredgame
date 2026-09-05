@@ -7,6 +7,7 @@
 import { normalise, isCorrect, closeness, nearMiss, slack, levenshtein }
   from "../src/shared/lib/normalise.ts";
 import { PICTO_SEED } from "../src/shared/data/picto.ts";
+import { readFileSync } from "node:fs";
 
 let n = 0;
 const ok = (c: boolean, m: string) => {
@@ -44,7 +45,7 @@ ok(!isCorrect("six feet", "six feet underground", ["six feet under"]),
 {
   const bank = PICTO_SEED.map((p) => ({
     answer: p.answer,
-    all: [p.answer, ...((p as { accept?: string[] }).accept ?? [])].map(normalise),
+    all: [p.answer, ...(p.accept ?? [])].map(normalise),
   }));
   let clashes = 0;
   for (let i = 0; i < bank.length; i++) {
@@ -67,6 +68,43 @@ ok(!isCorrect("six feet", "six feet underground", ["six feet under"]),
       if (p === q) continue;
       ok(!isCorrect(q.answer, p.answer, []), `"${q.answer}" is not accepted for "${p.answer}"`);
     }
+  }
+}
+
+// --- the accepts actually reach the player ----------------------------------
+// They were in the database and nowhere else for weeks, and the offline path
+// dropped them on the floor. Both are structural, so check them structurally.
+{
+  const content = readFileSync(new URL("../src/features/play/content.ts", import.meta.url), "utf8");
+  ok(/fromSeedPicto[\s\S]{0,400}accept:/.test(content),
+     "the bundled-seed path passes accept through to the player");
+  ok(/accept: row.accept/.test(content), "and so does the database path");
+  const seed = readFileSync(new URL("../scripts/seed.mjs", import.meta.url), "utf8");
+  ok(/accept: p.accept/.test(seed), "and the seeder writes accept to the database");
+}
+
+// --- phrasings the picture licenses -----------------------------------------
+// Every one of these is a guess a player can defend by pointing at the card.
+{
+  const bySlug = new Map(PICTO_SEED.map((p) => [p.slug, p]));
+  const licensed: [string, string][] = [
+    ["pig-in-a-blanket", "pig in blanket"],
+    ["fly-in-the-ointment", "fly in ointment"],
+    ["ace-in-the-hole", "ace in hole"],
+    ["bee-in-your-bonnet", "bee in bonnet"],
+    ["chip-on-your-shoulder", "chip on shoulder"],
+    ["caught-red-handed", "red handed"],
+    ["history-repeats", "history repeats"],
+    ["green-thumb", "green fingers"],
+    ["youre-under-arrest", "you're under arrest"],
+    ["cards-on-the-table", "cards on table"],
+    ["cat-out-of-the-bag", "let the cat out of the bag"],
+    ["six-feet-underground", "six feet under"],
+  ];
+  for (const [slug, guess] of licensed) {
+    const p = bySlug.get(slug);
+    ok(!!p, `${slug} is still in the bank`);
+    ok(isCorrect(guess, p!.answer, p!.accept), `"${guess}" is accepted for ${slug}`);
   }
 }
 

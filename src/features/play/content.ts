@@ -13,6 +13,7 @@ function fromSeedPicto(): PlayItem[] {
     render: "text" as const,
     spec: { items: p.items },
     answer: p.answer,
+    accept: p.accept,
     altHint: p.alt_hint,
     charHint: p.char_hint,
     difficulty: p.difficulty,

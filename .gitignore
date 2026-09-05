@@ -26,3 +26,11 @@ dist7/
 # FUSE leaves these behind when a file is rewritten while open
 .fuse_hidden*
 dist8/
+dist-contact/
+contact.tgz
+
+# throwaway probe scripts
+scripts/_*.mts
+
+# vite writes these next to a config when it transpiles it
+*.timestamp-*.mjs
