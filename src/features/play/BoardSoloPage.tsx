@@ -3,7 +3,7 @@ import { Dealing } from "@/shared/ui/Note";
 import { motion } from "framer-motion";
 import { stagger, riseIn, popIn, SPRING } from "@/shared/ui/motion";
 import { UnlockGate } from "@/features/play/Unlock";
-import { drawMatchCard, saveCard, type MatchCard } from "@/features/squareoff/matchCard";
+import { drawCard, saveCard, type Glyph, type Hero, type MatchCard } from "@/shared/card/frame";
 import { useSoloBoard } from "@/features/play/useSoloBoard";
 import { TurnPanel } from "@/features/rooms/TurnPanel";
 
@@ -54,12 +54,14 @@ export type DrawBoard<G> = (p: {
  */
 export function BoardSoloPage<G extends BoardState & { target: number | null; line: number[] | null },
                               R extends BoardRow>({
-  engine, title, board, glyphs, plain = false, challenge = "trivia", score,
+  engine, title, board, glyphs, plain = false, challenge = "trivia", score, art,
 }: {
   engine: BoardEngine<G, R>;
   title: string;
   board: DrawBoard<G>;
   glyphs: Record<Mark, string>;
+  /** the result card's picture: the game draws its final board on it */
+  art?: { hero: (g: G) => Hero; glyph?: Glyph; caption?: (g: G) => string | undefined };
   plain?: boolean;
   challenge?: "trivia" | "catapult" | "none";
   /** What the two chips count during play. Defaults to games won this session;
@@ -78,7 +80,14 @@ export function BoardSoloPage<G extends BoardState & { target: number | null; li
   useEffect(() => {
     if (!s.ended) { setCard(null); return; }
     let cancelled = false;
-    void drawMatchCard(null, sides[0], sides[1], title.toUpperCase())
+    const winner = s.wins.x === s.wins.o ? null : s.wins.x > s.wins.o ? sides[0] : sides[1];
+    void drawCard({
+      title: title.toUpperCase(), code: null,
+      headline: winner ? `${winner.name} win${winner.mark === "x" ? "" : "s"}` : "All square",
+      hero: art?.hero(g) ?? (() => {}),
+      glyph: art?.glyph, caption: art?.caption?.(g),
+      sides: [sides[0], sides[1]],
+    })
       .then((made) => { if (!cancelled) setCard(made); })
       .catch(() => { /* canvas unavailable; the score is still on screen */ });
     return () => { cancelled = true; };

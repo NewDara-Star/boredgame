@@ -4,6 +4,7 @@ import {
   Seats, AwayNotice, OverPanel, EndMatchLink, MatchOver, useMatchChrome,
 } from "@/features/rooms/matchUi";
 import { Board } from "./Board";
+import { ballGlyph, sortHero } from "./card";
 import { useSortRoom } from "./useSortRoom";
 
 /**
@@ -24,7 +25,9 @@ export function SortRaceRoom({
   const { now, names, sides, card, done } = useMatchChrome(
     code, "BALL SORT", status, players,
     { x: r.row?.x_player ?? null, o: r.row?.o_player ?? null },
-    !r.won);
+    !r.won,
+    { hero: () => sortHero(r.me?.tubes ?? [], r.me?.cap ?? 4), glyph: ballGlyph,
+      caption: () => r.me && r.row ? `Last race: ${r.me.moves} moves, par ${r.row.par}` : undefined });
 
   if (done) return <MatchOver sides={sides} myMark={r.seat ?? "x"} card={card} />;
   if (!r.row || !r.me) return <Dealing what="the tubes" />;

@@ -582,6 +582,29 @@ The line in the bundle is the one honest cheat left: a script could read
 `BANK` and play a board in a second. The referee cannot tell that from a fast
 thumb, and nothing here tries to.
 
+## The result card is the game's own picture
+
+Every game ends with a card you can keep — a 1080² PNG drawn onto a canvas,
+not a DOM screenshot. `src/shared/card/frame.ts` owns the frame: hot ground,
+the game's name repeated behind, the headline, the score strip, the room and
+the date, the wordmark, and `saveCard()` (the only place that hands over a
+file; read its comment before touching it — iOS transient activation and
+desktop Chrome's half-present Web Share both bit once). The middle of the card
+is the game's: each slice exports a `hero` in its own `card.ts` that draws the
+final board into the box it is given — `gridHero` for the 3×3 games,
+`connect4Hero`, `memoryHero`, `sortHero` (with `ballGlyph` for the seats),
+`roundHero` for a solo trivia or picto round. Rooms pass the art to
+`useMatchChrome`, solo boards to `BoardSoloPage`, rounds to `Summary` by naming
+the game. One card with the title swapped was the same picture nine times;
+a Connect 4 card should show the four that won.
+
+Fonts on a canvas are loaded or they are not: `drawCard` awaits
+`document.fonts.ready` first, or the first card of a session comes out in the
+system fallback. To look at cards without playing a session to the end, build
+a scratch Vite entry that imports the heroes and calls `drawCard` with
+fixtures, and serve Fredoka and Nunito locally to the headless browser — the
+Google Fonts link does not resolve from an agent shell.
+
 ## Brand: sticker on neon, but only where you are not reading
 
 The references are logo boards and packaging — saturated grounds, white fills,

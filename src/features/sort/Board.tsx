@@ -19,7 +19,7 @@ import type { Tube } from "./rules";
 
 /** ball colours, by index. The app's own tokens where they exist, so a red ball
     is the same red as a wrong answer and a blue one the same as trivia. */
-const INK: [string, string, string][] = [
+export const BALL: [string, string, string][] = [
   ["#FF8A96", "#E5233B", "#8E0D1E"],   // red
   ["#8FA4FF", "#2B4BFF", "#15258F"],   // blue
   ["#7FE0A6", "#10A04E", "#075A2A"],   // green
@@ -76,7 +76,7 @@ export function Board({
       style={{ maxWidth: size === "mini" ? 220 : undefined }}
       aria-label="Ball sort tubes">
       <defs>
-        {INK.map(([hi, mid, lo], i) => (
+        {BALL.map(([hi, mid, lo], i) => (
           <radialGradient key={i} id={`ball-${size}-${i}`} cx="36%" cy="30%" r="72%">
             <stop offset="0" stopColor={hi} />
             <stop offset=".34" stopColor={mid} />
@@ -134,10 +134,10 @@ export function Board({
                     <ellipse cx={x + TW / 2 + 1.5} cy={restY + R - 1} rx={R * 0.85} ry="3.5"
                       fill="#000" opacity=".22" />
                   )}
-                  <circle cx={x + TW / 2} cy={restY} r={R} fill={`url(#ball-${size}-${c % INK.length})`} />
+                  <circle cx={x + TW / 2} cy={restY} r={R} fill={`url(#ball-${size}-${c % BALL.length})`} />
                   <path d={`M ${x + TW / 2 - R * 0.86} ${restY + R * 0.42}
                             A ${R} ${R} 0 0 0 ${x + TW / 2 + R * 0.45} ${restY + R * 0.88}`}
-                    fill="none" stroke={INK[c % INK.length][0]} strokeWidth="1.6"
+                    fill="none" stroke={BALL[c % BALL.length][0]} strokeWidth="1.6"
                     strokeLinecap="round" opacity=".5" />
                   <ellipse cx={x + TW / 2 - R * 0.34} cy={restY - R * 0.42}
                     rx={R * 0.30} ry={R * 0.19} transform={`rotate(-32 ${x + TW / 2 - R * 0.34} ${restY - R * 0.42})`}

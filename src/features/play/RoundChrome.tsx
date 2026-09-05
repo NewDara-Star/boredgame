@@ -1,5 +1,7 @@
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
+import { drawCard, saveCard, type MatchCard } from "@/shared/card/frame";
+import { roundHero } from "./roundCard";
 import { Counter } from "@/shared/ui/Counter";
 import { SPRING, stagger, riseIn, popIn } from "@/shared/ui/motion";
 import type { PlayItem } from "./types";
@@ -125,9 +127,40 @@ export function Reveal({ correct, near, answer, gained, onNext, isLast, explanat
   );
 }
 
-export function Summary({ score, results, outcome, onAgain, children }:
+/** The round's result card: drawn once the round is over, kept if you want it. */
+function RoundCard({ title, results, score, outcome }:
+  { title: string; results: { correct: boolean }[]; score: number; outcome?: RoundOutcome | null }) {
+  const [card, setCard] = useState<MatchCard | null>(null);
+  const right = results.filter((r) => r.correct).length;
+  useEffect(() => {
+    let cancelled = false;
+    void drawCard({
+      title, code: null,
+      headline: `${right} of ${results.length}`,
+      hero: roundHero(results, score),
+      caption: outcome?.streak ? `Day ${outcome.streak} streak` : `${right} right, ${results.length - right} missed`,
+    }).then((made) => { if (!cancelled) setCard(made); })
+      .catch(() => { /* canvas unavailable; the score is still on screen */ });
+    return () => { cancelled = true; };
+  }, [title, results, score, outcome?.streak, right]);
+  if (!card) return null;
+  return (
+    <motion.div variants={riseIn} className="mt-6 space-y-2.5">
+      <img src={card.url} alt={`${title}: ${right} of ${results.length}, ${score} points`}
+        className="w-full rounded-2xl border-[3px] border-ink" />
+      <button onClick={() => saveCard(card.file)}
+        className="piece press w-full py-3.5 font-display text-lg font-semibold bg-pop">
+        Save the image
+      </button>
+    </motion.div>
+  );
+}
+
+export function Summary({ score, results, outcome, onAgain, children, title }:
   { score: number; results: { correct: boolean }[]; outcome?: RoundOutcome | null;
-    onAgain: () => void; children?: ReactNode }) {
+    onAgain: () => void; children?: ReactNode;
+    /** the game's name for the result card; no name, no card */
+    title?: string }) {
   const right = results.filter((r) => r.correct).length;
   return (
     <motion.div variants={stagger(0.08)} initial="hidden" animate="show" className="text-center">
@@ -147,6 +180,7 @@ export function Summary({ score, results, outcome, onAgain, children }:
           Day {outcome.streak} streak
         </motion.p>
       )}
+      {title && <RoundCard title={title} results={results} score={score} outcome={outcome} />}
       <motion.div variants={riseIn} className="mt-6 text-left">{children}</motion.div>
       <motion.button variants={riseIn} onClick={onAgain}
         className="piece press w-full mt-5 py-4 font-display text-lg font-semibold bg-picto text-surface">

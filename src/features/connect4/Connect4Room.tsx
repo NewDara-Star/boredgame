@@ -8,6 +8,7 @@ import {
   MatchOver, useMatchChrome, useStallRescue,
 } from "@/features/rooms/matchUi";
 import { Board } from "./Board";
+import { connect4Hero } from "./card";
 import { describe, stallWriter, type Mark } from "./rules";
 import { useC4Room } from "./useC4Room";
 
@@ -41,7 +42,8 @@ export function Connect4Room({
   // appears on the screen most likely to be stuck — faster while a question is
   // up, because that bar has to look continuous.
   const { now, names, scoreOf, sides, card, done } =
-    useMatchChrome(code, title, status, players, t.seats, asking);
+    useMatchChrome(code, title, status, players, t.seats, asking,
+      { hero: () => connect4Hero(g?.board ?? [], g?.line ?? null) });
 
   useEffect(() => { setChosen(null); }, [t.item?.id, g?.target]);
 

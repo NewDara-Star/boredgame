@@ -47,7 +47,7 @@ export function TriviaGame() {
     return (
       <>
       {filterBar}
-      <Summary score={r.score} results={r.results} outcome={r.outcome} onAgain={r.restart}>
+      <Summary score={r.score} results={r.results} outcome={r.outcome} onAgain={r.restart} title="STAR TRIVIA">
         <div className="grid gap-2.5">
           {r.results.map((res, i) => (
             <motion.div key={i}

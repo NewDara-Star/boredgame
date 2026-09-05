@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { popIn } from "@/shared/ui/motion";
 import type { RoomPlayer, RoomStatus } from "@/shared/types/db";
-import { drawMatchCard, saveCard, type MatchCard } from "@/features/squareoff/matchCard";
+import { drawCard, ellipsize, HEADLINE_CHARS, saveCard, type Glyph, type Hero, type MatchCard } from "@/shared/card/frame";
 
 export type Mark = "x" | "o";
 
@@ -123,15 +123,21 @@ export interface Side { mark: Mark; name: string; score: number }
  * seat, and drawing the result card. Three copies scored 0.99-1.00 against each
  * other, which is one bug fixed three times or, more often, once.
  */
+/** What the game puts on its result card: its board as it stood, and how a
+    seat is drawn. Read when the card is drawn, so it sees the final board. */
+export interface CardArt { hero: () => Hero; glyph?: Glyph; caption?: () => string | undefined }
+
 export function useMatchChrome(
   code: string, title: string, status: RoomStatus,
   players: RoomPlayer[], seats: Record<Mark, string | null>,
   /** how often the clock ticks — a question needs a smooth bar, an idle board
       needs only enough to notice somebody has gone */
   fast = false,
+  art?: CardArt,
 ) {
   const [now, setNow] = useState(Date.now());
   const [card, setCard] = useState<(MatchCard & { sig: string }) | null>(null);
+  const artRef = useRef(art); artRef.current = art;
 
   useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), fast ? 120 : 1000);
@@ -156,7 +162,16 @@ export function useMatchChrome(
   useEffect(() => {
     if (!done || !seated || card?.sig === sig) return;
     let cancelled = false;
-    void drawMatchCard(code, sides[0], sides[1], title)
+    const [a, b] = sides;
+    const winner = a.score === b.score ? null : a.score > b.score ? a : b;
+    const art = artRef.current;
+    void drawCard({
+      title, code,
+      headline: winner ? `${ellipsize(winner.name, HEADLINE_CHARS)} wins` : "All square",
+      hero: art?.hero() ?? (() => {}),
+      glyph: art?.glyph, caption: art?.caption?.(),
+      sides: [a, b],
+    })
       .then((made) => { if (!cancelled) setCard({ ...made, sig }); })
       .catch(() => { /* canvas unavailable; the score is still on screen */ });
     return () => { cancelled = true; };

@@ -4,6 +4,8 @@ import { stagger, riseIn, popIn, SPRING } from "@/shared/ui/motion";
 import { Board } from "./Board";
 import { useSortRace } from "./useSortRace";
 import type { Level } from "./rules";
+import { drawCard, saveCard, type MatchCard } from "@/shared/card/frame";
+import { ballGlyph, sortHero } from "./card";
 
 const LEVELS: Level[] = ["easy", "medium", "hard"];
 
@@ -26,6 +28,31 @@ export function SortRacePage() {
   }, [r.winner, r.startedAt]);
   const seconds = Math.max(0, Math.floor(((r.finishedAt ?? now) - r.startedAt) / 1000));
 
+  // The card, drawn once the session is over: the tally, and the tubes as the
+  // last race left them.
+  const [card, setCard] = useState<MatchCard | null>(null);
+  const sig = `${r.wins.me}-${r.wins.bot}|${r.ended}`;
+  useEffect(() => {
+    if (!r.ended) { setCard(null); return; }
+    let cancelled = false;
+    const sides = [
+      { mark: "x" as const, name: "You", score: r.wins.me },
+      { mark: "o" as const, name: "The bot", score: r.wins.bot },
+    ] as const;
+    const last = r.winner === "me"
+      ? `Last race: solved in ${r.me.moves}, par ${r.puzzle.par}`
+      : r.winner === "bot" ? `Last race: the bot finished in ${r.bot.moves}` : undefined;
+    void drawCard({
+      title: "BALL SORT", code: null,
+      headline: r.wins.me === r.wins.bot ? "All square" : r.wins.me > r.wins.bot ? "You win" : "The bot wins",
+      hero: sortHero(r.me.tubes, r.me.cap), glyph: ballGlyph, caption: last,
+      sides: [sides[0], sides[1]],
+    }).then((made) => { if (!cancelled) setCard(made); })
+      .catch(() => { /* canvas unavailable; the score is still on screen */ });
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sig]);
+
   if (r.ended) {
     const lead = r.wins.me === r.wins.bot ? "All square"
       : r.wins.me > r.wins.bot ? "You take the session" : "The bot takes the session";
@@ -40,6 +67,24 @@ export function SortRacePage() {
             {r.wins.me} <span className="opacity-40">—</span> {r.wins.bot}
           </p>
         </motion.div>
+        {card ? (
+          <>
+            <motion.img variants={popIn} src={card.url}
+              alt={`Ball Sort session: you ${r.wins.me}, the bot ${r.wins.bot}`}
+              className="w-full rounded-2xl border-[3px] border-ink" />
+            <button onClick={() => saveCard(card.file)}
+              className="piece press w-full py-4 font-display text-lg font-semibold bg-pop">
+              Save the image
+            </button>
+            <p className="text-[13px] font-bold text-soft text-center">
+              On a phone you can also press and hold the picture to save or share it.
+            </p>
+          </>
+        ) : (
+          <div className="piece grid place-items-center aspect-square bg-surface">
+            <p className="text-sm font-bold text-soft">Drawing the result…</p>
+          </div>
+        )}
         <button onClick={r.newSession}
           className="piece press w-full py-3.5 font-display font-semibold">
           Start a new session

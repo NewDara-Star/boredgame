@@ -5,6 +5,7 @@ import {
   MatchOver, useMatchChrome, useStallRescue,
 } from "@/features/rooms/matchUi";
 import { Board } from "./Board";
+import { memoryHero } from "./card";
 import { describe, scoreOf, stallWriter, type Mark } from "./rules";
 import { useMemoryRoom } from "./useMemoryRoom";
 import { AWAY_MS } from "@/features/play/clock";
@@ -24,7 +25,8 @@ export function MemoryRoom({
   const t = useMemoryRoom(roomId, userId);
   const g = t.game;
   const { now, names, sides, card, done } =
-    useMatchChrome(code, "MEMORY MATCH", status, players, t.seats, g?.phase === "asking");
+    useMatchChrome(code, "MEMORY MATCH", status, players, t.seats, g?.phase === "asking",
+      { hero: () => memoryHero(g?.deck ?? [], g?.board ?? []) });
 
   /**
    * This room used to have no rescue at all, on the reasoning that every phase
