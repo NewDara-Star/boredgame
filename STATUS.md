@@ -67,6 +67,45 @@ Each claim below was checked by running it, not by reading the code.
 | Rooms keep the winner's film | `sort_finish(p_room, p_user, p_tubes, p_moves, p_log)` is the only signature left, service_role only (pg_proc); the room hook times every move from the race's `started_at` and sends the log with the finish; `sort-finish` v5 stores it on the winner's seat when it replays; the room shows the film above the result. Not yet driven by two phones — the same caveat as every room finish |
 | The answer is not parked at index 0 | 371 of 1,517 have the answer first — the seeded insert shuffle, matching the generator's own count exactly |
 
+## Screen survey — 5 September
+
+Measured headless at 390 wide, two heights: 844 (installed to the home
+screen, no browser bars) and 664 (Safari with its bars — the common case).
+The app's own chrome takes 65px (header) + 62px (bottom nav, plus the safe
+area) off both, so the usable area is **714px** installed and **534px** in
+Safari. "Below" is how much of the screen sits under the fold on first
+paint; what is listed is what you have to scroll to reach.
+
+| Screen | 844 | 664 | Hidden at 664 |
+|---|---|---|---|
+| Home | +371 | +551 (2.0 screens) | guest card, Play someone, Start a room |
+| Games catalogue | +1054 | +1234 (3.3) | a list; scrolling is the point |
+| Profile | +105 | +285 (1.5) | sign-in, guest note |
+| Rooms, Ranks, Daily | fits | fits | — |
+| Trivia · question | fits | +94 | the fourth answer, partly |
+| Picto · puzzle | fits | +92 | "Need a clue" |
+| Square Off · pick | fits | fits | — |
+| **Square Off · question up** | +74 | **+227** | **the answers** |
+| Square Off · game over | +36 | +215 | the result, Play again |
+| Square Off · session over | +156 | +336 | the card, Start a new session |
+| Tic Tac Toe · playing | fits | fits | — |
+| Connect 4 · playing | fits | fits | — |
+| **Connect 4 Trivia · question up** | +115 | **+274** | **all four answers** |
+| **Connect 4 Catapult · shot up** | +37 | **+217** | **the catapult** |
+| **Catapult Squares · shot up** | fits | **+169** | **the catapult** |
+| Memory · playing | fits | fits | — |
+| Ball Sort · today, playing | fits | +183 | Take it back, the ladder |
+
+Not surveyed: room views (need two signed-in phones); they stack the same
+pieces as the solo pages plus Seats and the away notice, so expect worse.
+
+What causes it, in order of cost: every game page spends ~120px above the
+board on its own h1 and a seats row; boards are sized by width, not by the
+height left; and a question or a shot is appended UNDER the board instead of
+taking its place — so on a Safari phone you see the board and must scroll
+to do the thing the game is asking for. The result screens then stack the
+board, the result and the buttons the same way.
+
 ## Content
 
 **1,891 puzzles live in Supabase.** Square Off and Connect 4 Trivia draw on the
