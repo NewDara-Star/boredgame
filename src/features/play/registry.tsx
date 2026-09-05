@@ -80,7 +80,7 @@ export const GAMES: GameDef[] = [
   },
   {
     slug: "tictactoe", name: "Tic Tac Toe", tagline: "Three in a row. No questions asked.",
-    badge: "Board game", bank: null, path: "/rooms", chip: "bg-sand text-ink",
+    badge: "Board game", bank: null, path: "/tictactoe", chip: "bg-sand text-ink",
     room: { mode: "tictactoe", blurb: "The plain game. Take a square, first to three in a row." },
     Art: ({ size }) => (
       <svg viewBox="0 0 100 100" width={size} height={size} className="shrink-0">
@@ -97,7 +97,7 @@ export const GAMES: GameDef[] = [
   },
   {
     slug: "connect4", name: "Connect 4", tagline: "Drop a disc, line up four.",
-    badge: "Board game", bank: null, path: "/rooms", chip: "bg-sand text-ink",
+    badge: "Board game", bank: null, path: "/connect4", chip: "bg-sand text-ink",
     room: { mode: "connect4", blurb: "The plain game. Tap a column, the disc falls, four in a row wins." },
     Art: ({ size }) => (
       <svg viewBox="0 0 100 100" width={size} height={size} className="shrink-0">
@@ -117,7 +117,7 @@ export const GAMES: GameDef[] = [
   },
   {
     slug: "connect4trivia", name: "Connect 4 Trivia", tagline: "Answer right or the disc never drops.",
-    badge: "Board game", bank: "trivia", path: "/rooms", chip: "bg-hot text-surface",
+    badge: "Board game", bank: "trivia", path: "/connect4trivia", chip: "bg-hot text-surface",
     room: { mode: "connect4trivia", blurb: "Name a column, answer a question. Get it wrong and you lose the turn — no second chances." },
     Art: ({ size }) => (
       <motion.svg viewBox="0 0 100 100" width={size} height={size} className="shrink-0"

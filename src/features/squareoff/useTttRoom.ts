@@ -1,4 +1,6 @@
-import { newGame, pick, place, answer, advance, type Game } from "./rules";
+import {
+  newGame, pick, place, answer, advance, botSquare, describe, type Game,
+} from "./rules";
 import { decode, encode, type TttRow } from "./wire";
 import { useBoardRoom, startBoard, type BoardEngine, type Scope } from "@/features/rooms/useBoardRoom";
 
@@ -17,6 +19,8 @@ export const TTT: BoardEngine<Game, TttRow> = {
   channel: "ttt",
   decode, encode, newGame, place, pick, answer, advance,
   answerer: (g) => g.answerer,
+  botCell: botSquare,
+  describe,
 };
 
 export function useTttRoom(

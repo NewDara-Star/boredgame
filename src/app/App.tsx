@@ -21,6 +21,9 @@ const SquareOffPage = lazy(() => import("@/features/squareoff/SquareOffPage").th
 const LeaderboardPage = lazy(() => import("@/features/leaderboard/LeaderboardPage").then((m) => ({ default: m.LeaderboardPage })));
 const ProfilePage = lazy(() => import("@/features/profile/ProfilePage").then((m) => ({ default: m.ProfilePage })));
 const AdminPage = lazy(() => import("@/features/admin/AdminPage").then((m) => ({ default: m.AdminPage })));
+const TicTacToeSoloPage = lazy(() => import("@/features/tictactoe/TicTacToeSoloPage").then((m) => ({ default: m.TicTacToeSoloPage })));
+const Connect4SoloPage = lazy(() => import("@/features/connect4/Connect4SoloPage").then((m) => ({ default: m.Connect4SoloPage })));
+const Connect4TriviaSoloPage = lazy(() => import("@/features/connect4/Connect4SoloPage").then((m) => ({ default: m.Connect4TriviaSoloPage })));
 const RoomsPage = lazy(() => import("@/features/rooms/RoomsPage").then((m) => ({ default: m.RoomsPage })));
 
 /** Deliberately plain. A spinner that appears for 80ms on a fast connection is
@@ -42,6 +45,9 @@ export function App() {
               <Route path="/play" element={<CataloguePage />} />
               <Route path="/daily" element={<DailyPage />} />
               <Route path="/squareoff" element={<SquareOffPage />} />
+              <Route path="/tictactoe" element={<TicTacToeSoloPage />} />
+              <Route path="/connect4" element={<Connect4SoloPage />} />
+              <Route path="/connect4trivia" element={<Connect4TriviaSoloPage />} />
               <Route path="/ranks" element={<LeaderboardPage />} />
               <Route path="/profile" element={<ProfilePage />} />
               <Route path="/admin" element={<AdminPage />} />

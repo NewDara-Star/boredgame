@@ -403,6 +403,36 @@ Deferring it means the app renders before it knows whether anyone is signed in,
 which is a flash of the signed-out home page on every load — a worse trade than
 the bytes are worth, until the auth check itself gets faster.
 
+## Solo is a hook, not a page per game
+
+`useSoloBoard(engine, plain)` plays any board against the bot, and Square Off
+now goes through it too — it was the original, the other three were written
+against it by hand, and that is how Connect 4 inherited a dealing bug the
+original never had. `BoardSoloPage` draws any of them: both `Board` components
+already took identical props, so the page takes one as a prop.
+
+The bot is deliberately not a solved player in either game. A perfect Tic Tac
+Toe opponent draws every single time, which is not a game — `botSquare` and
+`botColumn` win, block, take the middle, and are otherwise loose, and
+`botIsRight` makes the bot miss questions at a rate set by their difficulty so
+its skill is visible rather than a hidden dice roll.
+
+Routes are `/tictactoe`, `/connect4`, `/connect4trivia`, and the catalogue
+cards point at them instead of at `/rooms`. They shipped room-only, which meant
+the games most likely to be played with a younger sibling could not be played
+unless she was holding a second phone.
+
+## Content has a deadline, not just an error path
+
+`loadContent` falls back to the bundled puzzle set when the database returns an
+error — but a request that never comes back is not an error. Patchy signal or a
+captive portal used to leave every game on "Dealing questions…" for as long as
+the tab stayed open, with a perfectly good bundled set unused in the same file.
+`withTimeout` bounds it at `CONTENT_TIMEOUT_MS` (6s) and treats silence and
+failure the same, because they are the same to whoever is staring at the
+screen. Six seconds is a compromise: shorter and a merely-slow connection gets
+the 51 bundled questions instead of the 1,787 live ones.
+
 ## Brand: sticker on neon, but only where you are not reading
 
 The references are logo boards and packaging — saturated grounds, white fills,

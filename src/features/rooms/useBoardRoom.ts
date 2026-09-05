@@ -14,6 +14,7 @@ export type Phase = "picking" | "asking" | "revealed" | "over";
     already satisfy it — c4's `last` carries a column and Square Off's carries a
     square and a steal flag, and neither is any of this file's business. */
 export interface BoardState {
+  board: (Mark | null)[];
   phase: Phase;
   turn: Mark;
   last: { by: Mark; correct: boolean } | null;
@@ -57,6 +58,13 @@ export interface BoardEngine<G extends BoardState, R extends BoardRow> {
    * steal, so it always is.
    */
   answerer(g: G): Mark | null;
+  /** Where the bot would move. Deliberately not a solved player in either game
+      — win, block, take the middle, otherwise loose. A perfect Tic Tac Toe
+      opponent draws every single time, which is not a game. */
+  botCell(board: (Mark | null)[], me: Mark, rand?: () => number): number;
+  /** One line of English for what just happened. The board alone is not
+      legible: it cannot say "you missed, so the bot gets one shot at it". */
+  describe(g: G, names: Record<Mark, string>, you: Mark | null): string;
 }
 
 export function useBoardRoom<G extends BoardState, R extends BoardRow>(

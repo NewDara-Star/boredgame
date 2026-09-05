@@ -1,5 +1,6 @@
 import { supabase } from "@/shared/lib/supabase";
 import { shuffleSeeded } from "@/shared/lib/shuffle";
+import { withTimeout } from "@/shared/lib/timeout";
 import { PICTO_SEED } from "@/shared/data/picto";
 import { TRIVIA_SEED } from "@/shared/data/trivia";
 import type { Puzzle, GameKey } from "@/shared/types/db";
@@ -68,16 +69,31 @@ function fromRow(row: PuzzleRow): PlayItem {
  * Database first, bundled content as the fallback. The app is fully playable
  * before Supabase exists, which is what makes it testable on day one.
  */
+export const CONTENT_TIMEOUT_MS = 6000;
+
 export async function loadContent(game: GameKey): Promise<PlayItem[]> {
-  if (supabase) {
-    const { data, error } = await supabase
-      .from("puzzles")
-      .select("*, categories(name)")
-      .eq("game", game)
-      .eq("status", "live");
-    if (!error && data && data.length > 0) return (data as PuzzleRow[]).map(fromRow);
-  }
-  return game === "picto" ? fromSeedPicto() : fromSeedTrivia();
+  const bundled = () => (game === "picto" ? fromSeedPicto() : fromSeedTrivia());
+  if (!supabase) return bundled();
+
+  // Bounded, because an error is not the only way this goes wrong. A request
+  // that simply never comes back — bad signal, captive-portal wifi — used to
+  // leave every game sitting on "Dealing questions…" for as long as the tab was
+  // open, with a perfectly good bundled set sitting unused in the same file.
+  const rows = await withTimeout(
+    (async () => {
+      const { data, error } = await supabase!
+        .from("puzzles")
+        .select("*, categories(name)")
+        .eq("game", game)
+        .eq("status", "live");
+      if (error) throw error;
+      return (data ?? []) as PuzzleRow[];
+    })(),
+    CONTENT_TIMEOUT_MS,
+    () => [] as PuzzleRow[],
+  );
+
+  return rows.length > 0 ? rows.map(fromRow) : bundled();
 }
 
 /**

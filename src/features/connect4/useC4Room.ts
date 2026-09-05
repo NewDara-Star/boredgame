@@ -1,4 +1,6 @@
-import { newGame, pick, drop, answer, advance, type Game } from "./rules";
+import {
+  newGame, pick, drop, answer, advance, botColumn, describe, type Game,
+} from "./rules";
 import { decode, encode, type C4Row } from "./wire";
 import { useBoardRoom, startBoard, type BoardEngine, type Scope } from "@/features/rooms/useBoardRoom";
 
@@ -14,6 +16,8 @@ export const C4: BoardEngine<Game, C4Row> = {
   place: drop,
   pick,
   answerer: (g) => (g.phase === "asking" ? g.turn : null),
+  botCell: botColumn,
+  describe,
 };
 
 export function useC4Room(
