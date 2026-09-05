@@ -932,6 +932,24 @@ begin
   return true;
 end $$;
 
+-- Dealing the tubes.
+--
+-- Two bugs lived here, and each one made Ball Sort rooms unreachable.
+--
+-- The first: seats were `min(user_id), max(user_id)`, and Postgres has no
+-- min(uuid). Every deal threw, so no Ball Sort room had ever been played.
+--
+-- The second: the insert was `on conflict (room_id) do nothing`, and nothing
+-- deletes a race row — reopen_room clears room_rounds and that is all. So the
+-- SECOND match in a room landed on the first match's row, `winner` and all:
+-- both phones opened it already over, showing the previous round's result and
+-- the previous round's film, permanently. A new room was the only way out.
+--
+-- The three board games never had that, because startBoard() upserts
+-- unconditionally. What makes an unconditional overwrite safe is
+-- claim_room_start: only the caller that moves the room waiting -> playing
+-- gets true, so exactly one deal per match reaches the write. sort_start
+-- already had that guard and then declined to use it.
 create or replace function public.sort_start(
   p_room bigint, p_seed bigint, p_level text, p_par int,
   p_cap int, p_colours int, p_tubes text
@@ -946,13 +964,26 @@ begin
   -- client's effect firing twice.
   if not public.claim_room_start(p_room) then return false; end if;
 
-  select min(user_id), max(user_id) into v_x, v_o
-  from public.room_players where room_id = p_room;
+  -- Two ordered reads, not min()/max(): there is no min(uuid).
+  select user_id into v_x from public.room_players
+   where room_id = p_room order by user_id limit 1;
+  select user_id into v_o from public.room_players
+   where room_id = p_room order by user_id desc limit 1;
 
   insert into public.sort_races
     (room_id, seed, level, par, cap, colours, x_tubes, o_tubes, x_player, o_player)
   values (p_room, p_seed, p_level, p_par, p_cap, p_colours, p_tubes, p_tubes, v_x, v_o)
-  on conflict (room_id) do nothing;
+  on conflict (room_id) do update set
+    seed = excluded.seed, level = excluded.level, par = excluded.par,
+    cap = excluded.cap, colours = excluded.colours,
+    x_tubes = excluded.x_tubes, o_tubes = excluded.o_tubes,
+    x_player = excluded.x_player, o_player = excluded.o_player,
+    x_moves = 0, o_moves = 0,
+    x_done_at = null, o_done_at = null,
+    -- last match's film is not this match's film
+    x_log = null, o_log = null,
+    winner = null,
+    started_at = now(), updated_at = now();
   return true;
 end $$;
 revoke all on function public.sort_start(bigint, bigint, text, int, int, int, text) from public, anon;
@@ -1023,9 +1054,18 @@ revoke all on function public.sort_finish(bigint, text, int) from public, anon;
 grant execute on function public.sort_finish(bigint, text, int) to authenticated;
 
 -- A rematch: new seed, new puzzle, both boards back to the start.
+--
+-- It used to be a weapon. The only check was that you were seated, so the
+-- player who was LOSING could call it mid-race and put both boards back to
+-- zero. Proven by impersonation: the seat on 2 moves reset the seat on 18.
+--
+-- A rematch belongs to a finished race, so the guard is `winner is not null`,
+-- and a refusal RAISES rather than matching zero rows — end_match was already
+-- silently doing nothing for guests once, and a quiet no-op is how that hid.
 create or replace function public.sort_rematch(
   p_room bigint, p_seed bigint, p_par int, p_colours int, p_tubes text
 ) returns void language plpgsql security definer set search_path to 'public' as $$
+declare moved int;
 begin
   if public.sort_seat(p_room) is null then
     raise exception 'not seated in race %', p_room;
@@ -1034,8 +1074,12 @@ begin
      set seed = p_seed, par = p_par, colours = p_colours,
          x_tubes = p_tubes, o_tubes = p_tubes,
          x_moves = 0, o_moves = 0, x_done_at = null, o_done_at = null,
+         -- a new board's film is not the old board's
+         x_log = null, o_log = null,
          winner = null, started_at = now(), updated_at = now()
-   where room_id = p_room;
+   where room_id = p_room and winner is not null;
+  get diagnostics moved = row_count;
+  if moved = 0 then raise exception 'that race is still being played'; end if;
 end $$;
 revoke all on function public.sort_rematch(bigint, bigint, int, int, text) from public, anon;
 grant execute on function public.sort_rematch(bigint, bigint, int, int, text) to authenticated;

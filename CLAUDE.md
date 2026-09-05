@@ -621,6 +621,22 @@ nothing said so because nobody had ever dealt one. It claims the room start
 ITSELF, where the board games have the lobby claim and then insert — so do not
 claim before calling it.
 
+**An empty table is a path nobody has run.** `sort_races` had zero rows, and
+that emptiness was the evidence: every Ball Sort deal had been throwing. Two
+more came out of probing the same row's whole life rather than reading it.
+`sort_start` inserted `on conflict (room_id) do nothing` and nothing ever
+deletes a race — `reopen_room` clears `room_rounds` and stops — so the SECOND
+match in a room landed on the first one's row with `winner` still set: both
+phones opened it already over, showing the last round's result and the last
+round's film, permanently. The board games escape this only because
+`startBoard` upserts unconditionally, which is safe because `claim_room_start`
+lets exactly one caller through per match; `sort_start` had that guard and
+declined to use it. And `sort_rematch` checked only that you were seated, so
+the player who was LOSING could reset a live race — the seat on 2 moves wiping
+the seat on 18. A rematch now needs `winner is not null` and RAISES when
+refused, because `end_match` already hid behind a zero-row update once.
+`c4_games` and `memory_games` are still empty. That is not proof they work.
+
 **A room game is (mode, bank, challenge), not (mode, bank).** Square Off and
 Catapult Squares are the same mode and the same board; only what a move costs
 tells them apart, and Catapult Squares draws on no bank, so on a fresh room the
