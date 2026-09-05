@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { refusal } from "@/shared/lib/fire";
 import { supabase } from "@/shared/lib/supabase";
 import { today } from "@/features/play/streak";
 import {
@@ -101,7 +102,9 @@ export function useSortSolo(level: Level, userId: string | undefined, practice =
       body: { solo: id, moves: g.history.map((h) => [h.from, h.to]), claimed: g.moves, log: encodeLog(g.log) },
     });
     if (e || !data?.ms) {
-      setError("That finish did not reach the board — your time here is your own.");
+      const why = await refusal(e);
+      setError(why ? `That finish was not accepted: ${why} — your time here is your own.`
+                   : "That finish did not reach the board — your time here is your own.");
       setResult({ ms: localMs, moves: g.moves, server: false });
     } else {
       setResult({ ms: Number(data.ms), moves: Number(data.moves ?? g.moves), server: true });

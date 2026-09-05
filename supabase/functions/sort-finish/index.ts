@@ -28,12 +28,34 @@ const URL_ = Deno.env.get("SUPABASE_URL")!;
 const ANON = Deno.env.get("SUPABASE_ANON_KEY")!;
 const SERVICE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
+/**
+ * A browser will not POST here without asking permission first.
+ *
+ * Before a cross-origin POST carrying an Authorization header, the browser
+ * sends an OPTIONS preflight. This function answered that preflight with
+ * `405 POST only` — its very first line — so the browser refused to send the
+ * POST at all. The referee was therefore unreachable from the app FROM THE
+ * DAY IT SHIPPED: every Ball Sort finish, solo and room, died at the
+ * preflight, and the only sign was a generic "could not post that finish".
+ * Three attempts are in the logs as three OPTIONS 405s and no POST.
+ *
+ * So the preflight is answered, and every reply carries the headers, or the
+ * browser discards a perfectly good response.
+ */
+const CORS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Max-Age": "86400",
+};
+
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
-    status, headers: { "Content-Type": "application/json" },
+    status, headers: { ...CORS, "Content-Type": "application/json" },
   });
 
 Deno.serve(async (req: Request) => {
+  if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS });
   if (req.method !== "POST") return json({ error: "POST only" }, 405);
 
   const auth = req.headers.get("Authorization") ?? "";

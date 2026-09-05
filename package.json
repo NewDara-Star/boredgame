@@ -14,7 +14,8 @@
     "check:sort": "node --experimental-strip-types scripts/check-sort.mts",
     "check:layout": "node --experimental-strip-types scripts/check-layout.mts",
     "check:lobby": "node --experimental-strip-types scripts/check-lobby.mts",
-    "check:schema": "node --experimental-strip-types scripts/check-schema.mts"
+    "check:schema": "node --experimental-strip-types scripts/check-schema.mts",
+    "check:fire": "node --experimental-strip-types scripts/check-fire.mts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.0",

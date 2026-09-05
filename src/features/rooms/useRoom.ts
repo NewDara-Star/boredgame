@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { fire } from "@/shared/lib/fire";
 import { supabase } from "@/shared/lib/supabase";
 import { attempt } from "@/shared/lib/write";
 import type { Room, RoomPlayer, RoomRound } from "@/shared/types/db";
@@ -87,7 +88,7 @@ export function useRoom(code: string | undefined, userId: string | undefined) {
   // is what tells the other browser you are still here.
   useEffect(() => {
     if (!supabase || !room || !userId) return;
-    const beat = () => void supabase!.rpc("touch_presence", { p_room: room.id });
+    const beat = () => fire(supabase!.rpc("touch_presence", { p_room: room.id }), "Presence");
     beat();
     const id = setInterval(beat, 20_000);
     return () => clearInterval(id);

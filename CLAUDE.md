@@ -653,6 +653,37 @@ whitespace stripped, which is how the two Ball Sort functions above were
 confirmed identical to what is deployed. Migrations are the database's record;
 this file is a second copy, and a second copy is a thing that drifts.
 
+**Two ways a request is never sent, and neither one throws.** A Ball Sort room
+on two phones showed both at once: the opponent's board frozen at zero moves,
+and "hasn't been seen for 2 minutes" against a player who was right there. One
+cause each, and the evidence for both was a request that was NOT in the server
+logs — a whole day of play with zero calls to `sort_move` and zero to
+`touch_presence`, while every other RPC was there.
+
+`supabase.rpc(...)` is a lazy builder, not a Promise: it performs the request
+inside `.then()`. So `void supabase.rpc(…)` — which reads exactly like
+fire-and-forget — builds a request and never sends it. Nothing throws, nothing
+logs, nothing appears in the network tab. `nearMiss.ts` had it right with
+`.then(() => {}, () => {})`; the board post and the presence heartbeat did not,
+so the one room mode that is meant to be simultaneous was two people playing
+alone, and everyone went "away" two minutes after joining, in every mode. Use
+`fire()` from `shared/lib/fire.ts`.
+
+The other: a cross-origin POST carrying an Authorization header is preceded by
+an OPTIONS preflight, and `sort-finish` opened with `if (req.method !== "POST")
+return 405`. It answered the preflight with the rejection, so the browser never
+sent the POST. The referee was unreachable from the app from the day it
+shipped — every finish, solo and room, which is why `sort_solo` had three
+attempts and no completions and why no film was ever stored. The replay logic
+was fine all along; it had never once been reached. An edge function must
+answer OPTIONS BEFORE it rejects anything.
+
+`npm run check:fire` holds both, mutation-tested four ways. And the reason
+neither was diagnosable from the app: both finish handlers threw away the
+referee's actual message and showed one sentence for every possible failure.
+`refusal()` reads it out of the error's Response now. When a feature is quiet
+rather than broken, look for the request that is missing from the logs.
+
 **A room game is (mode, bank, challenge), not (mode, bank).** Square Off and
 Catapult Squares are the same mode and the same board; only what a move costs
 tells them apart, and Catapult Squares draws on no bank, so on a fresh room the

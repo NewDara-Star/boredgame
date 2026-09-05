@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { fire, refusal } from "@/shared/lib/fire";
 import { supabase } from "@/shared/lib/supabase";
 import { attempt } from "@/shared/lib/write";
 import {
@@ -95,9 +96,9 @@ export function useSortRoom(roomId: number | null, userId: string | undefined) {
       the move. */
   const post = useCallback((g: Game) => {
     if (!supabase || !roomId) return;
-    void supabase.rpc("sort_move", {
+    fire(supabase.rpc("sort_move", {
       p_room: roomId, p_tubes: encodeTubes(g.tubes), p_moves: g.moves,
-    });
+    }), "Posting your board");
   }, [roomId]);
 
   /**
@@ -116,7 +117,11 @@ export function useSortRoom(roomId: number | null, userId: string | undefined) {
         log: encodeLog(g.log),
       },
     });
-    if (err) setError("Could not post that finish — try tapping again.");
+    if (err) {
+      const why = await refusal(err);
+      setError(why ? `That finish was not accepted: ${why}`
+                   : "Could not post that finish — try tapping again.");
+    }
     setFinishing(false);
   }, [roomId, finishing]);
 
