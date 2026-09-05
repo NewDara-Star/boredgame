@@ -1,10 +1,8 @@
 import { useEffect, useState } from "react";
 import type { Challenge, RoomPlayer, RoomStatus } from "@/shared/types/db";
+import { TurnPanel } from "@/features/rooms/TurnPanel";
 import { Note, Dealing } from "@/shared/ui/Note";
-import { QuestionPanel, Timer } from "@/features/squareoff/QuestionPanel";
 import { askMs } from "@/features/play/clock";
-import { Catapult } from "@/features/challenge/Catapult";
-import { targetFor } from "@/features/challenge/rules";
 
 /** Long enough to line a shot up without a clock in your face. */
 const CATAPULT_ASK_MS = 30_000;
@@ -108,44 +106,19 @@ export function Connect4Room({
           onRematch={() => void t.rematch()}
           onQuit={() => void t.quit()}
           onChangeGame={() => void t.changeGame()} />
-      ) : !plain && challenge === "catapult" && (g.phase === "asking" || g.phase === "revealed") ? (
-        <div className="space-y-3">
-          {/* Seeded on when the turn was written, which both phones read off the
-              same row — so they see the same target without another column. */}
-          <Catapult
-            key={t.askedAt}
-            target={targetFor(t.askedAt, "medium")}
-            locked={!mine || revealed}
-            onFire={(hit) => t.submit(hit)}
-            note={mine && !revealed ? undefined : `${names[other]} is lining one up`} />
-        </div>
-      ) : !plain && t.item && (g.phase === "asking" || g.phase === "revealed") ? (
-        <div className="space-y-3">
-          {asking && <Timer fraction={Math.max(0, left / ask)} />}
-          <QuestionPanel
-            // Already permuted by loadContent, seeded on the puzzle id — do NOT
-            // shuffle again here, or the two players see different orders.
-            item={t.item} options={t.item.choices ?? []} chosen={chosen}
-            revealed={revealed} locked={!mine || revealed}
-            onAnswer={(opt) => { setChosen(opt); t.submit(opt === t.item!.answer); }} />
-
-          {/* The pause is skippable, and once a reveal is stuck whoever
-              stallWriter names gets the same button rather than sitting out the
-              grace period. The two conditions are never true on both screens. */}
-          {g.phase === "revealed" && g.last && (
-            g.last.by === t.myMark ? (
-              <button onClick={t.advanceNow}
-                className="piece press w-full py-3.5 font-display text-lg font-semibold bg-ink text-paper">
-                Next
-              </button>
-            ) : stall?.action === "advance" && stall.mark === t.myMark ? (
-              <button onClick={t.forceAdvance}
-                className="piece press w-full py-3.5 font-display text-lg font-semibold bg-ink text-paper">
-                Move it on
-              </button>
-            ) : null
-          )}
-        </div>
+      ) : !plain && (g.phase === "asking" || g.phase === "revealed") ? (
+        <TurnPanel
+          challenge={challenge === "catapult" ? "catapult" : "trivia"}
+          item={t.item} options={t.item?.choices ?? []}
+          chosen={chosen} setChosen={setChosen}
+          onAnswer={(correct: boolean) => t.submit(correct)}
+          asking={asking} revealed={revealed} mine={!!mine}
+          fraction={Math.max(0, left / ask)} askedAt={t.askedAt}
+          waitingOn={names[other]}
+          advanceOwner={g.phase === "revealed" && g.last ? g.last.by : null}
+          stall={stall} myMark={t.myMark}
+          onAdvanceNow={t.advanceNow} onForceAdvance={t.forceAdvance}
+          nextLabel="Next" />
       ) : null}
     </div>
   );

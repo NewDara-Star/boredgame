@@ -25,3 +25,4 @@ dist7/
 
 # FUSE leaves these behind when a file is rewritten while open
 .fuse_hidden*
+dist8/

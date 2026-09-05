@@ -1,3 +1,8 @@
+import {
+  other, speaker, stallWriter as stall,
+  type Mark, type Cell, type Stall,
+} from "../play/board.ts";
+
 /**
  * Connect 4 — the grid, gravity and the win test, as pure functions.
  *
@@ -16,8 +21,7 @@ export const COLS = 7;
 export const ROWS = 6;
 export const SIZE = COLS * ROWS;
 
-export type Mark = "x" | "o";
-export type Cell = Mark | null;
+export { other, speaker, type Mark, type Cell, type Stall };
 export type Phase = "picking" | "asking" | "revealed" | "over";
 
 export interface Game {
@@ -34,7 +38,6 @@ export interface Game {
   line: number[] | null;
 }
 
-export const other = (m: Mark): Mark => (m === "x" ? "o" : "x");
 
 export const newGame = (first: Mark = "x"): Game => ({
   board: Array(SIZE).fill(null),
@@ -171,12 +174,7 @@ export function botColumn(board: Cell[], me: Mark, rand = Math.random): number {
 /* ------------------------------------------------------------ narration */
 
 export function describe(g: Game, names: Record<Mark, string>, you: Mark | null = null): string {
-  const mine = (m: Mark) => m === you;
-  const who = (m: Mark) => (mine(m) ? "You" : names[m]);
-  // "miss" + "s" is "misss", and "go" + "s" is "gos". English adds -es after a
-  // sibilant or an o, and this helper is handed both on the most-seen lines.
-  const s = (m: Mark, verb: string) =>
-    mine(m) ? verb : /(s|sh|ch|x|z|o)$/.test(verb) ? `${verb}es` : `${verb}s`;
+  const { mine, who, verb: s } = speaker(names, you);
   const col = (n: number) => `column ${n + 1}`;
 
   if (g.phase === "over") {
@@ -203,23 +201,12 @@ export function describe(g: Game, names: Record<Mark, string>, you: Mark | null 
  * transition is written by one client, so each phase needs a deadline after
  * which the other player may write it instead. See CLAUDE.md.
  */
-export type Stall = { mark: Mark; action: "timeout" | "advance" };
 
 export function stallWriter(
   g: Pick<Game, "phase" | "turn" | "last">,
   elapsed: number,
   ms: { ask: number; reveal: number; grace: number },
 ): Stall | null {
-  if (g.phase === "asking") {
-    if (elapsed >= ms.ask + ms.grace) return { mark: other(g.turn), action: "timeout" };
-    if (elapsed >= ms.ask) return { mark: g.turn, action: "timeout" };
-    return null;
-  }
-  if (g.phase === "revealed" && g.last) {
-    const owner = g.last.by;
-    if (elapsed >= ms.reveal + ms.grace) return { mark: other(owner), action: "advance" };
-    if (elapsed >= ms.reveal) return { mark: owner, action: "advance" };
-    return null;
-  }
-  return null;
+  // No steal here, so a pending answer is always owed by whoever's turn it is.
+  return stall(g, g.phase === "asking" ? g.turn : null, elapsed, ms);
 }

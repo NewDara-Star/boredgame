@@ -1,3 +1,7 @@
+import {
+  other, speaker, type Mark, type Cell, type Phase,
+} from "../play/board.ts";
+
 /**
  * Flip and match. Two tiles a turn; a pair scores and you go again.
  *
@@ -14,9 +18,7 @@
  * Import-free so bare Node can check it.
  */
 
-export type Mark = "x" | "o";
-export type Cell = Mark | null;
-export type Phase = "picking" | "asking" | "revealed" | "over";
+export { other, speaker, type Mark, type Cell, type Phase };
 
 export const PAIRS = 8;
 export const SIZE = PAIRS * 2;      // 16 tiles, a 4x4 grid
@@ -41,7 +43,6 @@ export interface Game {
   line: number[] | null;
 }
 
-export const other = (m: Mark): Mark => (m === "x" ? "o" : "x");
 
 /** Fisher-Yates on a caller-supplied source of randomness, so a test can hand
     it a seeded one and get the same deck twice. */
@@ -193,10 +194,7 @@ export function botFlip(
 
 /** One line of English for what just happened. */
 export function describe(g: Game, names: Record<Mark, string>, you: Mark | null = null): string {
-  const mine = (m: Mark) => m === you;
-  const who = (m: Mark) => (mine(m) ? "You" : names[m]);
-  const s = (m: Mark, verb: string) =>
-    mine(m) ? verb : /(s|sh|ch|x|z|o)$/.test(verb) ? `${verb}es` : `${verb}s`;
+  const { mine, who, verb: s } = speaker(names, you);
 
   if (g.phase === "over") {
     if (g.winner === "draw") return "Every pair found — it's a draw.";

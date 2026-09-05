@@ -3,10 +3,13 @@ import { Dealing } from "@/shared/ui/Note";
 import { motion } from "framer-motion";
 import { stagger, riseIn, popIn, SPRING } from "@/shared/ui/motion";
 import { UnlockGate } from "@/features/play/Unlock";
-import { QuestionPanel, Timer } from "@/features/squareoff/QuestionPanel";
 import { drawMatchCard, saveCard, type MatchCard } from "@/features/squareoff/matchCard";
 import { useSoloBoard } from "@/features/play/useSoloBoard";
-import { Catapult } from "@/features/challenge/Catapult";
+import { TurnPanel } from "@/features/rooms/TurnPanel";
+
+/** A sentinel that is never any question's answer, so "wrong" can be expressed
+    through the same one-string channel a tapped option uses. */
+const NOT_THE_ANSWER = "\u0000";
 import type { BoardEngine, BoardRow, BoardState, Mark } from "@/features/rooms/useBoardRoom";
 
 function Side({ mark, name, active, score, glyph }:
@@ -178,27 +181,24 @@ export function BoardSoloPage<G extends BoardState & { target: number | null; li
             </button>
           </div>
         </motion.div>
-      ) : challenge === "catapult" && (g.phase === "asking" || g.phase === "revealed") ? (
+      ) : (g.phase === "asking" || g.phase === "revealed") ? (
         <motion.div variants={riseIn}>
-          <Catapult
-            key={s.target.x}
-            target={s.target}
-            locked={!s.iAnswer}
-            shot={s.botFires}
-            onFire={(hit) => s.fire(hit)}
-            // Only while the bot is genuinely the one shooting. Keyed off
-            // "not my turn" it replaced your own "Just long." the instant you
-            // fired, so you never learned anything from the shot you just took.
-            note={engine.answerer(g) === "o" && !s.botFires
-              ? "The bot is lining one up" : undefined} />
-        </motion.div>
-      ) : s.item && (g.phase === "asking" || g.phase === "revealed") ? (
-        <motion.div variants={riseIn} className="space-y-3">
-          {s.iAnswer && !revealed && <Timer fraction={s.fraction} />}
-          <QuestionPanel
-            item={s.item} options={s.options} chosen={s.chosen}
-            revealed={revealed} locked={!s.iAnswer || revealed}
-            onAnswer={s.submit} />
+          {/* The same panel the rooms draw. It only reached three copies
+              because solo advances on a timer and a room can be stuck, so they
+              looked different — but the difference is one nullable prop. */}
+          <TurnPanel
+            challenge={challenge === "catapult" ? "catapult" : "trivia"}
+            item={s.item} options={s.options}
+            chosen={s.chosen} setChosen={() => {}}
+            onAnswer={(correct) => (challenge === "catapult"
+              ? s.fire(correct)
+              : s.submit(correct ? s.item?.answer ?? null : NOT_THE_ANSWER))}
+            asking={g.phase === "asking"} revealed={revealed} mine={s.iAnswer}
+            fraction={s.fraction} askedAt={0} target={s.target}
+            waitingOn="The bot"
+            botShot={s.botFires}
+            advanceOwner={null} stall={null} myMark="x"
+            onAdvanceNow={() => {}} onForceAdvance={() => {}} nextLabel="Next" />
         </motion.div>
       ) : null}
 
