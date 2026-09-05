@@ -48,8 +48,8 @@ export function CataloguePage() {
               ${playable ? "" : "opacity-55"}`}>
               <g.Art size={62} />
               <div className="min-w-0">
-                <span className={`inline-block whitespace-nowrap text-[12px] font-black uppercase
-                  tracking-wide rounded-full px-2 py-0.5 ${g.chip}`}>{g.badge}</span>
+                <span className={`inline-block text-[9px] font-black uppercase tracking-widest
+                  rounded-full px-2 py-0.5 ${g.chip}`}>{g.badge}</span>
                 <h2 className="font-display text-xl font-semibold mt-1">{g.name}</h2>
                 <p className="text-[13px] text-soft font-semibold leading-snug">{g.tagline}</p>
                 <p className="text-[13px] font-bold text-soft/70 mt-1 tabular-nums">

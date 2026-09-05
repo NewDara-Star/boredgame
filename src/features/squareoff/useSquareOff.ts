@@ -8,7 +8,8 @@ import {
   newGame, pick, answer, advance, botSquare, botIsRight, type Game, type Mark,
 } from "./rules";
 
-export const ASK_MS = 15_000;
+import { ASK_MS, askMs } from "@/features/play/clock";
+export { ASK_MS, askMs };
 const BOT_PICK_MS = 850;
 const BOT_THINK_MS = 1500;
 const BOT_COMMIT_MS = 750;
@@ -28,6 +29,7 @@ export function useSquareOff() {
   const [options, setOptions] = useState<string[]>([]);
   const [chosen, setChosen] = useState<string | null>(null);
   const [left, setLeft] = useState(ASK_MS);
+  const ask = askMs(item?.difficulty);
   const [results, setResults] = useState<RoundResult[]>([]);
   const [outcome, setOutcome] = useState<RoundOutcome | null>(null);
   // A session across games, the same as a room keeps. Playing the bot five times
@@ -62,7 +64,9 @@ export function useSquareOff() {
       setOptions(shuffle(next.choices!));
     }
     setChosen(null);
-    setLeft(ASK_MS);
+    // The new question's own clock, not the previous one's — `next` is in hand
+    // here, whereas `ask` below is a render behind at this moment.
+    setLeft(askMs(next?.difficulty));
     askedAt.current = Date.now();
   }, []);
 
@@ -112,12 +116,12 @@ export function useSquareOff() {
   useEffect(() => {
     if (game.phase !== "asking" || game.answerer !== "x") return;
     const id = setInterval(() => {
-      const remaining = ASK_MS - (Date.now() - askedAt.current);
+      const remaining = ask - (Date.now() - askedAt.current);
       setLeft(remaining);
       if (remaining <= 0) { clearInterval(id); submit(null); }
     }, 100);
     return () => clearInterval(id);
-  }, [game.phase, game.answerer, submit]);
+  }, [game.phase, game.answerer, submit, ask]);
 
   useEffect(() => {
     if (game.phase !== "revealed") return;
@@ -171,7 +175,7 @@ export function useSquareOff() {
     game, item, options, chosen, results, outcome, names, wins, ended,
     endSession, newSession,
     loading: pool.length === 0,
-    fraction: left / ASK_MS,
+    fraction: left / ask,
     myTurnToPick: game.phase === "picking" && game.turn === "x",
     iAnswer: game.phase === "asking" && game.answerer === "x",
     choose, submit, restart,

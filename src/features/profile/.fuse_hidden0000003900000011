@@ -17,7 +17,7 @@ function Stat({ value, label, accent = "" }:
   return (
     <motion.div variants={popIn} className={`piece p-3.5 ${accent}`}>
       <b className="block font-display text-[28px] leading-none font-semibold tabular-nums">{value}</b>
-      <span className="block text-[12px] font-black uppercase tracking-widest text-soft mt-1.5">
+      <span className="block text-[9.5px] font-black uppercase tracking-widest text-soft mt-1.5">
         {label}
       </span>
     </motion.div>
@@ -159,9 +159,7 @@ function MemberView() {
                 className={`piece grid place-items-center aspect-square
                   ${earned ? "bg-pop" : "bg-sand opacity-45"}`}>
                 <span className="font-display text-lg font-semibold tabular-nums leading-none">{m.days}</span>
-                {/* No tracking: at 12px in a 53px square the trailing letter-space put
-                    "DAY" exactly on the boundary. Size is what has to be legible. */}
-                <span className="text-[12px] font-black uppercase text-soft">day</span>
+                <span className="text-[7.5px] font-black uppercase tracking-wider text-soft">day</span>
               </motion.div>
             );
           })}
@@ -183,9 +181,9 @@ function MemberView() {
                 </div>
                 {/* No tracking and a hard break: "Accomplished" next to "Advanced"
                     collided at phone width with letter-spacing applied. */}
-                <p className={`text-[12px] font-black uppercase mt-1.5 leading-[1.15] break-words
+                <p className={`text-[9px] font-black uppercase mt-1.5 leading-[1.15] break-words
                   ${locked ? "text-soft/60" : "text-ink"}`}>{rk.name}</p>
-                <p className="text-[12px] font-bold text-soft/60 tabular-nums leading-tight mt-0.5">
+                <p className="text-[9px] font-bold text-soft/60 tabular-nums leading-tight mt-0.5">
                   {locked ? `${rk.min - p.answered} to go` : "unlocked"}
                 </p>
               </motion.div>

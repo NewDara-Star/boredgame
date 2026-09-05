@@ -44,7 +44,7 @@ export function WeekStrip({ streak, lastPlayed }: { streak: number; lastPlayed: 
           transition={{ ...SPRING, delay: i * 0.035 }}
           className={`flex-1 rounded-2xl border-[2.5px] border-ink py-2 text-center
             ${d.played ? "bg-pop" : d.isToday ? "bg-surface" : "bg-sand/60"}`}>
-          <span className="block text-[12px] font-black uppercase tracking-wide text-soft">
+          <span className="block text-[9px] font-black uppercase tracking-wide text-soft">
             {d.label}
           </span>
           <span className="block font-display text-[17px] font-semibold tabular-nums leading-tight">

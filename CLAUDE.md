@@ -359,6 +359,29 @@ phase. Nothing read the wrong one, because every reader is guarded by the
 phase. It is nulled now — two versions of the truth with nothing standing on
 the wrong one is a bug waiting for its first reader.
 
+## 12px is the floor, and the clock follows the question
+
+The interface had 61 uses of 10 and 11px text, plus eight more between 7.5 and
+9.5px that a grep for "10 or 11" never saw. They are labels, not decoration —
+"3 to go", the category counts, whose turn it is — and that size is where an
+older player stops being able to read them. Everything is 12px or above now,
+and `check-type-size.mts` fails the build if anything drops below it, because
+the next arbitrary value someone reaches for will be 10px again.
+
+Where a bumped label got tight, the fix was letter-spacing rather than size:
+`tracking-widest` is what costs the width, and dropping it buys back more than
+12px costs. "WORD PUZZLE" broke over two lines in a carousel card until the
+tracking came off. Size is the part that has to be legible.
+
+The question clock was a flat 15 seconds — generous for "what colour is the
+sky", mean for four long options, and the same fifteen seconds for a
+nine-year-old reading aloud as for someone on their hundredth round. `askMs()`
+takes it from the question's own difficulty: 15 / 18 / 22. Derived from the
+puzzle rather than stored on the room, so both clients compute the same
+deadline from the same row without another column to keep in step — which is
+what `check-clock.mts` pins down, along with the rule that the clock always
+stays longer than the reveal pause it would otherwise race.
+
 ## Brand: sticker on neon, but only where you are not reading
 
 The references are logo boards and packaging — saturated grounds, white fills,

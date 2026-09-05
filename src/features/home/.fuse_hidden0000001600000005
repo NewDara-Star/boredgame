@@ -124,11 +124,8 @@ export function HomePage() {
             <motion.div key={g.slug} variants={riseIn} className="snap-start shrink-0 w-[168px]">
               <Link to={g.path} className="piece press flex flex-col h-full p-4">
                 <div className="h-[72px] grid place-items-center mb-3"><g.Art size={68} /></div>
-                {/* nowrap and ordinary tracking: at 12px "WORD PUZZLE" with widest
-                    tracking broke over two lines in a carousel card. Letter-spacing
-                    is what was costing the width, not the size. */}
-                <span className={`sticker inline-block self-start whitespace-nowrap text-[12px]
-                  font-black uppercase tracking-wide px-2 py-0.5 ${g.chip}`}>{g.badge}</span>
+                <span className={`sticker inline-block self-start text-[9px] font-black uppercase
+                  tracking-widest px-2 py-0.5 ${g.chip}`}>{g.badge}</span>
                 <h3 className="font-display text-[17px] leading-tight font-semibold mt-2">{g.name}</h3>
                 <p className="text-[12px] text-soft font-semibold leading-snug line-clamp-3 mt-0.5">
                   {g.tagline}
