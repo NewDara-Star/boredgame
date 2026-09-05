@@ -1,9 +1,10 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "@/app/providers/AuthProvider";
 import { loadContent, shuffle } from "@/features/play/content";
 import { recordRound, type RoundOutcome } from "@/features/play/progress";
 import { deal } from "@/features/play/dealer";
 import { askMs } from "@/features/play/clock";
+import { targetFor, botShot, isHit, type Shot } from "@/features/challenge/rules";
 import type { PlayItem, RoundResult } from "@/features/play/types";
 import type { BoardEngine, BoardRow, BoardState, Mark } from "@/features/rooms/useBoardRoom";
 // How often the bot gets a question right, by that question's difficulty. It
@@ -32,6 +33,8 @@ export function useSoloBoard<G extends BoardState, R extends BoardRow>(
   engine: BoardEngine<G, R>,
   /** No questions: taking the square is the whole move. */
   plain = false,
+  /** What the asking phase asks for. */
+  challenge: "trivia" | "catapult" = "trivia",
 ) {
   const { user } = useAuth();
   const [pool, setPool] = useState<PlayItem[]>([]);
@@ -57,13 +60,30 @@ export function useSoloBoard<G extends BoardState, R extends BoardRow>(
   // effect twice under StrictMode.
   const poolRef = useRef<PlayItem[]>([]);
   useEffect(() => {
-    if (plain) return;
+    if (plain || challenge !== "trivia") return;
     void loadContent("trivia").then((all) => {
       const usable = shuffle(all.filter((i) => i.choices && i.choices.length >= 2));
       poolRef.current = usable;
       setPool(usable);
     });
-  }, [plain]);
+  }, [plain, challenge]);
+
+  // The catapult's target moves every turn but the physics never do, so getting
+  // better at it is a real thing that happens — which is the whole point of it
+  // as an alternative to a question.
+  const [seed, setSeed] = useState(() => Date.now());
+  const [botFires, setBotFires] = useState<Shot | null>(null);
+  const level = "medium" as const;
+  // Memoised on the seed, not rebuilt each render. targetFor returns a fresh
+  // object, so an unmemoised target changed identity on every render, re-ran
+  // the bot's effect, and its cleanup cancelled the timer that commits the
+  // bot's shot — the same deadlock twice, once through state and once through
+  // an object literal.
+  const target = useMemo(() => targetFor(seed, level), [seed]);
+  const newTarget = useCallback(() => {
+    setSeed(Date.now());
+    setBotFires(null);
+  }, []);
 
   const lastServed = useRef<string | null>(null);
   const dealQuestion = useCallback(() => {
@@ -85,17 +105,19 @@ export function useSoloBoard<G extends BoardState, R extends BoardRow>(
 
   /** The one door every state change goes through. */
   const commit = useCallback((next: G) => {
-    if (next.phase === "asking" && game.phase !== "asking") dealQuestion();
+    if (next.phase === "asking" && game.phase !== "asking") {
+      if (challenge === "trivia") dealQuestion(); else newTarget();
+    }
     setGame(next);
-  }, [game.phase, dealQuestion]);
+  }, [game.phase, dealQuestion, challenge, newTarget]);
 
   const choose = useCallback((cell: number) => {
     if (game.phase !== "picking" || game.turn !== "x") return;
-    if (!plain && pool.length === 0) return;
+    if (!plain && challenge === "trivia" && pool.length === 0) return;
     const next = plain ? engine.place(game, cell) : engine.pick(game, cell);
     if (next === game) return;                 // full column, taken square
     commit(next);
-  }, [game, plain, pool.length, commit, engine]);
+  }, [game, plain, pool.length, commit, engine, challenge]);
 
   const submit = useCallback((opt: string | null) => {
     if (game.phase !== "asking" || engine.answerer(game) !== "x" || !item) return;
@@ -107,18 +129,45 @@ export function useSoloBoard<G extends BoardState, R extends BoardRow>(
     commit(engine.answer(game, opt === item.answer));
   }, [game, item, commit, engine]);
 
+  /** A shot resolves exactly as an answer does — the board never learns which. */
+  const fire = useCallback((hit: boolean) => {
+    if (game.phase !== "asking" || engine.answerer(game) !== "x") return;
+    commit(engine.answer(game, hit));
+  }, [game, engine, commit]);
+
   // --- the bot ---------------------------------------------------------------
   useEffect(() => {
     if (game.phase !== "picking" || game.turn !== "o") return;
-    if (!plain && pool.length === 0) return;
+    if (!plain && challenge === "trivia" && pool.length === 0) return;
     const cell = engine.botCell(game.board, "o");
     const t = setTimeout(
       () => commit(plain ? engine.place(game, cell) : engine.pick(game, cell)),
       plain ? PLAIN_BOT_MS : BOT_PICK_MS);
     return () => clearTimeout(t);
-  }, [game, commit, engine, plain, pool.length]);
+  }, [game, commit, engine, plain, pool.length, challenge]);
+
+  /**
+   * Scheduled once per target, tracked in a ref rather than guarded on state.
+   *
+   * The first version guarded on `botFires` and listed it as a dependency, so
+   * showing the bot's shot re-ran the effect and the cleanup cancelled the very
+   * timer that was going to commit its answer. The bot picked a column, took
+   * aim, and the game sat there forever.
+   */
+  const botAimed = useRef(-1);
+  useEffect(() => {
+    if (challenge !== "catapult") return;
+    if (game.phase !== "asking" || engine.answerer(game) !== "o") return;
+    if (botAimed.current === seed) return;
+    botAimed.current = seed;
+    const shot = botShot(target, level, Math.random);
+    const t = setTimeout(() => setBotFires(shot), 420);
+    const t2 = setTimeout(() => commit(engine.answer(game, isHit(shot, target))), 420 + 980);
+    return () => { clearTimeout(t); clearTimeout(t2); };
+  }, [challenge, game, engine, target, seed, commit]);
 
   useEffect(() => {
+    if (challenge !== "trivia") return;
     if (game.phase !== "asking" || engine.answerer(game) !== "o" || !item) return;
     // Decided up front so the option it highlights is the one it commits to —
     // watching it get one wrong is the point, not a hidden dice roll.
@@ -131,10 +180,13 @@ export function useSoloBoard<G extends BoardState, R extends BoardRow>(
     const t2 = setTimeout(() => commit(engine.answer(game, choice === item.answer)),
       BOT_THINK_MS + BOT_COMMIT_MS);
     return () => { clearTimeout(t1); clearTimeout(t2); };
-  }, [game, item, options, commit, engine]);
+  }, [challenge, game, item, options, commit, engine]);
 
   // --- the clock, and moving on ----------------------------------------------
   useEffect(() => {
+    // No clock on a shot: a countdown on an eight-year-old lining up a catapult
+    // is the pressure this mode exists to remove.
+    if (challenge !== "trivia") return;
     if (game.phase !== "asking" || engine.answerer(game) !== "x") return;
     const id = setInterval(() => {
       const remaining = ask - (Date.now() - askedAt.current);
@@ -142,13 +194,16 @@ export function useSoloBoard<G extends BoardState, R extends BoardRow>(
       if (remaining <= 0) { clearInterval(id); submit(null); }
     }, 100);
     return () => clearInterval(id);
-  }, [game, submit, ask, engine]);
+  }, [game, submit, ask, engine, challenge]);
 
   useEffect(() => {
     if (game.phase !== "revealed") return;
-    const t = setTimeout(() => commit(engine.advance(game)), REVEAL_MS);
+    // A shot has "Just long." to read and nothing else; a question can have an
+    // explanation. Neither wants the other's pause.
+    const t = setTimeout(() => commit(engine.advance(game)),
+      challenge === "catapult" ? 1900 : REVEAL_MS);
     return () => clearTimeout(t);
-  }, [game, commit, engine]);
+  }, [game, commit, engine, challenge]);
 
   useEffect(() => {
     if (game.phase !== "over" || counted.current) return;
@@ -173,7 +228,8 @@ export function useSoloBoard<G extends BoardState, R extends BoardRow>(
   const restart = useCallback(() => {
     saved.current = false;
     counted.current = false;
-    setResults([]); setOutcome(null); setItem(null); setChosen(null);
+    setResults([]); setOutcome(null); setItem(null); setChosen(null); setBotFires(null);
+    botAimed.current = -1;
     // Loser starts the next one, the same rule a room uses. `seen` deliberately
     // survives, so a rematch does not re-ask the questions you just had.
     setGame((g) => engine.newGame(g.winner === "x" ? "o" : "x"));
@@ -188,6 +244,7 @@ export function useSoloBoard<G extends BoardState, R extends BoardRow>(
     counted.current = false;
     setResults([]); setOutcome(null); setItem(null); setChosen(null);
     setWins({ x: 0, o: 0 }); setEnded(false);
+    setBotFires(null); botAimed.current = -1;
     setGame(engine.newGame("x"));
   }, [engine]);
 
@@ -196,10 +253,11 @@ export function useSoloBoard<G extends BoardState, R extends BoardRow>(
   return {
     game, item, options, chosen, results, outcome, names, wins, ended,
     endSession, newSession,
-    loading: !plain && pool.length === 0,
+    loading: !plain && challenge === "trivia" && pool.length === 0,
     fraction: left / ask,
     myTurnToPick: game.phase === "picking" && game.turn === "x",
     iAnswer: game.phase === "asking" && engine.answerer(game) === "x",
-    choose, submit, restart,
+    choose, submit, restart, fire,
+    target, botFires, challenge,
   };
 }

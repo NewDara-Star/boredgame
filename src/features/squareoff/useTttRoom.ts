@@ -26,8 +26,9 @@ export const TTT: BoardEngine<Game, TttRow> = {
 export function useTttRoom(
   roomId: number | null, userId: string | undefined,
   scope: Scope | null = null, plain = false,
+  challenge: "trivia" | "catapult" = "trivia",
 ) {
-  return useBoardRoom(TTT, roomId, userId, scope, plain);
+  return useBoardRoom(TTT, roomId, userId, scope, plain, challenge);
 }
 
 export const startSquareOff = (roomId: number, xId: string, oId: string) =>

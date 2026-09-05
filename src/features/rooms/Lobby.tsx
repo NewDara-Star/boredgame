@@ -23,11 +23,13 @@ export function Lobby({
   levels: Record<Level, number>;
   userId: string;
   alone: boolean;
-  onSetup: (mode: string, game: string, cats: string[], levels: string[]) => void;
+  onSetup: (mode: string, game: string, cats: string[], levels: string[],
+            challenge: string) => void;
   onReady: (ready: boolean) => void;
 }) {
   const picked = room.categories ?? [];
   const levelsOn = room.difficulty ?? [];
+  const challenge = room.challenge ?? "trivia";
   const me = players.find((p) => p.user_id === userId);
   const everyoneReady = players.length === room.capacity && players.every((p) => p.ready);
 
@@ -57,7 +59,7 @@ export function Lobby({
                 // one so a selection survives; switching to Picto race does not,
                 // and five of the categories have no trivia in them at all.
                 <button key={g.slug}
-                  onClick={() => onSetup(c.mode, c.game ?? room.game, c.game === room.game ? picked : [], levelsOn)}
+                  onClick={() => onSetup(c.mode, c.game ?? room.game, c.game === room.game ? picked : [], levelsOn, challenge)}
                 className={`piece press text-left p-3.5 ${on ? "bg-hot text-surface" : "bg-surface"}`}>
                 <span className="flex items-center gap-2">
                   <span className={`grid place-items-center h-5 w-5 rounded-full border-[3px] border-ink shrink-0
@@ -93,7 +95,7 @@ export function Lobby({
                 // start a game with nothing to deal.
                 <button key={c.name} disabled={c.count === 0 && !on}
                   onClick={() => onSetup(room.mode, room.game,
-                    on ? picked.filter((n) => n !== c.name) : [...picked, c.name], levelsOn)}
+                    on ? picked.filter((n) => n !== c.name) : [...picked, c.name], levelsOn, challenge)}
                   className={`border-2 border-ink rounded-full px-2.5 py-1 text-[12px] font-bold
                     disabled:opacity-40
                     ${on ? "bg-ink text-paper" : "bg-surface text-ink"}`}>
@@ -108,7 +110,7 @@ export function Lobby({
               <span className="text-soft/60"> · {inPool} to draw from</span>
             </p>
             {picked.length > 0 && (
-              <button onClick={() => onSetup(room.mode, room.game, [], levelsOn)}
+              <button onClick={() => onSetup(room.mode, room.game, [], levelsOn, challenge)}
                 className="border-2 border-ink rounded-full px-2.5 py-1 text-[13px] font-black
                   uppercase tracking-wider bg-pop">Clear</button>
             )}
@@ -120,7 +122,29 @@ export function Lobby({
       {hasBank && (
       <motion.section variants={riseIn}>
         <p className="text-[12px] font-black uppercase tracking-widest text-soft mb-2">
-          3 · How hard? <span className="text-soft/60">optional</span>
+          3 · What does a move cost?
+        </p>
+        <div className="grid grid-cols-2 gap-2">
+          {([
+            ["trivia", "A question", "Four options. Rewards knowing things."],
+            ["catapult", "A shot", "Aim a catapult at a target. Rewards aim, not age."],
+          ] as const).map(([key, label, blurb]) => (
+            <button key={key}
+              onClick={() => onSetup(room.mode, room.game, picked, levelsOn, key)}
+              className={`piece press p-3 text-left ${
+                challenge === key ? "bg-hot text-surface" : "bg-surface"}`}>
+              <span className="block font-display text-base font-semibold">{label}</span>
+              <span className="block text-[12px] font-bold opacity-75 mt-0.5">{blurb}</span>
+            </button>
+          ))}
+        </div>
+      </motion.section>
+      )}
+
+      {hasBank && challenge === "trivia" && (
+      <motion.section variants={riseIn}>
+        <p className="text-[12px] font-black uppercase tracking-widest text-soft mb-2">
+          4 · How hard? <span className="text-soft/60">optional</span>
         </p>
         <div className="piece p-3.5">
           <div className="grid grid-cols-3 gap-2">
@@ -130,7 +154,7 @@ export function Lobby({
               return (
                 <button key={l} disabled={n === 0}
                   onClick={() => onSetup(room.mode, room.game, picked,
-                    on ? levelsOn.filter((x) => x !== l) : [...levelsOn, l])}
+                    on ? levelsOn.filter((x) => x !== l) : [...levelsOn, l], challenge)}
                   className={`piece press py-2.5 disabled:opacity-40
                     ${on ? "bg-hot text-surface" : "bg-surface"}`}>
                   <span className="block font-display text-base font-semibold capitalize">{l}</span>
@@ -150,7 +174,7 @@ export function Lobby({
 
       <motion.section variants={riseIn}>
         <p className="text-[12px] font-black uppercase tracking-widest text-soft mb-2">
-          {hasBank ? "4" : "2"} · Both of you happy?
+          {hasBank ? "5" : "2"} · Both of you happy?
         </p>
         <div className="grid gap-2">
           {players.map((p) => (

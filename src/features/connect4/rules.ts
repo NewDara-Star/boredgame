@@ -173,7 +173,10 @@ export function botColumn(board: Cell[], me: Mark, rand = Math.random): number {
 export function describe(g: Game, names: Record<Mark, string>, you: Mark | null = null): string {
   const mine = (m: Mark) => m === you;
   const who = (m: Mark) => (mine(m) ? "You" : names[m]);
-  const s = (m: Mark, verb: string) => (mine(m) ? verb : `${verb}s`);
+  // "miss" + "s" is "misss". English adds -es after a sibilant, and this helper
+  // is handed "miss" on the most common line in the whole game.
+  const s = (m: Mark, verb: string) =>
+    mine(m) ? verb : /(s|sh|ch|x|z)$/.test(verb) ? `${verb}es` : `${verb}s`;
   const col = (n: number) => `column ${n + 1}`;
 
   if (g.phase === "over") {

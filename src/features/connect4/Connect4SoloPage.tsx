@@ -14,3 +14,10 @@ export function Connect4TriviaSoloPage() {
   return <BoardSoloPage engine={C4} title="Connect 4 Trivia" Board={Board}
     glyphs={{ x: "●", o: "●" }} />;
 }
+
+/** The same board, with the question replaced by a shot. Built for a player who
+    loses a general-knowledge question to an adult whatever the setting says. */
+export function Connect4CatapultSoloPage() {
+  return <BoardSoloPage engine={C4} title="Connect 4 Catapult" Board={Board}
+    glyphs={{ x: "●", o: "●" }} challenge="catapult" />;
+}

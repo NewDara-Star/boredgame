@@ -6,6 +6,7 @@ import { UnlockGate } from "@/features/play/Unlock";
 import { QuestionPanel, Timer } from "@/features/squareoff/QuestionPanel";
 import { drawMatchCard, saveCard, type MatchCard } from "@/features/squareoff/matchCard";
 import { useSoloBoard } from "@/features/play/useSoloBoard";
+import { Catapult } from "@/features/challenge/Catapult";
 import type { BoardEngine, BoardRow, BoardState, Mark } from "@/features/rooms/useBoardRoom";
 
 function Side({ mark, name, active, score, glyph }:
@@ -44,15 +45,16 @@ export interface BoardProps {
  */
 export function BoardSoloPage<G extends BoardState & { target: number | null; line: number[] | null },
                               R extends BoardRow>({
-  engine, title, Board, glyphs, plain = false,
+  engine, title, Board, glyphs, plain = false, challenge = "trivia",
 }: {
   engine: BoardEngine<G, R>;
   title: string;
   Board: (p: BoardProps) => JSX.Element;
   glyphs: Record<Mark, string>;
   plain?: boolean;
+  challenge?: "trivia" | "catapult";
 }) {
-  const s = useSoloBoard(engine, plain);
+  const s = useSoloBoard(engine, plain, challenge);
   const g = s.game;
   const [card, setCard] = useState<MatchCard | null>(null);
 
@@ -167,6 +169,20 @@ export function BoardSoloPage<G extends BoardState & { target: number | null; li
               End session
             </button>
           </div>
+        </motion.div>
+      ) : challenge === "catapult" && (g.phase === "asking" || g.phase === "revealed") ? (
+        <motion.div variants={riseIn}>
+          <Catapult
+            key={s.target.x}
+            target={s.target}
+            locked={!s.iAnswer}
+            shot={s.botFires}
+            onFire={(hit) => s.fire(hit)}
+            // Only while the bot is genuinely the one shooting. Keyed off
+            // "not my turn" it replaced your own "Just long." the instant you
+            // fired, so you never learned anything from the shot you just took.
+            note={engine.answerer(g) === "o" && !s.botFires
+              ? "The bot is lining one up" : undefined} />
         </motion.div>
       ) : s.item && (g.phase === "asking" || g.phase === "revealed") ? (
         <motion.div variants={riseIn} className="space-y-3">

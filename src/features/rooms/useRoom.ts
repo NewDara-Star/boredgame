@@ -160,11 +160,12 @@ export function useRoom(code: string | undefined, userId: string | undefined) {
   const levels = levelCounts(pool, room?.categories);
 
   const setup = useCallback(
-    async (mode: string, game: string, cats: string[], levels: string[]) => {
+    async (mode: string, game: string, cats: string[], levels: string[],
+           challenge: string) => {
       if (!supabase || !room) return;
       setError(await attempt("Changing the setup", supabase.rpc("set_room_setup", {
         p_room: room.id, p_mode: mode, p_game: game,
-        p_categories: cats, p_difficulty: levels,
+        p_categories: cats, p_difficulty: levels, p_challenge: challenge,
       })));
     }, [room]);
 
@@ -189,7 +190,8 @@ export async function createRoom(userId: string, username: string): Promise<stri
   const { data, error } = await supabase
     .from("rooms")
     .insert({ code, host_id: userId, game: "trivia", mode: "squareoff",
-              status: "waiting", best_of: 5, categories: null, difficulty: null })
+              status: "waiting", best_of: 5, categories: null, difficulty: null,
+              challenge: "trivia" })
     .select().single();
   if (error || !data) return null;
   // Creating a room is joining it. Making the host click "Join this room" on a

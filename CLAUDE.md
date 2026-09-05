@@ -433,6 +433,40 @@ failure the same, because they are the same to whoever is staring at the
 screen. Six seconds is a compromise: shorter and a merely-slow connection gets
 the 51 bundled questions instead of the 1,787 live ones.
 
+## A move can cost a shot instead of an answer
+
+`rooms.challenge` is `trivia` or `catapult`. It exists because trivia gates a
+square on knowledge, and an eight-year-old loses that to an adult at every
+difficulty setting — the dial was worth building but it is not what an age gap
+needs. Aim is close to age-neutral, and it is learnable: the target moves every
+turn but the physics never do.
+
+The board never learns which it was. `phase === "asking"` has always meant "a
+thing must resolve true or false before the move lands", and a shot resolves it
+through the same `answer()` as a question, steal and all. That is what the
+`useBoardRoom` refactor bought.
+
+The target is seeded on `updated_at` — the moment the turn was written, which
+both clients already read off the same row — so two phones show the same target
+with no extra column. `challenge/rules.ts` is import-free and pure: the
+component draws with it, the bot aims with it, and `check-catapult.mts` holds
+all three to the same rules, including that the arc drawn on screen ENDS where
+the verdict says it landed.
+
+There is no trajectory preview, on purpose: with one you line the line up with
+the target and the skill evaporates. You get where the last shot landed and
+whether it was long or short. There is no countdown either — the room keeps a
+30s deadline so an idle player cannot freeze the board, but no bar is drawn,
+because a clock ticking at a child lining up a shot is the pressure this mode
+exists to remove.
+
+Two React deadlocks were found by playing it, both the same shape: an effect
+that schedules the bot's shot, listing something it sets in its own dependency
+array. Setting it re-ran the effect and the cleanup cancelled the timer that
+would have committed the bot's move, so the bot took aim and the game sat there
+forever. Once through state (`botFires`), once through an object rebuilt every
+render (`targetFor` is memoised on the seed now).
+
 ## Brand: sticker on neon, but only where you are not reading
 
 The references are logo boards and packaging — saturated grounds, white fills,

@@ -86,6 +86,8 @@ export interface Attempt {
 
 export type RoomStatus = "waiting" | "playing" | "finished" | "abandoned";
 
+export type Challenge = "trivia" | "catapult";
+
 export interface Room {
   id: number;
   code: string;
@@ -100,6 +102,9 @@ export interface Room {
   /** null means every level. Rooms drew from the whole bank before this existed,
       so one trivia question in five was hard whoever was sitting there. */
   difficulty: string[] | null;
+  /** What a move costs: answering a question, or landing a shot. Trivia is a
+      knowledge test, which an eight-year-old loses to an adult at any setting. */
+  challenge: Challenge;
   status: RoomStatus;
   best_of: number;
   /** seats. Both game modes are two-player, but the cap is data, not an assumption. */

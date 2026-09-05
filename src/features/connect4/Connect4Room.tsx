@@ -1,7 +1,12 @@
 import { useEffect, useState } from "react";
-import type { RoomPlayer, RoomStatus } from "@/shared/types/db";
+import type { Challenge, RoomPlayer, RoomStatus } from "@/shared/types/db";
 import { QuestionPanel, Timer } from "@/features/squareoff/QuestionPanel";
 import { askMs } from "@/features/play/clock";
+import { Catapult } from "@/features/challenge/Catapult";
+import { targetFor } from "@/features/challenge/rules";
+
+/** Long enough to line a shot up without a clock in your face. */
+const CATAPULT_ASK_MS = 30_000;
 import {
   Seats, AwayNotice, OverPanel, EndMatchLink,
   MatchOver, useMatchChrome, useStallRescue,
@@ -17,15 +22,17 @@ const GRACE_MS = 6000;
 const REVEAL_MS = 4500;
 
 export function Connect4Room({
-  roomId, code, status, categories, difficulty, players, userId, plain,
+  roomId, code, status, categories, difficulty, challenge, players, userId, plain,
 }: {
   roomId: number; code: string; status: RoomStatus;
   categories: string[] | null; difficulty: string[] | null;
+  /** what a move costs: a question, or a shot */
+  challenge: Challenge;
   players: RoomPlayer[]; userId: string;
   /** Plain Connect 4 drops on tap. Otherwise a column costs a right answer. */
   plain: boolean;
 }) {
-  const t = useC4Room(roomId, userId, { categories, difficulty }, plain);
+  const t = useC4Room(roomId, userId, { categories, difficulty }, plain, challenge);
   const [chosen, setChosen] = useState<string | null>(null);
 
   const g = t.game;
@@ -47,7 +54,11 @@ export function Connect4Room({
   // names exactly one mark at any instant — unit-checked.
   // Both clients derive the deadline from the same puzzle, so they agree
   // without another column to keep in step.
-  const ask = askMs(t.item?.difficulty);
+  // A shot gets longer than a question and no countdown bar: a timer ticking
+  // down while an eight-year-old lines up a catapult is the pressure this mode
+  // exists to remove. The deadline stays only so an idle player cannot freeze
+  // the board — stallWriter still needs one.
+  const ask = challenge === "catapult" ? CATAPULT_ASK_MS : askMs(t.item?.difficulty);
   const elapsed = now - t.askedAt;
   const left = ask - elapsed;
   const stall = g && !plain
@@ -60,6 +71,7 @@ export function Connect4Room({
   if (!t.ready) return <p className="text-sm text-soft font-bold">Loading questions…</p>;
   if (!g) return <p className="text-sm text-soft font-bold">Dealing the board…</p>;
 
+  const other: Mark = g.turn === "x" ? "o" : "x";
   const revealed = g.phase === "revealed" || g.phase === "over";
 
   return (
@@ -99,6 +111,17 @@ export function Connect4Room({
           onRematch={() => void t.rematch()}
           onQuit={() => void t.quit()}
           onChangeGame={() => void t.changeGame()} />
+      ) : !plain && challenge === "catapult" && (g.phase === "asking" || g.phase === "revealed") ? (
+        <div className="space-y-3">
+          {/* Seeded on when the turn was written, which both phones read off the
+              same row — so they see the same target without another column. */}
+          <Catapult
+            key={t.askedAt}
+            target={targetFor(t.askedAt, "medium")}
+            locked={!mine || revealed}
+            onFire={(hit) => t.submit(hit)}
+            note={mine && !revealed ? undefined : `${names[other]} is lining one up`} />
+        </div>
       ) : !plain && t.item && (g.phase === "asking" || g.phase === "revealed") ? (
         <div className="space-y-3">
           {asking && <Timer fraction={Math.max(0, left / ask)} />}

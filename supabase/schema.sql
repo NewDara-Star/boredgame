@@ -719,3 +719,45 @@ drop policy if exists "c4 written by members" on public.c4_games;
 create policy "c4 written by members" on public.c4_games
   for all using (public.is_room_member(c4_games.room_id))
       with check (public.is_room_member(c4_games.room_id));
+
+-- ============ what a move costs ============
+-- Trivia gates a square on knowledge, which an eight-year-old loses to an adult
+-- however easy the questions are — no difficulty setting fixes an age gap on
+-- general knowledge. A skill shot is close to age-neutral.
+alter table public.rooms add column if not exists challenge text not null default 'trivia';
+alter table public.rooms drop constraint if exists rooms_challenge_check;
+alter table public.rooms add constraint rooms_challenge_check
+  check (challenge in ('trivia','catapult'));
+
+-- Same trap as last time: a new defaulted argument makes a SECOND function
+-- rather than replacing the first, and every call with the old arity then fails
+-- with "function is not unique". Drop the old signature explicitly.
+drop function if exists public.set_room_setup(bigint, text, text, text[], text[]);
+
+create or replace function public.set_room_setup(
+  p_room bigint, p_mode text, p_game text, p_categories text[],
+  p_difficulty text[] default null, p_challenge text default 'trivia')
+returns void language plpgsql security definer set search_path to 'public' as $$
+begin
+  if not exists (select 1 from public.room_players p
+                 where p.room_id = p_room and p.user_id = auth.uid()) then
+    raise exception 'not a member of room %', p_room;
+  end if;
+  if p_mode not in ('race','squareoff','tictactoe','connect4','connect4trivia') then
+    raise exception 'unknown mode %', p_mode;
+  end if;
+  if p_difficulty is not null and exists (
+       select 1 from unnest(p_difficulty) d where d not in ('easy','medium','hard')) then
+    raise exception 'unknown difficulty in %', p_difficulty;
+  end if;
+  if coalesce(p_challenge, 'trivia') not in ('trivia','catapult') then
+    raise exception 'unknown challenge %', p_challenge;
+  end if;
+  update public.rooms r set
+    mode = p_mode, game = p_game::game_key,
+    categories = nullif(p_categories, '{}'),
+    difficulty = nullif(p_difficulty, '{}'),
+    challenge = coalesce(p_challenge, 'trivia')
+  where r.id = p_room and r.status = 'waiting';
+  update public.room_players p set ready = false where p.room_id = p_room;
+end $$;

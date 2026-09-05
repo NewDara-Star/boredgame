@@ -5,7 +5,7 @@
 import {
   COLS, ROWS, SIZE, newGame, drop, pick, answer, advance, winnerOf, landingRow,
   openColumns, boardFull, botColumn, other, stallWriter,
-  type Game, type Mark, type Cell,
+  type Game, type Mark, type Cell, describe,
 } from "../src/features/connect4/rules.ts";
 
 let failed = 0;
@@ -207,6 +207,24 @@ console.log("\nabandonment: exactly one writer at any instant");
   })());
   ok("a pick has no deadline, nor has a finished game",
      at_(newGame("x"), 99999) === null && at_(play(newGame("x"), [0, 6, 1, 6, 2, 6, 3]), 99999) === null);
+}
+
+console.log("\nthe sentence under the board");
+{
+  // On screen for every turn of every game, so a typo in it is the most visible
+  // bug in the app — and "miss" + "s" was "misss" for months.
+  const names = { x: "You", o: "Dara" };
+  const missed = { ...newGame("x"), phase: "revealed",
+                   last: { by: "o", col: 3, correct: false } } as unknown as Game;
+  const line = describe(missed, names, "x");
+  ok("a third-person miss reads as English", line.includes("Dara misses"));
+  ok("and never doubles the s", !line.includes("misss"));
+  const own = describe({ ...missed, last: { by: "x", col: 3, correct: false } } as unknown as Game,
+                       names, "x");
+  ok("first person stays unconjugated", own.includes("You miss") && !own.includes("You misses"));
+  ok("a hit reads cleanly too",
+     !describe({ ...missed, last: { by: "o", col: 3, correct: true } } as unknown as Game,
+               names, "x").includes("misss"));
 }
 
 console.log("\nmisc");

@@ -4,7 +4,7 @@
  */
 import {
   newGame, pick, answer, advance, winnerOf, botSquare, other, stallWriter,
-  type Game, type Mark, type Cell,
+  type Game, type Mark, type Cell, describe,
 } from "../src/features/squareoff/rules.ts";
 
 let failed = 0;
@@ -151,6 +151,19 @@ console.log("\nabandonment: exactly one writer at any instant");
      && at(newGame("x"), 99999) === null
      && at(advance(claimed), 99999) === null
      && at(over, 99999) === null);
+}
+
+console.log("\nthe sentence under the board");
+{
+  const names = { x: "You", o: "Dara" };
+  const missed = { ...newGame("x"), phase: "revealed", target: 4,
+                   last: { by: "o", square: 4, correct: false, steal: false } } as unknown as Game;
+  const line = describe(missed, names, "x");
+  ok("a third-person miss reads as English", line.includes("Dara misses"));
+  ok("and never doubles the s", !line.includes("misss"));
+  const own = describe({ ...missed,
+    last: { by: "x", square: 4, correct: false, steal: false } } as unknown as Game, names, "x");
+  ok("first person stays unconjugated", own.includes("You miss") && !own.includes("You misses"));
 }
 
 console.log("\nmisc");

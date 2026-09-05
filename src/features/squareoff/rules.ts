@@ -152,7 +152,10 @@ export function advance(g: Game): Game {
 export function describe(g: Game, names: Record<Mark, string>, you: Mark | null = null): string {
   const second = (m: Mark) => m === you;
   const who = (m: Mark) => (second(m) ? "You" : names[m]);
-  const s = (m: Mark, verb: string) => (second(m) ? verb : `${verb}s`);
+  // "miss" + "s" is "misss". English adds -es after a sibilant, and this helper
+  // is handed "miss" on the most common line in the whole game.
+  const s = (m: Mark, verb: string) =>
+    second(m) ? verb : /(s|sh|ch|x|z)$/.test(verb) ? `${verb}es` : `${verb}s`;
   const sq = (n: number) => `square ${n + 1}`;
 
   if (g.phase === "over") {

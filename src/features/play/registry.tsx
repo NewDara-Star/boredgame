@@ -116,6 +116,42 @@ export const GAMES: GameDef[] = [
     ),
   },
   {
+    slug: "catapultsquares", name: "Catapult Squares",
+    tagline: "Land the shot, claim the square.",
+    badge: "Board game", bank: null, path: "/catapultsquares", chip: "bg-good text-surface",
+    room: { mode: "squareoff", blurb: "Tic-tac-toe, but a square costs a shot rather than a right answer." },
+    Art: ({ size }) => (
+      <svg viewBox="0 0 100 100" width={size} height={size} className="shrink-0">
+        <path d="M8 78 H92" stroke="var(--color-ink)" strokeWidth="4" strokeLinecap="round" />
+        <path d="M14 78 Q46 8 84 74" fill="none" stroke="var(--color-ink)"
+          strokeWidth="3" strokeDasharray="5 5" opacity="0.55" />
+        <rect x="70" y="66" width="24" height="12" rx="3"
+          fill="var(--color-good)" stroke="var(--color-ink)" strokeWidth="3" />
+        <circle cx="18" cy="70" r="7" fill="var(--color-picto)"
+          stroke="var(--color-ink)" strokeWidth="3" />
+      </svg>
+    ),
+  },
+  {
+    slug: "connect4catapult", name: "Connect 4 Catapult",
+    tagline: "Hit the target, drop the disc.",
+    badge: "Board game", bank: null, path: "/connect4catapult", chip: "bg-good text-surface",
+    room: { mode: "connect4trivia", blurb: "Name a column, then land a shot to earn it." },
+    Art: ({ size }) => (
+      <svg viewBox="0 0 100 100" width={size} height={size} className="shrink-0">
+        <rect x="8" y="34" width="84" height="58" rx="10"
+          fill="none" stroke="var(--color-ink)" strokeWidth="4" />
+        {[0, 1, 2, 3].map((c) => [0, 1].map((r) => (
+          <circle key={`${c}-${r}`} cx={20 + c * 20} cy={50 + r * 22} r="8"
+            stroke="var(--color-ink)" strokeWidth="3"
+            fill={(c === 2 && r === 1) ? "var(--color-picto)" : "var(--color-surface)"} />
+        )))}
+        <path d="M6 26 Q40 -6 78 22" fill="none" stroke="var(--color-good)"
+          strokeWidth="4" strokeDasharray="5 4" strokeLinecap="round" />
+      </svg>
+    ),
+  },
+  {
     slug: "connect4trivia", name: "Connect 4 Trivia", tagline: "Answer right or the disc never drops.",
     badge: "Board game", bank: "trivia", path: "/connect4trivia", chip: "bg-hot text-surface",
     room: { mode: "connect4trivia", blurb: "Name a column, answer a question. Get it wrong and you lose the turn — no second chances." },

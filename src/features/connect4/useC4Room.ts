@@ -23,8 +23,9 @@ export const C4: BoardEngine<Game, C4Row> = {
 export function useC4Room(
   roomId: number | null, userId: string | undefined,
   scope: Scope | null = null, plain = false,
+  challenge: "trivia" | "catapult" = "trivia",
 ) {
-  return useBoardRoom(C4, roomId, userId, scope, plain);
+  return useBoardRoom(C4, roomId, userId, scope, plain, challenge);
 }
 
 export const startConnect4 = (roomId: number, xId: string, oId: string) =>

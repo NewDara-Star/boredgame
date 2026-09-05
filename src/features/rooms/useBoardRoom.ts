@@ -74,6 +74,9 @@ export function useBoardRoom<G extends BoardState, R extends BoardRow>(
   scope: Scope | null = null,
   /** No questions at all: taking the square is the whole move. */
   plain = false,
+  /** What the asking phase asks for. A catapult turn deals no puzzle — the
+      target comes from the seed both clients already share. */
+  challenge: "trivia" | "catapult" = "trivia",
 ) {
   const [row, setRow] = useState<R | null>(null);
   // Mirrors `row` so `write` can revert a failed move without taking `row` as a
@@ -88,10 +91,10 @@ export function useBoardRoom<G extends BoardState, R extends BoardRow>(
   const [writeError, setWriteError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (plain) return;                       // nothing to ask, nothing to fetch
+    if (plain || challenge !== "trivia") return;   // nothing to ask, nothing to fetch
     void loadContent("trivia").then((all) =>
       setPool(shuffle(all.filter((i) => i.choices && i.choices.length >= 2 && /^\d+$/.test(i.id)))));
-  }, [plain]);
+  }, [plain, challenge]);
 
   useEffect(() => {
     if (!supabase || !roomId) return;
@@ -150,7 +153,9 @@ export function useBoardRoom<G extends BoardState, R extends BoardRow>(
     const patch: Record<string, unknown> = {
       ...engine.encode(next), updated_at: new Date().toISOString(),
     };
-    if (next.phase === "asking") patch.puzzle_id = nextPuzzleId();
+    if (next.phase === "asking") {
+      patch.puzzle_id = challenge === "trivia" ? nextPuzzleId() : null;
+    }
 
     // Apply it here first. Waiting for the write AND the realtime echo before
     // showing your own move meant every tap cost a round trip plus a push before
@@ -164,7 +169,7 @@ export function useBoardRoom<G extends BoardState, R extends BoardRow>(
     setWriteError(msg);
     // A refused move must not leave a board on screen that no one else can see.
     if (msg && before) remember(before);
-  }, [roomId, nextPuzzleId, remember, engine]);
+  }, [roomId, nextPuzzleId, remember, engine, challenge]);
 
   /** The client that wrote the winning move books the win, so the tally moves
       exactly once however many browsers are watching. Incremented in the
@@ -246,10 +251,11 @@ export function useBoardRoom<G extends BoardState, R extends BoardRow>(
     if (plain || !game || game.phase !== "revealed" || !game.last || game.last.by !== myMark) return;
     // A correct answer has nothing to read; a miss has the right answer and
     // sometimes an explanation. One fixed pause served neither.
-    const pause = game.last.correct ? 1300 : item?.explanation ? 2900 : 2200;
+    const pause = challenge !== "trivia" ? 1200
+      : game.last.correct ? 1300 : item?.explanation ? 2900 : 2200;
     const t = setTimeout(() => void write(engine.advance(game)), pause);
     return () => clearTimeout(t);
-  }, [plain, game, myMark, write, engine, item?.explanation]);
+  }, [plain, game, myMark, write, engine, item?.explanation, challenge]);
 
   const rematch = useCallback(async () => {
     if (!supabase || !roomId || !row) return;
@@ -268,8 +274,8 @@ export function useBoardRoom<G extends BoardState, R extends BoardRow>(
     game, myMark, item, choose, submit, rematch, quit, changeGame,
     forceTimeout, forceAdvance, advanceNow,
     error: poolError ?? writeError,
-    /** A plain game is never waiting for content — it has none. */
-    ready: plain || pool.length > 0,
+    /** A plain or catapult game is never waiting for content — it has none. */
+    ready: plain || challenge !== "trivia" || pool.length > 0,
     /** when the current question went up, so both clients run the same clock */
     askedAt: row ? Date.parse(row.updated_at) : 0,
     seats: { x: row?.x_player ?? null, o: row?.o_player ?? null },
