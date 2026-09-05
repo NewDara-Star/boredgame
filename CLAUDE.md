@@ -590,13 +590,22 @@ the game's name repeated behind, the headline, the score strip, the room and
 the date, the wordmark, and `saveCard()` (the only place that hands over a
 file; read its comment before touching it — iOS transient activation and
 desktop Chrome's half-present Web Share both bit once). The middle of the card
-is the game's: each slice exports a `hero` in its own `card.ts` that draws the
-final board into the box it is given — `gridHero` for the 3×3 games,
-`connect4Hero`, `memoryHero`, `sortHero` (with `ballGlyph` for the seats),
-`roundHero` for a solo trivia or picto round. Rooms pass the art to
+is the game's, and which picture depends on what the card is FOR:
+
+- A **session** card (a room match, a solo run of games) shows the game's
+  ARTWORK — the catalogue art redrawn at card size on a tilted stage with the
+  name as a sticker, via `artStage()`. The same picture every time for that
+  game, so it is recognisable in a group chat at thumbnail size. A session is
+  several games; the last board would be one game standing in for five, and a
+  half-played one if the match was quit.
+- A **result** card (one Ball Sort board, one trivia or picto round) shows the
+  RESULT — `sortHero` draws the tubes as they finished, `roundHero` the ten
+  right-or-wrong dots over the score — because there the board is the score,
+  the way a Wordle share is the grid.
+
+Each slice exports its art from its own `card.ts`. Rooms pass it to
 `useMatchChrome`, solo boards to `BoardSoloPage`, rounds to `Summary` by naming
-the game. One card with the title swapped was the same picture nine times;
-a Connect 4 card should show the four that won.
+the game.
 
 Fonts on a canvas are loaded or they are not: `drawCard` awaits
 `document.fonts.ready` first, or the first card of a session comes out in the

@@ -276,3 +276,23 @@ export function saveCard(file: File) {
   }
   viaLink(file);
 }
+
+/**
+ * A session card shows the GAME, not a board: the same picture every time
+ * for that game, so it is recognisable in a group chat at thumbnail size.
+ * These two are what every artwork hero is built from — the game's name as
+ * a sticker along the bottom of the panel, and a slightly tilted stage above
+ * it for the drawing, the tilt being what says "illustration" rather than
+ * "screenshot of a board".
+ */
+export function artStage(c: Ctx, box: Box, name: string, tilt: number,
+                         draw: (c: Ctx, w: number, h: number) => void) {
+  const nameH = 74;
+  sticker(c, name, box.x + box.w / 2, box.y + box.h - nameH / 2 + 6, 56, POP, 7);
+  const stage = { w: box.w, h: box.h - nameH - 8 };
+  c.save();
+  c.translate(box.x + stage.w / 2, box.y + stage.h / 2);
+  c.rotate((tilt * Math.PI) / 180);
+  draw(c, stage.w, stage.h);
+  c.restore();
+}

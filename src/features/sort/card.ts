@@ -1,5 +1,5 @@
 /** The result card's picture: the tubes as they finished, lit the way the board lights them. */
-import { INK as INK_, type Glyph, type Hero } from "@/shared/card/frame";
+import { artStage, INK as INK_, type Glyph, type Hero } from "@/shared/card/frame";
 import { BALL } from "./Board";
 import type { Tube } from "./rules";
 
@@ -38,3 +38,26 @@ export const ballGlyph: Glyph = (c, mark, cx, cy, s) => {
   g.addColorStop(0, hi); g.addColorStop(0.34, mid); g.addColorStop(1, lo);
   c.beginPath(); c.arc(cx, cy, r, 0, Math.PI * 2); c.fillStyle = g; c.fill();
 };
+
+/** The session card's picture: three tubes — one home, one mixed, one empty. */
+export const sortArt = (name: string): Hero => (c, box) =>
+  artStage(c, box, name, 3, (c, _w, h) => {
+    const tubesShown: Tube[] = [[0, 0, 0, 0], [1, 3, 1, 4], []];
+    const th = h * 0.9, tw = th * 0.27, gap = tw * 0.45, r = tw * 0.4, slot = (th - 20) / 4;
+    const w = 3 * tw + 2 * gap;
+    tubesShown.forEach((t, i) => {
+      const x = -w / 2 + i * (tw + gap), top = -th / 2;
+      c.beginPath(); c.moveTo(x, top); c.lineTo(x, top + th - tw / 2);
+      c.arc(x + tw / 2, top + th - tw / 2, tw / 2, Math.PI, 0, true); c.lineTo(x + tw, top);
+      c.fillStyle = "rgba(20,16,13,.06)"; c.fill(); c.lineWidth = 7; c.strokeStyle = INK_; c.stroke();
+      c.beginPath(); c.ellipse(x + tw / 2, top, tw / 2, 7, 0, 0, Math.PI * 2);
+      c.fillStyle = "#FBF4E6"; c.fill(); c.stroke();
+      t.forEach((colour, k) => {
+        const cx = x + tw / 2, cy = top + th - 14 - r - k * slot;
+        const [hi, mid, lo] = BALL[colour];
+        const g = c.createRadialGradient(cx - r * 0.3, cy - r * 0.4, r * 0.1, cx, cy, r * 1.1);
+        g.addColorStop(0, hi); g.addColorStop(0.34, mid); g.addColorStop(1, lo);
+        c.beginPath(); c.arc(cx, cy, r, 0, Math.PI * 2); c.fillStyle = g; c.fill();
+      });
+    });
+  });

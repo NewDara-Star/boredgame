@@ -2,7 +2,7 @@ import type { RoomPlayer, RoomStatus } from "@/shared/types/db";
 import { Note, Dealing } from "@/shared/ui/Note";
 import { Board } from "@/features/squareoff/Board";
 import { describe, type Mark } from "@/features/squareoff/rules";
-import { gridHero } from "@/features/squareoff/card";
+import { TIC_TAC_TOE_ART } from "@/features/squareoff/card";
 import { useTttRoom } from "@/features/squareoff/useTttRoom";
 import {
   Seats, AwayNotice, OverPanel, EndMatchLink, MatchOver, useMatchChrome,
@@ -23,7 +23,7 @@ export function TicTacToeRoom({
   const t = useTttRoom(roomId, userId, null, true);
   const { now, names, scoreOf, sides, card, done } =
     useMatchChrome(code, "TIC TAC TOE", status, players, t.seats, false,
-      { hero: () => gridHero(t.game?.board ?? [], t.game?.line ?? null) });
+      { hero: () => TIC_TAC_TOE_ART });
 
   const g = t.game;
 

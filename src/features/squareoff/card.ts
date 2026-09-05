@@ -1,28 +1,32 @@
 /**
- * The result card's picture for the 3×3 games: the final grid, as it stood.
- * Square Off and Tic Tac Toe share the board, so they share this.
+ * The session card's picture for the 3×3 games. Square Off and Tic Tac Toe
+ * share the board, so they share this — with their own marks on it.
  */
-import { COLOUR, GOOD, INK, rounded, tint, type Hero } from "@/shared/card/frame";
+import { artStage, COLOUR, INK, type Hero } from "@/shared/card/frame";
 import type { Cell } from "./rules";
 
-export const gridHero = (board: Cell[], line: number[] | null): Hero => (c, box) => {
-  const cell = 104, gap = 12, side = cell * 3 + gap * 2;
-  const x0 = box.x + (box.w - side) / 2, y0 = box.y + (box.h - side) / 2;
-  for (let i = 0; i < 9; i++) {
-    const owner = board[i];
-    const won = !!line?.includes(i);
-    const x = x0 + (i % 3) * (cell + gap), y = y0 + Math.floor(i / 3) * (cell + gap);
-    c.fillStyle = won ? GOOD : owner ? tint(COLOUR[owner], 0.18) : "#FFFFFF";
-    rounded(c, x, y, cell, cell, 22); c.fill();
-    c.lineWidth = 6; c.strokeStyle = INK; rounded(c, x, y, cell, cell, 22); c.stroke();
-    if (!owner) continue;
-    const cx = x + cell / 2, cy = y + cell / 2, s = cell * 0.5;
-    c.lineWidth = 12; c.lineCap = "round"; c.strokeStyle = won ? "#FFFFFF" : COLOUR[owner];
+/** The session card's picture: the hash, as on the catalogue, at card size. */
+export const gridArt = (name: string, marks: [Cell, Cell, Cell, Cell, Cell, Cell, Cell, Cell, Cell]): Hero =>
+  (c, box) => artStage(c, box, name, -4, (c, _w, h) => {
+    const s = h * 0.92, cell = s / 3;
+    c.lineWidth = 10; c.lineCap = "round"; c.strokeStyle = INK;
     c.beginPath();
-    if (owner === "x") {
-      c.moveTo(cx - s / 2, cy - s / 2); c.lineTo(cx + s / 2, cy + s / 2);
-      c.moveTo(cx + s / 2, cy - s / 2); c.lineTo(cx - s / 2, cy + s / 2);
-    } else c.arc(cx, cy, s / 2, 0, Math.PI * 2);
+    for (const k of [1, 2]) {
+      c.moveTo(-s / 2 + cell * k, -s / 2 + 8); c.lineTo(-s / 2 + cell * k, s / 2 - 8);
+      c.moveTo(-s / 2 + 8, -s / 2 + cell * k); c.lineTo(s / 2 - 8, -s / 2 + cell * k);
+    }
     c.stroke();
-  }
-};
+    marks.forEach((m, i) => {
+      if (!m) return;
+      const cx = -s / 2 + cell * (i % 3) + cell / 2, cy = -s / 2 + cell * Math.floor(i / 3) + cell / 2;
+      const r = cell * 0.26;
+      c.lineWidth = 16; c.strokeStyle = COLOUR[m]; c.beginPath();
+      if (m === "x") { c.moveTo(cx - r, cy - r); c.lineTo(cx + r, cy + r); c.moveTo(cx + r, cy - r); c.lineTo(cx - r, cy + r); }
+      else c.arc(cx, cy, r, 0, Math.PI * 2);
+      c.stroke();
+    });
+  });
+
+export const SQUARE_OFF_ART: Hero = gridArt("SQUARE OFF", ["x", null, null, null, "o", null, null, null, "x"]);
+export const TIC_TAC_TOE_ART: Hero = gridArt("TIC TAC TOE", ["x", "o", "x", null, "o", null, null, null, null]);
+export const CATAPULT_SQUARES_ART: Hero = gridArt("CATAPULT SQUARES", ["x", null, "o", null, "x", null, "o", null, null]);

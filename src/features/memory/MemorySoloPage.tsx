@@ -2,7 +2,7 @@ import { BoardSoloPage } from "@/features/play/BoardSoloPage";
 import { Board } from "./Board";
 import { scoreOf } from "./rules";
 import { MEMORY } from "./useMemoryRoom";
-import { memoryHero } from "./card";
+import { memoryArt } from "./card";
 
 /**
  * Memory against the bot. Its recall is a span of the last six tiles it was
@@ -21,7 +21,7 @@ export function MemorySoloPage() {
       title="Memory Match"
       challenge="none"
       glyphs={{ x: "◆", o: "●" }}
-      art={{ hero: (g) => memoryHero(g.deck, g.board) }}
+      art={{ hero: () => memoryArt("MEMORY MATCH") }}
       // Pairs, not games won: it is the number you are playing for.
       score={(g) => ({ x: scoreOf(g, "x"), o: scoreOf(g, "o") })}
       board={({ game, myTurn, onPick }) => (
