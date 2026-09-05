@@ -1,241 +1,30 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { supabase } from "@/shared/lib/supabase";
-import { loadContent, shuffle } from "@/features/play/content";
-import type { PlayItem } from "@/features/play/types";
-import { newGame, pick, place, answer, advance, type Game, type Mark } from "./rules";
+import { newGame, pick, place, answer, advance, type Game } from "./rules";
 import { decode, encode, type TttRow } from "./wire";
-import { deal } from "@/features/play/dealer";
-import { scopePool, emptyReason, type Scope } from "@/features/play/scope";
-import { attempt } from "@/shared/lib/write";
+import { useBoardRoom, startBoard, type BoardEngine, type Scope } from "@/features/rooms/useBoardRoom";
 
 /**
- * Two browsers, one board. Both clients run the identical reducer from rules.ts
- * and Postgres carries the result — the same trick the race mode uses, so there
- * is still no socket code anywhere in this app.
+ * Square Off and plain Tic Tac Toe: same board, same table, same reducer, with
+ * the questions switched off for the plain one.
  *
- * Who writes: whoever owes the action. The picker writes the pick, the answerer
- * writes the answer, and the answerer also writes the move on from the reveal.
- * Any other arrangement has both clients racing to write the same transition.
+ * Everything that is not specific to this board — the subscription, the
+ * optimistic write, booking the win, quitting, reopening, starting — lives in
+ * useBoardRoom. What is left here is the difference: the answer can be owed by
+ * the player who did NOT pick, because a miss gives the opponent one shot at
+ * the square.
  */
+export const TTT: BoardEngine<Game, TttRow> = {
+  table: "ttt_games",
+  channel: "ttt",
+  decode, encode, newGame, place, pick, answer, advance,
+  answerer: (g) => g.answerer,
+};
+
 export function useTttRoom(
   roomId: number | null, userId: string | undefined,
-  /** What the room may deal from — categories and difficulty together. One
-      object rather than one parameter per axis, which is how this grew a
-      difficulty bug: the lobby had a category filter and the dealer had no
-      idea a level filter was even meant to exist. */
-  scope: Scope | null = null,
-  /** Plain Tic Tac Toe: same board, same table, no questions. Taking a square
-      is the whole move, so there is no asking phase and nothing to deal. */
-  plain = false,
+  scope: Scope | null = null, plain = false,
 ) {
-  const [row, setRow] = useState<TttRow | null>(null);
-  // Mirrors `row` so `write` can revert a failed move without taking `row` as a
-  // dependency — `write` has to keep a stable identity or the reveal timer,
-  // which depends on it, restarts every time the row changes.
-  const rowRef = useRef<TttRow | null>(null);
-  const remember = useCallback((next: TttRow | null) => { rowRef.current = next; setRow(next); }, []);
-  const [pool, setPool] = useState<PlayItem[]>([]);
-  const seen = useRef<Set<string>>(new Set());
-  const lastServed = useRef<string | null>(null);
-  const [poolError, setPoolError] = useState<string | null>(null);
-  const [writeError, setWriteError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (plain) return;                       // nothing to ask, nothing to fetch
-    void loadContent("trivia").then((all) =>
-      setPool(shuffle(all.filter((i) => i.choices && i.choices.length >= 2 && /^\d+$/.test(i.id)))));
-  }, [plain]);
-
-  useEffect(() => {
-    if (!supabase || !roomId) return;
-    let channel: ReturnType<NonNullable<typeof supabase>["channel"]> | null = null;
-    let cancelled = false;
-    (async () => {
-      const { data } = await supabase!.from("ttt_games").select("*").eq("room_id", roomId).maybeSingle();
-      if (cancelled) return;
-      remember((data as TttRow | null) ?? null);
-      channel = supabase!
-        .channel(`ttt:${roomId}`)
-        .on("postgres_changes",
-          { event: "*", schema: "public", table: "ttt_games", filter: `room_id=eq.${roomId}` },
-          (p) => remember(p.new as TttRow))
-        .subscribe();
-    })();
-    return () => { cancelled = true; if (channel) void supabase!.removeChannel(channel); };
-  }, [roomId, remember]);
-
-  const game: Game | null = row ? decode(row) : null;
-  const myMark: Mark | null =
-    !row || !userId ? null : row.x_player === userId ? "x" : row.o_player === userId ? "o" : null;
-  const item = row?.puzzle_id != null
-    ? pool.find((i) => i.id === String(row.puzzle_id)) ?? null
-    : null;
-
-  // Memoised on the scope's CONTENT, not its identity. The room row is replaced
-  // on every realtime tick, so a `{categories, difficulty}` built in the parent
-  // is a new object each render — and a changing nextPuzzleId changes `write`,
-  // which restarts the reveal timer that depends on it, forever.
-  const scopeKey = JSON.stringify([scope?.categories ?? null, scope?.difficulty ?? null]);
-
-  const nextPuzzleId = useCallback(() => {
-    const scoped = scopePool(pool, scope ?? {});
-    // An empty scope is a misconfigured room, not a reason to quietly serve from
-    // the whole bank as if the filter had never been set.
-    if (scoped.length === 0) {
-      setPoolError(emptyReason(scope ?? {}, pool.length === 0));
-      return null;
-    }
-    setPoolError(null);
-    const { item } = deal(scoped, (i) => i.id, seen.current, { avoid: lastServed.current });
-    if (!item) return null;
-    lastServed.current = item.id;
-    return Number(item.id);
-  }, [pool, scopeKey]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  /** Write a transition. `puzzle` is set whenever the new state needs a question. */
-  const write = useCallback(async (next: Game, withPuzzle: boolean) => {
-    if (!supabase || !roomId) return;
-    const patch: Record<string, unknown> = { ...encode(next), updated_at: new Date().toISOString() };
-    if (withPuzzle) patch.puzzle_id = nextPuzzleId();
-
-    // Apply it here first. Waiting for the write AND the realtime echo before
-    // showing your own move meant every tap cost a round trip plus a push before
-    // anything on your screen moved — and if realtime hiccupped, nothing moved
-    // at all. Realtime is the confirmation now, not the trigger.
-    const before = rowRef.current;
-    if (before) remember({ ...before, ...patch } as TttRow);
-
-    const msg = await attempt("That move",
-      supabase.from("ttt_games").update(patch).eq("room_id", roomId));
-    setWriteError(msg);
-    // A refused move must not leave a board on screen that no one else can see.
-    if (msg && before) remember(before);
-  }, [roomId, nextPuzzleId, remember]);
-
-  /** The client that wrote the winning move books the win, so the tally moves
-      exactly once however many browsers are watching. Incremented in the
-      database rather than read-modify-written from this client's copy of the
-      players list, which can lag realtime across a rematch. */
-  const bookWin = useCallback(async (next: Game) => {
-    if (next.phase !== "over" || !next.winner || next.winner === "draw") return;
-    const row = rowRef.current;
-    if (!supabase || !row || !roomId) return;
-    const seat = next.winner === "x" ? row.x_player : row.o_player;
-    if (!seat) return;
-    setWriteError(await attempt("Recording the win",
-      supabase.rpc("bump_room_score", { p_room: roomId, p_user: seat })));
-  }, [roomId]);
-
-  const choose = useCallback((square: number) => {
-    if (!game || myMark !== game.turn || game.phase !== "picking") return;
-    if (plain) {
-      const next = place(game, square);
-      void (async () => { await write(next, false); await bookWin(next); })();
-      return;
-    }
-    void write(pick(game, square), true);
-  }, [game, myMark, write, plain, bookWin]);
-
-  const submit = useCallback((correct: boolean) => {
-    if (!game || game.phase !== "asking" || game.answerer !== myMark) return;
-    const next = answer(game, correct);
-    void (async () => { await write(next, false); await bookWin(next); })();
-  }, [game, myMark, write, bookWin]);
-
-  /** Move on now rather than sitting out the pause. The timer stays as the
-      fallback so an idle player cannot stall the board, but a pause you can
-      skip is the difference between a game that feels quick and one that
-      does not — a shorter fixed timer is not the same thing. */
-  const advanceNow = useCallback(() => {
-    if (!game || game.phase !== "revealed" || !game.last || game.last.by !== myMark) return;
-    const next = advance(game);
-    void write(next, next.phase === "asking");
-  }, [game, myMark, write]);
-
-  /** Writes the miss for a question nobody answered — including when the person
-      who owed it has closed the tab. Callers must check stallWriter() first. */
-  const forceTimeout = useCallback(() => {
-    if (!game || game.phase !== "asking") return;
-    void write(answer(game, false), false);
-  }, [game, write]);
-
-  /** Moves on from a reveal its owner never wrote. The pause below is a
-      setTimeout in the answerer's tab, so a locked phone, an app switch or a
-      backgrounded laptop suspends it and the board freezes for both players
-      with nothing else running anywhere. Unguarded on purpose — the caller is
-      whichever client stallWriter() named, which is not always the answerer. */
-  const forceAdvance = useCallback(() => {
-    if (!game || game.phase !== "revealed" || !game.last) return;
-    const next = advance(game);
-    void write(next, next.phase === "asking");
-  }, [game, write]);
-
-  /** Ends the session rather than the game. Rematch keeps the tally; this stops
-      it. Through an RPC because the UPDATE policy on rooms is host-only — as a
-      direct update this matched zero rows for the guest and said nothing. */
-  const quit = useCallback(async () => {
-    if (!supabase || !roomId) return;
-    setWriteError(await attempt("Ending the match",
-      supabase.rpc("end_match", { p_room: roomId })));
-  }, [roomId]);
-
-  /** Back to the lobby with the same code and the same two people, so a
-      different game does not cost a new room. Clearing the other player's ready
-      flag is not something RLS lets a client do, hence the RPC. */
-  const changeGame = useCallback(async () => {
-    if (!supabase || !roomId) return;
-    setWriteError(await attempt("Reopening the room",
-      supabase.rpc("reopen_room", { p_room: roomId })));
-  }, [roomId]);
-
-  // The player who just answered owns the move on, so exactly one client writes it.
-  useEffect(() => {
-    if (!game || game.phase !== "revealed" || !game.last || game.last.by !== myMark) return;
-    const next = advance(game);
-    // A correct answer has nothing to read; a miss has the right answer and
-    // sometimes an explanation. One fixed pause served neither.
-    const pause = game.last.correct ? 1300 : item?.explanation ? 2900 : 2200;
-    const t = setTimeout(() => void write(next, next.phase === "asking"), pause);
-    return () => clearTimeout(t);
-  }, [game, myMark, write, item?.explanation]);
-
-  const rematch = useCallback(async () => {
-    if (!supabase || !roomId || !row) return;
-    // Loser starts the next one. After a draw, alternate off whoever started
-    // last rather than defaulting to x every time.
-    const first: Mark = row.winner === "x" ? "o"
-      : row.winner === "o" ? "x"
-      : row.turn === "x" ? "o" : "x";
-    setWriteError(await attempt("Starting the rematch",
-      supabase.from("ttt_games")
-        .update({ ...encode(newGame(first)), puzzle_id: null }).eq("room_id", roomId)));
-  }, [roomId, row]);
-
-  return {
-    game, myMark, item, choose, submit, rematch, quit, changeGame,
-    forceTimeout, forceAdvance, advanceNow,
-    error: poolError ?? writeError,
-    ready: pool.length > 0,
-    /** when the current question went up, so both clients run the same clock */
-    askedAt: row ? Date.parse(row.updated_at) : 0,
-    seats: { x: row?.x_player ?? null, o: row?.o_player ?? null },
-  };
+  return useBoardRoom(TTT, roomId, userId, scope, plain);
 }
 
-/**
- * Dealing the board is not a hook — the lobby starts the game once both players
- * have agreed, and the lobby does not own a ttt subscription.
- */
-export async function startSquareOff(roomId: number, xId: string, oId: string) {
-  if (!supabase) return null;
-  // The database decides who starts. A client-side "am I the host" guard holds
-  // against two people but not against one client's effect firing twice, and a
-  // second upsert here wipes a board that is already in play.
-  const { data: won, error } = await supabase.rpc("claim_room_start", { p_room: roomId });
-  if (error) return await attempt("Starting the game", Promise.resolve({ error }));
-  if (won !== true) return null;
-  return await attempt("Dealing the board", supabase.from("ttt_games").upsert({
-    room_id: roomId, ...encode(newGame("x")),
-    puzzle_id: null, x_player: xId, o_player: oId,
-  }));
-}
+export const startSquareOff = (roomId: number, xId: string, oId: string) =>
+  startBoard(TTT, roomId, xId, oId);

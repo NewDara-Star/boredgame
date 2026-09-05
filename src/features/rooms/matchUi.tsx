@@ -1,6 +1,9 @@
+import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 import { popIn } from "@/shared/ui/motion";
-import type { RoomPlayer } from "@/shared/types/db";
+import type { RoomPlayer, RoomStatus } from "@/shared/types/db";
+import { drawMatchCard, saveCard, type MatchCard } from "@/features/squareoff/matchCard";
 
 export type Mark = "x" | "o";
 
@@ -111,4 +114,134 @@ export function EndMatchLink({ onQuit }: { onQuit: () => void }) {
       End match and see the score
     </button>
   );
+}
+
+export interface Side { mark: Mark; name: string; score: number }
+
+/**
+ * The chrome every room game grew its own copy of: the clock, who is in which
+ * seat, and drawing the result card. Three copies scored 0.99-1.00 against each
+ * other, which is one bug fixed three times or, more often, once.
+ */
+export function useMatchChrome(
+  code: string, title: string, status: RoomStatus,
+  players: RoomPlayer[], seats: Record<Mark, string | null>,
+  /** how often the clock ticks — a question needs a smooth bar, an idle board
+      needs only enough to notice somebody has gone */
+  fast = false,
+) {
+  const [now, setNow] = useState(Date.now());
+  const [card, setCard] = useState<(MatchCard & { sig: string }) | null>(null);
+
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), fast ? 120 : 1000);
+    return () => clearInterval(id);
+  }, [fast]);
+
+  // Names come from the seat, not from "the other person in the list" — with a
+  // spectator or a third join that guess puts the wrong name on the wrong mark.
+  const nameOf = (m: Mark) =>
+    players.find((p) => p.user_id === seats[m])?.username ?? (m === "x" ? "Host" : "Guest");
+  const scoreOf = (m: Mark) => players.find((p) => p.user_id === seats[m])?.score ?? 0;
+  const sides: Side[] = (["x", "o"] as Mark[])
+    .map((m) => ({ mark: m, name: nameOf(m), score: scoreOf(m) }));
+  const names: Record<Mark, string> = { x: nameOf("x"), o: nameOf("o") };
+
+  // Seats come from the game row and scores from room_players, both of which
+  // arrive after the first render. Drawing on "finished" alone produces a card
+  // that says Host 0 / Guest 0 above a real scoreline, and then never redraws.
+  const done = status === "finished";
+  const seated = !!seats.x && !!seats.o && players.length >= 2;
+  const sig = `${code}|${title}|${sides[0].name}:${sides[0].score}|${sides[1].name}:${sides[1].score}`;
+  useEffect(() => {
+    if (!done || !seated || card?.sig === sig) return;
+    let cancelled = false;
+    void drawMatchCard(code, sides[0], sides[1], title)
+      .then((made) => { if (!cancelled) setCard({ ...made, sig }); })
+      .catch(() => { /* canvas unavailable; the score is still on screen */ });
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [done, seated, sig]);
+
+  return { now, nameOf, scoreOf, sides, names, card, done };
+}
+
+/** The end of a session, as opposed to the end of a game: the tally, the
+    shareable card, and a way out. */
+export function MatchOver({ sides, myMark, card }: {
+  sides: Side[]; myMark: Mark | null; card: (MatchCard & { sig: string }) | null;
+}) {
+  const [a, b] = sides;
+  const winner = a.score === b.score ? null : a.score > b.score ? a : b;
+  return (
+    <motion.div variants={popIn} initial="hidden" animate="show" className="space-y-4">
+      <div className={`piece p-6 text-center ${
+        !winner ? "bg-sand" : winner.mark === myMark ? "bg-good text-surface" : "bg-surface"}`}>
+        <p className="text-[10px] font-black uppercase tracking-widest opacity-70">Match over</p>
+        <p className="font-display text-3xl font-semibold mt-1">
+          {!winner ? "All square" : `${winner.name} takes it`}
+        </p>
+        <p className="font-display text-6xl font-semibold tabular-nums mt-3">
+          {a.score} <span className="opacity-40">—</span> {b.score}
+        </p>
+        <p className="text-xs font-bold opacity-70 mt-1">{a.name} v {b.name}</p>
+      </div>
+
+      {card ? (
+        <>
+          <img src={card.url} alt={`Result: ${a.name} ${a.score}, ${b.name} ${b.score}`}
+            className="w-full rounded-2xl border-[3px] border-ink" />
+          <button onClick={() => saveCard(card.file)}
+            className="piece press w-full py-4 font-display text-lg font-semibold bg-pop">
+            Save the image
+          </button>
+          <p className="text-[11px] font-bold text-soft text-center">
+            On a phone you can also press and hold the picture to save or share it.
+          </p>
+        </>
+      ) : (
+        <div className="piece grid place-items-center aspect-square bg-surface">
+          <p className="text-sm font-bold text-soft">Drawing the result…</p>
+        </div>
+      )}
+
+      <Link to="/rooms" className="piece press block w-full py-3.5 text-center font-display font-semibold">
+        New room
+      </Link>
+    </motion.div>
+  );
+}
+
+/** What stallWriter() returns: who may write the stuck transition, and which. */
+export interface Stall { mark: Mark; action: "timeout" | "advance" }
+
+/**
+ * Take over a transition its owner never wrote.
+ *
+ * Every phase is written by exactly one client, so a player who locks their
+ * phone takes their half of the game with them. The reveal case is the one that
+ * actually bit: its pause is a setTimeout in the answerer's tab, and a locked
+ * phone suspends it with nothing else running anywhere. stallWriter names
+ * exactly one mark at any instant — unit-checked in both rules modules — and
+ * this fires it at most once per written state.
+ *
+ * Both games had a byte-identical copy of this, which is how the reveal case
+ * came to be missing from one of them for a fortnight.
+ */
+export function useStallRescue(
+  stall: Stall | null, myMark: Mark | null, askedAt: number,
+  /** true once the question this stall refers to is actually on screen */
+  haveItem: boolean,
+  act: { forceTimeout: () => void; forceAdvance: () => void },
+) {
+  const fired = useRef<number>(-1);
+  useEffect(() => {
+    if (!stall || stall.mark !== myMark || fired.current === askedAt) return;
+    // Timing out a question this client has not loaded would write a miss for
+    // something nobody was shown.
+    if (stall.action === "timeout" && !haveItem) return;
+    fired.current = askedAt;
+    if (stall.action === "timeout") act.forceTimeout();
+    else act.forceAdvance();
+  }, [stall, myMark, askedAt, haveItem, act]);
 }

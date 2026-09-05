@@ -83,7 +83,13 @@ export function answer(g: Game, correct: boolean): Game {
   if (g.phase !== "asking" || g.target === null || !g.answerer) return g;
   const by = g.answerer;
   const last = { by, square: g.target, correct, steal: g.steal };
-  if (!correct) return { ...g, phase: "revealed", last };
+  // answerer is cleared on the way out of `asking` because it means "who owes
+  // the pending answer", and once the answer is in, nobody does. decode() has
+  // always derived it from the phase, so the stored game already agreed; it was
+  // only the reducer's own output that carried a stale mark through `revealed`,
+  // where every reader happens to be guarded by the phase anyway. Two versions
+  // of the truth with nothing currently standing on the wrong one.
+  if (!correct) return { ...g, phase: "revealed", answerer: null, last };
 
   const board = g.board.slice();
   board[g.target] = by;
@@ -93,7 +99,7 @@ export function answer(g: Game, correct: boolean): Game {
   const win = winnerOf(board);
   if (win) return { ...done, winner: win.mark, line: win.line };
   if (openSquares(board).length === 0) return { ...done, winner: "draw" as const };
-  return { ...g, board, phase: "revealed", last };
+  return { ...g, board, phase: "revealed", answerer: null, last };
 }
 
 /**

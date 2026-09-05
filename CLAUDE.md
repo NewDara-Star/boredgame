@@ -332,6 +332,33 @@ runs in the browser. And `attempts` lets an account inflate its own
 it, but a guest who claims their account keeps whatever numbers they arrived
 with.
 
+## One board hook, three games
+
+Square Off and Connect 4 had a hook each — 234 and 223 lines whose
+subscription, optimistic write, win booking, quit, reopen and start scored
+0.98-1.00 against each other on a structural diff. `useBoardRoom` is the one
+copy; `BoardEngine` is the difference, and the difference is small: the table
+name, the codec, the reducer functions, and who owes a pending answer (Square
+Off can hand it to the opponent on a miss, Connect 4 cannot).
+
+The engine has one rule worth knowing. **A question is dealt exactly when the
+state being written is `asking`** — read off the state, not passed in by the
+caller. That replaced a boolean at every call site, which Connect 4 got wrong
+at three of them, dealing a question for a phase that never asks one.
+`check-engines.mts` plays both games to completion many times over and asserts
+the invariant holds, because the whole hook now rests on it.
+
+The three room screens share `useMatchChrome` (the clock, the seats, the
+result card), `MatchOver`, and `useStallRescue`. The last of those is the
+frozen-board fix, and it existed in two copies — which is exactly how the
+reveal case came to be missing from one of them.
+
+Writing this found one real inconsistency: `answer()` left `answerer` set while
+the phase was `revealed`, though `decode()` has always derived it from the
+phase. Nothing read the wrong one, because every reader is guarded by the
+phase. It is nulled now — two versions of the truth with nothing standing on
+the wrong one is a bug waiting for its first reader.
+
 ## Brand: sticker on neon, but only where you are not reading
 
 The references are logo boards and packaging — saturated grounds, white fills,
