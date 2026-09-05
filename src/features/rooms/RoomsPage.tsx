@@ -12,6 +12,8 @@ import { startSquareOff } from "@/features/squareoff/useTttRoom";
 import { TicTacToeRoom } from "@/features/tictactoe/TicTacToeRoom";
 import { Connect4Room } from "@/features/connect4/Connect4Room";
 import { startConnect4 } from "@/features/connect4/useC4Room";
+import { MemoryRoom } from "@/features/memory/MemoryRoom";
+import { startMemory } from "@/features/memory/useMemoryRoom";
 import { Lobby } from "./Lobby";
 import { InviteCard } from "./InviteCard";
 import { AuthCard } from "@/features/profile/AuthCard";
@@ -38,6 +40,7 @@ export function RoomsPage() {
   // gated on this one flag rather than on a growing list of mode names.
   const BOARDS = {
     squareoff: "3x3", tictactoe: "3x3", connect4: "c4", connect4trivia: "c4",
+    memory: "mem",
   } as const;
   const board = room ? BOARDS[room.mode as keyof typeof BOARDS] ?? null : null;
 
@@ -62,7 +65,9 @@ export function RoomsPage() {
     if (!board) { void startNextRound(); return; }
     const guest = players.find((p) => p.user_id !== room.host_id);
     if (!guest) return;
-    const start = board === "c4" ? startConnect4 : startSquareOff;
+    const start = board === "c4" ? startConnect4
+      : board === "mem" ? startMemory
+      : startSquareOff;
     void start(room.id, room.host_id, guest.user_id)
       .then((msg) => { if (msg) setStartError(msg); });
   }, [room, isHost, everyoneReady, players, startNextRound, board]);
@@ -217,6 +222,11 @@ export function RoomsPage() {
 
       {iAmIn && !waiting && room.mode === "tictactoe" && (
         <TicTacToeRoom roomId={room.id} code={room.code} status={room.status}
+          players={players} userId={user.id} />
+      )}
+
+      {iAmIn && !waiting && board === "mem" && (
+        <MemoryRoom roomId={room.id} code={room.code} status={room.status}
           players={players} userId={user.id} />
       )}
 

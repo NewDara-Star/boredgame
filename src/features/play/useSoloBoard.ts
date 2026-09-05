@@ -34,7 +34,7 @@ export function useSoloBoard<G extends BoardState, R extends BoardRow>(
   /** No questions: taking the square is the whole move. */
   plain = false,
   /** What the asking phase asks for. */
-  challenge: "trivia" | "catapult" = "trivia",
+  challenge: "trivia" | "catapult" | "none" = "trivia",
 ) {
   const { user } = useAuth();
   const [pool, setPool] = useState<PlayItem[]>([]);
@@ -53,6 +53,9 @@ export function useSoloBoard<G extends BoardState, R extends BoardRow>(
   const [ended, setEnded] = useState(false);
   const counted = useRef(false);
   const seen = useRef<Set<string>>(new Set());
+  /** What the bot has been shown this session. Only Memory fills this in; the
+      board bots have nothing to remember. */
+  const botSeen = useRef<Map<number, number>>(new Map());
   const askedAt = useRef(Date.now());
 
   // Held in a ref as well as state: `deal` runs inside event handlers and
@@ -112,7 +115,11 @@ export function useSoloBoard<G extends BoardState, R extends BoardRow>(
   }, [game.phase, dealQuestion, challenge, newTarget]);
 
   const choose = useCallback((cell: number) => {
-    if (game.phase !== "picking" || game.turn !== "x") return;
+    // No phase check here on purpose. Memory's second tap lands during
+    // `asking`, and every reducer already refuses an illegal move by handing
+    // back the state it was given — so the reducer is the authority and the
+    // hook does not keep a second, staler copy of the rules.
+    if (game.turn !== "x") return;
     if (!plain && challenge === "trivia" && pool.length === 0) return;
     const next = plain ? engine.place(game, cell) : engine.pick(game, cell);
     if (next === game) return;                 // full column, taken square
@@ -137,9 +144,14 @@ export function useSoloBoard<G extends BoardState, R extends BoardRow>(
 
   // --- the bot ---------------------------------------------------------------
   useEffect(() => {
-    if (game.phase !== "picking" || game.turn !== "o") return;
+    // "asking" is the bot's second tap when the challenge is neither a question
+    // nor a shot — Memory's turn is two taps, and without this the bot turned
+    // one tile over and sat looking at it forever.
+    const owed = game.phase === "picking"
+      || (challenge === "none" && game.phase === "asking");
+    if (!owed || game.turn !== "o") return;
     if (!plain && challenge === "trivia" && pool.length === 0) return;
-    const cell = engine.botCell(game.board, "o");
+    const cell = engine.botCell(game, "o", Math.random, botSeen.current);
     const t = setTimeout(
       () => commit(plain ? engine.place(game, cell) : engine.pick(game, cell)),
       plain ? PLAIN_BOT_MS : BOT_PICK_MS);
@@ -205,6 +217,10 @@ export function useSoloBoard<G extends BoardState, R extends BoardRow>(
     return () => clearTimeout(t);
   }, [game, commit, engine, challenge]);
 
+  // Everything the bot could have learned from, including the tiles the player
+  // turned over — watching is how you get good at this game.
+  useEffect(() => { engine.observe?.(game, botSeen.current); }, [game, engine]);
+
   useEffect(() => {
     if (game.phase !== "over" || counted.current) return;
     counted.current = true;
@@ -230,6 +246,8 @@ export function useSoloBoard<G extends BoardState, R extends BoardRow>(
     counted.current = false;
     setResults([]); setOutcome(null); setItem(null); setChosen(null); setBotFires(null);
     botAimed.current = -1;
+    // A rematch is a new deck, so what it saw last game is worth nothing.
+    botSeen.current = new Map();
     // Loser starts the next one, the same rule a room uses. `seen` deliberately
     // survives, so a rematch does not re-ask the questions you just had.
     setGame((g) => engine.newGame(g.winner === "x" ? "o" : "x"));
@@ -245,6 +263,7 @@ export function useSoloBoard<G extends BoardState, R extends BoardRow>(
     setResults([]); setOutcome(null); setItem(null); setChosen(null);
     setWins({ x: 0, o: 0 }); setEnded(false);
     setBotFires(null); botAimed.current = -1;
+    botSeen.current = new Map();
     setGame(engine.newGame("x"));
   }, [engine]);
 

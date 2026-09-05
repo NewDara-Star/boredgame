@@ -761,3 +761,47 @@ begin
   where r.id = p_room and r.status = 'waiting';
   update public.room_players p set ready = false where p.room_id = p_room;
 end $$;
+
+-- ============ memory match ============
+-- Sixteen tiles, eight pairs, a match keeps the turn. The one game here where
+-- being eight is not a disadvantage — recall of where a thing was is flat
+-- across ages, and a child on a run keeps the turn and runs away with it.
+alter table public.rooms drop constraint if exists rooms_mode_check;
+alter table public.rooms add constraint rooms_mode_check
+  check (mode in ('race','squareoff','tictactoe','connect4','connect4trivia','memory'));
+
+create table if not exists public.memory_games (
+  room_id    bigint primary key references public.rooms(id) on delete cascade,
+  -- dealt once by whoever starts and stored, so both phones turn over the same
+  -- tiles without either of them shuffling
+  deck       text not null check (char_length(deck) = 16),
+  board      text not null default '----------------'
+             check (char_length(board) = 16),
+  turn       text not null default 'x' check (turn in ('x','o')),
+  phase      text not null default 'picking'
+             check (phase in ('picking','asking','revealed','over')),
+  target     smallint check (target between 0 and 15),
+  last       jsonb,
+  winner     text check (winner in ('x','o','draw')),
+  puzzle_id  bigint references public.puzzles(id),
+  x_player   uuid references auth.users(id) on delete set null,
+  o_player   uuid references auth.users(id) on delete set null,
+  updated_at timestamptz not null default now()
+);
+
+alter table public.memory_games enable row level security;
+
+drop policy if exists "memory readable by the people in the room" on public.memory_games;
+create policy "memory readable by the people in the room" on public.memory_games
+  for select using (public.is_room_member(memory_games.room_id));
+
+drop policy if exists "memory written by members" on public.memory_games;
+create policy "memory written by members" on public.memory_games
+  for all using (public.is_room_member(memory_games.room_id))
+      with check (public.is_room_member(memory_games.room_id));
+
+-- c4_games shipped without this once already: the board only moves for whoever
+-- tapped it, and the opponent's screen never hears a thing.
+do $$ begin
+  alter publication supabase_realtime add table public.memory_games;
+exception when duplicate_object then null; end $$;

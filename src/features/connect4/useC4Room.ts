@@ -16,14 +16,14 @@ export const C4: BoardEngine<Game, C4Row> = {
   place: drop,
   pick,
   answerer: (g) => (g.phase === "asking" ? g.turn : null),
-  botCell: botColumn,
+  botCell: (g, me, rand) => botColumn(g.board, me, rand),
   describe,
 };
 
 export function useC4Room(
   roomId: number | null, userId: string | undefined,
   scope: Scope | null = null, plain = false,
-  challenge: "trivia" | "catapult" = "trivia",
+  challenge: "trivia" | "catapult" | "none" = "trivia",
 ) {
   return useBoardRoom(C4, roomId, userId, scope, plain, challenge);
 }

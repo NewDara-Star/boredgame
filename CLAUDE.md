@@ -467,6 +467,35 @@ would have committed the bot's move, so the bot took aim and the game sat there
 forever. Once through state (`botFires`), once through an object rebuilt every
 render (`targetFor` is memoised on the seed now).
 
+## Memory Match, and what it cost to fit in
+
+Sixteen tiles, eight pairs, a match keeps the turn. It is the one game here
+where being eight is not a disadvantage: recall of where a thing was is flat
+across ages, and a child on a run of matches keeps going and runs away with it.
+
+It reuses `useBoardRoom` and `useSoloBoard` whole, which took three small
+widenings rather than a fourth copy of anything:
+
+- **Both taps go through `flip`.** The first opens a pair, the second closes it.
+  So `place` and `pick` are the same function, and `answer` returns the state it
+  was given — a memory turn resolves on a tap, not on an answer.
+- **`choose` no longer checks the phase.** Memory's second tap lands during
+  `asking`, and every reducer already refuses an illegal move by returning the
+  state unchanged. The reducer is the authority; the hook was keeping a second,
+  staler copy of the rules.
+- **`challenge: "none"`.** The asking phase needs no question and no target, so
+  nothing is fetched and nothing is dealt.
+
+The bot has a memory span, not a dice roll: it consults the last `BOT_SPAN`
+tiles it was shown, kept by the hook and filled in by the engine's `observe`.
+Perfect recall wins this game every time, which is not a game — measured, not
+assumed. `check-memory.mts` plays it three ways: a memory beats no memory, two
+equal memories are an even match, and someone who remembers more than it does
+wins about 85% of the time. That last one is the point.
+
+Watch for `slice(-0)`. A bot told to remember nothing had perfect recall,
+because `slice(-0)` is `slice(0)` and returns everything.
+
 ## Brand: sticker on neon, but only where you are not reading
 
 The references are logo boards and packaging — saturated grounds, white fills,

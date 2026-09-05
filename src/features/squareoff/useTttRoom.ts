@@ -19,14 +19,14 @@ export const TTT: BoardEngine<Game, TttRow> = {
   channel: "ttt",
   decode, encode, newGame, place, pick, answer, advance,
   answerer: (g) => g.answerer,
-  botCell: botSquare,
+  botCell: (g, me, rand) => botSquare(g.board, me, rand),
   describe,
 };
 
 export function useTttRoom(
   roomId: number | null, userId: string | undefined,
   scope: Scope | null = null, plain = false,
-  challenge: "trivia" | "catapult" = "trivia",
+  challenge: "trivia" | "catapult" | "none" = "trivia",
 ) {
   return useBoardRoom(TTT, roomId, userId, scope, plain, challenge);
 }

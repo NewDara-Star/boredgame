@@ -58,10 +58,17 @@ export interface BoardEngine<G extends BoardState, R extends BoardRow> {
    * steal, so it always is.
    */
   answerer(g: G): Mark | null;
-  /** Where the bot would move. Deliberately not a solved player in either game
-      — win, block, take the middle, otherwise loose. A perfect Tic Tac Toe
-      opponent draws every single time, which is not a game. */
-  botCell(board: (Mark | null)[], me: Mark, rand?: () => number): number;
+  /**
+   * Where the bot would move. Deliberately not a solved player in any of them —
+   * a perfect Tic Tac Toe opponent draws every time and a perfect memory never
+   * loses, which is the opposite of the point.
+   *
+   * `seen` is whatever this engine has been shown this session, kept by the
+   * hook and filled in by `observe`. Engines that need no memory ignore it.
+   */
+  botCell(g: G, me: Mark, rand?: () => number, seen?: Map<number, number>): number;
+  /** Called on every state the bot could learn from. Only Memory implements it. */
+  observe?(g: G, seen: Map<number, number>): void;
   /** One line of English for what just happened. The board alone is not
       legible: it cannot say "you missed, so the bot gets one shot at it". */
   describe(g: G, names: Record<Mark, string>, you: Mark | null): string;
@@ -76,7 +83,7 @@ export function useBoardRoom<G extends BoardState, R extends BoardRow>(
   plain = false,
   /** What the asking phase asks for. A catapult turn deals no puzzle — the
       target comes from the seed both clients already share. */
-  challenge: "trivia" | "catapult" = "trivia",
+  challenge: "trivia" | "catapult" | "none" = "trivia",
 ) {
   const [row, setRow] = useState<R | null>(null);
   // Mirrors `row` so `write` can revert a failed move without taking `row` as a
@@ -191,7 +198,11 @@ export function useBoardRoom<G extends BoardState, R extends BoardRow>(
   }, [write, bookWin]);
 
   const choose = useCallback((cell: number) => {
-    if (!game || myMark !== game.turn || game.phase !== "picking") return;
+    // No phase check here on purpose. Memory's second tap lands during
+    // `asking`, and every reducer already refuses an illegal move by handing
+    // back the state it was given — so the reducer is the authority and the
+    // hook does not keep a second, staler copy of the rules.
+    if (!game || myMark !== game.turn) return;
     const next = plain ? engine.place(game, cell) : engine.pick(game, cell);
     if (next === game) return;               // full column, taken square: nothing happened
     void apply(next);

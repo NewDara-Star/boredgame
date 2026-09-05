@@ -3,7 +3,8 @@ import type { GameKey } from "@/shared/types/db";
 import { PICTO_SEED } from "@/shared/data/picto";
 import { PictoRenderer } from "@/features/picto/PictoRenderer";
 
-export type RoomMode = "race" | "squareoff" | "tictactoe" | "connect4" | "connect4trivia";
+export type RoomMode =
+  | "race" | "squareoff" | "tictactoe" | "connect4" | "connect4trivia" | "memory";
 
 export interface GameDef {
   slug: string;
@@ -112,6 +113,23 @@ export const GAMES: GameDef[] = [
               fill={filled ? (mine ? "var(--color-picto)" : "var(--color-trivia)") : "var(--color-surface)"} />
           );
         }))}
+      </svg>
+    ),
+  },
+  {
+    slug: "memory", name: "Memory Match",
+    tagline: "Turn two over. Keep the pairs you find.",
+    badge: "Card game", bank: null, path: "/memory", chip: "bg-trivia text-surface",
+    room: { mode: "memory", blurb: "Sixteen tiles, eight pairs. Find one and you go again." },
+    Art: ({ size }) => (
+      <svg viewBox="0 0 100 100" width={size} height={size} className="shrink-0">
+        {[0, 1].map((r) => [0, 1].map((c) => (
+          <rect key={`${r}-${c}`} x={12 + c * 40} y={12 + r * 40} width="32" height="32" rx="6"
+            fill={r === 0 && c === 1 ? "var(--color-trivia)" : "var(--color-surface)"}
+            stroke="var(--color-ink)" strokeWidth="4" />
+        )))}
+        <text x="28" y="38" textAnchor="middle" fontSize="20">⭐</text>
+        <text x="68" y="78" textAnchor="middle" fontSize="20">⭐</text>
       </svg>
     ),
   },
