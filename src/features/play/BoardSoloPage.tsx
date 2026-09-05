@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import type { Cell } from "@/features/squareoff/rules";
 import { stagger, riseIn, popIn, SPRING } from "@/shared/ui/motion";
 import { UnlockGate } from "@/features/play/Unlock";
 import { QuestionPanel, Timer } from "@/features/squareoff/QuestionPanel";
@@ -26,15 +25,21 @@ function Side({ mark, name, active, score, glyph }:
   );
 }
 
-/** Both boards take exactly these props, which is why one page can draw either. */
-export interface BoardProps {
-  board: Cell[];
-  target: number | null;
-  line: number[] | null;
-  canPick: boolean;
-  compact?: boolean;
+/**
+ * How a game draws its own board.
+ *
+ * It used to be a component with a fixed prop shape, which worked while every
+ * board was a grid of marks and broke the moment Memory needed the deck as
+ * well. A render function lets each game say what "you may tap this" means for
+ * it — Memory's second tap lands during `asking`, where a Square Off board must
+ * look untappable.
+ */
+export type DrawBoard<G> = (p: {
+  game: G;
+  /** whether it is your turn at all; the phase rule is the game's own business */
+  myTurn: boolean;
   onPick: (i: number) => void;
-}
+}) => JSX.Element;
 
 /**
  * One player against the bot, whichever board.
@@ -45,14 +50,17 @@ export interface BoardProps {
  */
 export function BoardSoloPage<G extends BoardState & { target: number | null; line: number[] | null },
                               R extends BoardRow>({
-  engine, title, Board, glyphs, plain = false, challenge = "trivia",
+  engine, title, board, glyphs, plain = false, challenge = "trivia", score,
 }: {
   engine: BoardEngine<G, R>;
   title: string;
-  Board: (p: BoardProps) => JSX.Element;
+  board: DrawBoard<G>;
   glyphs: Record<Mark, string>;
   plain?: boolean;
-  challenge?: "trivia" | "catapult";
+  challenge?: "trivia" | "catapult" | "none";
+  /** What the two chips count during play. Defaults to games won this session;
+      Memory counts pairs, because that is the number you are playing for. */
+  score?: (g: G) => Record<Mark, number>;
 }) {
   const s = useSoloBoard(engine, plain, challenge);
   const g = s.game;
@@ -114,6 +122,7 @@ export function BoardSoloPage<G extends BoardState & { target: number | null; li
 
   if (s.loading) return <p className="text-soft font-bold">Dealing questions…</p>;
 
+  const live = score ? score(g) : s.wins;
   const answerer = engine.answerer(g);
   const active: Mark = g.phase === "asking" && answerer ? answerer : g.turn;
   const revealed = g.phase === "revealed" || g.phase === "over";
@@ -128,17 +137,15 @@ export function BoardSoloPage<G extends BoardState & { target: number | null; li
           {title}
         </h1>
         <div className="flex gap-2 shrink-0">
-          <Side mark="x" name="You" glyph={glyphs.x} score={s.wins.x}
+          <Side mark="x" name="You" glyph={glyphs.x} score={live.x}
             active={active === "x" && g.phase !== "over"} />
-          <Side mark="o" name="Bot" glyph={glyphs.o} score={s.wins.o}
+          <Side mark="o" name="Bot" glyph={glyphs.o} score={live.o}
             active={active === "o" && g.phase !== "over"} />
         </div>
       </motion.div>
 
       <motion.div variants={popIn}>
-        <Board board={g.board} target={g.target} line={g.line}
-          canPick={s.myTurnToPick} compact={g.phase === "asking" || g.phase === "revealed"}
-          onPick={s.choose} />
+        {board({ game: g, myTurn: s.myTurn, onPick: s.choose })}
       </motion.div>
 
       {/* The board cannot say "you missed, so the bot gets one shot at it". */}

@@ -275,6 +275,9 @@ export function useSoloBoard<G extends BoardState, R extends BoardRow>(
     loading: !plain && challenge === "trivia" && pool.length === 0,
     fraction: left / ask,
     myTurnToPick: game.phase === "picking" && game.turn === "x",
+    /** Whose turn it is, without a view on which phases accept a tap — that
+        rule belongs to the game, not to the page drawing it. */
+    myTurn: game.turn === "x",
     iAnswer: game.phase === "asking" && engine.answerer(game) === "x",
     choose, submit, restart, fire,
     target, botFires, challenge,

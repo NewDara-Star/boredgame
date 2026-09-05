@@ -6,7 +6,8 @@
  */
 import {
   targetFor, landingX, isHit, missBy, describeShot, powerFor, arc, botShot,
-  BOT_ACCURACY, MIN_ANGLE, MAX_ANGLE, clamp, type Level, type Shot,
+  previewDots, PREVIEW, BOT_ACCURACY, MIN_ANGLE, MAX_ANGLE, clamp,
+  type Level, type Shot,
 } from "../src/features/challenge/rules.ts";
 
 let n = 0;
@@ -128,6 +129,63 @@ for (const l of LEVELS) {
   });
   ok(rates[0] > rates[1] && rates[1] > rates[2],
      `easy is genuinely easier than hard (${rates.map((r) => r.toFixed(2)).join(" > ")})`);
+}
+
+// --- the preview cannot lie about the flight -------------------------------
+// The whole point of showing an arc is that it is the arc. Asserting only that
+// the drawn path ENDS in the right place — which is what the first version
+// checked — passes happily while the shape on screen is wrong.
+for (let i = 0; i < 400; i++) {
+  const shot: Shot = {
+    angle: MIN_ANGLE + rnd() * (MAX_ANGLE - MIN_ANGLE),
+    power: 0.08 + rnd() * 0.92,          // including the weak pulls
+  };
+  const dots = previewDots(shot);
+  ok(dots.length >= 6, `even a gentle pull previews dots (${dots.length})`);
+
+  const vx = shot.power * Math.cos(shot.angle);
+  const vy = shot.power * Math.sin(shot.angle);
+  for (const d of dots) {
+    // Every dot must satisfy the equation of motion the ball will follow.
+    const t = d.x / vx;
+    const y = vy * t - 0.5 * t * t;
+    ok(Math.abs(y - d.y) < 1e-6,
+       `a preview dot sits on the real flight path (${d.y.toFixed(5)} vs ${y.toFixed(5)})`);
+    ok(d.y >= 0, "and never underground");
+  }
+
+  // It shows the opening, not the answer: the last dot stops well short of
+  // where the shot lands, or aiming becomes tracing.
+  const last = dots[dots.length - 1].x;
+  const land = landingX(shot);
+  ok(last < land * 0.98, `the preview stops short of the landing (${last.toFixed(2)} < ${land.toFixed(2)})`);
+  ok(last <= land * PREVIEW + 0.05, "and shows only the opening of the flight");
+
+  // Spaced along the ground, not by time — dots must not bunch at the top.
+  const gaps = dots.slice(1).map((d, k) => d.x - dots[k].x);
+  if (gaps.length > 2) {
+    const min = Math.min(...gaps), max = Math.max(...gaps);
+    // Relative, because the gap now scales with the shot.
+    ok(max <= min * 1.6 + 1e-6,
+       `dots are evenly spaced along the ground (${min.toFixed(4)}..${max.toFixed(4)})`);
+  }
+}
+ok(previewDots({ angle: Math.PI / 4, power: 0 }).length === 0, "no power previews nothing");
+
+// --- the picture fits the box ----------------------------------------------
+// Both axes are drawn at one scale now. If a reachable shot can peak higher
+// than the field is tall, the arc leaves the picture and the honesty is gone.
+// Height of a shot landing at x is x·tan(angle)/4.
+{
+  const FIELD = 34 / 86;      // GROUND / SCALE, from Catapult.tsx
+  let worst = 0;
+  for (let i = 0; i < 2000; i++) {
+    const angle = MIN_ANGLE + rnd() * (MAX_ANGLE - MIN_ANGLE);
+    const p = rnd();
+    const peak = Math.pow(p * Math.sin(angle), 2) / 2;
+    if (landingX({ angle, power: p }) <= 1) worst = Math.max(worst, peak);
+  }
+  ok(worst <= FIELD, `the tallest possible shot fits the field (${worst.toFixed(3)} <= ${FIELD.toFixed(3)})`);
 }
 
 console.log(`${n} catapult assertions hold`);

@@ -1,38 +1,37 @@
 import { useEffect, useRef, useState } from "react";
 import {
-  MIN_ANGLE, MAX_ANGLE, arc, clamp, describeShot, isHit, landingX,
+  MIN_ANGLE, MAX_ANGLE, arc, clamp, describeShot, isHit, previewDots,
   type Shot, type Target,
 } from "./rules";
 
-/* The drawing is 100 wide and 46 tall. Height is squashed relative to width on
-   purpose: a physically proportional lob would leave the picture. Horizontal
-   distance is exact, which is the part the game is judged on. */
-const W = 100, H = 46, GROUND = 40;
-/* The launcher is not hard against the left edge: you pull BACK from it, and at
-   6% of the width that drag left the picture within a few pixels — which on a
-   phone means the shot you were lining up simply never happens. */
-const LAUNCH_X = 14;
-const SPAN = 82;          // world x 0..1 across the field
-const RISE = 58;          // world y, squashed
-const MAX_PULL = 34;      // how far back a full-power pull is, in svg units
-/* The arm is drawn shorter than the pull is measured: a full-power pull is 34
-   units from a launcher sitting 6 units above a ground line at 40, which puts
-   the end of the arm outside the picture. */
-const DRAW_PULL = 20;
+/*
+ * The picture is 100 wide and 40 tall, and BOTH axes use the same scale.
+ *
+ * The first version squashed the vertical by 40% so a steep lob would fit,
+ * which meant the arc on screen was not the arc the ball flew — you could not
+ * learn anything from watching it. The angle is capped at 55° instead, so the
+ * tallest useful shot fits an honest picture.
+ */
+const W = 100, H = 40;
+const GROUND = 34;
+const LAUNCH_X = 8;
+/** One world unit of distance is this many svg units, horizontally AND up. */
+const SCALE = 86;
+/** A full-power pull, in svg units. About a third of the width — a thumb drag,
+    and drawn as a ring so you can see where full power is instead of finding
+    out by missing. */
+const MAX_PULL = 26;
+const FLIGHT_MS = 820;
 
-const sx = (x: number) => LAUNCH_X + x * SPAN;
-const sy = (y: number) => GROUND - y * RISE;
-
-const FLIGHT_MS = 780;
+const sx = (x: number) => LAUNCH_X + x * SCALE;
+const sy = (y: number) => GROUND - y * SCALE;
 
 /**
  * Aim, pull back, let go.
  *
- * This is the alternative to answering a question for your move. There is no
- * trajectory preview on purpose — with one you simply line the line up with the
- * target and the skill evaporates. What you get instead is where the last shot
- * landed and whether it was long or short, which is enough to learn from and is
- * the same information for a child and an adult.
+ * The alternative to answering a question for your move, and the reason it
+ * exists: a trivia question is a knowledge test that an eight-year-old loses to
+ * an adult at any difficulty, and aim is not.
  */
 export function Catapult({
   target, locked, shot, onFire, note,
@@ -51,8 +50,6 @@ export function Catapult({
   const [t, setT] = useState(0);
   const [landed, setLanded] = useState<Shot | null>(null);
 
-  // A shot handed in from outside (the bot, or the other player) is played back
-  // through exactly the same animation as your own.
   useEffect(() => { if (shot) launch(shot, false); /* eslint-disable-next-line */ }, [shot]);
 
   function launch(s: Shot, report: boolean) {
@@ -78,8 +75,8 @@ export function Catapult({
     if (!box) return null;
     const px = ((e.clientX - box.left) / box.width) * W;
     const py = ((e.clientY - box.top) / box.height) * H;
-    // The pull is from the pointer back to the launcher, so dragging down and
-    // left fires up and right — a slingshot, which needs no explaining.
+    // The pull runs from the pointer back to the launcher, so dragging down and
+    // left fires up and right. A slingshot needs no explaining.
     return { dx: LAUNCH_X - px, dy: py - GROUND };
   }
 
@@ -94,18 +91,22 @@ export function Catapult({
 
   const live = pull ? shotFromPull(pull) : null;
   const drawn = flying ?? landed;
-  const path = drawn ? arc(drawn, 28) : [];
+  const path = drawn ? arc(drawn, 40) : [];
   const ball = flying
     ? path[Math.min(path.length - 1, Math.round(t * (path.length - 1)))]
     : landed ? path[path.length - 1] : null;
 
   const busy = !!flying;
   const canAim = !locked && !busy && !shot;
+  const dots = live ? previewDots(live) : [];
+
+  const armX = live ? LAUNCH_X - live.power * MAX_PULL * Math.cos(live.angle) : 0;
+  const armY = live ? GROUND - 3 + live.power * MAX_PULL * Math.sin(live.angle) : 0;
 
   return (
     <div className="space-y-2">
       <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`}
-        className={`w-full rounded-2xl border-[3px] border-ink bg-sand touch-none
+        className={`w-full rounded-2xl border-[3px] border-ink bg-sand touch-none select-none
           ${canAim ? "cursor-grab" : ""}`}
         onPointerDown={(e) => {
           if (!canAim) return;
@@ -121,50 +122,66 @@ export function Catapult({
           setPull(null);
           if (s.power > 0.04) launch(s, true);
         }}
-        // Deliberately no onPointerLeave: a pull that wanders outside the box
-        // is still a pull. Only a cancelled pointer abandons the shot.
+        // No onPointerLeave: a pull that wanders outside the box is still a
+        // pull, and cancelling on leave meant a shot that never happened.
         onPointerCancel={() => setPull(null)}>
 
-        <line x1="0" y1={GROUND} x2={W} y2={GROUND}
-          stroke="var(--color-ink)" strokeWidth="1.5" />
+        <defs>
+          {/* The arm is drawn by pulling DOWN from a launcher that sits on the
+              ground, so at full power it reaches below the field. Clipped
+              rather than shortened: the length is the power reading. */}
+          <clipPath id="field"><rect x="0" y="0" width={W} height={H} /></clipPath>
+        </defs>
 
-        {/* the target */}
+        <line x1="0" y1={GROUND} x2={W} y2={GROUND}
+          stroke="var(--color-ink)" strokeWidth="1.6" />
+
+        {/* the target: a bucket on the ground, not a stripe */}
         <g>
-          <rect x={sx(target.x - target.radius)} y={GROUND - 5}
-            width={target.radius * 2 * SPAN} height="5"
-            fill="var(--color-good)" stroke="var(--color-ink)" strokeWidth="1.2" rx="1.5" />
-          <circle cx={sx(target.x)} cy={GROUND - 8.5} r="2.6"
-            fill="var(--color-hot)" stroke="var(--color-ink)" strokeWidth="1.2" />
+          <path d={`M ${sx(target.x - target.radius)} ${GROUND}
+                    L ${sx(target.x - target.radius * 0.72)} ${GROUND - 7}
+                    L ${sx(target.x + target.radius * 0.72)} ${GROUND - 7}
+                    L ${sx(target.x + target.radius)} ${GROUND} Z`}
+            fill="var(--color-good)" stroke="var(--color-ink)" strokeWidth="1.4"
+            strokeLinejoin="round" />
+          <ellipse cx={sx(target.x)} cy={GROUND - 7}
+            rx={target.radius * 0.72 * SCALE} ry="1.6"
+            fill="var(--color-paper)" stroke="var(--color-ink)" strokeWidth="1.2" />
         </g>
 
-        {/* the launcher */}
-        <rect x={LAUNCH_X - 3} y={GROUND - 6} width="6" height="6" rx="1.5"
+        {/* how far back full power is — visible rather than discovered */}
+        {canAim && (
+          <circle cx={LAUNCH_X} cy={GROUND - 3} r={MAX_PULL}
+            fill="none" stroke="var(--color-ink)" strokeWidth="0.6"
+            strokeDasharray="2 3" opacity="0.28" />
+        )}
+
+        <rect x={LAUNCH_X - 3.5} y={GROUND - 6} width="7" height="6" rx="1.5"
           fill="var(--color-surface)" stroke="var(--color-ink)" strokeWidth="1.5" />
 
-        {/* the pull: a band and a stub of the direction, never the whole arc */}
         {live && (
-          <g>
-            <line x1={LAUNCH_X} y1={GROUND - 4}
-              x2={LAUNCH_X - live.power * DRAW_PULL * Math.cos(live.angle)}
-              y2={GROUND - 4 + live.power * DRAW_PULL * Math.sin(live.angle)}
-              stroke="var(--color-ink)" strokeWidth="1.6" strokeLinecap="round" />
-            {arc(live, 5).slice(1, 4).map((p, i) => (
-              <circle key={i} cx={sx(p.x)} cy={sy(p.y)} r="1"
-                fill="var(--color-ink)" opacity={0.45 - i * 0.12} />
+          <g clipPath="url(#field)">
+            <line x1={LAUNCH_X} y1={GROUND - 3} x2={armX} y2={armY}
+              stroke="var(--color-ink)" strokeWidth="1.8" strokeLinecap="round" />
+            <circle cx={armX} cy={armY} r="2.4"
+              fill="var(--color-picto)" stroke="var(--color-ink)" strokeWidth="1.2" />
+            {/* the opening of the real flight path, fading out */}
+            {dots.map((p, i) => (
+              <circle key={i} cx={sx(p.x)} cy={sy(p.y)}
+                r={1.5 - (i / Math.max(1, dots.length)) * 0.7}
+                fill="var(--color-ink)"
+                opacity={0.55 - (i / Math.max(1, dots.length)) * 0.35} />
             ))}
-            <rect x={LAUNCH_X - 3} y={GROUND - 13} width={live.power * 30} height="2.5"
-              rx="1.25" fill="var(--color-hot)" />
           </g>
         )}
 
-        {/* where it went */}
         {drawn && (
           <polyline
             points={path.slice(0, flying
               ? Math.max(2, Math.round(t * path.length))
               : path.length).map((p) => `${sx(p.x)},${sy(p.y)}`).join(" ")}
-            fill="none" stroke="var(--color-ink)" strokeWidth="1"
-            strokeDasharray="2 2" opacity="0.5" />
+            fill="none" stroke="var(--color-ink)" strokeWidth="0.9"
+            strokeDasharray="2 2" opacity="0.45" />
         )}
         {ball && (
           <circle cx={sx(ball.x)} cy={sy(ball.y)} r="2.4"
@@ -182,6 +199,3 @@ export function Catapult({
     </div>
   );
 }
-
-/** Exposed for tests and for the bot: the landing spot a shot produces. */
-export { landingX };

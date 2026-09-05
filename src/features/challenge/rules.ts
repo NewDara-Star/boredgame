@@ -16,10 +16,31 @@
 
 export type Level = "easy" | "medium" | "hard";
 
-/** Radians. Below the first the shot is a line drive; above the second it is a
-    lob that lands on your own head. Both are frustrating rather than hard. */
-export const MIN_ANGLE = Math.PI / 12;      // 15°
-export const MAX_ANGLE = (Math.PI / 180) * 80;
+/**
+ * Radians. Below the first the shot is a line drive; above the second it is a
+ * lob, and — more to the point — a lob does not fit on screen.
+ *
+ * The height of a shot that lands at x is `x·tan(angle)/4`. At 80° that is
+ * 1.4x, so a shot across the field needed a picture taller than it was wide.
+ * The first version squashed the drawing to cope, which meant the arc you
+ * watched was not the arc it flew and judging the next shot was guesswork. At
+ * 55° the tallest useful shot peaks at about a third of the field width, which
+ * fits an honest 1:0.4 picture.
+ */
+export const MIN_ANGLE = Math.PI / 12;                 // 15°
+export const MAX_ANGLE = (Math.PI / 180) * 55;
+
+/**
+ * How much of the flight the aim preview shows.
+ *
+ * Not all of it, on purpose, and not none of it either. None was the first
+ * version: every shot was a blind guess and the only feedback was "way short"
+ * after the turn was already spent. All of it turns the game into lining a
+ * curve up with a target, which is not aiming. The genre convention — Angry
+ * Birds and everything after it — is the opening arc, enough to read direction
+ * and curvature while leaving the distance to you.
+ */
+export const PREVIEW = 0.55;
 
 /** How wide a target is, and so how forgiving the game is. */
 const RADIUS: Record<Level, number> = { easy: 0.085, medium: 0.06, hard: 0.042 };
@@ -89,14 +110,17 @@ export function powerFor(x: number, angle: number): number | null {
   return p >= 0 && p <= 1 ? p : null;
 }
 
-/** Points along the flight, for drawing. t is normalised to the whole flight,
-    so the caller does not need to know the time of impact. */
-export function arc({ angle, power }: Shot, steps = 24): { x: number; y: number }[] {
+/** Points along the flight, for drawing. `upto` is a fraction of the whole
+    flight, so a caller can draw the opening of it without knowing the time of
+    impact. */
+export function arc(
+  { angle, power }: Shot, steps = 24, upto = 1,
+): { x: number; y: number }[] {
   const a = clamp(angle, MIN_ANGLE, MAX_ANGLE);
   const p = clamp(power, 0, 1);
   const vx = p * Math.cos(a);
   const vy = p * Math.sin(a);
-  const flight = vy <= 0 ? 0 : 2 * vy;          // gravity = 1
+  const flight = (vy <= 0 ? 0 : 2 * vy) * clamp(upto, 0, 1);   // gravity = 1
   const out: { x: number; y: number }[] = [];
   for (let i = 0; i <= steps; i++) {
     const t = (flight * i) / steps;
@@ -127,4 +151,34 @@ export function botShot(target: Target, level: Level, rand: () => number): Shot 
   // If that angle cannot reach, fall back to the one that always can.
   return p === null ? { angle: Math.PI / 4, power: Math.sqrt(clamp(wanted, 0, 1)) }
                     : { angle, power: p };
+}
+
+/**
+ * The dots drawn while you are pulling back.
+ *
+ * Spaced by a fixed distance ALONG THE GROUND rather than by equal slices of
+ * time, which is what the LibGDX write-up on this recommends and is visibly
+ * better: equal time bunches the dots at the top of the arc, where the shot is
+ * slowest and least informative, and spreads them thin exactly where you are
+ * trying to read the launch.
+ *
+ * Every point is on the real flight path, because it comes out of `arc()` —
+ * the same function the shot itself is drawn with, which is asserted rather
+ * than assumed.
+ */
+export function previewDots(shot: Shot, count = 8): { x: number; y: number }[] {
+  const reach = landingX(shot) * PREVIEW;
+  if (reach <= 1e-4) return [];
+  // A fixed gap gave a gentle pull no dots at all — which is precisely the pull
+  // a beginner makes, and precisely when the feedback is worth most. The gap
+  // follows the shot instead, so every shot previews the same number of dots.
+  const gap = reach / (count + 1);
+  const fine = arc(shot, 400, PREVIEW);
+  const out: { x: number; y: number }[] = [];
+  let next = gap;
+  for (const p of fine) {
+    if (p.x >= next - 1e-9) { out.push(p); next += gap; }
+    if (out.length >= count) break;
+  }
+  return out;
 }
