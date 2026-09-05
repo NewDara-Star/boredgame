@@ -10,6 +10,9 @@ export interface PlayItem {
   prompt?: string;
   choices?: string[];
   answer: string;
+  /** Other spellings that count. A puzzle has one answer and many ways to say
+      it — "six feet under" for "six feet underground", and so on. */
+  accept?: string[];
   /** Picto only. Trivia uses a runtime 50/50 instead — a letter count on four
       options usually identifies the answer outright. */
   altHint?: string;

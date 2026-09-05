@@ -314,7 +314,7 @@ export function RoomsPage() {
             <form className="flex gap-2"
               onSubmit={(e) => {
                 e.preventDefault();
-                if (isCorrect(guess, currentPuzzle.answer)) { void claimWin(); }
+                if (isCorrect(guess, currentPuzzle.answer, currentPuzzle.accept)) { void claimWin(); }
                 setGuess("");
               }}>
               <Input value={guess} onChange={(e) => setGuess(e.target.value)}

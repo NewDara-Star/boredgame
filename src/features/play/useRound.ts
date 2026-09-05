@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useAuth } from "@/app/providers/AuthProvider";
 import type { GameKey } from "@/shared/types/db";
 import { isCorrect, closeness } from "@/shared/lib/normalise";
+import { logNearMiss } from "@/features/play/nearMiss";
 import { loadContent, shuffle } from "./content";
 import { readLocal, recordRound, type RoundOutcome } from "./progress";
 import { scoreAnswer } from "./scoring";
@@ -74,9 +75,9 @@ export function useRound(
     const ms = Date.now() - startedAt.current;
     const ok = current.choices
       ? given === current.answer
-      : isCorrect(given, current.answer);
+      : isCorrect(given, current.answer, current.accept);
     const gained = ok ? scoreAnswer(ms, streak, hintsUsed) : 0;
-    const near = !ok && closeness(given, current.answer) > 0.7;
+    const near = !ok && closeness(given, current.answer, current.accept) > 0.7;
 
     setScore((s) => s + gained);
     setStreak((s) => {
@@ -84,6 +85,8 @@ export function useRound(
       setBestStreak((b) => Math.max(b, n));
       return n;
     });
+    // Every accept list in the bank is a guess until this has something in it.
+    if (!ok) logNearMiss(current, given);
     setResults((r) => [...r, { item: current, correct: ok, given, msTaken: ms, hintsUsed }]);
     setLast({ correct: ok, given, gained, near });
     setPhase("revealed");

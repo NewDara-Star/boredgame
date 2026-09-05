@@ -42,6 +42,7 @@ export interface Puzzle {
   prompt: string | null;
   choices: string[] | null;
   answer: string;
+  accept: string[] | null;
   alt_hint: string | null;
   char_hint: string | null;
   explanation: string | null;

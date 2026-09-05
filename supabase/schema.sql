@@ -805,3 +805,43 @@ create policy "memory written by members" on public.memory_games
 do $$ begin
   alter publication supabase_realtime add table public.memory_games;
 exception when duplicate_object then null; end $$;
+
+-- ============ a puzzle has many right answers ============
+-- One string per puzzle made "read between the lines" wrong for "reading
+-- between the lines", "six feet under" wrong for "six feet underground", and
+-- "you're under arrest" wrong for "you are under arrest". The matcher lives in
+-- shared/lib/normalise.ts and is deliberately client-only: nothing server-side
+-- ever judges a typed answer, so the generosity needs no twin in SQL.
+alter table public.puzzles add column if not exists accept text[];
+
+-- What people typed and were told was wrong. The accept lists are guesses until
+-- this has something in it. Normalised text only, capped, no user id: it exists
+-- to rank the near-misses worth accepting, not to watch anybody play.
+create table if not exists public.near_misses (
+  puzzle_id  bigint not null references public.puzzles(id) on delete cascade,
+  guess      text   not null check (char_length(guess) between 1 and 60),
+  hits       int    not null default 1,
+  first_seen timestamptz not null default now(),
+  last_seen  timestamptz not null default now(),
+  primary key (puzzle_id, guess)
+);
+-- RLS on with NO policies: unreadable and unwritable from the client. The only
+-- way in is the definer function, which strips the text first.
+alter table public.near_misses enable row level security;
+
+create or replace function public.log_near_miss(p_puzzle bigint, p_guess text)
+returns void language plpgsql security definer set search_path to 'public' as $$
+declare g text := btrim(left(lower(regexp_replace(coalesce(p_guess,''), '[^a-zA-Z0-9 ]', '', 'g')), 60));
+begin
+  if length(g) = 0 then return; end if;
+  if not exists (select 1 from puzzles p where p.id = p_puzzle) then return; end if;
+  insert into near_misses (puzzle_id, guess) values (p_puzzle, g)
+  on conflict (puzzle_id, guess)
+    do update set hits = near_misses.hits + 1, last_seen = now();
+end $$;
+revoke all on function public.log_near_miss(bigint, text) from public;
+grant execute on function public.log_near_miss(bigint, text) to anon, authenticated;
+
+-- Read it with:
+--   select p.answer, n.guess, n.hits from near_misses n
+--   join puzzles p on p.id = n.puzzle_id order by n.hits desc limit 40;

@@ -54,6 +54,7 @@ function fromRow(row: PuzzleRow): PlayItem {
     // which a per-client random shuffle would not give them.
     choices: row.choices ? shuffleSeeded(row.choices, String(row.id)) : undefined,
     answer: row.answer,
+    accept: row.accept ?? undefined,
     altHint: row.alt_hint ?? undefined,
     charHint: row.char_hint ?? undefined,
     explanation: row.explanation ?? undefined,
