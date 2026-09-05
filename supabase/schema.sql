@@ -301,6 +301,9 @@ create table if not exists public.ttt_games (
   phase     text not null default 'picking'
               check (phase in ('picking','asking','revealed','over')),
   target    smallint check (target between 0 and 8),
+  -- Dead since the steal was removed: a miss costs the turn and nothing else.
+  -- Kept, rather than dropped, so a client still running the old build can
+  -- insert. Nothing reads it. Drop it once nothing old is deployed.
   steal     boolean not null default false,
   last      jsonb,
   winner    text check (winner in ('x','o','draw')),

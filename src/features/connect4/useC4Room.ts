@@ -7,7 +7,7 @@ import { useBoardRoom, startBoard, type BoardEngine, type Scope } from "@/featur
 /**
  * Connect 4, plain and trivia. The difference from Square Off is the whole of
  * this file: a miss costs the turn and nothing else, so the pending answer is
- * always owed by whoever's turn it is — there is no steal to hand it away.
+ * always owed by whoever's turn it is; nothing hands it away.
  */
 export const C4: BoardEngine<Game, C4Row> = {
   table: "c4_games",

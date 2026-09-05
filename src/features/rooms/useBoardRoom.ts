@@ -12,7 +12,7 @@ export type Phase = "picking" | "asking" | "revealed" | "over";
 
 /** Everything this hook needs to know about a game state. Both rules modules
     already satisfy it — c4's `last` carries a column and Square Off's carries a
-    square and a steal flag, and neither is any of this file's business. */
+    square, and that is not any of this file's business. */
 export interface BoardState {
   board: (Mark | null)[];
   phase: Phase;
@@ -53,9 +53,10 @@ export interface BoardEngine<G extends BoardState, R extends BoardRow> {
   answer(g: G, correct: boolean): G;
   advance(g: G): G;
   /**
-   * Who owes the pending answer. Square Off hands it to the opponent on a miss
-   * — the steal — so it is not always whoever's turn it is. Connect 4 has no
-   * steal, so it always is.
+   * Who owes the pending answer. Always whoever's turn it is, in every game —
+   * but it stays a hook rather than a constant because each game stores it
+   * differently, and because it was NOT always true: Square Off used to hand a
+   * missed question to the opponent.
    */
   answerer(g: G): Mark | null;
   /**

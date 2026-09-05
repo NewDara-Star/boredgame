@@ -44,7 +44,7 @@ export function SquareOffRoom({
   const { now, names, scoreOf, sides, card, done } =
     useMatchChrome(code, "SQUARE OFF", status, players, t.seats, asking);
 
-  useEffect(() => { setChosen(null); }, [t.item?.id, g?.steal]);
+  useEffect(() => { setChosen(null); }, [t.item?.id, g?.target]);
 
   // Each phase is written by one client, so a player who goes away takes their
   // half of the game with them unless someone else is allowed to step in.
@@ -127,7 +127,7 @@ export function SquareOffRoom({
           advanceOwner={g.phase === "revealed" && g.last ? g.last.by : null}
           stall={stall} myMark={t.myMark}
           onAdvanceNow={t.advanceNow} onForceAdvance={t.forceAdvance}
-          nextLabel={g.last?.correct || g.last?.steal ? "Next" : "Let them try it"} />
+          nextLabel="Next" />
       ) : null}
     </div>
   );

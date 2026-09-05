@@ -58,9 +58,9 @@ export type Stall = { mark: Mark; action: "timeout" | "advance" };
  * first and, after a grace period, the opponent — never both, which is the
  * property the check scripts assert across the whole timeline.
  *
- * `answerer` is the difference between the games: Square Off hands a missed
- * question to the opponent, so it is not always whoever's turn it is. Connect 4
- * has no steal. Passing it in is the whole of what used to be two copies.
+ * `answerer` is passed in rather than derived, which is the whole of what used
+ * to be two copies of this function. Every game now agrees it is whoever's turn
+ * it is; they did not always, which is why it is still a parameter.
  */
 export function stallWriter(
   g: { phase: Phase; last: { by: Mark } | null },

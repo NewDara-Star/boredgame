@@ -26,9 +26,6 @@ const games = [
     newGame: T.newGame,
     place: T.place, pick: T.pick, answer: T.answer, advance: T.advance,
     answerer: (g: T.Game) => g.answerer,
-    /** Square Off hands a missed question to the opponent, so advance() can
-        legitimately land on another question. */
-    advanceMayAsk: true,
   },
   {
     name: "connect4",
@@ -36,9 +33,6 @@ const games = [
     newGame: C.newGame,
     place: C.drop, pick: C.pick, answer: C.answer, advance: C.advance,
     answerer: (g: C.Game) => (g.phase === "asking" ? g.turn : null),
-    /** A miss costs the turn and nothing else, so advance() always lands on a
-        pick. This is the one Connect 4 used to get wrong. */
-    advanceMayAsk: false,
   },
 ] as const;
 
@@ -82,9 +76,11 @@ for (const g of games) {
         const owner = s.last?.by;
         ok(owner === "x" || owner === "o", `${w}: a reveal knows whose it was`);
         s = g.advance(s);
-        if (!g.advanceMayAsk) {
-          ok(s.phase !== "asking", `${w}: advancing never asks — there is no steal`);
-        }
+        // Universal now. Square Off used to be exempt because a miss handed
+        // the square to the opponent for a free attempt; that rule is gone, so
+        // no game may go backwards from a reveal into another question. Put a
+        // steal back anywhere and this is the assertion that stops you.
+        ok(s.phase !== "asking", `${w}: advancing never asks — there is no steal`);
         if (s.phase === "asking") asked++;
       }
       ok(PHASES.has(s.phase), `${w}: phase stays one of the four`);

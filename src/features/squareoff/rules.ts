@@ -8,38 +8,38 @@ export { other, type Mark, type Cell, type Stall };
 /**
  * Square Off — tic-tac-toe where a square costs a right answer.
  *
- * The rule that makes it a game rather than a speed quiz with a grid drawn on
- * it: turns alternate by PICK, and a steal is an interrupt that does not change
- * whose pick comes next.
- *
  *   X picks a square, X answers
  *     correct -> X claims it
- *     wrong   -> O gets one shot at that same square (a fresh question)
- *                  correct -> O claims it
- *                  wrong   -> the square stays open
+ *     wrong   -> the square stays open
  *   ...either way, the next pick is O's.
  *
- * So missing costs you the square and hands your opponent a free attempt, but
- * never costs you a turn outright. Every function here is pure — the solo game
- * and the two-player room run the same reducer, which is the only way the rules
- * can be guaranteed to match on both sides of a network.
+ * A miss costs you your turn and nothing else. It used to hand the square to
+ * your opponent for a free attempt — the "steal" — and that was a mistake for
+ * a reason that has nothing to do with balance: the opponent did not have to
+ * SPOT the opening, the game handed it to them. A windfall neither player
+ * earned is not tension, and against a much stronger player it compounds,
+ * because they convert your misses and you do not convert theirs. The drama it
+ * was supposed to create survives without it: miss the winning square and it
+ * stays open, and your opponent can go for it next turn — but they have to
+ * spend their own turn and make their own shot.
+ *
+ * Every function here is pure — the solo game and the two-player room run the
+ * same reducer, which is the only way the rules can be guaranteed to match on
+ * both sides of a network.
  */
 
 export type Phase = "picking" | "asking" | "revealed" | "over";
 
 export interface Game {
   board: Cell[];
-  /** whose PICK it is; a steal never moves this */
   turn: Mark;
   phase: Phase;
   /** the square currently being contested */
   target: number | null;
-  /** true when the pending question is the opponent's one shot at `target` */
-  steal: boolean;
-  /** who owes an answer right now */
+  /** who owes an answer right now — always whoever's turn it is */
   answerer: Mark | null;
   /** what the last answer did, so the UI can say so before play moves on */
-  last: { by: Mark; square: number; correct: boolean; steal: boolean } | null;
+  last: { by: Mark; square: number; correct: boolean } | null;
   winner: Mark | "draw" | null;
   line: number[] | null;
 }
@@ -56,7 +56,6 @@ export const newGame = (first: Mark = "x"): Game => ({
   turn: first,
   phase: "picking",
   target: null,
-  steal: false,
   answerer: null,
   last: null,
   winner: null,
@@ -79,14 +78,14 @@ export const openSquares = (board: Cell[]) =>
 /** The active player commits to a square. The question comes after, not before. */
 export function pick(g: Game, square: number): Game {
   if (g.phase !== "picking" || g.board[square] !== null) return g;
-  return { ...g, phase: "asking", target: square, steal: false, answerer: g.turn, last: null };
+  return { ...g, phase: "asking", target: square, answerer: g.turn, last: null };
 }
 
 /** Resolve the pending question. Claiming can end the game outright. */
 export function answer(g: Game, correct: boolean): Game {
   if (g.phase !== "asking" || g.target === null || !g.answerer) return g;
   const by = g.answerer;
-  const last = { by, square: g.target, correct, steal: g.steal };
+  const last = { by, square: g.target, correct };
   // answerer is cleared on the way out of `asking` because it means "who owes
   // the pending answer", and once the answer is in, nobody does. decode() has
   // always derived it from the phase, so the stored game already agreed; it was
@@ -99,7 +98,7 @@ export function answer(g: Game, correct: boolean): Game {
   board[g.target] = by;
   // A finished square is claimed, not contested — leaving `target` set paints the
   // winning square as "in play" instead of as part of the winning line.
-  const done = { ...g, board, phase: "over" as const, target: null, answerer: null, steal: false, last };
+  const done = { ...g, board, phase: "over" as const, target: null, answerer: null, last };
   const win = winnerOf(board);
   if (win) return { ...done, winner: win.mark, line: win.line };
   if (openSquares(board).length === 0) return { ...done, winner: "draw" as const };
@@ -122,7 +121,7 @@ export function place(g: Game, square: number): Game {
 
   const board = g.board.slice();
   board[square] = g.turn;
-  const last = { by: g.turn, square, correct: true, steal: false };
+  const last = { by: g.turn, square, correct: true };
 
   const win = winnerOf(board);
   if (win) return { ...g, board, phase: "over", target: null, answerer: null, last, winner: win.mark, line: win.line };
@@ -132,18 +131,17 @@ export function place(g: Game, square: number): Game {
 }
 
 /**
- * Move on from a resolved question: into the steal if one is owed, otherwise to
- * the other player's pick.
+ * Move on from a resolved question, to the other player's pick.
+ *
+ * Unconditional. Advancing never asks again — the branch that used to arm the
+ * steal here was the only way a phase could go backwards from `revealed` into
+ * `asking`, and check-engines.mts now holds every game to that.
  */
 export function advance(g: Game): Game {
   if (g.phase !== "revealed" || !g.last) return g;
-  const stealOwed = !g.last.correct && !g.last.steal;
-  if (stealOwed) {
-    return { ...g, phase: "asking", steal: true, answerer: other(g.turn), last: null };
-  }
   return {
     ...g, phase: "picking", turn: other(g.turn),
-    target: null, steal: false, answerer: null, last: null,
+    target: null, answerer: null, last: null,
   };
 }
 
@@ -163,16 +161,13 @@ export function describe(g: Game, names: Record<Mark, string>, you: Mark | null 
     return second(m) ? "You win." : `${names[m]} wins.`;
   }
   if (g.phase === "revealed" && g.last) {
-    const { by, square, correct, steal } = g.last;
+    const { by, square, correct } = g.last;
     if (correct) return `${who(by)} ${s(by, "take")} ${sq(square)}.`;
-    if (steal) return `${who(by)} ${s(by, "miss")} too — ${sq(square)} stays open.`;
-    const thief = other(by);
-    return `${who(by)} ${s(by, "miss")}. ${who(thief)} ${s(thief, "get")} one shot at it.`;
+    return `${who(by)} ${s(by, "miss")} — ${sq(square)} stays open.`;
   }
   if (g.phase === "asking" && g.answerer) {
     const m = g.answerer;
     const target = sq(g.target ?? 0);
-    if (g.steal) return `${who(m)} can steal ${target}.`;
     return second(m) ? `You're going for ${target}.` : `${names[m]} is going for ${target}.`;
   }
   return second(g.turn) ? "Your pick — take a square." : `${names[g.turn]} is picking.`;
@@ -210,8 +205,6 @@ export function stallWriter(
   elapsed: number,
   ms: { ask: number; reveal: number; grace: number },
 ): Stall | null {
-  // The steal is the difference: a missed question is owed by the opponent,
-  // not by whoever's turn it is. Everything else about a deadline is shared.
   return stall(g, g.phase === "asking" ? g.answerer : null, elapsed, ms);
 }
 

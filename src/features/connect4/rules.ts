@@ -9,7 +9,8 @@ import {
  * Two games are built on this file. Plain Connect 4 drops a disc when you tap a
  * column. Connect 4 Trivia makes the drop cost a right answer: you name a
  * column, you get a question, and a miss costs you the turn without placing
- * anything. There is deliberately no steal — that is Square Off's rule, and
+ * anything. A miss costs the turn and nothing else — Square Off worked the
+ * other way once and no longer does, so this is now simply the rule, and
  * Connect 4 punishes a lost tempo hard enough on its own.
  *
  * Index layout: row 0 is the TOP row, so index = row * COLS + col and a disc
@@ -207,6 +208,6 @@ export function stallWriter(
   elapsed: number,
   ms: { ask: number; reveal: number; grace: number },
 ): Stall | null {
-  // No steal here, so a pending answer is always owed by whoever's turn it is.
+  // A pending answer is always owed by whoever's turn it is.
   return stall(g, g.phase === "asking" ? g.turn : null, elapsed, ms);
 }

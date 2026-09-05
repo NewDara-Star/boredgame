@@ -24,7 +24,7 @@ Each claim below was checked by running it, not by reading the code.
 | Guest sees an account first, not a dashboard | Playwright at 390x844, fresh and with 214 answered |
 | Category filter shows real counts and restarts the round | screenshot: chips with per-category counts |
 | Options are not guessable by position | `npm run check:options` — seeded shuffle spreads answer-first input 25.1/25.5/24.9/24.5 over 2000 ids |
-| Square Off rules hold | `npm run check:squareoff` — 31 assertions, including the steal and turn order |
+| Square Off rules hold | `npm run check:squareoff` — turn order, endings, the bot and the stall deadlines |
 | A frozen reveal resolves without its owner | `check:squareoff`: at REVEAL+GRACE the opponent is named, and `advance()` gives the transition the owner owed |
 | The stall is not a regression | `git log -L` on the advance effect: the owner-only guard is present at `59a67e7`, the first Square Off commit — the code the 14:40 session ran on. Two touches ever, and the other only changed the pause length |
 | Room 14 proves the timer is suspended, not lost | froze at 17:33 with `last.by = x`; moved on its own at 17:53:41 with no fix deployed, landing on `phase: picking, turn: o, last: null` — byte-for-byte what `advance()` predicts. A closed tab cannot fire 20 minutes late |
@@ -32,7 +32,7 @@ Each claim below was checked by running it, not by reading the code.
 | Both real rows unstick under the new rule | replayed the stored `ttt_games` rows through `decode()` + `stallWriter()`: names `iamdamobi` and `Newdara` respectively, and `advance()` gives a valid `picking` state for each |
 | NOT reproduced: which OS behaviour suspends it | headless Chromium ignores `Page.setWebLifecycleState: frozen` — the timeout fired at 1364ms frozen and unfrozen, twice, including with nothing touching the page. The suspension is real in production and unreproducible in this lab |
 | A full solo Square Off game plays | Playwright drove 60 turns to "The bot wins", no console errors |
-| The steal fires and is narrated correctly | screenshot: "You miss. The bot gets one shot at it." |
+| A miss costs the turn and nothing else | `check:squareoff` walks 400 random games and never sees `advance()` land on `asking`; `check:engines` asserts the same for every game. Putting the steal back fails both |
 | Board and answers fit one phone screen | board shrinks while a question is up; verified at 390x844 |
 | Profiles cannot be self-inflated | `information_schema.column_privileges`: authenticated has UPDATE on `username`, `avatar` only |
 

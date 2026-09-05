@@ -7,7 +7,9 @@ export interface TttRow {
   turn: Mark;
   phase: Game["phase"];
   target: number | null;
-  steal: boolean;
+  /** Dead: the steal is gone. The column stays `not null default false` so a
+      client mid-deploy can still insert, and nothing reads it. */
+  steal?: boolean;
   last: Game["last"];
   winner: Mark | "draw" | null;
   puzzle_id: number | null;
@@ -26,12 +28,10 @@ export function decode(row: TttRow): Game {
     turn: row.turn,
     phase: row.phase,
     target: row.target,
-    steal: row.steal,
     // Whoever owes an answer follows from the phase; storing it as well is one
-    // more thing that can disagree with itself.
-    answerer: row.phase === "asking"
-      ? (row.steal ? (row.turn === "x" ? "o" : "x") : row.turn)
-      : null,
+    // more thing that can disagree with itself. With the steal gone it is
+    // always whoever's turn it is, the same as Connect 4.
+    answerer: row.phase === "asking" ? row.turn : null,
     last: row.last,
     winner: row.winner,
     line: win && row.winner && row.winner !== "draw" ? win.line : null,
@@ -47,7 +47,6 @@ export function encode(g: Game): Omit<TttRow, "room_id" | "puzzle_id" | "x_playe
     turn: g.turn,
     phase: g.phase,
     target: g.target,
-    steal: g.steal,
     last: g.last,
     winner: g.winner,
   };

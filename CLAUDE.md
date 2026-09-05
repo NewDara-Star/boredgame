@@ -187,13 +187,19 @@ a game rather than a speed quiz with a grid drawn on it:
     X picks a square, X answers
       correct -> X claims it
       wrong   -> O gets ONE shot at that same square, on a fresh question
-                   correct -> O claims it
-                   wrong   -> the square stays open
     ...and either way the next pick is O's.
 
-Turns alternate by **pick**. A steal is an interrupt that never changes whose
-pick comes next, so missing costs you the square and hands your opponent a free
-attempt, but never costs you a turn outright.
+**A miss costs your turn and nothing else** — the same rule as Connect 4.
+
+There used to be a steal: miss, and the reducer offered your square to your
+opponent for one free attempt. It went for a reason that is not about balance.
+The opponent never had to *spot* the opening — the game handed it to them — and
+a windfall neither player earned is not tension. Worse, it compounds across a
+skill gap: the stronger player converts the weaker one's misses and not the
+other way round, which is exactly backwards for a game meant to be playable
+across an age gap. The drama survives without it. Miss the winning square and
+it stays open; your opponent can go for it next turn, but they have to spend
+their own turn and land their own answer.
 
 `rules.ts` is pure and holds every one of those rules. The solo game and the
 two-player room both reduce through it — that is the only way the rules are
@@ -252,8 +258,9 @@ file extensions in import paths, while tsconfig sets
 
 Connect 4 is its own slice: 7×6, `row 0 is the TOP`, board stored as 42
 characters in `c4_games`. Plain drops on tap; the trivia version names a column
-first, then asks. **A miss loses the turn and nothing else** — there is no steal,
-so `advance()` always flips the turn. That was his call, not a simplification.
+first, then asks. **A miss loses the turn and nothing else** — the rule every
+game now shares, enforced for all of them by `check-engines.mts`: `advance()`
+may never land on `asking`.
 
 A bankless game still writes a `game_key` (rooms.game is NOT NULL) and ignores
 it. `GameDef.bank` is `null` for those two, which is what the catalogue, the home
@@ -453,8 +460,8 @@ turn but the physics never do.
 
 The board never learns which it was. `phase === "asking"` has always meant "a
 thing must resolve true or false before the move lands", and a shot resolves it
-through the same `answer()` as a question, steal and all. That is what the
-`useBoardRoom` refactor bought.
+through the same `answer()` as a question. That is what the `useBoardRoom`
+refactor bought.
 
 The target is seeded on `updated_at` — the moment the turn was written, which
 both clients already read off the same row — so two phones show the same target
@@ -735,7 +742,7 @@ the filter silently doing nothing.
 Two separate things, and it is worth not confusing them.
 
 **The pause was the real cost.** A fixed 2300ms sat between answering and the
-next pick, and a turn with a steal has two of them — nearly five seconds of
+next pick, and a turn with a steal had two of them — nearly five seconds of
 deliberate waiting per turn. The fix is not a shorter timer, it is a **skippable**
 one: whoever owes the advance gets a Next button, and the timer stays only as
 the fallback so an idle player cannot stall the board. Agency, not milliseconds.

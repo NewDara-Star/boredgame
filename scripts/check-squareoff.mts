@@ -11,11 +11,15 @@ let failed = 0;
 const ok = (name: string, cond: boolean) => {
   if (!cond) { failed++; console.log(`  FAIL  ${name}`); } else console.log(`  ok    ${name}`);
 };
+/** Same check, silent unless it fails — for assertions inside a long walk. */
+let quiet = 0;
+const ok0 = (cond: boolean, name: string) => {
+  quiet++;
+  if (!cond) { failed++; console.log(`  FAIL  ${name}`); }
+};
 
 /** pick -> answer -> advance, the way the UI drives it. */
 const play = (g: Game, square: number, correct: boolean) => advance(answer(pick(g, square), correct));
-/** answer the pending steal and move on */
-const resolve = (g: Game, correct: boolean) => advance(answer(g, correct));
 
 console.log("claiming");
 {
@@ -25,23 +29,46 @@ console.log("claiming");
   ok("back to picking", g.phase === "picking");
 }
 
-console.log("\nthe steal");
+console.log("\na miss costs your turn and nothing else");
 {
+  // There used to be a steal here: miss, and the reducer offered your square
+  // to your opponent. It went because the opponent never had to SPOT the
+  // opening — the game handed it over — and because against a stronger player
+  // it compounds: they convert your misses and you do not convert theirs.
   const missed = advance(answer(pick(newGame("x"), 0), false));
-  ok("a miss opens a steal", missed.phase === "asking" && missed.steal);
-  ok("the steal is on the same square", missed.target === 0);
-  ok("the opponent owes the answer", missed.answerer === "o");
-  ok("the pick still belongs to X", missed.turn === "x");
-  ok("nothing was claimed", missed.board[0] === null);
+  ok("a miss goes straight back to picking", missed.phase === "picking");
+  ok("nobody owes an answer", missed.answerer === null);
+  ok("the square is not contested any more", missed.target === null);
+  ok("the square stays open", missed.board[0] === null);
+  ok("and the next pick is the opponent's", missed.turn === "o");
 
-  const stolen = resolve(missed, true);
-  ok("a made steal claims it for O", stolen.board[0] === "o");
-  ok("and the next pick is O's", stolen.turn === "o");
-
-  const survived = resolve(missed, false);
-  ok("a missed steal leaves it open", survived.board[0] === null);
-  ok("and the next pick is still O's", survived.turn === "o");
-  ok("no second steal is offered", survived.phase === "picking");
+  // The property, over every reachable state rather than one example: there is
+  // no path on which advancing asks again, so there is nowhere a steal could
+  // hide. This is the assertion that would have to be deleted to put one back.
+  let asked = 0, seen = 0, seed = 7;
+  const rnd = (n: number) => { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return seed % n; };
+  for (let round = 0; round < 400; round++) {
+    let g = newGame(rnd(2) ? "x" : "o");
+    for (let step = 0; step < 60 && g.phase !== "over"; step++) {
+      if (g.phase === "picking") {
+        const open = g.board.map((c, i) => (c === null ? i : -1)).filter((i) => i >= 0);
+        g = pick(g, open[rnd(open.length)]);
+      } else if (g.phase === "asking") {
+        const before = g.turn;
+        g = answer(g, rnd(3) === 0);
+        ok0(g.phase !== "asking", "answering never leaves another question pending");
+        ok0(g.turn === before, "and answering never moves the pick");
+      } else {
+        const before = g.board.slice();
+        g = advance(g);
+        seen++;
+        if (g.phase === "asking") asked++;
+        ok0(g.board.every((c, i) => c === before[i]), "advancing never changes the board");
+      }
+    }
+  }
+  ok(`advancing never asks again, over ${seen} reveals`, asked === 0);
+  ok("the walk actually got somewhere", seen > 1000);
 }
 
 console.log("\nturn order holds over a long game");
@@ -50,11 +77,10 @@ console.log("\nturn order holds over a long game");
   const picks: Mark[] = [];
   for (let n = 0; n < 6; n++) {
     picks.push(g.turn);
-    // alternate hitting and missing so steals fire on half the turns
     const square = g.board.findIndex((c) => c === null);
     g = pick(g, square);
+    // alternate hitting and missing: neither should change whose pick is next
     g = advance(answer(g, n % 2 === 0));
-    if (g.phase === "asking") g = resolve(g, false); // let the steal fail
     if (g.phase === "over") break;
   }
   ok("picks alternate strictly", picks.every((m, i) => m === (i % 2 === 0 ? "x" : "o")));
@@ -101,19 +127,18 @@ console.log("\nabandonment: exactly one writer at any instant");
   };
 
   const asking = pick(newGame("x"), 0);           // x owes the answer
-  const stolen = advance(answer(asking, false));  // o owes the steal
   // The board that actually froze in production: x took square 0 and the
   // reveal was never written on. board "x--------", phase revealed.
   const claimed = answer(asking, true);
-  const missed = answer(asking, false);           // revealed, a steal owed next
+  const missed = answer(asking, false);
 
   ok("nobody writes while the clock runs",
      at(asking, 0) === null && at(asking, ASK - 1) === null);
   ok("the answerer writes their own timeout", at(asking, ASK) === "x:timeout");
   ok("the opponent takes over once the grace is up",
      at(asking, ASK + GRACE) === "o:timeout");
-  ok("it is the stealer who owes a stolen question",
-     at(stolen, ASK) === "o:timeout" && at(stolen, ASK + GRACE) === "x:timeout");
+  ok("a question is always owed by whoever's turn it is",
+     at(pick(newGame("o"), 3), ASK) === "o:timeout");
 
   ok("a reveal is left alone while the pause runs",
      at(claimed, 0) === null && at(claimed, REVEAL - 1) === null);
@@ -127,15 +152,14 @@ console.log("\nabandonment: exactly one writer at any instant");
   // would have called — so the board cannot diverge depending on who wrote it.
   ok("the rescued transition is the one the owner owed",
      advance(claimed).phase === "picking" && advance(claimed).turn === "o"
-     && advance(missed).phase === "asking" && advance(missed).steal
-     && advance(missed).answerer === "o");
+     && advance(missed).phase === "picking" && advance(missed).turn === "o");
   ok("the reveal deadline clears the longest pause in useTttRoom",
      REVEAL > 2900);
   ok("a frozen reveal always resolves eventually",
      at(claimed, 10 * 60_000) !== null);
 
   ok("never two writers at once", (() => {
-    for (const g of [asking, stolen, claimed, missed]) {
+    for (const g of [asking, claimed, missed]) {
       for (let t = 0; t <= ASK + GRACE * 3; t += 137) {
         const w = stallWriter(g, t, MS);
         if (w && w.mark !== "x" && w.mark !== "o") return false;
@@ -157,12 +181,12 @@ console.log("\nthe sentence under the board");
 {
   const names = { x: "You", o: "Dara" };
   const missed = { ...newGame("x"), phase: "revealed", target: 4,
-                   last: { by: "o", square: 4, correct: false, steal: false } } as unknown as Game;
+                   last: { by: "o", square: 4, correct: false } } as unknown as Game;
   const line = describe(missed, names, "x");
   ok("a third-person miss reads as English", line.includes("Dara misses"));
   ok("and never doubles the s", !line.includes("misss"));
   const own = describe({ ...missed,
-    last: { by: "x", square: 4, correct: false, steal: false } } as unknown as Game, names, "x");
+    last: { by: "x", square: 4, correct: false } } as unknown as Game, names, "x");
   ok("first person stays unconjugated", own.includes("You miss") && !own.includes("You misses"));
 }
 
