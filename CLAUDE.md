@@ -596,7 +596,9 @@ that finishes the board (`logSolves`), so a film on the ladder is always of a
 real solve. `frameAt(replay, t)` in rules.ts is the whole playback model —
 moves landed, the one in the air, the run clock — scaled so a long solve fits
 FIT_MS and holds the sorted board for HOLD_MS; the on-screen player
-(`ReplayPlayer`) and the GIF are the same frames. The GIF writer is ours
+(`ReplayPlayer`) and the GIF are the same frames. Rooms keep the winner's
+film on the race (`x_log`/`o_log`, timed from the deal); the loser never
+finishes, so there is no film of a loss. The GIF writer is ours
 (`src/shared/card/gif.ts`): one median-cut palette from the first frame so
 nothing flickers, only changed pixels per frame, plain LZW. It exists because
 the only moving picture every chat app plays without asking the browser for a

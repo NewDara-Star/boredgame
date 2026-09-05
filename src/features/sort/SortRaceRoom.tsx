@@ -5,6 +5,8 @@ import {
 } from "@/features/rooms/matchUi";
 import { Board } from "./Board";
 import { ballGlyph, sortArt } from "./card";
+import { ReplayPlayer } from "./ReplayPlayer";
+import { decodeLog, type Replay } from "./rules";
 import { useSortRoom } from "./useSortRoom";
 
 /**
@@ -37,6 +39,17 @@ export function SortRaceRoom({
       new Date(r.row.started_at).getTime()) / 1000));
   const them = r.seat === "x" ? names.o : names.x;
   const overPar = r.me.moves - r.row.par;
+
+  // the winner's solve, as a film, once the referee has kept one
+  const w = r.row.winner;
+  const wLog = w === "x" ? r.row.x_log : w === "o" ? r.row.o_log : null;
+  const wDone = w === "x" ? r.row.x_done_at : w === "o" ? r.row.o_done_at : null;
+  const film: Replay | null = w && wLog && wDone && r.puzzle ? {
+    tubes: r.puzzle.tubes, cap: r.puzzle.cap, log: decodeLog(wLog),
+    ms: Math.max(1, Date.parse(wDone) - Date.parse(r.row.started_at)),
+    moves: w === "x" ? r.row.x_moves : r.row.o_moves, par: r.row.par,
+    name: names[w], level: r.row.level, where: `ROOM ${code}`,
+  } : null;
 
   return (
     <div className="space-y-4">
@@ -99,6 +112,7 @@ export function SortRaceRoom({
               ? `Solved in ${r.me.moves} — par ${r.row.par}${overPar <= 0 ? ". On the nose." : ` (+${overPar}).`}`
               : `You were ${r.myProgress} of ${r.row.colours} tubes home.`}
           </p>
+          {film && <ReplayPlayer replay={film} />}
           <OverPanel
             headline={r.iWon ? "You win" : `${them} wins`}
             mine={r.iWon}

@@ -889,6 +889,9 @@ create table if not exists public.sort_races (
   winner     text check (winner in ('x','o')),
   x_player   uuid references auth.users(id) on delete set null,
   o_player   uuid references auth.users(id) on delete set null,
+  -- the winner's replay (see sort_solo.log); the other seat never finishes
+  x_log      text check (char_length(x_log) <= 6000),
+  o_log      text check (char_length(o_log) <= 6000),
   started_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -1057,7 +1060,7 @@ grant execute on function public.sort_rematch(bigint, bigint, int, int, text) to
 drop function if exists public.sort_finish(bigint, text, int);
 
 create or replace function public.sort_finish(
-  p_room bigint, p_user uuid, p_tubes text, p_moves int
+  p_room bigint, p_user uuid, p_tubes text, p_moves int, p_log text default null
 ) returns text language plpgsql security definer set search_path to 'public' as $$
 declare v_seat text; v_row public.sort_races;
 begin
@@ -1082,9 +1085,11 @@ begin
      set x_tubes   = case when v_seat = 'x' then p_tubes else x_tubes end,
          x_moves   = case when v_seat = 'x' then p_moves else x_moves end,
          x_done_at = case when v_seat = 'x' then now() else x_done_at end,
+         x_log     = case when v_seat = 'x' then p_log else x_log end,
          o_tubes   = case when v_seat = 'o' then p_tubes else o_tubes end,
          o_moves   = case when v_seat = 'o' then p_moves else o_moves end,
          o_done_at = case when v_seat = 'o' then now() else o_done_at end,
+         o_log     = case when v_seat = 'o' then p_log else o_log end,
          winner     = coalesce(winner, v_seat),
          updated_at = now()
    where room_id = p_room
@@ -1095,8 +1100,8 @@ end $$;
 -- Only the edge function's service role may run it. A player's own token
 -- cannot, which is the fix. Verified by impersonation: a member calling it
 -- directly gets "permission denied for function sort_finish".
-revoke all on function public.sort_finish(bigint, uuid, text, int) from public, anon, authenticated;
-grant execute on function public.sort_finish(bigint, uuid, text, int) to service_role;
+revoke all on function public.sort_finish(bigint, uuid, text, int, text) from public, anon, authenticated;
+grant execute on function public.sort_finish(bigint, uuid, text, int, text) to service_role;
 
 -- c4_games shipped without this once already: the board only moves for whoever
 -- tapped it, and the opponent's screen never hears a thing.

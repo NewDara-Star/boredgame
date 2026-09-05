@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/shared/lib/supabase";
 import { attempt } from "@/shared/lib/write";
 import {
-  decodeTubes, encodeTubes, isSolved, newGame, pour, puzzleFor, solvedCount, undo, whyNot,
+  decodeTubes, encodeLog, encodeTubes, isSolved, newGame, pour, puzzleFor, solvedCount, undo, whyNot,
   type Game, type Level, type Tube,
 } from "./rules";
 import type { Refusal } from "./Board";
@@ -26,6 +26,9 @@ export interface SortRow {
   winner: Seat | null;
   x_player: string | null;
   o_player: string | null;
+  /** the winner's replay — see sort_solo.log */
+  x_log: string | null;
+  o_log: string | null;
   started_at: string;
   updated_at: string;
 }
@@ -110,6 +113,7 @@ export function useSortRoom(roomId: number | null, userId: string | undefined) {
         room: roomId,
         moves: g.history.map((h) => [h.from, h.to]),
         claimed: g.moves,
+        log: encodeLog(g.log),
       },
     });
     if (err) setError("Could not post that finish — try tapping again.");
@@ -127,20 +131,21 @@ export function useSortRoom(roomId: number | null, userId: string | undefined) {
     }
     if (selected === i) { setSelected(null); return; }
     if (whyNot(me.tubes, me.cap, selected, i)) { setRefused({ tube: i, at: Date.now() }); return; }
-    const next = pour(me, selected, i);
+    // the race's clock, not the phone's: the film counts from the deal
+    const next = pour(me, selected, i, Date.now() - Date.parse(row?.started_at ?? "") || 0);
     setSelected(null);
     setMe(next);
     if (isSolved(next.tubes, next.cap)) void finish(next);
     else post(next);
-  }, [me, selected, row?.winner, post, finish]);
+  }, [me, selected, row?.winner, row?.started_at, post, finish]);
 
   const takeBack = useCallback(() => {
     if (!me || row?.winner) return;
     setSelected(null);
-    const back = undo(me);
+    const back = undo(me, Date.now() - Date.parse(row?.started_at ?? "") || 0);
     setMe(back);
     post(back);
-  }, [me, row?.winner, post]);
+  }, [me, row?.winner, row?.started_at, post]);
 
   const rematch = useCallback(async () => {
     if (!supabase || !roomId) return;

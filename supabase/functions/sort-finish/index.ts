@@ -99,20 +99,21 @@ Deno.serve(async (req: Request) => {
   const claimed = Number(body.claimed);
   const settled = Math.max(g.moves, Number.isFinite(claimed) ? claimed : 0);
 
+  // The replay, if one came: every ball that moved, with its time. Stored
+  // only if it is itself a legal line that finishes this board — a film of
+  // a different solve is not this finish's film. Missing or bent, it is
+  // dropped; the finish still counts.
+  const log = typeof body.log === "string" && body.log.length <= 6000 && /^[0-5][0-5]@\d+(,[0-5][0-5]@\d+)*$/.test(body.log)
+    && logSolves(puzzle, decodeLog(body.log)) ? body.log : null;
+
   const admin = createClient(URL_, SERVICE, { auth: { persistSession: false } });
   if (race) {
     const { data: winner, error: settleError } = await admin.rpc("sort_finish", {
-      p_room: room, p_user: user.id, p_tubes: encodeTubes(g.tubes), p_moves: settled,
+      p_room: room, p_user: user.id, p_tubes: encodeTubes(g.tubes), p_moves: settled, p_log: log,
     });
     if (settleError) return json({ error: settleError.message }, 400);
     return json({ winner, moves: settled, par: race.par, tubes: encodeTubes(g.tubes) });
   }
-  // The replay, if one came: every ball that moved, with its time. Stored
-  // only if it is itself a legal line that finishes this board — a film of
-  // a different solve is not this attempt's film. Missing or bent, it is
-  // dropped; the time still counts.
-  const log = typeof body.log === "string" && body.log.length <= 6000 && /^[0-5][0-5]@\d+(,[0-5][0-5]@\d+)*$/.test(body.log)
-    && logSolves(puzzle, decodeLog(body.log)) ? body.log : null;
   // The time is the database's — now() against the row's started_at — and it
   // refuses one too fast for a thumb, so a script playing the stored line is
   // told no rather than given a rank.
