@@ -4,7 +4,8 @@ import { PICTO_SEED } from "@/shared/data/picto";
 import { PictoRenderer } from "@/features/picto/PictoRenderer";
 
 export type RoomMode =
-  | "race" | "squareoff" | "tictactoe" | "connect4" | "connect4trivia" | "memory";
+  | "race" | "squareoff" | "tictactoe" | "connect4" | "connect4trivia" | "memory"
+  | "ballsort";
 
 export interface GameDef {
   slug: string;
@@ -137,9 +138,8 @@ export const GAMES: GameDef[] = [
     slug: "ballsort", name: "Ball Sort Race",
     tagline: "Same tubes, two boards. First to sort wins.",
     badge: "Puzzle", bank: null, path: "/ballsort", chip: "bg-hot text-surface",
-    // Solo against the bot for now. The two-phone race is the reason it exists
-    // and it is next; the rules and the seeded puzzle already assume it.
-    room: null,
+    room: { mode: "ballsort",
+      blurb: "The same tubes on both screens, both of you at once. First to sort wins." },
     Art: ({ size }) => (
       <svg viewBox="0 0 100 100" width={size} height={size} className="shrink-0">
         <defs>

@@ -1,0 +1,98 @@
+/**
+ * Proving a finish, rather than believing one.
+ *
+ * The database can tell that a board is sorted. It cannot tell that you got
+ * there by pouring, and the old flow took your word for it — anyone who read
+ * the client could call sort_finish from a console with "0000/1111/2222/3333"
+ * and win a race without touching a tube.
+ *
+ * So the claim is replayed here instead. You send the moves you actually made;
+ * this regenerates the puzzle from the race's seed, applies every pour through
+ * the reducer, and rejects the first one that is illegal. Only then does it
+ * call the privileged settle.
+ *
+ * The point of doing it in an edge function rather than in SQL: this imports
+ * ../../../src/features/sort/rules.ts VERBATIM — the same file the phones run
+ * and the same file scripts/check-sort.mts holds to 2,000 assertions. A
+ * plpgsql reimplementation would be a second version of the rules, free to
+ * drift from the first, and a drifted referee is worse than a trusting one.
+ * scripts/check-edge.mts fails the build if the copy here stops matching.
+ */
+import { createClient } from "jsr:@supabase/supabase-js@2";
+import {
+  decodeTubes, encodeTubes, isSolved, newGame, pour, puzzleFor, type Level,
+} from "./rules.ts";
+
+const URL_ = Deno.env.get("SUPABASE_URL")!;
+const ANON = Deno.env.get("SUPABASE_ANON_KEY")!;
+const SERVICE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+
+const json = (body: unknown, status = 200) =>
+  new Response(JSON.stringify(body), {
+    status, headers: { "Content-Type": "application/json" },
+  });
+
+Deno.serve(async (req: Request) => {
+  if (req.method !== "POST") return json({ error: "POST only" }, 405);
+
+  const auth = req.headers.get("Authorization") ?? "";
+  if (!auth) return json({ error: "no token" }, 401);
+
+  // Read as the PLAYER, so row-level security is what proves they belong in
+  // this race rather than a check written here that could be forgotten.
+  const asPlayer = createClient(URL_, ANON, {
+    global: { headers: { Authorization: auth } },
+    auth: { persistSession: false },
+  });
+  const { data: who } = await asPlayer.auth.getUser();
+  const user = who?.user;
+  if (!user) return json({ error: "not signed in" }, 401);
+
+  let body: { room?: number; moves?: [number, number][]; claimed?: number };
+  try { body = await req.json(); } catch { return json({ error: "bad body" }, 400); }
+  const room = Number(body.room);
+  const moves = body.moves;
+  if (!Number.isFinite(room) || !Array.isArray(moves)) {
+    return json({ error: "room and moves are required" }, 400);
+  }
+  // A race is a few dozen pours. Anything near this is someone probing.
+  if (moves.length > 2000) return json({ error: "too many moves" }, 400);
+
+  const { data: race, error } = await asPlayer
+    .from("sort_races").select("*").eq("room_id", room).maybeSingle();
+  if (error || !race) return json({ error: "no race you can see there" }, 403);
+  if (race.winner) return json({ winner: race.winner, already: true });
+
+  // The same call both phones made to lay the puzzle out.
+  const puzzle = puzzleFor(Number(race.seed), race.level as Level);
+  let g = newGame(puzzle);
+  for (let i = 0; i < moves.length; i++) {
+    const mv = moves[i];
+    if (!Array.isArray(mv) || mv.length !== 2) {
+      return json({ error: `move ${i} is malformed` }, 400);
+    }
+    const next = pour(g, Number(mv[0]), Number(mv[1]));
+    // pour() hands back the object it was given when the pour is illegal, so
+    // identity is the check — the same one the UI uses for a stray tap.
+    if (next === g) return json({ error: `move ${i} is not a legal pour` }, 400);
+    g = next;
+  }
+  if (!isSolved(g.tubes, g.cap)) return json({ error: "those moves do not finish it" }, 400);
+
+  // Undo does not remove a move from your count, so the client's number can be
+  // higher than the replay's — never lower, and a higher one only costs them.
+  const claimed = Number(body.claimed);
+  const settled = Math.max(g.moves, Number.isFinite(claimed) ? claimed : 0);
+
+  const admin = createClient(URL_, SERVICE, { auth: { persistSession: false } });
+  const { data: winner, error: settleError } = await admin.rpc("sort_finish", {
+    p_room: room, p_user: user.id, p_tubes: encodeTubes(g.tubes), p_moves: settled,
+  });
+  if (settleError) return json({ error: settleError.message }, 400);
+
+  return json({ winner, moves: settled, par: race.par, tubes: encodeTubes(g.tubes) });
+});
+
+// decodeTubes is exported by rules.ts and unused here; referenced so a future
+// edit that drops it from the shared file fails this build rather than the app.
+void decodeTubes;

@@ -1037,6 +1037,67 @@ end $$;
 revoke all on function public.sort_rematch(bigint, bigint, int, int, text) from public, anon;
 grant execute on function public.sort_rematch(bigint, bigint, int, int, text) to authenticated;
 
+-- Finishing a race is no longer something a client may assert.
+--
+-- The three-argument sort_finish above took your word that a sorted board was
+-- one you had played to. It checked the board really was sorted and that the
+-- move count was at least par, which stops the lazy cheat, but anyone who read
+-- the client could call it from a console with "0000/1111/2222/3333//" and win
+-- without touching a tube.
+--
+-- The only caller now is the sort-finish edge function, which REPLAYS your
+-- move list against the puzzle the seed generates — importing the very same
+-- src/features/sort/rules.ts both phones run, so there is no second
+-- implementation free to drift. A drifted referee would be worse than a
+-- trusting one: it would reject honest finishes. check-sort.mts fails the
+-- build if the deployed copy stops matching byte for byte.
+--
+-- `create or replace` with a new signature would leave the old three-argument
+-- version callable, which is the entire thing being fixed, so it is dropped.
+drop function if exists public.sort_finish(bigint, text, int);
+
+create or replace function public.sort_finish(
+  p_room bigint, p_user uuid, p_tubes text, p_moves int
+) returns text language plpgsql security definer set search_path to 'public' as $$
+declare v_seat text; v_row public.sort_races;
+begin
+  select * into v_row from public.sort_races where room_id = p_room for update;
+  if v_row.room_id is null then raise exception 'no race in room %', p_room; end if;
+
+  v_seat := case when v_row.x_player = p_user then 'x'
+                 when v_row.o_player = p_user then 'o' end;
+  if v_seat is null then raise exception 'not seated in race %', p_room; end if;
+  if v_row.winner is not null then return v_row.winner; end if;
+
+  -- Belt as well as braces. The edge function has already proven the board by
+  -- replay; these two hold even if it is ever bypassed or rewritten badly.
+  if not public.sort_is_solved(p_tubes, v_row.cap) then
+    raise exception 'that board is not sorted';
+  end if;
+  if p_moves < v_row.par then
+    raise exception 'a % move solve is below par (%)', p_moves, v_row.par;
+  end if;
+
+  update public.sort_races
+     set x_tubes   = case when v_seat = 'x' then p_tubes else x_tubes end,
+         x_moves   = case when v_seat = 'x' then p_moves else x_moves end,
+         x_done_at = case when v_seat = 'x' then now() else x_done_at end,
+         o_tubes   = case when v_seat = 'o' then p_tubes else o_tubes end,
+         o_moves   = case when v_seat = 'o' then p_moves else o_moves end,
+         o_done_at = case when v_seat = 'o' then now() else o_done_at end,
+         winner     = coalesce(winner, v_seat),
+         updated_at = now()
+   where room_id = p_room
+   returning winner into v_seat;
+  return v_seat;
+end $$;
+
+-- Only the edge function's service role may run it. A player's own token
+-- cannot, which is the fix. Verified by impersonation: a member calling it
+-- directly gets "permission denied for function sort_finish".
+revoke all on function public.sort_finish(bigint, uuid, text, int) from public, anon, authenticated;
+grant execute on function public.sort_finish(bigint, uuid, text, int) to service_role;
+
 -- c4_games shipped without this once already: the board only moves for whoever
 -- tapped it, and the opponent's screen never hears a thing.
 do $$ begin

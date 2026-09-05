@@ -4,8 +4,10 @@
  */
 import {
   CAP, pourSize, pour, undo, isSolved, solvedCount, newGame, solve, puzzleFor,
-  botPour, BOT_SKILL, BOT_PACE, type Level, type Tube,
+  botPour, BOT_SKILL, BOT_PACE, encodeTubes, decodeTubes, type Level, type Tube,
 } from "../src/features/sort/rules.ts";
+import { readFileSync } from "node:fs";
+import { createHash } from "node:crypto";
 
 let n = 0;
 const ok = (c: boolean, m: string) => {
@@ -134,6 +136,88 @@ const rand = () => { seq = (Math.imul(seq, 1664525) + 1013904223) >>> 0; return 
     console.log(`  bot ${level}: solves in ${(totalMoves / solvedGames).toFixed(1)} moves on average`);
   }
   ok(BOT_SKILL.easy < BOT_SKILL.hard && BOT_PACE.easy > BOT_PACE.hard, "harder is sharper and faster");
+}
+
+// --- the wire format -----------------------------------------------------------
+// The row stores tubes as a string because SQL has to read it too, so the
+// round trip is a property and not an implementation detail.
+{
+  for (const level of LEVELS) {
+    for (let s = 0; s < 30; s++) {
+      const p = puzzleFor(4_000_000 + s * 7919, level);
+      const wire = encodeTubes(p.tubes);
+      ok(/^[0-9/]*$/.test(wire), `${level} ${s}: the wire form is digits and slashes`);
+      ok(JSON.stringify(decodeTubes(wire)) === JSON.stringify(p.tubes),
+         `${level} ${s}: encode then decode is the identity`);
+      ok(wire.split("/").length === p.tubes.length,
+         `${level} ${s}: every tube survives, empties included`);
+    }
+  }
+  ok(encodeTubes([[0,1,2,3],[],[]]) === "0123//", "empty tubes are empty segments");
+  ok(decodeTubes("0123//").length === 3, "and come back as empty tubes");
+}
+
+// --- what the edge function does when it verifies a finish ----------------------
+// The server does not take "I won" on trust: it regenerates the puzzle from the
+// seed and replays the move list, rejecting the first illegal pour. That is
+// exactly the loop below, running the same functions the deployed function
+// imports — so a change that would break the referee breaks this first.
+{
+  const replay = (seed: number, level: Level, moves: number[][]) => {
+    let g = newGame(puzzleFor(seed, level));
+    for (const [f, t] of moves) {
+      const next = pour(g, f, t);
+      if (next === g) return { ok: false as const, at: g.history.length };
+      g = next;
+    }
+    return { ok: isSolved(g.tubes, g.cap), g };
+  };
+  for (const level of LEVELS) {
+    for (let s = 0; s < 12; s++) {
+      const seed = 6_000_000 + s * 15_485_863;
+      const p = puzzleFor(seed, level);
+      const line = solve(p.tubes, CAP)!;
+      const good = replay(seed, level, line);
+      ok(good.ok, `${level} ${s}: an honest move list is accepted`);
+      ok(good.g!.moves === line.length, `${level} ${s}: and counts the moves it made`);
+      ok(good.g!.moves >= p.par, `${level} ${s}: a real solve is never under par`);
+
+      // the console cheat: claim the finish with no moves at all
+      ok(!replay(seed, level, []).ok, `${level} ${s}: an empty move list finishes nothing`);
+      // stop one short
+      ok(!replay(seed, level, line.slice(0, -1)).ok, `${level} ${s}: one pour short is not a finish`);
+      // An illegal pour spliced into the middle. Note it is NOT enough to
+      // reverse a real move and call that tampering: a reversed pour can be
+      // legal and can still solve the puzzle, and the server SHOULD accept any
+      // legal line that finishes — the referee checks legality, not that you
+      // played the one line the solver happened to find.
+      const bent = [...line.slice(0, Math.floor(line.length / 2)), [0, 0],
+                    ...line.slice(Math.floor(line.length / 2))];
+      ok(!replay(seed, level, bent).ok, `${level} ${s}: an illegal pour anywhere voids the list`);
+      const strange = [...line]; strange[0] = [99, 0];
+      ok(!replay(seed, level, strange).ok, `${level} ${s}: an out-of-range tube voids it too`);
+      // and a line that IS legal and DOES solve is accepted however it got there
+      ok(replay(seed, level, line).ok, `${level} ${s}: legality is the test, not which line`);
+      // the same list against a DIFFERENT seed — a replayed win from another race
+      ok(!replay(seed + 1, level, line).ok, `${level} ${s}: a line from another puzzle does not transfer`);
+    }
+  }
+}
+
+// --- the referee is the same file the players run --------------------------------
+// supabase/functions/sort-finish/rules.ts is a copy, because a deployed
+// function needs its dependencies beside it. A copy that drifts is worse than
+// no server check at all — it would reject honest finishes — so it is not
+// allowed to drift silently.
+{
+  const sha = (p: string) => createHash("sha256")
+    .update(readFileSync(new URL(p, import.meta.url))).digest("hex");
+  const mine = sha("../src/features/sort/rules.ts");
+  const deployed = sha("../supabase/functions/sort-finish/rules.ts");
+  ok(mine === deployed,
+     `the deployed rules are byte-for-byte the played rules\n` +
+     `      src:      ${mine}\n      function: ${deployed}\n` +
+     `      -> cp src/features/sort/rules.ts supabase/functions/sort-finish/rules.ts and redeploy`);
 }
 
 console.log(`${n} ball-sort assertions hold`);
