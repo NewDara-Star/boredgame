@@ -1184,3 +1184,48 @@ create or replace view public.sort_daily_best with (security_invoker = true) as
    where s.ms is not null
    order by s.day, s.level, s.user_id, s.ms asc, s.moves asc;
 grant select on public.sort_daily_best to authenticated;
+
+-- ---------------------------------------------------------------------------
+-- The room modes live in ONE place.
+--
+-- rooms_mode_check and set_room_setup each kept a list of them. When ballsort
+-- was added the constraint got it and the function did not, so choosing Ball
+-- Sort in a room failed with "unknown mode ballsort" — for a mode the table
+-- itself accepted. Nobody saw it until someone tried, because no Ball Sort
+-- room had ever been set up.
+--
+-- The constraint is now the only list, and the function turns its violation
+-- back into the message the lobby shows. Adding a mode is one edit.
+-- ---------------------------------------------------------------------------
+create or replace function public.set_room_setup(
+  p_room bigint, p_mode text, p_game text, p_categories text[],
+  p_difficulty text[] default null, p_challenge text default 'trivia')
+returns void language plpgsql security definer set search_path to 'public' as $$
+begin
+  if not exists (select 1 from public.room_players p
+                 where p.room_id = p_room and p.user_id = auth.uid()) then
+    raise exception 'not a member of room %', p_room;
+  end if;
+  if p_difficulty is not null and exists (
+       select 1 from unnest(p_difficulty) d where d not in ('easy','medium','hard')) then
+    raise exception 'unknown difficulty in %', p_difficulty;
+  end if;
+  if coalesce(p_challenge, 'trivia') not in ('trivia','catapult') then
+    raise exception 'unknown challenge %', p_challenge;
+  end if;
+
+  begin
+    update public.rooms r set
+      mode = p_mode, game = p_game::game_key,
+      categories = nullif(p_categories, '{}'),
+      difficulty = nullif(p_difficulty, '{}'),
+      challenge = coalesce(p_challenge, 'trivia')
+    where r.id = p_room and r.status = 'waiting';
+  exception when check_violation then
+    raise exception 'unknown mode %', p_mode;
+  end;
+
+  update public.room_players p set ready = false where p.room_id = p_room;
+end $$;
+revoke all on function public.set_room_setup(bigint, text, text, text[], text[], text) from public, anon;
+grant execute on function public.set_room_setup(bigint, text, text, text[], text[], text) to authenticated;

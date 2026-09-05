@@ -19,7 +19,11 @@ export interface GameDef {
   /** a tailwind bg-* class for the badge */
   chip: string;
   /** how it plays in a room, or null if it is solo only */
-  room: { mode: RoomMode; blurb: string } | null;
+  /** How this game is set up in a room. `challenge` is what a move costs
+      where the mode supports both — Square Off and Catapult Squares are the
+      same mode and the same board, and only this tells them apart. Leave it
+      out for a game where the question does not arise. */
+  room: { mode: RoomMode; blurb: string; challenge?: "trivia" | "catapult" } | null;
   /** Sized in pixels, never in percentages: a percentage-sized SVG inside a
       centring container has no definite box to resolve against and blows the
       card apart. Every caller passes an explicit size. */
@@ -64,7 +68,7 @@ export const GAMES: GameDef[] = [
   {
     slug: "squareoff", name: "Square Off", tagline: "Answer right to claim a square.",
     badge: "Board game", bank: "trivia", path: "/squareoff", chip: "bg-hot text-surface",
-    room: { mode: "squareoff", blurb: "Tic-tac-toe. A square costs a right answer, and missing gives your opponent one shot at it." },
+    room: { mode: "squareoff", challenge: "trivia", blurb: "Tic-tac-toe. A square costs a right answer, and missing gives your opponent one shot at it." },
     Art: ({ size }) => (
       <motion.svg viewBox="0 0 100 100" width={size} height={size} className="shrink-0"
         animate={{ rotate: [0, 4, -4, 0] }}
@@ -164,7 +168,7 @@ export const GAMES: GameDef[] = [
     slug: "catapultsquares", name: "Catapult Squares",
     tagline: "Land the shot, claim the square.",
     badge: "Board game", bank: null, path: "/catapultsquares", chip: "bg-good text-surface",
-    room: { mode: "squareoff", blurb: "Tic-tac-toe, but a square costs a shot rather than a right answer." },
+    room: { mode: "squareoff", challenge: "catapult", blurb: "Tic-tac-toe, but a square costs a shot rather than a right answer." },
     Art: ({ size }) => (
       <svg viewBox="0 0 100 100" width={size} height={size} className="shrink-0">
         <path d="M8 78 H92" stroke="var(--color-ink)" strokeWidth="4" strokeLinecap="round" />
@@ -181,7 +185,7 @@ export const GAMES: GameDef[] = [
     slug: "connect4catapult", name: "Connect 4 Catapult",
     tagline: "Hit the target, drop the disc.",
     badge: "Board game", bank: null, path: "/connect4catapult", chip: "bg-good text-surface",
-    room: { mode: "connect4trivia", blurb: "Name a column, then land a shot to earn it." },
+    room: { mode: "connect4trivia", challenge: "catapult", blurb: "Name a column, then land a shot to earn it." },
     Art: ({ size }) => (
       <svg viewBox="0 0 100 100" width={size} height={size} className="shrink-0">
         <rect x="8" y="34" width="84" height="58" rx="10"
@@ -199,7 +203,7 @@ export const GAMES: GameDef[] = [
   {
     slug: "connect4trivia", name: "Connect 4 Trivia", tagline: "Answer right or the disc never drops.",
     badge: "Board game", bank: "trivia", path: "/connect4trivia", chip: "bg-hot text-surface",
-    room: { mode: "connect4trivia", blurb: "Name a column, answer a question. Get it wrong and you lose the turn — no second chances." },
+    room: { mode: "connect4trivia", challenge: "trivia", blurb: "Name a column, answer a question. Get it wrong and you lose the turn — no second chances." },
     Art: ({ size }) => (
       <motion.svg viewBox="0 0 100 100" width={size} height={size} className="shrink-0"
         animate={{ rotate: [0, 3, -3, 0] }}

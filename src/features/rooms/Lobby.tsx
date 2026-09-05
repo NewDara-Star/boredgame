@@ -41,6 +41,11 @@ export function Lobby({
   // is not "optional" for them, it is meaningless. Hide it rather than offer a
   // choice that changes nothing.
   const hasBank = ROOM_GAMES.some((g) => g.room.mode === room.mode && g.bank !== null);
+  // Only two modes can be played either way. Offering "a question or a shot"
+  // for a Picto race asks about something that does not exist there, and a
+  // catapult game has no questions to filter or grade.
+  const hasChallenge = ROOM_GAMES.some((g) => g.room.mode === room.mode && g.room.challenge);
+  const asks = hasBank && (!hasChallenge || challenge === "trivia");
 
   return (
     <motion.div variants={stagger(0.06)} initial="hidden" animate="show" className="space-y-4">
@@ -50,16 +55,25 @@ export function Lobby({
         </p>
         <div className="grid gap-2">
           {ROOM_GAMES.map((g) => {
-            const c = { mode: g.room.mode, game: g.bank, label: g.name, blurb: g.room.blurb };
+            const c = { mode: g.room.mode, game: g.bank, label: g.name,
+                        blurb: g.room.blurb, challenge: g.room.challenge };
             // A bankless game is identified by its mode alone. rooms.game is NOT
             // NULL, so it keeps whatever key was already there and ignores it.
-            const on = room.mode === c.mode && (c.game === null || room.game === c.game);
+            //
+            // The challenge is part of the identity where a mode has two games
+            // in it. Without it a fresh room — squareoff, trivia — lit up BOTH
+            // Square Off and Catapult Squares, because Catapult Squares draws
+            // on no bank and so passed the game test on any row.
+            const on = room.mode === c.mode
+              && (c.game === null || room.game === c.game)
+              && (c.challenge === undefined || challenge === c.challenge);
             return (
               // Categories belong to a bank. Square Off and Trivia race share
                 // one so a selection survives; switching to Picto race does not,
                 // and five of the categories have no trivia in them at all.
                 <button key={g.slug}
-                  onClick={() => onSetup(c.mode, c.game ?? room.game, c.game === room.game ? picked : [], levelsOn, challenge)}
+                  onClick={() => onSetup(c.mode, c.game ?? room.game,
+                    c.game === room.game ? picked : [], levelsOn, c.challenge ?? challenge)}
                 className={`piece press text-left p-3.5 ${on ? "bg-hot text-surface" : "bg-surface"}`}>
                 <span className="flex items-center gap-2">
                   <span className={`grid place-items-center h-5 w-5 rounded-full border-[3px] border-ink shrink-0
@@ -77,7 +91,7 @@ export function Lobby({
         </div>
       </motion.section>
 
-      {hasBank && (
+      {asks && (
       <motion.section variants={riseIn}>
         <p className="text-[12px] font-black uppercase tracking-widest text-soft mb-2">
           2 · Which categories? <span className="text-soft/60">optional</span>
@@ -119,7 +133,7 @@ export function Lobby({
       </motion.section>
       )}
 
-      {hasBank && (
+      {hasChallenge && (
       <motion.section variants={riseIn}>
         <p className="text-[12px] font-black uppercase tracking-widest text-soft mb-2">
           3 · What does a move cost?
@@ -141,7 +155,7 @@ export function Lobby({
       </motion.section>
       )}
 
-      {hasBank && challenge === "trivia" && (
+      {asks && (
       <motion.section variants={riseIn}>
         <p className="text-[12px] font-black uppercase tracking-widest text-soft mb-2">
           4 · How hard? <span className="text-soft/60">optional</span>
