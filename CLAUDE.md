@@ -610,6 +610,23 @@ median must let the median be the last entry, or a box whose popular colour
 sorts last is peeled one shade at a time and the palette fills with greens.
 Both are caught by decoding the output with Pillow, not by looking at it.
 
+**Rooms: two lists of the same thing is one list too many.** The room modes
+were in `rooms_mode_check` and again in `set_room_setup`; ballsort reached the
+first and not the second, so the mode was unreachable from the lobby while the
+table would have stored it happily. The constraint is the list now and the
+function catches its violation, so adding a mode is one edit. The same shape of
+bug cost Ball Sort rooms twice in a day: `sort_start` also picked its two seats
+with `min(user_id)` on a uuid column, which is not a function that exists, and
+nothing said so because nobody had ever dealt one. It claims the room start
+ITSELF, where the board games have the lobby claim and then insert — so do not
+claim before calling it.
+
+**A room game is (mode, bank, challenge), not (mode, bank).** Square Off and
+Catapult Squares are the same mode and the same board; only what a move costs
+tells them apart, and Catapult Squares draws on no bank, so on a fresh room the
+lobby lit both. `npm run check:lobby` holds the invariant: whatever the row
+says, at most one card is on.
+
 The line in the bundle is the one honest cheat left: a script could read
 `BANK` and play a board in a second. `sort_solo_finish` refuses a time under
 150ms a move — two taps faster than a thumb — so the script gets no rank, but
