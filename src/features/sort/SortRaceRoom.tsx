@@ -55,7 +55,7 @@ export function SortRaceRoom({
       </div>
 
       <div className="piece bg-surface p-3 pt-1">
-        <Board tubes={r.me.tubes} cap={r.me.cap} selected={r.selected}
+        <Board tubes={r.me.tubes} cap={r.me.cap} selected={r.selected} refused={r.refused}
           onPick={r.pick} disabled={!!r.won} />
       </div>
 

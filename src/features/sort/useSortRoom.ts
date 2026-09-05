@@ -2,9 +2,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/shared/lib/supabase";
 import { attempt } from "@/shared/lib/write";
 import {
-  decodeTubes, encodeTubes, isSolved, newGame, pour, puzzleFor, solvedCount, undo,
+  decodeTubes, encodeTubes, isSolved, newGame, pour, puzzleFor, solvedCount, undo, whyNot,
   type Game, type Level, type Tube,
 } from "./rules";
+import type { Refusal } from "./useSortRace";
 
 export type Seat = "x" | "o";
 
@@ -49,6 +50,7 @@ export function useSortRoom(roomId: number | null, userId: string | undefined) {
   const [error, setError] = useState<string | null>(null);
   const [me, setMe] = useState<Game | null>(null);
   const [selected, setSelected] = useState<number | null>(null);
+  const [refused, setRefused] = useState<Refusal | null>(null);
   const [finishing, setFinishing] = useState(false);
 
   const seat: Seat | null = !row || !userId ? null
@@ -66,7 +68,7 @@ export function useSortRoom(roomId: number | null, userId: string | undefined) {
     if (dealtFor.current === Number(row.seed)) return;
     dealtFor.current = Number(row.seed);
     setMe(newGame(puzzle));
-    setSelected(null);
+    setSelected(null); setRefused(null);
     setFinishing(false);
   }, [puzzle, row?.seed]);
 
@@ -114,9 +116,9 @@ export function useSortRoom(roomId: number | null, userId: string | undefined) {
     setFinishing(false);
   }, [roomId, finishing]);
 
-  /** Tap a tube: the first lifts its top run, the second pours it. A second
-      tap that would be an illegal pour lifts that tube instead, which is what
-      a thumb changing its mind meant. */
+  /** Tap a tube: the first lifts its top ball, the second drops it there. A
+      tube that cannot take it — only ever a full one — refuses visibly and the
+      ball stays lifted. */
   const pick = useCallback((i: number) => {
     if (!me || row?.winner) return;
     if (selected === null) {
@@ -124,8 +126,8 @@ export function useSortRoom(roomId: number | null, userId: string | undefined) {
       return;
     }
     if (selected === i) { setSelected(null); return; }
+    if (whyNot(me.tubes, me.cap, selected, i)) { setRefused({ tube: i, at: Date.now() }); return; }
     const next = pour(me, selected, i);
-    if (next === me) { setSelected(me.tubes[i].length > 0 ? i : null); return; }
     setSelected(null);
     setMe(next);
     if (isSolved(next.tubes, next.cap)) void finish(next);
@@ -160,7 +162,7 @@ export function useSortRoom(roomId: number | null, userId: string | undefined) {
   const theirMoves = !row || !seat ? 0 : seat === "x" ? row.o_moves : row.x_moves;
 
   return {
-    row, seat, puzzle, me, selected, error, finishing,
+    row, seat, puzzle, me, selected, refused, error, finishing,
     theirTubes, theirMoves,
     myProgress: me ? solvedCount(me.tubes, me.cap) : 0,
     theirProgress: theirTubes && row ? solvedCount(theirTubes, row.cap) : 0,

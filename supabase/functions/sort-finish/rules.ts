@@ -1,87 +1,91 @@
 /**
  * Ball Sort, as a race.
  *
- * Tubes of coloured balls; sort them until every tube holds one colour. Three
- * rules: only the top ball moves, it may land only on an empty tube or on its
- * own colour, and a tube holds CAP. The empty tubes are the entire puzzle —
- * they are your working space, and running out of it is how you get stuck.
+ * Six tubes, five colours, four balls of each, one tube empty. Sort them until
+ * every tube holds one colour. The rules are the physical ones: the top ball
+ * of any tube may go onto any tube that has room. No "same colour only" — a
+ * real set of tubes does not stop you parking a red on a blue to dig out the
+ * green underneath, and that parking is half the plan.
  *
  * Played as a race rather than a solitaire: the same puzzle on two phones,
- * Dublin and Manchester, first to sort it wins. That is the reason it is in
- * this app rather than being the ten-thousandth clone of itself. Pure planning
- * and no knowledge, so an eight-year-old and an adult are on level ground.
+ * Dublin and Manchester, first to sort it wins. Under these rules every board
+ * is solvable and there is no dead end (a move can always be taken back, so
+ * the position graph is undirected), which makes it exactly a speed contest —
+ * seeing the shortest route and executing it. That is the game.
  *
- * Everything here is a pure function of its arguments and import-free, so the
- * component draws it, the bot plays it, both phones agree on the puzzle from
- * one seed, and scripts/check-sort.mts holds all of that to account.
+ * What a phone CANNOT do under these rules is solve a board: the state space
+ * runs to millions of positions and A* takes seconds at the tail. So nothing
+ * here solves anything. scripts/sort-bank.mts solved every board in advance
+ * and wrote bank.ts — board, and the shortest line through it — and this file
+ * only picks from it by seed. Difficulty is the length of that shortest line.
+ *
+ * Everything here is a pure function of its arguments, so the component draws
+ * it, the bot plays it, both phones agree on the puzzle from one seed, the
+ * edge function replays a finish with it, and scripts/check-sort.mts holds all
+ * of that to account. bank.ts is its only import.
  */
+import { BANK, type BankEntry } from "./bank.ts";
 
 export type Level = "easy" | "medium" | "hard";
 
 /** A tube, bottom first. Values are colour indices. */
 export type Tube = number[];
+/** one ball, from a tube to a tube */
+export type Move = [from: number, to: number];
 
 export interface Puzzle {
   tubes: Tube[];
   cap: number;
   colours: number;
-  /** the fewest moves it can be solved in — the solver's answer, not a guess */
+  /** the fewest moves it can be solved in — A*'s answer, not a guess */
   par: number;
+  /** one shortest line, for the bot. Not the only one: most boards have
+      hundreds of equally short routes, so a player is not being asked to
+      find THIS one. */
+  line: Move[];
 }
 
 export interface Game {
   tubes: Tube[];
   cap: number;
   moves: number;
-  /** a move is one pour, however many balls travel */
-  history: { from: number; to: number; n: number }[];
+  history: { from: number; to: number }[];
 }
 
-/** colours × cap balls, plus this many empty tubes to work in */
-const SHAPE: Record<Level, { colours: number; empties: number; minPar: number }> = {
-  easy:   { colours: 4, empties: 2, minPar: 6 },
-  medium: { colours: 5, empties: 2, minPar: 10 },
-  hard:   { colours: 6, empties: 2, minPar: 15 },
-};
 export const CAP = 4;
+export const COLOURS = 5;
 
-const top = (t: Tube) => t[t.length - 1];
 const isUniform = (t: Tube) => t.every((c) => c === t[0]);
 
-/** How many balls a pour would move: the run of matching colour on top of
-    `from`, limited by the room left in `to`. 0 when the pour is illegal. */
-export function pourSize(tubes: Tube[], cap: number, from: number, to: number): number {
-  if (from === to) return 0;
+/** Why a move is refused, or null when it is fine. The UI says so — a tube
+    that will not take a ball should visibly refuse, not silently re-select. */
+export function whyNot(tubes: Tube[], cap: number, from: number, to: number):
+  "same" | "empty" | "full" | "range" | null {
   const a = tubes[from], b = tubes[to];
-  if (!a || !b || a.length === 0 || b.length >= cap) return 0;
-  const colour = top(a);
-  if (b.length > 0 && top(b) !== colour) return 0;
-  let run = 0;
-  for (let i = a.length - 1; i >= 0 && a[i] === colour; i--) run++;
-  return Math.min(run, cap - b.length);
+  if (!a || !b) return "range";
+  if (from === to) return "same";
+  if (a.length === 0) return "empty";
+  if (b.length >= cap) return "full";
+  return null;
 }
-
 export const canPour = (tubes: Tube[], cap: number, from: number, to: number) =>
-  pourSize(tubes, cap, from, to) > 0;
+  whyNot(tubes, cap, from, to) === null;
 
-/** The pour, applied. Returns the same game when it is illegal, so a caller can
-    test by identity and a stray tap changes nothing. */
+/** One ball, poured. Returns the same game when the move is illegal, so a
+    caller can test by identity and a stray tap changes nothing. */
 export function pour(g: Game, from: number, to: number): Game {
-  const n = pourSize(g.tubes, g.cap, from, to);
-  if (n === 0) return g;
+  if (!canPour(g.tubes, g.cap, from, to)) return g;
   const tubes = g.tubes.map((t) => t.slice());
-  const moved = tubes[from].splice(tubes[from].length - n, n);
-  tubes[to].push(...moved);
-  return { ...g, tubes, moves: g.moves + 1, history: [...g.history, { from, to, n }] };
+  tubes[to].push(tubes[from].pop()!);
+  return { ...g, tubes, moves: g.moves + 1, history: [...g.history, { from, to }] };
 }
 
-/** Take the last pour back. Undo is not free in a race — it still cost a move. */
+/** Take the last move back. Undo is not free in a race — it still cost a move. */
 export function undo(g: Game): Game {
   const last = g.history[g.history.length - 1];
   if (!last) return g;
   const tubes = g.tubes.map((t) => t.slice());
-  const moved = tubes[last.to].splice(tubes[last.to].length - last.n, last.n);
-  tubes[last.from].push(...moved);
+  tubes[last.from].push(tubes[last.to].pop()!);
   return { ...g, tubes, history: g.history.slice(0, -1) };
 }
 
@@ -94,15 +98,23 @@ export const solvedCount = (tubes: Tube[], cap: number) =>
 
 /**
  * The wire format: one character per ball, "/" between tubes, so
- * "0123/1032/2301/3210//" is four filled tubes and two empty ones.
+ * "0123/1032/2301/3210/2013/" is five filled tubes and one empty.
  *
  * It lives here rather than in a wire module because the SERVER parses it too
  * — sort_is_solved reads it in SQL, and the edge function that verifies a
- * finish runs this very file. One definition, three runtimes.
+ * finish runs this very file. One definition, three runtimes. bank.ts stores
+ * boards in this form as well.
  */
 export const encodeTubes = (tubes: Tube[]) => tubes.map((t) => t.join("")).join("/");
 export const decodeTubes = (s: string): Tube[] =>
   s.split("/").map((t) => [...t].map((c) => Number(c)));
+
+/** A bank line is two digits per move, "05" being tube 0 to tube 5. */
+export const decodeLine = (s: string): Move[] => {
+  const out: Move[] = [];
+  for (let i = 0; i + 1 < s.length; i += 2) out.push([Number(s[i]), Number(s[i + 1])]);
+  return out;
+};
 
 export const newGame = (p: Puzzle): Game =>
   ({ tubes: p.tubes.map((t) => t.slice()), cap: p.cap, moves: 0, history: [] });
@@ -110,10 +122,10 @@ export const newGame = (p: Puzzle): Game =>
 /**
  * A stream of numbers from one seed. Both phones derive the puzzle from the
  * moment the race was written — the row they already share — so they get the
- * same tubes without another column. Same hash as the catapult's, for the
+ * same board without another column. Same hash as the catapult's, for the
  * same reason: seeds are timestamps whose low bits move in lockstep.
  */
-function stream(seed: number): () => number {
+export function stream(seed: number): () => number {
   let h = Math.abs(Math.trunc(seed)) || 1;
   h = (h ^ 61) ^ (h >>> 16);
   h = h + (h << 3);
@@ -124,130 +136,63 @@ function stream(seed: number): () => number {
   return () => { s = (Math.imul(s, 1664525) + 1013904223) >>> 0; return s / 4294967296; };
 }
 
-/** Tubes are interchangeable, so two boards that differ only in which tube is
-    where are the same position. Sorting the key is what makes the solver's
-    visited set small enough to be fast. */
-const keyOf = (tubes: Tube[]) => tubes.map((t) => t.join("")).sort().join("|");
+export const fromBank = (e: BankEntry): Puzzle => {
+  const line = decodeLine(e[1]);
+  return { tubes: decodeTubes(e[0]), cap: CAP, colours: COLOURS, par: line.length, line };
+};
 
 /**
- * The fewest pours that solve a position, or null past `limit` nodes.
- *
- * Breadth-first, so the first solution found is the shortest. Two pruning
- * rules keep it honest and quick: never pour a finished tube, and never pour
- * a single-colour tube into an empty one (that is the same position with the
- * names swapped). The `limit` exists so a pathological board cannot hang a
- * phone; the generator treats "too hard to solve" as "reject".
- */
-export function solve(tubes: Tube[], cap: number, limit = 60_000): number[][] | null {
-  const start = keyOf(tubes);
-  if (isSolved(tubes, cap)) return [];
-  const seen = new Set<string>([start]);
-  let frontier: { tubes: Tube[]; path: number[][] }[] = [{ tubes, path: [] }];
-  let nodes = 0;
-  while (frontier.length) {
-    const next: typeof frontier = [];
-    for (const { tubes: cur, path } of frontier) {
-      for (let from = 0; from < cur.length; from++) {
-        const a = cur[from];
-        if (a.length === 0) continue;
-        if (a.length === cap && isUniform(a)) continue;             // finished: leave it
-        for (let to = 0; to < cur.length; to++) {
-          const n = pourSize(cur, cap, from, to);
-          if (n === 0) continue;
-          if (cur[to].length === 0 && isUniform(a)) continue;        // rename, not a move
-          const t2 = cur.map((t) => t.slice());
-          const moved = t2[from].splice(t2[from].length - n, n);
-          t2[to].push(...moved);
-          const k = keyOf(t2);
-          if (seen.has(k)) continue;
-          const p2 = [...path, [from, to]];
-          if (isSolved(t2, cap)) return p2;
-          seen.add(k);
-          next.push({ tubes: t2, path: p2 });
-          if (++nodes > limit) return null;
-        }
-      }
-    }
-    frontier = next;
-  }
-  return null;
-}
-
-/**
- * The puzzle for a seed.
- *
- * Random fill, then PROVE it: a random arrangement can be unsolvable, or
- * solvable in three pours, and neither is a puzzle. Each candidate is run
- * through the solver and kept only if it is solvable and its optimal solution
- * is long enough to be interesting. The solver's answer is stored as `par`,
- * so the game can say "solved in 14, par 11" and mean it.
+ * The puzzle for a seed: one draw from the level's shelf of the bank. The
+ * bank is finite, so over enough races a board comes round again; the shelves
+ * are large enough that two people racing weekly will not notice for years.
  */
 export function puzzleFor(seed: number, level: Level = "medium"): Puzzle {
-  const { colours, empties, minPar } = SHAPE[level];
-  const next = stream(seed);
-  for (let attempt = 0; attempt < 40; attempt++) {
-    const balls: number[] = [];
-    for (let c = 0; c < colours; c++) for (let i = 0; i < CAP; i++) balls.push(c);
-    for (let i = balls.length - 1; i > 0; i--) {                    // Fisher–Yates
-      const j = Math.floor(next() * (i + 1));
-      [balls[i], balls[j]] = [balls[j], balls[i]];
-    }
-    const tubes: Tube[] = [];
-    for (let c = 0; c < colours; c++) tubes.push(balls.slice(c * CAP, c * CAP + CAP));
-    for (let e = 0; e < empties; e++) tubes.push([]);
-    if (tubes.some((t) => t.length === CAP && isUniform(t))) continue; // a free tube is no fun
-    const path = solve(tubes, CAP);
-    if (!path || path.length < minPar) continue;
-    return { tubes, cap: CAP, colours, par: path.length };
-  }
-  // Unreached in practice (see check-sort.mts); a known-good fallback so the
-  // race can always start rather than crash.
-  const tubes: Tube[] = [[0,1,2,3],[1,0,3,2],[2,3,0,1],[3,2,1,0],[],[]];
-  return { tubes, cap: CAP, colours: 4, par: solve(tubes, CAP)?.length ?? 8 };
+  const shelf = BANK[level];
+  return fromBank(shelf[Math.floor(stream(seed)() * shelf.length)]);
 }
-
-/** How often the bot takes the best move rather than a merely legal one. */
-export const BOT_SKILL: Record<Level, number> = { easy: 0.55, medium: 0.7, hard: 0.82 };
-/** Milliseconds between the bot's pours — its thinking time. */
-export const BOT_PACE: Record<Level, number> = { easy: 2600, medium: 2000, hard: 1500 };
 
 /**
- * The bot's next pour. It knows the optimal line (it can afford to solve), and
- * plays it with probability BOT_SKILL; otherwise a random legal pour. So it is
- * beatable by planning, not by luck.
+ * The bot.
  *
- * Two rules stop "random" from becoming "never finishes", which it did on one
- * hard board in twelve: it never plays the exact reverse of its last pour —
- * the main way a wanderer loops — and once it is within four pours of the end
- * it closes out. A bot that flails in the middle is a fair opponent; one that
- * dithers on the last two tubes is a race with nobody in it.
+ * It cannot solve the board any more than the phone can, so it plays the
+ * stored shortest line — and is made beatable not by playing worse moves but
+ * by HESITATING: with probability 1 − skill it makes a move that is not on
+ * the line, sees it, and takes it back, which costs it two moves and two
+ * beats of its clock. That is what a person who lost the thread does, and it
+ * shows on the other phone as a ball going out and coming home.
  */
-export function botPour(g: Game, level: Level, rand: () => number): [number, number] | null {
-  const legal: [number, number][] = [];
-  const last = g.history[g.history.length - 1];
-  for (let f = 0; f < g.tubes.length; f++) {
-    const a = g.tubes[f];
-    if (a.length === 0 || (a.length === g.cap && isUniform(a))) continue;
-    for (let t = 0; t < g.tubes.length; t++) {
-      if (pourSize(g.tubes, g.cap, f, t) === 0) continue;
-      if (g.tubes[t].length === 0 && isUniform(a)) continue;
-      if (last && last.from === t && last.to === f) continue;      // not straight back
-      legal.push([f, t]);
+export const BOT_SKILL: Record<Level, number> = { easy: 0.75, medium: 0.85, hard: 0.93 };
+/** Milliseconds between the bot's moves — its thinking time, before jitter. */
+export const BOT_PACE: Record<Level, number> = { easy: 1900, medium: 1500, hard: 1100 };
+
+export interface BotState {
+  /** how far along the line it is */
+  step: number;
+  /** the move it is currently regretting, to be taken back next */
+  regret: Move | null;
+}
+export const botStart = (): BotState => ({ step: 0, regret: null });
+
+export function botMove(g: Game, line: Move[], st: BotState, level: Level, rand: () => number):
+  { move: Move; st: BotState } | null {
+  if (st.regret) return { move: [st.regret[1], st.regret[0]], st: { ...st, regret: null } };
+  const planned = line[st.step];
+  if (!planned) return null;
+  if (rand() >= BOT_SKILL[level]) {
+    const wrong: Move[] = [];
+    for (let f = 0; f < g.tubes.length; f++) for (let t = 0; t < g.tubes.length; t++) {
+      if (f === planned[0] && t === planned[1]) continue;
+      if (g.tubes[f].length === g.cap && isUniform(g.tubes[f])) continue; // it would not touch a finished tube
+      if (canPour(g.tubes, g.cap, f, t)) wrong.push([f, t]);
+    }
+    if (wrong.length) {
+      const move = wrong[Math.floor(rand() * wrong.length)];
+      return { move, st: { ...st, regret: move } };
     }
   }
-  const best = solve(g.tubes, g.cap, 20_000);
-  if (best && best.length && (best.length <= 4 || rand() < BOT_SKILL[level]))
-    return best[0] as [number, number];
-  // A random pour, but never one that KILLS the board: a legal pour can fill
-  // the working space in a way nothing recovers from, and the bot then has
-  // moves for ever and a finish never. One hard board in twelve did exactly
-  // that. Shuffle the candidates and take the first that leaves a solution.
-  for (let i = legal.length - 1; i > 0; i--) {
-    const j = Math.floor(rand() * (i + 1)); [legal[i], legal[j]] = [legal[j], legal[i]];
-  }
-  for (const [f, t] of legal) {
-    const after = pour(g, f, t).tubes;
-    if (solve(after, g.cap, 20_000)) return [f, t];
-  }
-  return best && best.length ? (best[0] as [number, number]) : null;
+  return { move: planned, st: { ...st, step: st.step + 1 } };
 }
+
+/** The bot's next thinking time: its pace, ±40%, so it does not tick like a clock. */
+export const botDelay = (level: Level, rand: () => number) =>
+  Math.round(BOT_PACE[level] * (0.6 + rand() * 0.8));

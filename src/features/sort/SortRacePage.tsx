@@ -71,7 +71,7 @@ export function SortRacePage() {
       </motion.div>
 
       <motion.div variants={popIn} className="piece bg-surface p-3 pt-1">
-        <Board tubes={r.me.tubes} cap={r.me.cap} selected={r.selected}
+        <Board tubes={r.me.tubes} cap={r.me.cap} selected={r.selected} refused={r.refused}
           onPick={r.pick} disabled={over} />
       </motion.div>
 

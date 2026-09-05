@@ -47,6 +47,13 @@ Each claim below was checked by running it, not by reading the code.
 | c4_games is in the realtime publication | it was NOT — created outside `supabase_realtime`, which shows each player only their own moves. `pg_publication_tables` now lists it alongside `ttt_games`, both `relreplident = d` |
 | The database refuses an unknown room mode | `set_room_setup` and `rooms_mode_check` both list exactly the five modes, read back from `pg_get_functiondef` and `pg_get_constraintdef` |
 | All six games render on the catalogue | headless Chromium at 420x900 against the built bundle: six cards, the two bankless ones showing "Head-to-head" instead of a bank count, no page errors |
+| Ball Sort plays the physical rules | `npm run check:sort` — a ball goes onto any tube with room, one ball a move, a full tube refuses, every move reversible; 15,629 assertions |
+| Every Ball Sort board is what the bank says | same run: 300 boards, every stored line legal and exactly par, par in its band (easy 15–18, medium 19–21, hard 22–25), no duplicates, first two per shelf re-solved by an independent search |
+| The bot finishes every race and hesitates, not blunders | same run: 60 races solved, hesitations taken straight back, the board as it was, never touches a finished tube |
+| Tampering is caught | mutation runs: a changed digit in a bank line, a full tube accepting a ball, and the bot one step off its line each fail the check |
+| The board does not hint, and refuses visibly | headless Chromium on the built bundle: 0 pop-coloured strokes with a ball lifted; tapping a full tube leaves the ball lifted, moves at 0, and runs a Web Animations shake that replays on a second tap |
+| A race is playable end to end | same run: a medium board matched to its bank entry, the take-back restored the start and still counted a move, the stored line sorted it — "Solved in 22 — par 21 (+1)" |
+| The referee replays the same bank | `sort-finish` v2 deployed with `rules.ts` and `bank.ts` beside `index.ts`; sha256 of both copies equals the played files (b225675d… for the bank) |
 | The answer is not parked at index 0 | 371 of 1,517 have the answer first — the seeded insert shuffle, matching the generator's own count exactly |
 
 ## Content
@@ -86,6 +93,10 @@ tabs do not fit 390px, and the header now carries status — streak and rank bad
   has had two browsers in it. Seat assignment, the transition writer rule and
   the shared clock all held. The race mode still has not been played by two
   people, and no room has been tested across a disconnect.
+- **A Ball Sort room across two phones, through the edge function.** The
+  function is deployed and its files are byte-checked, but no finish has been
+  posted to it from a real room yet — neither shell here can reach the Supabase
+  host. Dublin vs Manchester is the test.
 - **The streak across a real day boundary.** `touch_streak` is unit-obvious and
   the same-day path is exercised, but nothing has yet played on two consecutive
   real days. Worth checking tomorrow.

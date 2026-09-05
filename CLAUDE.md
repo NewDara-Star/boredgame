@@ -542,6 +542,46 @@ wins about 85% of the time. That last one is the point.
 Watch for `slice(-0)`. A bot told to remember nothing had perfect recall,
 because `slice(-0)` is `slice(0)` and returns everything.
 
+## Ball Sort is a race, and nothing on a phone solves it
+
+Six tubes, five colours, four of each, one tube empty, and the PHYSICAL rules:
+the top ball of any tube goes onto any tube with room. The "same colour only"
+rule every app clone uses is not in the game — a real set of tubes lets you
+park a red on a blue to dig out the green underneath, and that parking is half
+the plan. It is played as a race: the same board on two phones (or against the
+bot), first to sort it wins, so the skill is seeing the shortest route.
+
+Measured consequences of the physical rules, on 205 random boards:
+
+- Every board is solvable and there are no dead ends — any move can be taken
+  back as a move, so the position graph is undirected. Under the same-colour
+  rule only 27% of random boards were solvable.
+- Shortest solutions run 13–24 moves, median 20; most boards have hundreds of
+  equally short lines, so "one forced line" difficulty does not exist. The only
+  difficulty dial is length: easy ≤ 18, medium 19–21, hard ≥ 22.
+- **A phone cannot solve one.** Plain BFS did not finish (6.7M states, 33s).
+  A* with a good bound: median 0.2s, worst case over 17s — on a Mac.
+
+So `src/features/sort/rules.ts` contains no solver. `scripts/sort-bank.mts`
+runs A* offline (minutes; run several workers, then `emit`) and writes
+`bank.ts`: 100 boards per band with one shortest line each, sorted so the
+cheapest-to-verify come first. `puzzleFor(seed, level)` is one seeded pick from
+a shelf; both phones and the edge function make the same pick. The bot plays
+the stored line and is made beatable by hesitating — an off-line move it takes
+straight back, two moves and two beats of its clock — not by playing worse.
+
+The board does not hint. Nothing lights up to say where a ball can go; the one
+thing it says is NO, by shaking a full tube, because a silent refusal reads as
+a broken tap. `check-sort.mts` holds the bank to account: every line legal and
+exactly par, par inside its band, the bound never above par, no duplicates, and
+an independent iterative-deepening search re-solving the first two boards of
+each shelf. `supabase/functions/sort-finish/` carries byte copies of `rules.ts`
+AND `bank.ts`; the check fails if either drifts.
+
+The line in the bundle is the one honest cheat left: a script could read
+`BANK` and play a board in a second. The referee cannot tell that from a fast
+thumb, and nothing here tries to.
+
 ## Brand: sticker on neon, but only where you are not reading
 
 The references are logo boards and packaging — saturated grounds, white fills,
@@ -910,6 +950,11 @@ npm run typecheck  # tsc --noEmit
 npm run build      # tsc -b && vite build
 
 for f in scripts/check-*.mts; do node --experimental-strip-types "$f"; done
+
+# the Ball Sort bank (slow, offline; two workers, then merge)
+node --experimental-strip-types scripts/sort-bank.mts run 0 50 &
+node --experimental-strip-types scripts/sort-bank.mts run 1 50 ; wait
+node --experimental-strip-types scripts/sort-bank.mts emit 100
 ```
 
 `npm run build` fails from an agent shell with `EPERM ... unlink dist/assets/…`:

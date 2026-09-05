@@ -1,5 +1,6 @@
+import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
-import { pourSize, type Tube } from "./rules";
+import type { Tube } from "./rules";
 
 /**
  * The tubes, drawn. One SVG so the geometry is exact whatever the width, and
@@ -8,6 +9,12 @@ import { pourSize, type Tube } from "./rules";
  * Balls are lit from top-left — a specular arc on the upper-left face, colour
  * falling off to the lower-right, a sliver of rim light on the shadow edge and
  * one soft cast shadow at the bottom of the tube. Six gradients, one light.
+ *
+ * It does not hint. No tube lights up to say "put it here": the board is the
+ * board, the way a real set of tubes is, and where a ball can go is part of
+ * what you are racing to see. The one thing it does say is NO — a full tube
+ * that is tapped with a ball in hand shakes, because a silent refusal reads
+ * as a broken tap.
  */
 
 /** ball colours, by index. The app's own tokens where they exist, so a red ball
@@ -22,7 +29,7 @@ const INK: [string, string, string][] = [
 ];
 
 const TW = 40, GAP = 9, R = 14.5, SLOT = 31.5;
-const LIFT = 44;                               // headroom for a lifted run
+const LIFT = 44;                               // headroom for the lifted ball
 const PAD_X = 8, PAD_BOTTOM = 10;
 
 export function tubeGeometry(n: number, cap: number) {
@@ -33,12 +40,14 @@ export function tubeGeometry(n: number, cap: number) {
 }
 
 export function Board({
-  tubes, cap, selected, onPick, size = "full", disabled = false,
+  tubes, cap, selected, refused, onPick, size = "full", disabled = false,
 }: {
   tubes: Tube[];
   cap: number;
-  /** the tube whose top run is lifted, waiting for a destination */
+  /** the tube whose top ball is lifted, waiting for a destination */
   selected?: number | null;
+  /** the tube that just refused a ball, and when — a new stamp shakes it */
+  refused?: { tube: number; at: number } | null;
   onPick?: (i: number) => void;
   size?: "full" | "mini";
   disabled?: boolean;
@@ -46,16 +55,20 @@ export function Board({
   const g = tubeGeometry(tubes.length, cap);
   const interactive = !!onPick && !disabled;
 
-  // the lifted run, so it can be drawn floating
-  const liftCount = (i: number) => {
-    if (selected !== i) return 0;
-    const t = tubes[i]; if (!t.length) return 0;
-    const c = t[t.length - 1]; let n = 0;
-    for (let k = t.length - 1; k >= 0 && t[k] === c; k--) n++;
-    return n;
-  };
-  const canReceive = (i: number) =>
-    selected != null && selected !== i && pourSize(tubes, cap, selected, i) > 0;
+  // the lifted ball, so it can be drawn floating
+  const liftCount = (i: number) => (selected === i && tubes[i].length > 0 ? 1 : 0);
+
+  // The refusal shake, through the Web Animations API rather than a motion
+  // prop: it must replay every time, including twice on the same tube, and a
+  // keyframe prop that comes back equal does not.
+  const groups = useRef<(SVGGElement | null)[]>([]);
+  useEffect(() => {
+    if (!refused) return;
+    groups.current[refused.tube]?.animate(
+      [-0, -4, 4, -3, 3, -1, 0].map((dx) => ({ transform: `translateX(${dx}px)` })),
+      { duration: 320, easing: "ease-out" },
+    );
+  }, [refused?.at, refused?.tube]);
 
   return (
     <svg viewBox={`0 0 ${g.w} ${g.h}`}
@@ -83,10 +96,10 @@ export function Board({
       </defs>
 
       {tubes.map((t, i) => {
-        const x = g.x(i), lifted = liftCount(i), receive = canReceive(i);
+        const x = g.x(i), lifted = liftCount(i);
         const full = t.length === cap && t.every((c) => c === t[0]);
         return (
-          <g key={i}
+          <g key={i} ref={(el) => { groups.current[i] = el; }}
             onPointerDown={interactive ? (e) => { e.preventDefault(); onPick!(i); } : undefined}
             style={{ cursor: interactive ? "pointer" : "default" }}>
             {/* a generous hit area, because the tube is narrow and the thumb is not */}
@@ -96,9 +109,8 @@ export function Board({
             <path d={`M ${x} ${g.top} V ${g.top + g.tubeH - TW / 2}
                       A ${TW / 2} ${TW / 2} 0 0 0 ${x + TW} ${g.top + g.tubeH - TW / 2}
                       V ${g.top} Z`}
-              fill={receive ? "rgba(255,208,40,.22)" : full ? "rgba(16,160,78,.10)" : "rgba(20,16,13,.05)"}
-              stroke={receive ? "var(--color-pop)" : "var(--color-ink)"}
-              strokeWidth={receive ? 2.6 : 2} strokeLinejoin="round" />
+              fill={full ? "rgba(16,160,78,.10)" : "rgba(20,16,13,.05)"}
+              stroke="var(--color-ink)" strokeWidth="2" strokeLinejoin="round" />
             <path d={`M ${x} ${g.top} V ${g.top + g.tubeH - TW / 2}
                       A ${TW / 2} ${TW / 2} 0 0 0 ${x + TW} ${g.top + g.tubeH - TW / 2}
                       V ${g.top} Z`}

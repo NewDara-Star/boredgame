@@ -1,18 +1,19 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  BOT_PACE, botPour, isSolved, newGame, pour, puzzleFor, solvedCount, undo,
-  type Game, type Level,
+  botDelay, botMove, botStart, isSolved, newGame, pour, puzzleFor, solvedCount, undo, whyNot,
+  type BotState, type Game, type Level,
 } from "./rules";
 
 export type Racer = "me" | "bot";
+export interface Refusal { tube: number; at: number }
 
 /**
  * A race against the bot: the same puzzle on two boards, first to sort it.
  *
  * Your board and the bot's are independent games from one puzzle. The bot
- * pours on its own clock and never touches yours; the race ends the instant
- * either board is sorted. Both keep counting moves, because "solved in 14, par
- * 11" is the sentence the game exists to say.
+ * moves on its own clock and never touches yours; the race ends the instant
+ * either board is sorted. Both keep counting moves, because "solved in 24, par
+ * 20" is the sentence the game exists to say.
  */
 export function useSortRace(level: Level = "medium") {
   const [seed, setSeed] = useState(() => Date.now());
@@ -21,6 +22,7 @@ export function useSortRace(level: Level = "medium") {
   const [me, setMe] = useState<Game>(() => newGame(puzzle));
   const [bot, setBot] = useState<Game>(() => newGame(puzzle));
   const [selected, setSelected] = useState<number | null>(null);
+  const [refused, setRefused] = useState<Refusal | null>(null);
   const [winner, setWinner] = useState<Racer | null>(null);
   const [startedAt, setStartedAt] = useState<number>(() => Date.now());
   const [finishedAt, setFinishedAt] = useState<number | null>(null);
@@ -30,7 +32,7 @@ export function useSortRace(level: Level = "medium") {
   // a fresh puzzle resets both boards; the tally survives it
   useEffect(() => {
     setMe(newGame(puzzle)); setBot(newGame(puzzle));
-    setSelected(null); setWinner(null);
+    setSelected(null); setRefused(null); setWinner(null);
     setStartedAt(Date.now()); setFinishedAt(null);
   }, [puzzle]);
 
@@ -43,9 +45,9 @@ export function useSortRace(level: Level = "medium") {
     });
   }, []);
 
-  /** Tap a tube. First tap lifts its top run; the second pours it, or — if
-      that pour is illegal — lifts the new tube instead, which is what a thumb
-      that changed its mind meant. */
+  /** Tap a tube. The first tap lifts its top ball; the second drops it there.
+      A tube that cannot take it — only ever a full one — refuses visibly and
+      the ball stays lifted, because a silent re-select reads as a broken tap. */
   const pick = useCallback((i: number) => {
     if (winner) return;
     setMe((g) => {
@@ -54,8 +56,8 @@ export function useSortRace(level: Level = "medium") {
         return g;
       }
       if (selected === i) { setSelected(null); return g; }
+      if (whyNot(g.tubes, g.cap, selected, i)) { setRefused({ tube: i, at: Date.now() }); return g; }
       const next = pour(g, selected, i);
-      if (next === g) { setSelected(g.tubes[i].length > 0 ? i : null); return g; }
       setSelected(null);
       if (isSolved(next.tubes, next.cap)) finish("me");
       return next;
@@ -68,22 +70,28 @@ export function useSortRace(level: Level = "medium") {
     setMe((g) => undo(g));
   }, [winner]);
 
-  // The bot, on its own clock. Its next pour is decided at the moment it pours,
-  // from the board as it is then — it never plans against a board you changed.
+  // The bot, on its own clock: the stored line, with hesitations. Each move
+  // schedules the next, at a jittered pace, so it does not tick like a clock.
   const botRand = useRef(Math.random);
+  const botState = useRef<BotState>(botStart());
+  useEffect(() => { botState.current = botStart(); }, [puzzle]);
   useEffect(() => {
     if (winner) return;
-    const t = setInterval(() => {
+    let timer: ReturnType<typeof setTimeout>;
+    const tick = () => {
       setBot((g) => {
         if (isSolved(g.tubes, g.cap)) return g;
-        const mv = botPour(g, level, botRand.current);
-        if (!mv) return g;
-        const next = pour(g, mv[0], mv[1]);
+        const r = botMove(g, puzzle.line, botState.current, level, botRand.current);
+        if (!r) return g;
+        botState.current = r.st;
+        const next = pour(g, r.move[0], r.move[1]);
         if (isSolved(next.tubes, next.cap)) finish("bot");
         return next;
       });
-    }, BOT_PACE[level]);
-    return () => clearInterval(t);
+      timer = setTimeout(tick, botDelay(level, botRand.current));
+    };
+    timer = setTimeout(tick, botDelay(level, botRand.current));
+    return () => clearTimeout(timer);
   }, [level, winner, finish, puzzle]);
 
   const restart = useCallback(() => setSeed(Date.now()), []);
@@ -93,7 +101,7 @@ export function useSortRace(level: Level = "medium") {
   }, []);
 
   return {
-    puzzle, me, bot, selected, winner, wins, ended,
+    puzzle, me, bot, selected, refused, winner, wins, ended,
     startedAt, finishedAt,
     progress: { me: solvedCount(me.tubes, me.cap), bot: solvedCount(bot.tubes, bot.cap) },
     pick, takeBack, restart, endSession, newSession,

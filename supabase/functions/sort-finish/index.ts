@@ -7,16 +7,16 @@
  * and win a race without touching a tube.
  *
  * So the claim is replayed here instead. You send the moves you actually made;
- * this regenerates the puzzle from the race's seed, applies every pour through
- * the reducer, and rejects the first one that is illegal. Only then does it
- * call the privileged settle.
+ * this picks the same board the race's seed picked from the bank, applies
+ * every move through the reducer, and rejects the first one that is illegal.
+ * Only then does it call the privileged settle.
  *
- * The point of doing it in an edge function rather than in SQL: this imports
- * ../../../src/features/sort/rules.ts VERBATIM — the same file the phones run
- * and the same file scripts/check-sort.mts holds to 2,000 assertions. A
- * plpgsql reimplementation would be a second version of the rules, free to
+ * The point of doing it in an edge function rather than in SQL: rules.ts and
+ * bank.ts beside this file are VERBATIM copies of src/features/sort/ — the
+ * files the phones run and the files scripts/check-sort.mts holds to account.
+ * A plpgsql reimplementation would be a second version of the rules, free to
  * drift from the first, and a drifted referee is worse than a trusting one.
- * scripts/check-edge.mts fails the build if the copy here stops matching.
+ * check-sort fails the build if either copy here stops matching.
  */
 import { createClient } from "jsr:@supabase/supabase-js@2";
 import {
@@ -63,7 +63,7 @@ Deno.serve(async (req: Request) => {
   if (error || !race) return json({ error: "no race you can see there" }, 403);
   if (race.winner) return json({ winner: race.winner, already: true });
 
-  // The same call both phones made to lay the puzzle out.
+  // The same call both phones made to lay the puzzle out: one pick from the bank.
   const puzzle = puzzleFor(Number(race.seed), race.level as Level);
   let g = newGame(puzzle);
   for (let i = 0; i < moves.length; i++) {
