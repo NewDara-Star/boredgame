@@ -23,18 +23,24 @@ function Glyph({ mark }: { mark: Mark }) {
 }
 
 export function Board({
-  board, target, line, canPick, compact = false, onPick,
+  board, target, line, canPick, compact = false, width, onPick,
 }: {
   board: Cell[]; target: number | null; line: number[] | null;
-  canPick: boolean; compact?: boolean; onPick: (i: number) => void;
+  canPick: boolean; compact?: boolean;
+  /** the width the screen can give it, measured by PlayBoard. Without one it
+      falls back to the old width-driven sizing, which is what the room
+      screens and the result cards still want. */
+  width?: number;
+  onPick: (i: number) => void;
 }) {
   return (
     // The board shrinks while a question is up. At full size the options sit
     // below the fold, and you cannot judge whether a square is worth fighting
     // for without seeing the board it belongs to.
     <motion.div
-      className="grid grid-cols-3 mx-auto"
-      animate={{ maxWidth: compact ? 188 : 336, gap: compact ? 6 : 10 }}
+      className={`grid grid-cols-3 mx-auto ${width ? "" : "w-full"}`}
+      style={width ? { width } : undefined}
+      animate={{ maxWidth: width ?? (compact ? 188 : 336), gap: width ? Math.max(4, width * 0.03) : compact ? 6 : 10 }}
       transition={SPRING}>
       {board.map((cell, i) => {
         const contested = target === i;

@@ -34,6 +34,14 @@
 }
 
 html, body, #root { height: 100%; }
+
+/* What the app itself takes off the screen before a page gets any: the sticky
+   header, main's own padding, and — on a phone — the bottom bar. Measured, not
+   guessed: see the screen survey in STATUS.md. */
+:root { --chrome: calc(62px + 1rem + 5rem + 6px); }
+@media (min-width: 640px) { :root { --chrome: calc(62px + 3rem); } }
+/* the 6px is the hard shadow: every .piece casts 0 5px 0, so a surface sized
+   to the pixel scrolls by five of them. */
 body {
   margin: 0;
   background: var(--color-paper);
@@ -81,6 +89,29 @@ h1, h2, h3, .display { font-family: var(--font-display); font-weight: 600; lette
     transform: rotate(-1.5deg);
   }
   .sticker-r { transform: rotate(1.5deg); }
+
+  /* --- a game fills the screen, it does not flow down it ---
+     A phone in Safari has 534px between the header and the bottom bar; the
+     same phone on the home screen has 714. A play screen laid out by flow
+     puts the thing you are being asked to tap under the fold on the first and
+     not the second, which is how "answer the question" became "scroll, then
+     answer the question". So a play screen is exactly as tall as the space it
+     is given: the fixed parts take what they need and the board takes the
+     rest, however much that is. It can still scroll if a reveal grows it,
+     which is a safety valve rather than the layout. */
+  .play-surface {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    min-height: 0;
+    height: calc(100dvh - var(--chrome));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  /* On a laptop there is no bottom bar and no shortage of height; let it flow. */
+  @media (min-width: 640px) {
+    .play-surface { height: auto; overflow: visible; }
+  }
 
   /* Carousels are swiped, not scrolled with a bar. */
   .no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }

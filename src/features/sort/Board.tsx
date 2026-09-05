@@ -35,6 +35,9 @@ const PAD_X = 8, PAD_BOTTOM = 10;
 /** the tube that just refused a ball, and when — a new stamp shakes it again */
 export interface Refusal { tube: number; at: number }
 
+/** how wide the tubes are for their height, so PlayBoard can fit them */
+export const TUBES_RATIO = 1.57;
+
 export function tubeGeometry(n: number, cap: number) {
   const tubeH = cap * SLOT + 12;
   const w = PAD_X * 2 + n * TW + (n - 1) * GAP;
@@ -43,7 +46,7 @@ export function tubeGeometry(n: number, cap: number) {
 }
 
 export function Board({
-  tubes, cap, selected, refused, onPick, size = "full", disabled = false,
+  tubes, cap, selected, refused, onPick, size = "full", disabled = false, width,
 }: {
   tubes: Tube[];
   cap: number;
@@ -54,6 +57,8 @@ export function Board({
   onPick?: (i: number) => void;
   size?: "full" | "mini";
   disabled?: boolean;
+  /** the width the screen can give it — see PlayBoard */
+  width?: number;
 }) {
   const g = tubeGeometry(tubes.length, cap);
   const interactive = !!onPick && !disabled;
@@ -76,7 +81,7 @@ export function Board({
   return (
     <svg viewBox={`0 0 ${g.w} ${g.h}`}
       className={`w-full select-none ${size === "mini" ? "" : "touch-manipulation"}`}
-      style={{ maxWidth: size === "mini" ? 220 : undefined }}
+      style={{ maxWidth: width ?? (size === "mini" ? 220 : undefined) }}
       aria-label="Ball sort tubes">
       <defs>
         {BALL.map(([hi, mid, lo], i) => (

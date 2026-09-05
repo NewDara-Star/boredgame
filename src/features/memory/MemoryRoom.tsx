@@ -5,6 +5,7 @@ import {
   MatchOver, useMatchChrome, useStallRescue,
 } from "@/features/rooms/matchUi";
 import { Board } from "./Board";
+import { PlayBoard, PlayRow, PlaySurface } from "@/features/play/PlaySurface";
 import { memoryArt } from "./card";
 import { describe, scoreOf, stallWriter, type Mark } from "./rules";
 import { useMemoryRoom } from "./useMemoryRoom";
@@ -51,28 +52,38 @@ export function MemoryRoom({
   const mine = g.turn === t.myMark;
 
   return (
-    <div className="space-y-4">
-      <Seats
-        names={names}
-        scores={{ x: scoreOf(g, "x"), o: scoreOf(g, "o") }}
-        active={g.turn}
-        dimmed={g.phase === "over"}
-        glyph={(m: Mark) => (m === "x" ? "◆" : "●")} />
+    <PlaySurface>
+      <PlayRow>
+        <Seats
+          names={names}
+          scores={{ x: scoreOf(g, "x"), o: scoreOf(g, "o") }}
+          active={g.turn}
+          dimmed={g.phase === "over"}
+          glyph={(m: Mark) => (m === "x" ? "◆" : "●")} />
+      </PlayRow>
 
-      <Board game={g} canFlip={mine && (g.phase === "picking" || g.phase === "asking")}
-        onFlip={t.choose} />
+      <PlayBoard min={78}>
+        {(width) => (
+          <Board game={g} width={width}
+            canFlip={mine && (g.phase === "picking" || g.phase === "asking")}
+            onFlip={t.choose} />
+        )}
+      </PlayBoard>
 
-      <p className="text-center text-[15px] font-bold text-soft min-h-[24px]">
-        {describe(g, names, t.myMark)}
-      </p>
+      <PlayRow className="space-y-3">
+        <p className="text-center text-[15px] font-bold text-soft">
+          {describe(g, names, t.myMark)}
+        </p>
 
-      <Note>{t.error}</Note>
+        <Note>{t.error}</Note>
 
-      <AwayNotice players={players} userId={userId} now={now} />
+        <AwayNotice players={players} userId={userId} now={now} />
 
-      {g.phase !== "over" && <EndMatchLink onQuit={() => void t.quit()} />}
+        {g.phase !== "over" && <EndMatchLink onQuit={() => void t.quit()} />}
+      </PlayRow>
 
       {g.phase === "over" && (
+        <PlayRow>
         <OverPanel
           headline={g.winner === "draw" ? "All square"
             : g.winner === t.myMark ? "You win" : `${names[g.winner as Mark]} wins`}
@@ -81,7 +92,8 @@ export function MemoryRoom({
           onRematch={() => void t.rematch()}
           onQuit={() => void t.quit()}
           onChangeGame={() => void t.changeGame()} />
+        </PlayRow>
       )}
-    </div>
+    </PlaySurface>
   );
 }

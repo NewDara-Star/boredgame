@@ -3,7 +3,8 @@ import { Note, Dealing } from "@/shared/ui/Note";
 import {
   Seats, AwayNotice, OverPanel, EndMatchLink, MatchOver, useMatchChrome,
 } from "@/features/rooms/matchUi";
-import { Board } from "./Board";
+import { Board, TUBES_RATIO } from "./Board";
+import { PlayBoard, PlayRow, PlaySurface } from "@/features/play/PlaySurface";
 import { ballGlyph, sortArt } from "./card";
 import { ReplayPlayer } from "./ReplayPlayer";
 import { decodeLog, type Replay } from "./rules";
@@ -52,7 +53,8 @@ export function SortRaceRoom({
   } : null;
 
   return (
-    <div className="space-y-4">
+    <PlaySurface>
+      <PlayRow className="space-y-3">
       <Seats
         names={names}
         scores={{ x: r.seat === "x" ? r.myProgress : r.theirProgress,
@@ -69,13 +71,24 @@ export function SortRaceRoom({
         <Stat label="Tubes home" value={String(r.myProgress)}
           sub={`${them} ${r.theirProgress}`} />
       </div>
+      </PlayRow>
 
-      <div className="piece bg-surface p-3 pt-1">
-        <Board tubes={r.me.tubes} cap={r.me.cap} selected={r.selected} refused={r.refused}
-          onPick={r.pick} disabled={!!r.won} />
-      </div>
+      {!r.won && (() => {
+        const me = r.me;
+        return (
+          <PlayBoard ratio={TUBES_RATIO} min={120}>
+            {(width) => (
+              <div className="piece bg-surface p-3 pt-1" style={{ width }}>
+                <Board tubes={me.tubes} cap={me.cap} selected={r.selected} refused={r.refused}
+                  width={width - 26} onPick={r.pick} disabled={!!r.won} />
+              </div>
+            )}
+          </PlayBoard>
+        );
+      })()}
 
-      <p className="text-center text-[15px] font-bold text-soft min-h-[24px]">
+      <PlayRow className="space-y-3">
+      <p className="text-center text-[15px] font-bold text-soft">
         {r.won ? (r.iWon ? "You sorted it first." : `${them} got there first.`)
           : r.finishing ? "Checking that finish…"
           : r.selected === null ? "Tap a tube to lift its top ball."
@@ -104,15 +117,19 @@ export function SortRaceRoom({
       <AwayNotice players={players} userId={userId} now={now} />
 
       {!r.won && <EndMatchLink onQuit={() => void r.quit()} />}
+      </PlayRow>
 
       {r.won && (
         <>
-          <p className="text-center text-[13px] font-bold text-soft">
-            {r.iWon
-              ? `Solved in ${r.me.moves} — par ${r.row.par}${overPar <= 0 ? ". On the nose." : ` (+${overPar}).`}`
-              : `You were ${r.myProgress} of ${r.row.colours} tubes home.`}
-          </p>
-          {film && <ReplayPlayer replay={film} />}
+          <PlayRow>
+            <p className="text-center text-[13px] font-bold text-soft">
+              {r.iWon
+                ? `Solved in ${r.me.moves} — par ${r.row.par}${overPar <= 0 ? ". On the nose." : ` (+${overPar}).`}`
+                : `You were ${r.myProgress} of ${r.row.colours} tubes home.`}
+            </p>
+          </PlayRow>
+          {film && <div className="flex-1 min-h-0 overflow-y-auto"><ReplayPlayer replay={film} /></div>}
+          <PlayRow>
           <OverPanel
             headline={r.iWon ? "You win" : `${them} wins`}
             mine={r.iWon}
@@ -120,9 +137,10 @@ export function SortRaceRoom({
             onRematch={() => void r.rematch()}
             onQuit={() => void r.quit()}
             onChangeGame={() => void r.quit()} />
+          </PlayRow>
         </>
       )}
-    </div>
+    </PlaySurface>
   );
 }
 

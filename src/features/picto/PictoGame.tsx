@@ -64,10 +64,9 @@ export function PictoGame() {
 
   return (
     <div>
-      {filterBar}
       <Hud index={r.index} total={r.items.length} score={r.score} streak={r.streak} accent="#FF5A1F" />
 
-      <div className="relative mt-5">
+      <div className="relative mt-4">
         <Burst show={r.phase === "revealed" && !!r.last?.correct} />
         <AnimatePresence mode="wait">
           <motion.div

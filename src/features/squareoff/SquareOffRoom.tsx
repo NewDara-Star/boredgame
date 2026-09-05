@@ -3,6 +3,7 @@ import type { Challenge, RoomPlayer, RoomStatus } from "@/shared/types/db";
 import { Note, Dealing } from "@/shared/ui/Note";
 import { TurnPanel } from "@/features/rooms/TurnPanel";
 import { Board } from "./Board";
+import { PlayBoard, PlayRow, PlaySurface } from "@/features/play/PlaySurface";
 import { SQUARE_OFF_ART } from "./card";
 import { describe, stallWriter, type Mark } from "./rules";
 import { useTttRoom } from "./useTttRoom";
@@ -82,32 +83,45 @@ export function SquareOffRoom({
   const revealed = g.phase === "revealed" || g.phase === "over";
 
   return (
-    <div className="space-y-4">
-      <Seats
-        names={names}
-        scores={{ x: scoreOf("x"), o: scoreOf("o") }}
-        active={g.phase === "asking" ? g.answerer : g.turn}
-        dimmed={g.phase === "over"}
-        glyph={(m: Mark) => (m === "x" ? "✕" : "◯")} />
+    <PlaySurface>
+      <PlayRow>
+        <Seats
+          names={names}
+          scores={{ x: scoreOf("x"), o: scoreOf("o") }}
+          active={g.phase === "asking" ? g.answerer : g.turn}
+          dimmed={g.phase === "over"}
+          glyph={(m: Mark) => (m === "x" ? "✕" : "◯")} />
+      </PlayRow>
 
-      <Board board={g.board} target={g.target} line={g.line}
-        canPick={g.phase === "picking" && g.turn === t.myMark}
-        compact={g.phase === "asking" || g.phase === "revealed"}
-        onPick={t.choose} />
+      <PlayBoard min={78}>
+        {(width) => (
+          <Board board={g.board} target={g.target} line={g.line} width={width}
+            canPick={g.phase === "picking" && g.turn === t.myMark}
+            compact={g.phase === "asking" || g.phase === "revealed"}
+            onPick={t.choose} />
+        )}
+      </PlayBoard>
 
-      <p className="text-center text-[15px] font-bold text-soft min-h-[24px]">
-        {describe(g, names, t.myMark)}
-      </p>
+      <PlayRow className="space-y-3">
+        <p className="text-center text-[15px] font-bold text-soft">
+          {describe(g, names, t.myMark)}
+        </p>
 
-      {/* A room that cannot serve a question is broken, and saying so beats a
-          board that never advances. */}
-      <Note>{t.error}</Note>
+        {/* A room that cannot serve a question is broken, and saying so beats a
+            board that never advances. */}
+        <Note>{t.error}</Note>
 
-      <AwayNotice players={players} userId={userId} now={now} />
+        <AwayNotice players={players} userId={userId} now={now} />
 
-      {g.phase !== "over" && <EndMatchLink onQuit={() => void t.quit()} />}
+        {/* Only while the board is yours to look at: with a question up the
+            four options are the screen, and a link under them that ends the
+            match is both a wrong tap waiting to happen and 32px of a 534px
+            phone. */}
+        {g.phase === "picking" && <EndMatchLink onQuit={() => void t.quit()} />}
+      </PlayRow>
 
       {g.phase === "over" ? (
+        <PlayRow>
         <OverPanel
           headline={g.winner === "draw" ? "Draw"
             : g.winner === t.myMark ? "You win" : `${names[g.winner as Mark]} wins`}
@@ -116,7 +130,9 @@ export function SquareOffRoom({
           onRematch={() => void t.rematch()}
           onQuit={() => void t.quit()}
           onChangeGame={() => void t.changeGame()} />
+        </PlayRow>
       ) : (g.phase === "asking" || g.phase === "revealed") ? (
+        <PlayRow>
         <TurnPanel
           challenge={challenge === "catapult" ? "catapult" : "trivia"}
           item={t.item} options={t.item?.choices ?? []}
@@ -129,7 +145,8 @@ export function SquareOffRoom({
           stall={stall} myMark={t.myMark}
           onAdvanceNow={t.advanceNow} onForceAdvance={t.forceAdvance}
           nextLabel="Next" />
+        </PlayRow>
       ) : null}
-    </div>
+    </PlaySurface>
   );
 }

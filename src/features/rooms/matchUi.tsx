@@ -3,7 +3,8 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { popIn } from "@/shared/ui/motion";
 import type { RoomPlayer, RoomStatus } from "@/shared/types/db";
-import { drawCard, ellipsize, HEADLINE_CHARS, saveCard, type Glyph, type Hero, type MatchCard } from "@/shared/card/frame";
+import { drawCard, ellipsize, HEADLINE_CHARS, type Glyph, type Hero, type MatchCard } from "@/shared/card/frame";
+import { ResultScreen } from "@/features/play/ResultScreen";
 
 export type Mark = "x" | "o";
 
@@ -189,41 +190,17 @@ export function MatchOver({ sides, myMark, card }: {
   const [a, b] = sides;
   const winner = a.score === b.score ? null : a.score > b.score ? a : b;
   return (
-    <motion.div variants={popIn} initial="hidden" animate="show" className="space-y-4">
-      <div className={`piece p-6 text-center ${
-        !winner ? "bg-sand" : winner.mark === myMark ? "bg-good text-surface" : "bg-surface"}`}>
-        <p className="text-[12px] font-black uppercase tracking-widest opacity-70">Match over</p>
-        <p className="font-display text-3xl font-semibold mt-1">
-          {!winner ? "All square" : `${winner.name} takes it`}
-        </p>
-        <p className="font-display text-6xl font-semibold tabular-nums mt-3">
-          {a.score} <span className="opacity-40">—</span> {b.score}
-        </p>
-        <p className="text-xs font-bold opacity-70 mt-1">{a.name} v {b.name}</p>
-      </div>
-
-      {card ? (
-        <>
-          <img src={card.url} alt={`Result: ${a.name} ${a.score}, ${b.name} ${b.score}`}
-            className="w-full rounded-2xl border-[3px] border-ink" />
-          <button onClick={() => saveCard(card.file)}
-            className="piece press w-full py-4 font-display text-lg font-semibold bg-pop">
-            Save the image
-          </button>
-          <p className="text-[13px] font-bold text-soft text-center">
-            On a phone you can also press and hold the picture to save or share it.
-          </p>
-        </>
-      ) : (
-        <div className="piece grid place-items-center aspect-square bg-surface">
-          <p className="text-sm font-bold text-soft">Drawing the result…</p>
-        </div>
-      )}
-
-      <Link to="/rooms" className="piece press block w-full py-3.5 text-center font-display font-semibold">
+    <ResultScreen
+      headline={!winner ? "All square" : `${winner.name} takes it`}
+      score={`${a.score} — ${b.score}`}
+      tone={!winner ? "draw" : winner.mark === myMark ? "win" : "loss"}
+      card={card}
+      alt={`Result: ${a.name} ${a.score}, ${b.name} ${b.score}`}>
+      <Link to="/rooms"
+        className="piece press py-3.5 text-center font-display text-lg font-semibold bg-surface">
         New room
       </Link>
-    </motion.div>
+    </ResultScreen>
   );
 }
 

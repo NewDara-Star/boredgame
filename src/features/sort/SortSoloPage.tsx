@@ -7,7 +7,8 @@ import { clock, decodeLog, type Level } from "./rules";
 import { Avatar } from "@/shared/ui/Avatar";
 import { stagger, riseIn, popIn } from "@/shared/ui/motion";
 import { drawCard, saveCard, type MatchCard } from "@/shared/card/frame";
-import { Board } from "./Board";
+import { Board, TUBES_RATIO } from "./Board";
+import { PlayBoard, PlayRow, PlaySurface } from "@/features/play/PlaySurface";
 import { sortHero } from "./card";
 import { useSortSolo, type Standing } from "./useSortSolo";
 
@@ -64,7 +65,10 @@ export function SortSoloPage() {
 
   return (
     <motion.div variants={stagger(0.07)} initial="hidden" animate="show" className="space-y-4">
-      <motion.div variants={riseIn} className="flex items-center justify-between gap-3 flex-wrap">
+      {/* The game fills the screen; the ladder starts under it on purpose —
+          a list is the one thing worth scrolling to. */}
+      <PlaySurface>
+      <PlayRow className="flex items-center justify-between gap-3 flex-wrap">
         <div>
           <h1 className="font-display text-[26px] leading-none font-semibold whitespace-nowrap">
             {practice ? "Practice" : "Today's tubes"}
@@ -83,42 +87,50 @@ export function SortSoloPage() {
             </button>
           ))}
         </div>
-      </motion.div>
+      </PlayRow>
 
       {!r.result && (
         <>
-          <motion.div variants={riseIn} className="grid grid-cols-3 gap-2 text-center">
+          <PlayRow className="grid grid-cols-3 gap-2 text-center">
             <Stat label="Time" value={clock(elapsed)}
               sub={r.startedAt === null ? "on first lift" : practice ? "practice" : "server-timed"} />
             <Stat label="Moves" value={String(r.me.moves)} sub={`par ${r.puzzle.par}`} />
             {practice
               ? <Stat label="Board" value="random" sub="not ranked" />
               : <Stat label="To beat" value={leader ? clock(leader.ms) : "—"} sub={leader ? leader.username : "nobody yet today"} />}
-          </motion.div>
+          </PlayRow>
 
           {/* The board, while it is yours to play. Once it is sorted the film
               takes its place — it has the tubes and the clock in it, and a
               sorted board above a film of the sorted board was the same
               picture twice on a phone that had to be scrolled past it. */}
-          <motion.div variants={popIn} className="piece bg-surface p-3 pt-1">
-            <Board tubes={r.me.tubes} cap={r.me.cap} selected={r.selected} refused={r.refused}
-              onPick={r.pick} disabled={r.finishing} />
-          </motion.div>
+          <PlayBoard ratio={TUBES_RATIO} min={120}>
+            {(width) => (
+              <div className="piece bg-surface p-3 pt-1" style={{ width }}>
+                <Board tubes={r.me.tubes} cap={r.me.cap} selected={r.selected} refused={r.refused}
+                  width={width - 26} onPick={r.pick} disabled={r.finishing} />
+              </div>
+            )}
+          </PlayBoard>
 
-          <motion.p variants={riseIn} className="text-center text-[15px] font-bold text-soft min-h-[24px]">
-            {r.finishing ? "Checking with the referee…"
-              : r.selected === null ? "Tap a tube to lift its top ball."
-              : "Now tap where it goes."}
-          </motion.p>
+          <PlayRow>
+            <p className="text-center text-[15px] font-bold text-soft">
+              {r.finishing ? "Checking with the referee…"
+                : r.selected === null ? "Tap a tube to lift its top ball."
+                : "Now tap where it goes."}
+            </p>
+          </PlayRow>
         </>
       )}
 
       {r.error && (
-        <motion.p variants={riseIn} className="piece bg-pop p-3 text-[13px] font-bold text-center">{r.error}</motion.p>
+        <PlayRow>
+          <p className="piece bg-pop p-3 text-[13px] font-bold text-center">{r.error}</p>
+        </PlayRow>
       )}
 
       {r.result ? (
-        <motion.div variants={popIn} className="space-y-3">
+        <motion.div variants={popIn} className="space-y-3 shrink-0">
           {/* one line, not a panel: the film above it already says the time big */}
           <div className="piece px-4 py-3 bg-good text-surface flex items-baseline justify-between gap-3">
             <p className="font-display text-2xl font-semibold tabular-nums">{clock(r.result.ms)}</p>
@@ -149,7 +161,7 @@ export function SortSoloPage() {
           </div>
         </motion.div>
       ) : (
-        <motion.div variants={riseIn} className="grid grid-cols-2 gap-2.5">
+        <PlayRow className="grid grid-cols-2 gap-2.5">
           <button onClick={r.takeBack} disabled={r.me.history.length === 0 || r.finishing}
             className="piece press py-3 font-display font-semibold bg-surface disabled:opacity-50">
             Take it back
@@ -165,8 +177,9 @@ export function SortSoloPage() {
               Practice instead
             </button>
           )}
-        </motion.div>
+        </PlayRow>
       )}
+      </PlaySurface>
 
       {practice ? (
         <motion.div variants={riseIn} className="text-center">

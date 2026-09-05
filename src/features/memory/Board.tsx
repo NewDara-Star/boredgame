@@ -7,15 +7,20 @@ import { COLS, FACES, faceUp, type Game } from "./rules";
  * keeps its face showing, because half the game is remembering where the pairs
  * you have already seen were.
  */
-export function Board({ game, canFlip, onFlip }: {
+export function Board({ game, canFlip, width, onFlip }: {
   game: Game;
   canFlip: boolean;
+  /** the width the screen can give it — see PlayBoard */
+  width?: number;
   onFlip: (i: number) => void;
 }) {
   const up = faceUp(game);
+  const gap = width ? Math.max(3, width * 0.024) : 8;
   return (
-    <div className="grid gap-2 mx-auto w-full max-w-[340px]"
-      style={{ gridTemplateColumns: `repeat(${COLS}, minmax(0, 1fr))` }}>
+    <div className={`grid mx-auto ${width ? "" : "w-full"}`}
+      style={{ gridTemplateColumns: `repeat(${COLS}, minmax(0, 1fr))`,
+               gap, width, maxWidth: width ?? 340,
+               fontSize: width ? Math.max(14, width * 0.09) : undefined }}>
       {game.deck.map((face, i) => {
         const owner = game.board[i];
         const shown = owner !== null || up.includes(i);
@@ -27,7 +32,8 @@ export function Board({ game, canFlip, onFlip }: {
             animate={{ scale: pair ? 1.06 : 1 }}
             transition={SPRING}
             aria-label={shown ? `${FACES[face]}${owner ? ", claimed" : ""}` : `Tile ${i + 1}, face down`}
-            className={`piece press aspect-square grid place-items-center text-[30px] leading-none
+            className={`piece press aspect-square grid place-items-center leading-none
+              ${width ? "" : "text-[30px]"}
               disabled:opacity-100
               ${owner === "x" ? "bg-picto/25" : owner === "o" ? "bg-trivia/25"
                 : shown ? "bg-pop" : "bg-surface"}`}>

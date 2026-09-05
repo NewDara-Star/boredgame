@@ -648,6 +648,47 @@ a scratch Vite entry that imports the heroes and calls `drawCard` with
 fixtures, and serve Fredoka and Nunito locally to the headless browser — the
 Google Fonts link does not resolve from an agent shell.
 
+## A game fills the screen; it does not flow down it
+
+A phone in Safari gives a page **534px** between the header and the bottom
+bar. The same phone with the app on its home screen gives **714**. The app's
+own chrome is 62px of header, 62px of bottom bar and main's padding —
+`--chrome` in index.css is those numbers and nothing else.
+
+Laid out by flow, a game screen puts its board first (sized by the width of
+the phone, so ~360px tall whatever is left) and appends the question under it.
+The survey in STATUS.md measured what that cost: Square Off's four answers sat
+227px below the fold, Connect 4 Trivia's 274px, and both catapult modes cut
+the catapult in half. The board was always visible and the control never was.
+
+So a play screen is a **fixed-height column**, not a document:
+
+- `PlaySurface` is exactly `100dvh - var(--chrome)` tall — `dvh`, so Safari's
+  bars count — and scrolls only as a safety valve.
+- `PlayRow` is a fixed part: the seats, the caption, the question panel. It
+  takes its natural height and is never squeezed.
+- `PlayBoard` is the leftover: `flex-1 min-h-0`, and it MEASURES itself with a
+  ResizeObserver and hands its child a pixel width of `min(w, h × ratio)`.
+  Every board takes a `width` prop and draws to it.
+
+The measurement is not squeamishness about CSS. "Fit a box of known aspect
+ratio inside another box" has no honest pure-CSS answer: `aspect-ratio` with a
+fixed height ignores `max-width`, and with a fixed width it ignores
+`max-height`, so one of the two always breaks and the cells stop being square.
+A second trap: inside a centring parent a grid with only `max-width` shrinks to
+its content — Square Off's board rendered at 108px in a 358px box until it was
+given an explicit width.
+
+When the space left is under ~78px the board is not drawn at all. On a Safari
+phone with four answers up that is what happens, and it is the right answer:
+the caption already says "You're going for square 5", and a smear of nine grey
+dots is not a board. On a taller phone the same screen shows it.
+
+`npm run check:layout` holds the shape — every play screen is a surface, every
+board is drawn at a measured width, and the chrome numbers still match the
+Shell. It cannot prove pixels; `node scripts/survey-screens.mjs dist` does
+that, in a browser, when a screen changes shape.
+
 ## Brand: sticker on neon, but only where you are not reading
 
 The references are logo boards and packaging — saturated grounds, white fills,
@@ -1016,6 +1057,9 @@ npm run typecheck  # tsc --noEmit
 npm run build      # tsc -b && vite build
 
 for f in scripts/check-*.mts; do node --experimental-strip-types "$f"; done
+
+# what a phone actually sees — needs playwright, so not part of the build
+npx vite build --outDir dist && node scripts/survey-screens.mjs dist
 
 # the Ball Sort bank (slow, offline; two workers, then merge)
 node --experimental-strip-types scripts/sort-bank.mts run 0 50 &

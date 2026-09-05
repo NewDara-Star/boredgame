@@ -65,9 +65,11 @@ Each claim below was checked by running it, not by reading the code.
 | Watch on the ladder | headless with a stubbed row carrying a log: "watch" shows only on rows that have one, opens the player inline with "Make the film", and closes |
 | The referee keeps only real films | `sort-finish` v4: a log is stored on the attempt only if it matches `^[0-5][0-5]@\d+(,…)*$`, is ≤ 6000 chars, and replays to the sorted board in time order; `sort_solo_finish(p_id, p_user, p_moves, p_log)` is the only signature left, service_role only (read back from pg_proc) |
 | Rooms keep the winner's film | `sort_finish(p_room, p_user, p_tubes, p_moves, p_log)` is the only signature left, service_role only (pg_proc); the room hook times every move from the race's `started_at` and sends the log with the finish; `sort-finish` v5 stores it on the winner's seat when it replays; the room shows the film above the result. Not yet driven by two phones — the same caveat as every room finish |
+| Every play screen fits the phone | `node scripts/survey-screens.mjs` against the built bundle at 390×844 and 390×664: 13 play screens, all +0px below the fold, measured to the top of the bottom bar. Before: four of them hid the control you were being asked to use, by 169–274px |
+| The layout cannot quietly go back | `npm run check:layout` — 33 assertions that every play screen is a `PlaySurface`, every board is drawn at the width `PlayBoard` measured, and `--chrome` still matches the Shell's own header and padding. Mutation-tested: dropping `PlaySurface` from one room, `min-h-0` from the board box, the 6px shadow allowance, the Shell's padding, or the card's `max-h-full` each fail it |
 | The answer is not parked at index 0 | 371 of 1,517 have the answer first — the seeded insert shuffle, matching the generator's own count exactly |
 
-## Screen survey — 5 September
+## Screen survey — 5 September (before the fix)
 
 Measured headless at 390 wide, two heights: 844 (installed to the home
 screen, no browser bars) and 664 (Safari with its bars — the common case).
@@ -98,6 +100,13 @@ paint; what is listed is what you have to scroll to reach.
 
 Not surveyed: room views (need two signed-in phones); they stack the same
 pieces as the solo pages plus Seats and the away notice, so expect worse.
+
+**Re-measured after the fix: every play screen is +0px at both heights.**
+Trivia, Picto, all four Square Off states, Tic Tac Toe, both plain and trivia
+and catapult Connect 4, Catapult Squares and Memory now fit 534px with nothing
+below the fold. Ball Sort solo is +87 and stays that way on purpose — the
+board and its controls fit, and the ladder under them is a list worth
+scrolling to. Home, the catalogue and Profile are lists and unchanged.
 
 What causes it, in order of cost: every game page spends ~120px above the
 board on its own h1 and a seats row; boards are sized by width, not by the

@@ -7,6 +7,7 @@ import { useTttRoom } from "@/features/squareoff/useTttRoom";
 import {
   Seats, AwayNotice, OverPanel, EndMatchLink, MatchOver, useMatchChrome,
 } from "@/features/rooms/matchUi";
+import { PlayBoard, PlayRow, PlaySurface } from "@/features/play/PlaySurface";
 
 /**
  * Plain Tic Tac Toe. The board, the reducer and the synced-row hook are all
@@ -33,29 +34,38 @@ export function TicTacToeRoom({
 
 
   return (
-    <div className="space-y-4">
-      <Seats
-        names={names}
-        scores={{ x: scoreOf("x"), o: scoreOf("o") }}
-        active={g.phase === "over" ? null : g.turn}
-        glyph={(m) => (m === "x" ? "✕" : "◯")}
-        dimmed={g.phase === "over"} />
+    <PlaySurface>
+      <PlayRow>
+        <Seats
+          names={names}
+          scores={{ x: scoreOf("x"), o: scoreOf("o") }}
+          active={g.phase === "over" ? null : g.turn}
+          glyph={(m) => (m === "x" ? "✕" : "◯")}
+          dimmed={g.phase === "over"} />
+      </PlayRow>
 
-      <Board board={g.board} target={null} line={g.line}
-        canPick={g.phase === "picking" && g.turn === t.myMark}
-        onPick={t.choose} />
+      <PlayBoard min={78}>
+        {(width) => (
+          <Board board={g.board} target={null} line={g.line} width={width}
+            canPick={g.phase === "picking" && g.turn === t.myMark}
+            onPick={t.choose} />
+        )}
+      </PlayBoard>
 
-      <p className="text-center text-[15px] font-bold text-soft min-h-[24px]">
-        {describe(g, names, t.myMark)}
-      </p>
+      <PlayRow className="space-y-3">
+        <p className="text-center text-[15px] font-bold text-soft">
+          {describe(g, names, t.myMark)}
+        </p>
 
-      <Note>{t.error}</Note>
+        <Note>{t.error}</Note>
 
-      <AwayNotice players={players} userId={userId} now={now} />
+        <AwayNotice players={players} userId={userId} now={now} />
 
-      {g.phase !== "over" && <EndMatchLink onQuit={() => void t.quit()} />}
+        {g.phase !== "over" && <EndMatchLink onQuit={() => void t.quit()} />}
+      </PlayRow>
 
       {g.phase === "over" && (
+        <PlayRow>
         <OverPanel
           headline={g.winner === "draw" ? "Draw"
             : g.winner === t.myMark ? "You win" : `${names[g.winner as Mark]} wins`}
@@ -64,7 +74,8 @@ export function TicTacToeRoom({
           onRematch={() => void t.rematch()}
           onQuit={() => void t.quit()}
           onChangeGame={() => void t.changeGame()} />
+        </PlayRow>
       )}
-    </div>
+    </PlaySurface>
   );
 }

@@ -10,15 +10,19 @@ const COLOUR: Record<Mark, string> = { x: "var(--color-picto)", o: "var(--color-
  * empty slot in a stack is a worse game than asking them to hit the column.
  */
 export function Board({
-  board, target, line, canPick, compact = false, onPick,
+  board, target, line, canPick, compact = false, width, onPick,
 }: {
   board: Cell[]; target: number | null; line: number[] | null;
-  canPick: boolean; compact?: boolean; onPick: (col: number) => void;
+  canPick: boolean; compact?: boolean;
+  /** the width the screen can give it — see PlayBoard */
+  width?: number;
+  onPick: (col: number) => void;
 }) {
   return (
     <motion.div
-      className="grid grid-cols-7 mx-auto w-full"
-      animate={{ maxWidth: compact ? 260 : 360, gap: compact ? 3 : 5 }}
+      className={`grid grid-cols-7 mx-auto ${width ? "" : "w-full"}`}
+      style={width ? { width } : undefined}
+      animate={{ maxWidth: width ?? (compact ? 260 : 360), gap: width ? Math.max(2, width * 0.014) : compact ? 3 : 5 }}
       transition={SPRING}>
       {Array.from({ length: COLS }, (_, c) => {
         const open = landingRow(board, c) >= 0;
@@ -33,7 +37,7 @@ export function Board({
             className={`flex flex-col rounded-[10px] p-[2px]
               ${pickable ? "press cursor-pointer" : "cursor-default"}
               ${contested ? "bg-pop" : pickable ? "bg-sand/70" : "bg-transparent"}`}
-            style={{ gap: compact ? 3 : 5 }}>
+            style={{ gap: width ? Math.max(2, width * 0.014) : compact ? 3 : 5 }}>
             {Array.from({ length: ROWS }, (_, r) => {
               const i = r * COLS + c;
               const cell = board[i];

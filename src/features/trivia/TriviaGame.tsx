@@ -75,7 +75,6 @@ export function TriviaGame() {
 
   return (
     <div>
-      {filterBar}
       <Hud index={r.index} total={r.items.length} score={r.score} streak={r.streak} accent="#2B4BFF" />
 
       <AnimatePresence mode="wait">
@@ -84,16 +83,16 @@ export function TriviaGame() {
           exit={{ opacity: 0, y: -16 }} transition={SPRING} className="relative">
           <Burst show={revealed && !!r.last?.correct} />
 
-          <span className="inline-block mt-5 text-[12px] font-black uppercase tracking-widest
+          <span className="inline-block mt-4 text-[12px] font-black uppercase tracking-widest
             bg-trivia text-surface rounded-full px-2.5 py-1">
             {item.category} · {item.difficulty}
           </span>
-          <h2 className="mt-3 font-display text-[26px] leading-tight font-semibold text-balance">
+          <h2 className="mt-2.5 font-display text-[26px] leading-tight font-semibold text-balance">
             {item.prompt}
           </h2>
 
           <motion.div variants={stagger(0.055, 0.1)} initial="hidden" animate="show"
-            className="mt-5 grid gap-2.5">
+            className="mt-4 grid gap-2">
             {options.map((opt, i) => {
               const isBurned = burned.has(opt);
               const isAnswer = opt === item.answer;
@@ -106,7 +105,7 @@ export function TriviaGame() {
                 <motion.button key={opt} variants={riseIn}
                   disabled={revealed || isBurned} onClick={() => r.submit(opt)}
                   whileTap={revealed ? undefined : { scale: 0.97 }}
-                  className={`piece ${revealed ? "" : "press"} flex items-center gap-3 text-left px-4 py-4 ${bg}`}>
+                  className={`piece ${revealed ? "" : "press"} flex items-center gap-3 text-left px-4 py-3.5 ${bg}`}>
                   <span aria-hidden className="text-base shrink-0"
                     style={{ color: revealed && (isAnswer || isMine) ? "currentColor" : HUES[i % 4] }}>
                     {SHAPES[i % 4]}

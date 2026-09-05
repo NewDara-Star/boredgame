@@ -56,7 +56,7 @@ export function QuestionPanel({
             <motion.button key={opt} variants={riseIn}
               disabled={locked}
               onClick={() => onAnswer(opt)}
-              className={`piece ${locked ? "" : "press"} flex items-center gap-3 text-left px-4 py-3.5 ${bg}`}>
+              className={`piece ${locked ? "" : "press"} flex items-center gap-3 text-left px-4 py-3 ${bg}`}>
               <span aria-hidden className="text-base shrink-0"
                 style={{ color: revealed && (isAnswer || isMine) ? "currentColor" : HUES[i % 4] }}>
                 {SHAPES[i % 4]}

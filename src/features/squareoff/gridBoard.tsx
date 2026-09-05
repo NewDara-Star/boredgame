@@ -11,9 +11,10 @@ export const gridBoard =
   <G extends { board: (("x" | "o") | null)[]; target: number | null; line: number[] | null; phase: string }>(
     Grid: typeof Board,
   ): DrawBoard<G> =>
-    ({ game, myTurn, onPick }) => (
+    ({ game, myTurn, width, onPick }) => (
       <Grid board={game.board} target={game.target} line={game.line}
         canPick={myTurn && game.phase === "picking"}
         compact={game.phase === "asking" || game.phase === "revealed"}
+        width={width}
         onPick={onPick} />
     );

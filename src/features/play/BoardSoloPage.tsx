@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { Dealing } from "@/shared/ui/Note";
 import { motion } from "framer-motion";
-import { stagger, riseIn, popIn, SPRING } from "@/shared/ui/motion";
+import { popIn } from "@/shared/ui/motion";
+import { PlayBoard, PlayHead, PlayRow, PlaySurface } from "@/features/play/PlaySurface";
 import { UnlockGate } from "@/features/play/Unlock";
-import { drawCard, saveCard, type Glyph, type Hero, type MatchCard } from "@/shared/card/frame";
+import { drawCard, type Glyph, type Hero, type MatchCard } from "@/shared/card/frame";
+import { ResultScreen } from "@/features/play/ResultScreen";
 import { useSoloBoard } from "@/features/play/useSoloBoard";
 import { TurnPanel } from "@/features/rooms/TurnPanel";
 
@@ -11,23 +13,6 @@ import { TurnPanel } from "@/features/rooms/TurnPanel";
     through the same one-string channel a tapped option uses. */
 const NOT_THE_ANSWER = "\u0000";
 import type { BoardEngine, BoardRow, BoardState, Mark } from "@/features/rooms/useBoardRoom";
-
-function Side({ mark, name, active, score, glyph }:
-  { mark: Mark; name: string; active: boolean; score: number; glyph: string }) {
-  return (
-    <motion.div
-      animate={{ scale: active ? 1 : 0.94, opacity: active ? 1 : 0.5 }}
-      transition={SPRING}
-      className={`piece flex items-center gap-2 px-3 py-2 ${active ? "bg-pop" : "bg-surface"}`}>
-      <span className="font-display text-xl font-semibold leading-none"
-        style={{ color: mark === "x" ? "var(--color-picto)" : "var(--color-trivia)" }}>
-        {glyph}
-      </span>
-      <span className="text-[13px] font-black uppercase tracking-wide">{name}</span>
-      <span className="font-display text-lg font-semibold tabular-nums leading-none">{score}</span>
-    </motion.div>
-  );
-}
 
 /**
  * How a game draws its own board.
@@ -42,8 +27,15 @@ export type DrawBoard<G> = (p: {
   game: G;
   /** whether it is your turn at all; the phase rule is the game's own business */
   myTurn: boolean;
+  /** the width the screen can spare — see PlayBoard. Boards draw to it rather
+      than to the width of the phone, so a question is never below the fold. */
+  width: number;
   onPick: (i: number) => void;
 }) => JSX.Element;
+
+/** how wide each board is for its height: 1 for the square ones, a little
+    wider than square for Connect 4's seven columns and its numbers. */
+export const BOARD_RATIO = { square: 1, connect4: 1.09 };
 
 /**
  * One player against the bot, whichever board.
@@ -54,11 +46,14 @@ export type DrawBoard<G> = (p: {
  */
 export function BoardSoloPage<G extends BoardState & { target: number | null; line: number[] | null },
                               R extends BoardRow>({
-  engine, title, board, glyphs, plain = false, challenge = "trivia", score, art,
+  engine, title, board, glyphs, ratio = BOARD_RATIO.square,
+  plain = false, challenge = "trivia", score, art,
 }: {
   engine: BoardEngine<G, R>;
   title: string;
   board: DrawBoard<G>;
+  /** the board's width over its height, so it can be fitted to the space left */
+  ratio?: number;
   glyphs: Record<Mark, string>;
   /** the result card's picture: the game draws its final board on it */
   art?: { hero: (g: G) => Hero; glyph?: Glyph; caption?: (g: G) => string | undefined };
@@ -95,41 +90,19 @@ export function BoardSoloPage<G extends BoardState & { target: number | null; li
   }, [s.ended, sig]);
 
   if (s.ended) {
-    const lead = s.wins.x === s.wins.o ? "All square"
-      : s.wins.x > s.wins.o ? "You take the session" : "The bot takes the session";
     return (
-      <motion.div variants={stagger(0.07)} initial="hidden" animate="show" className="space-y-4">
-        <motion.div variants={popIn} className={`piece p-6 text-center ${
-          s.wins.x === s.wins.o ? "bg-sand"
-            : s.wins.x > s.wins.o ? "bg-good text-surface" : "bg-bad text-surface"}`}>
-          <p className="text-[12px] font-black uppercase tracking-widest opacity-70">Session over</p>
-          <p className="font-display text-3xl font-semibold mt-1">{lead}</p>
-          <p className="font-display text-6xl font-semibold tabular-nums mt-3">
-            {s.wins.x} <span className="opacity-40">—</span> {s.wins.o}
-          </p>
-        </motion.div>
-        {card ? (
-          <>
-            <img src={card.url} alt={`${title} session: you ${s.wins.x}, the bot ${s.wins.o}`}
-              className="w-full rounded-2xl border-[3px] border-ink" />
-            <button onClick={() => saveCard(card.file)}
-              className="piece press w-full py-4 font-display text-lg font-semibold bg-pop">
-              Save the image
-            </button>
-            <p className="text-[13px] font-bold text-soft text-center">
-              On a phone you can also press and hold the picture to save or share it.
-            </p>
-          </>
-        ) : (
-          <div className="piece grid place-items-center aspect-square bg-surface">
-            <p className="text-sm font-bold text-soft">Drawing the result…</p>
-          </div>
-        )}
+      <ResultScreen
+        headline={s.wins.x === s.wins.o ? "All square"
+          : s.wins.x > s.wins.o ? "You take it" : "The bot takes it"}
+        score={`${s.wins.x} — ${s.wins.o}`}
+        tone={s.wins.x === s.wins.o ? "draw" : s.wins.x > s.wins.o ? "win" : "loss"}
+        card={card}
+        alt={`${title} session: you ${s.wins.x}, the bot ${s.wins.o}`}>
         <button onClick={s.newSession}
-          className="piece press w-full py-3.5 font-display font-semibold">
-          Start a new session
+          className="piece press py-3.5 font-display text-lg font-semibold bg-surface">
+          New session
         </button>
-      </motion.div>
+      </ResultScreen>
     );
   }
 
@@ -140,58 +113,56 @@ export function BoardSoloPage<G extends BoardState & { target: number | null; li
   const active: Mark = g.phase === "asking" && answerer ? answerer : g.turn;
   const revealed = g.phase === "revealed" || g.phase === "over";
 
+  const over = g.phase === "over";
   return (
-    <motion.div variants={stagger(0.07)} initial="hidden" animate="show" className="space-y-4">
-      {/* Wraps rather than squeezing: "Connect 4 Trivia" beside two score chips
-          does not fit 390px, and letting the h1 break put "Connect" on one line
-          and "4" on the next. */}
-      <motion.div variants={riseIn} className="flex items-center justify-between gap-3 flex-wrap">
-        <h1 className="font-display text-[26px] leading-none font-semibold whitespace-nowrap">
-          {title}
-        </h1>
-        <div className="flex gap-2 shrink-0">
-          <Side mark="x" name="You" glyph={glyphs.x} score={live.x}
-            active={active === "x" && g.phase !== "over"} />
-          <Side mark="o" name="Bot" glyph={glyphs.o} score={live.o}
-            active={active === "o" && g.phase !== "over"} />
-        </div>
-      </motion.div>
+    <PlaySurface>
+      <PlayHead title={title} seats={[
+        { mark: "x", name: "You", glyph: glyphs.x, score: live.x, active: active === "x" && !over },
+        { mark: "o", name: "Bot", glyph: glyphs.o, score: live.o, active: active === "o" && !over },
+      ]} />
 
-      <motion.div variants={popIn}>
-        {board({ game: g, myTurn: s.myTurn, onPick: s.choose })}
-      </motion.div>
+      {/* The board takes what is left after the fixed parts, and shrinks
+          rather than pushing them off the bottom. When a question is up on a
+          short phone that can be 100px — small, but the board is reference
+          then, and the four answers are the screen. */}
+      <PlayBoard ratio={ratio} min={78}>
+        {(width) => board({ game: g, myTurn: s.myTurn, width, onPick: s.choose })}
+      </PlayBoard>
 
       {/* The board cannot say "you missed, so the bot gets one shot at it". */}
-      <motion.p variants={riseIn}
-        className="text-center text-[15px] font-bold text-soft min-h-[24px]">
-        {engine.describe(g, s.names, "x")}
-      </motion.p>
+      <PlayRow>
+        <p className="text-center text-[15px] font-bold text-soft">
+          {engine.describe(g, s.names, "x")}
+        </p>
+      </PlayRow>
 
-      {g.phase === "over" ? (
-        <motion.div variants={popIn} className={`piece p-6 text-center
+      {over ? (
+        <PlayRow>
+        <motion.div variants={popIn} initial="hidden" animate="show" className={`piece p-4 text-center
           ${g.winner === "x" ? "bg-good text-surface"
             : g.winner === "o" ? "bg-bad text-surface" : "bg-sand"}`}>
-          <p className="font-display text-3xl font-semibold">
+          <p className="font-display text-2xl font-semibold">
             {g.winner === "x" ? "You win" : g.winner === "o" ? "The bot wins" : "Draw"}
+            {s.results.length > 0 && (
+              <span className="text-sm font-bold opacity-80">
+                {" · "}{s.results.filter((r) => r.correct).length} of {s.results.length} right
+              </span>
+            )}
           </p>
-          {s.results.length > 0 && (
-            <p className="text-sm font-bold mt-1 opacity-80">
-              {s.results.filter((r) => r.correct).length} of {s.results.length} questions right
-            </p>
-          )}
-          <div className="grid grid-cols-2 gap-2.5 mt-5">
+          <div className="grid grid-cols-2 gap-2.5 mt-3">
             <button onClick={s.restart}
-              className="piece press py-3.5 font-display text-lg font-semibold bg-surface text-ink">
+              className="piece press py-3 font-display text-lg font-semibold bg-surface text-ink">
               Play again
             </button>
             <button onClick={s.endSession}
-              className="piece press py-3.5 font-display text-lg font-semibold bg-surface text-ink">
+              className="piece press py-3 font-display text-lg font-semibold bg-surface text-ink">
               End session
             </button>
           </div>
         </motion.div>
+        </PlayRow>
       ) : (g.phase === "asking" || g.phase === "revealed") ? (
-        <motion.div variants={riseIn}>
+        <PlayRow>
           {/* The same panel the rooms draw. It only reached three copies
               because solo advances on a timer and a room can be stuck, so they
               looked different — but the difference is one nullable prop. */}
@@ -208,10 +179,10 @@ export function BoardSoloPage<G extends BoardState & { target: number | null; li
             botShot={s.botFires}
             advanceOwner={null} stall={null} myMark="x"
             onAdvanceNow={() => {}} onForceAdvance={() => {}} nextLabel="Next" />
-        </motion.div>
+        </PlayRow>
       ) : null}
 
       <UnlockGate outcome={s.outcome} />
-    </motion.div>
+    </PlaySurface>
   );
 }

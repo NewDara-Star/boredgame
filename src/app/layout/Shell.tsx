@@ -89,7 +89,10 @@ export function Shell() {
         </div>
       )}
 
-      <main className="flex-1 max-w-3xl w-full mx-auto px-4 py-6 pb-28 sm:pb-6">
+      {/* pb-20 clears the 62px bottom bar and its safe area with 18px to
+          spare; pb-28 spent 50px of a 534px screen on nothing. --chrome in
+          index.css is these numbers, and .play-surface subtracts them. */}
+      <main className="flex-1 max-w-3xl w-full mx-auto px-4 pt-4 pb-20 sm:py-6">
         {/* Keyed on the path so navigating away from a broken screen clears it. */}
         <ErrorBoundary key={pathname}>
           <Outlet />

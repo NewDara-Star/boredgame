@@ -8,6 +8,8 @@ import {
   MatchOver, useMatchChrome, useStallRescue,
 } from "@/features/rooms/matchUi";
 import { Board } from "./Board";
+import { BOARD_RATIO } from "@/features/play/BoardSoloPage";
+import { PlayBoard, PlayRow, PlaySurface } from "@/features/play/PlaySurface";
 import { connect4Art } from "./card";
 import { describe, stallWriter, type Mark } from "./rules";
 import { useC4Room } from "./useC4Room";
@@ -75,30 +77,39 @@ export function Connect4Room({
   const revealed = g.phase === "revealed" || g.phase === "over";
 
   return (
-    <div className="space-y-4">
-      <Seats
-        names={names}
-        scores={{ x: scoreOf("x"), o: scoreOf("o") }}
-        active={g.phase === "over" ? null : g.turn}
-        glyph={() => "●"}
-        dimmed={g.phase === "over"} />
+    <PlaySurface>
+      <PlayRow>
+        <Seats
+          names={names}
+          scores={{ x: scoreOf("x"), o: scoreOf("o") }}
+          active={g.phase === "over" ? null : g.turn}
+          glyph={() => "●"}
+          dimmed={g.phase === "over"} />
+      </PlayRow>
 
-      <Board board={g.board} target={g.target} line={g.line}
-        canPick={g.phase === "picking" && g.turn === t.myMark}
-        compact={!plain && (g.phase === "asking" || g.phase === "revealed")}
-        onPick={t.choose} />
+      <PlayBoard ratio={BOARD_RATIO.connect4} min={78}>
+        {(width) => (
+          <Board board={g.board} target={g.target} line={g.line} width={width}
+            canPick={g.phase === "picking" && g.turn === t.myMark}
+            compact={!plain && (g.phase === "asking" || g.phase === "revealed")}
+            onPick={t.choose} />
+        )}
+      </PlayBoard>
 
-      <p className="text-center text-[15px] font-bold text-soft min-h-[24px]">
-        {describe(g, names, t.myMark)}
-      </p>
+      <PlayRow className="space-y-3">
+        <p className="text-center text-[15px] font-bold text-soft">
+          {describe(g, names, t.myMark)}
+        </p>
 
-      <Note>{t.error}</Note>
+        <Note>{t.error}</Note>
 
-      <AwayNotice players={players} userId={userId} now={now} />
+        <AwayNotice players={players} userId={userId} now={now} />
 
-      {g.phase !== "over" && <EndMatchLink onQuit={() => void t.quit()} />}
+        {g.phase === "picking" && <EndMatchLink onQuit={() => void t.quit()} />}
+      </PlayRow>
 
       {g.phase === "over" ? (
+        <PlayRow>
         <OverPanel
           headline={g.winner === "draw" ? "Draw"
             : g.winner === t.myMark ? "You win" : `${names[g.winner as Mark]} wins`}
@@ -107,7 +118,9 @@ export function Connect4Room({
           onRematch={() => void t.rematch()}
           onQuit={() => void t.quit()}
           onChangeGame={() => void t.changeGame()} />
+        </PlayRow>
       ) : !plain && (g.phase === "asking" || g.phase === "revealed") ? (
+        <PlayRow>
         <TurnPanel
           challenge={challenge === "catapult" ? "catapult" : "trivia"}
           item={t.item} options={t.item?.choices ?? []}
@@ -120,7 +133,8 @@ export function Connect4Room({
           stall={stall} myMark={t.myMark}
           onAdvanceNow={t.advanceNow} onForceAdvance={t.forceAdvance}
           nextLabel="Next" />
+        </PlayRow>
       ) : null}
-    </div>
+    </PlaySurface>
   );
 }
