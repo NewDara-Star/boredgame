@@ -5,10 +5,7 @@ import { TurnPanel } from "@/features/rooms/TurnPanel";
 import { Board } from "./Board";
 import { describe, stallWriter, type Mark } from "./rules";
 import { useTttRoom } from "./useTttRoom";
-import { askMs } from "@/features/play/clock";
-
-/** Long enough to line a shot up without a clock in your face. */
-const CATAPULT_ASK_MS = 30_000;
+import { askMs, AWAY_MS } from "@/features/play/clock";
 import {
   Seats, AwayNotice, OverPanel, EndMatchLink,
   MatchOver, useMatchChrome, useStallRescue,
@@ -53,11 +50,13 @@ export function SquareOffRoom({
   // answerer's tab, which a phone suspends the moment the screen locks.
   // Both clients derive the deadline from the same puzzle, so they agree
   // without another column to keep in step.
-  // A shot gets longer than a question and no countdown bar: a timer ticking
-  // down while an eight-year-old lines up a catapult is the pressure this mode
-  // exists to remove. The deadline stays only so an idle player cannot freeze
-  // the board — stallWriter still needs one.
-  const ask = challenge === "catapult" ? CATAPULT_ASK_MS : askMs(t.item?.difficulty);
+  // A shot has no clock at all — no bar, and no deadline anyone could play
+  // against. A timer ticking down while an eight-year-old lines up a catapult
+  // is the pressure this mode exists to remove, and the 30s it used to get was
+  // a reading-a-question number that a careful child can spend, with nothing on
+  // screen to warn them. What is left is only the away deadline, which is not a
+  // rule: it is how long before a silent client is assumed to be gone.
+  const ask = challenge === "catapult" ? AWAY_MS : askMs(t.item?.difficulty);
   const elapsed = now - t.askedAt;
   const left = ask - elapsed;
   const stall = g ? stallWriter(g, elapsed, { ask, reveal: REVEAL_MS, grace: GRACE_MS }) : null;

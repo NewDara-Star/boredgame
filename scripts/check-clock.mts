@@ -4,7 +4,7 @@
  * the puzzle, two phones disagree about when a question expired and the stall
  * rescue starts firing against a deadline the other side never saw.
  */
-import { askMs, ASK_MS } from "../src/features/play/clock.ts";
+import { askMs, ASK_MS, AWAY_MS } from "../src/features/play/clock.ts";
 import { stallWriter as tttStall } from "../src/features/squareoff/rules.ts";
 import { stallWriter as c4Stall } from "../src/features/connect4/rules.ts";
 
@@ -56,5 +56,30 @@ for (const level of ["easy", "medium", "hard"]) {
 // A harder question must genuinely buy more time, at every stage.
 ok(askMs("hard") + GRACE > askMs("easy") + GRACE, "the grace period rides on top of the clock");
 ok(askMs("hard") - askMs("easy") >= 5_000, "the difference is worth having");
+
+// --- a deadline is not a rule ------------------------------------------------
+// Two different things were spelled with the same number. askMs is a game rule
+// with a bar on screen; AWAY_MS is the point past which a silent client is
+// assumed to be gone. The catapult was given 30s — a reading-a-question number
+// — with nothing drawn to warn you, so the mode built to remove time pressure
+// had the strictest hidden clock in the app.
+{
+  const longestRule = Math.max(...["easy", "medium", "hard", "", "nonsense"].map(askMs));
+  ok(AWAY_MS > longestRule * 3,
+     `an away deadline is nowhere near a playable pace (${AWAY_MS} vs ${longestRule})`);
+  ok(AWAY_MS >= 60_000, "and is at least a minute — no one aims for a minute");
+
+  // The rooms must reach for the away deadline for a shot, not a question one.
+  // Grepped rather than imported: the choice lives in the component, and the
+  // point of this assertion is that nobody quietly puts a number back.
+  const fs = await import("node:fs");
+  for (const f of ["src/features/squareoff/SquareOffRoom.tsx",
+                   "src/features/connect4/Connect4Room.tsx"]) {
+    const src = fs.readFileSync(new URL("../" + f, import.meta.url), "utf8");
+    ok(/challenge === "catapult" \? AWAY_MS/.test(src),
+       `${f}: a shot gets the away deadline`);
+    ok(!/CATAPULT_ASK_MS/.test(src), `${f}: and no hand-rolled shot clock`);
+  }
+}
 
 console.log(`${n} clock assertions hold`);

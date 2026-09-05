@@ -2,18 +2,18 @@ import type { Challenge, RoomPlayer, RoomStatus } from "@/shared/types/db";
 import { Note, Dealing } from "@/shared/ui/Note";
 import {
   Seats, AwayNotice, OverPanel, EndMatchLink,
-  MatchOver, useMatchChrome,
+  MatchOver, useMatchChrome, useStallRescue,
 } from "@/features/rooms/matchUi";
 import { Board } from "./Board";
-import { describe, scoreOf, type Mark } from "./rules";
+import { describe, scoreOf, stallWriter, type Mark } from "./rules";
 import { useMemoryRoom } from "./useMemoryRoom";
+import { AWAY_MS } from "@/features/play/clock";
 
-/**
- * No stall rescue here, and none needed: every phase of a memory turn is
- * written by the player whose turn it is, and the only timed transition is
- * turning two tiles back over — which the reducer will do for whoever is
- * looking, because `advance` from a reveal is the same for both of them.
- */
+/** How long after a deadline passes before the other player takes over. */
+const GRACE_MS = 6000;
+/** When a reveal is considered stuck. Must sit above useBoardRoom's pause for
+    a bankless game (1200ms) or this races the timer it exists to back up. */
+const REVEAL_MS = 4500;
 export function MemoryRoom({
   roomId, code, status, players, userId,
 }: {
@@ -24,7 +24,24 @@ export function MemoryRoom({
   const t = useMemoryRoom(roomId, userId);
   const g = t.game;
   const { now, names, sides, card, done } =
-    useMatchChrome(code, "MEMORY MATCH", status, players, t.seats);
+    useMatchChrome(code, "MEMORY MATCH", status, players, t.seats, g?.phase === "asking");
+
+  /**
+   * This room used to have no rescue at all, on the reasoning that every phase
+   * is written by whoever's turn it is. That is true and it is exactly the
+   * problem: `useBoardRoom` guards both the reveal timer and advanceNow on
+   * `last.by === myMark`, so the pause that turns two tiles back over lives in
+   * one tab, and a locked phone froze the board for both players permanently.
+   *
+   * There is no clock on looking at a grid, so `ask` here is the away deadline
+   * rather than a rule — nothing counts down and nothing is drawn. `true` for
+   * haveItem because a memory turn deals no question to wait for.
+   */
+  const elapsed = now - t.askedAt;
+  const stall = g
+    ? stallWriter(g, elapsed, { ask: AWAY_MS, reveal: REVEAL_MS, grace: GRACE_MS })
+    : null;
+  useStallRescue(stall, t.myMark, t.askedAt, true, t);
 
   if (done) return <MatchOver sides={sides} myMark={t.myMark} card={card} />;
   if (!g) return <Dealing what="the tiles" />;

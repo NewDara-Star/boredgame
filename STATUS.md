@@ -32,6 +32,8 @@ Each claim below was checked by running it, not by reading the code.
 | Both real rows unstick under the new rule | replayed the stored `ttt_games` rows through `decode()` + `stallWriter()`: names `iamdamobi` and `Newdara` respectively, and `advance()` gives a valid `picking` state for each |
 | NOT reproduced: which OS behaviour suspends it | headless Chromium ignores `Page.setWebLifecycleState: frozen` — the timeout fired at 1364ms frozen and unfrozen, twice, including with nothing touching the page. The suspension is real in production and unreproducible in this lab |
 | A full solo Square Off game plays | Playwright drove 60 turns to "The bot wins", no console errors |
+| A shot has no clock | `check:clock` — the catapult uses `AWAY_MS` (90s, an abandonment backstop with nothing drawn) and not a question deadline; asserts no room hand-rolls one again |
+| Memory cannot freeze permanently | `check:memory` — a stranded tile and a stuck reveal each get an owner, `answer()` actually closes an abandoned pair rather than handing back the same state, and never two writers at once |
 | A miss costs the turn and nothing else | `check:squareoff` walks 400 random games and never sees `advance()` land on `asking`; `check:engines` asserts the same for every game. Putting the steal back fails both |
 | Board and answers fit one phone screen | board shrinks while a question is up; verified at 390x844 |
 | Profiles cannot be self-inflated | `information_schema.column_privileges`: authenticated has UPDATE on `username`, `avatar` only |

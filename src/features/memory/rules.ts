@@ -1,5 +1,6 @@
 import {
-  other, speaker, type Mark, type Cell, type Phase,
+  other, speaker, stallWriter as stall,
+  type Mark, type Cell, type Phase, type Stall,
 } from "../play/board.ts";
 
 /**
@@ -18,7 +19,7 @@ import {
  * Import-free so bare Node can check it.
  */
 
-export { other, speaker, type Mark, type Cell, type Phase };
+export { other, speaker, type Mark, type Cell, type Phase, type Stall };
 
 export const PAIRS = 8;
 export const SIZE = PAIRS * 2;      // 16 tiles, a 4x4 grid
@@ -134,9 +135,25 @@ export function advance(g: Game): Game {
   };
 }
 
-/** Never used: a memory turn resolves on the second tap, not on an answer. It
-    exists so this engine satisfies the same interface as the boards. */
-export const answer = (g: Game): Game => g;
+/**
+ * Closing a turn nobody finished.
+ *
+ * A memory turn resolves on the SECOND tap, so there is nothing here anyone
+ * answers — this used to hand back the state it was given, purely so the
+ * engine satisfied the same interface as the boards. That made it a no-op on
+ * the one path that needs it: flip a tile, lock your phone, and the board sits
+ * in `asking` with a second tap that is never coming and a rescue that writes
+ * the same row back. Nothing moved, for either player, ever again.
+ *
+ * So it does the only sensible thing for an abandoned pair: the tile goes back
+ * face down and the turn passes. `correct` is ignored — a pair nobody finished
+ * is not a match — and it is kept in the signature because the shared hook
+ * calls every engine the same way.
+ */
+export function answer(g: Game, _correct = false): Game {
+  if (g.phase !== "asking" || g.target === null) return g;
+  return { ...g, phase: "picking", turn: other(g.turn), target: null, last: null, line: null };
+}
 
 /** How many tiles back the bot can remember. A bot that recalls everything it
     has ever been shown wins 100% of the time against a person playing normally
@@ -213,4 +230,34 @@ export function describe(g: Game, names: Record<Mark, string>, you: Mark | null 
     return mine(g.turn) ? "Now find its partner." : `${names[g.turn]} is looking for a partner.`;
   }
   return mine(g.turn) ? "Your turn — turn a tile over." : `${names[g.turn]} is turning tiles.`;
+}
+
+/* ------------------------------------------------------- abandonment */
+
+/**
+ * Who unsticks a memory board that has stopped moving.
+ *
+ * This was missing, on the reasoning that "every phase is written by the
+ * player whose turn it is, and advance from a reveal is the same for both of
+ * them". The second half is not true: `useBoardRoom` guards its reveal timer
+ * and its advanceNow on `last.by === myMark`, so the pause that turns two
+ * tiles back over is a setTimeout in ONE tab. A locked phone suspends it and
+ * the board freezes for both players with nothing running anywhere — the same
+ * bug Square Off had, in a game that never got the fix.
+ *
+ * Two ways to strand it, and both need an owner:
+ *
+ *   asking   — one tile up and no second tap coming. `answer()` closes it.
+ *   revealed — two tiles up and nobody turning them back. `advance()` does.
+ *
+ * The `asking` deadline is an away deadline, not a rule: there is no shot
+ * clock on looking at a grid and there should not be one. Exactly one mark is
+ * named at any instant, which is what the check script holds it to.
+ */
+export function stallWriter(
+  g: Pick<Game, "phase" | "turn" | "last">,
+  elapsed: number,
+  ms: { ask: number; reveal: number; grace: number },
+): Stall | null {
+  return stall(g, g.phase === "asking" ? g.turn : null, elapsed, ms);
 }

@@ -4,8 +4,9 @@
  * the turn, and the bot forgets enough to be beaten.
  */
 import {
-  PAIRS, SIZE, FACES, newGame, shuffledDeck, flip, advance, faceUp, scoreOf,
-  botFlip, remember, BOT_SPAN, describe, other, claimed, type Game, type Mark,
+  PAIRS, SIZE, FACES, newGame, shuffledDeck, flip, advance, answer, stallWriter,
+  faceUp, scoreOf, botFlip, remember, BOT_SPAN, describe, other, claimed,
+  type Game, type Mark,
 } from "../src/features/memory/rules.ts";
 
 let failed = 0;
@@ -165,6 +166,75 @@ console.log("\nthe sentence under the board");
   const theirs = describe({ ...flip(flip(g, a), partner), last: { by: "o", a, b: partner, correct: true } },
                           names, "x");
   ok("theirs is conjugated", theirs.includes("mariam finds a pair") && theirs.includes("goes again"));
+}
+
+console.log("\na board nobody is left to move");
+{
+  // This room shipped with no rescue at all, on the reasoning that every phase
+  // is written by whoever's turn it is. That is true and it is the problem:
+  // the pause that turns two tiles back over is a setTimeout in ONE tab, and a
+  // locked phone froze the board for both players with nothing running
+  // anywhere. Both ways to strand it now have an owner.
+  const MS = { ask: 90_000, reveal: 4500, grace: 6000 };
+  const at = (g: Parameters<typeof stallWriter>[0], t: number) => {
+    const w = stallWriter(g, t, MS);
+    return w ? `${w.mark}:${w.action}` : null;
+  };
+  const g0 = newGame("x", rnd);
+  const oneUp = flip(g0, 0);                       // x turned a tile and left
+  ok("one tile up is an asking phase", oneUp.phase === "asking" && oneUp.target === 0);
+
+  const pair = g0.deck.findIndex((f, i) => i !== 0 && f === g0.deck[0]);
+  const wrong = g0.deck.findIndex((f, i) => i !== 0 && f !== g0.deck[0]);
+  const missed = flip(oneUp, wrong);               // two tiles up, no match
+  ok("a mismatch leaves a reveal", missed.phase === "revealed");
+
+  ok("nobody writes while the away deadline runs",
+     at(oneUp, 0) === null && at(oneUp, MS.ask - 1) === null);
+  ok("a stranded tile is the flipper's to close first", at(oneUp, MS.ask) === "x:timeout");
+  ok("and the opponent's once the grace is up",
+     at(oneUp, MS.ask + MS.grace) === "o:timeout");
+  ok("a stuck reveal is the flipper's first", at(missed, MS.reveal) === "x:advance");
+  ok("and the opponent's after the grace", at(missed, MS.reveal + MS.grace) === "o:advance");
+  ok("a frozen board always resolves eventually", at(missed, 10 * 60_000) !== null);
+  ok("never two writers at once", (() => {
+    for (const g of [oneUp, missed]) {
+      for (let t = 0; t <= MS.ask + MS.grace * 3; t += 311) {
+        const w = stallWriter(g, t, MS);
+        if (w && w.mark !== "x" && w.mark !== "o") return false;
+        if (w && w.action !== "timeout" && w.action !== "advance") return false;
+      }
+    }
+    return true;
+  })());
+
+  // The rescue writes engine.answer() for a timeout. That used to hand back the
+  // state it was given, so the rescue wrote the same row and nothing moved —
+  // the deadline fired and the board stayed stuck. It has to actually close.
+  const closed = answer(oneUp, false);
+  ok("closing a stranded tile turns it back over", closed.phase === "picking" && closed.target === null);
+  ok("and passes the turn", closed.turn === "o");
+  ok("and claims nothing", closed.board.every((c) => c === null));
+  ok("closing is only for a stranded tile",
+     answer(g0, false) === g0 && answer(missed, false) === missed);
+
+  // and the reveal rescue writes advance(), which must move for either player
+  const moved = advance(missed);
+  ok("advancing a stuck reveal turns the tiles back", moved.phase === "picking" && moved.last === null);
+  ok("and passes the turn on a miss", moved.turn === "o");
+
+  // a matched pair keeps the turn, so the rescue must not steal it
+  const made = flip(oneUp, pair);
+  if (made.phase === "revealed") {
+    ok("a matched pair keeps the turn through the rescue", advance(made).turn === "x");
+  } else {
+    ok("a matched pair that ends the game needs no rescue", made.phase === "over");
+  }
+
+  // a finished game and a fresh pick have no deadline at all
+  ok("no deadline on a pick or a finished board",
+     at(g0, 99_999) === null
+     && at({ ...g0, phase: "over" as const }, 99_999) === null);
 }
 
 console.log("\nmisc");

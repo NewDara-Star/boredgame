@@ -26,3 +26,21 @@ const BY_LEVEL: Record<string, number> = {
 export function askMs(difficulty?: string | null): number {
   return BY_LEVEL[difficulty ?? ""] ?? ASK_MS;
 }
+
+/**
+ * The deadline for a phase that has NO rule about how long you may take.
+ *
+ * Two different things were being spelled with the same number. `askMs` is a
+ * game rule — the bar is on screen, running out is a move you lost, and the
+ * length is tuned to how long the question takes to read. This is not a rule
+ * at all: it is the point past which a silent client is assumed to be gone, so
+ * the other player can write the transition and carry on. Nothing counts down
+ * to it and nothing is drawn for it.
+ *
+ * Lining up a catapult shot was given 30 seconds, which is a reading-a-question
+ * number. A child aiming carefully can spend that, and did so with nothing on
+ * screen to warn them — the mode that exists to remove time pressure had the
+ * strictest hidden clock in the app. Ninety seconds is not a pace anyone plays
+ * at; it only ever means the phone is face down.
+ */
+export const AWAY_MS = 90_000;
