@@ -4,7 +4,7 @@ import { loadContent, shuffle } from "@/features/play/content";
 import { recordRound, type RoundOutcome } from "@/features/play/progress";
 import { deal } from "@/features/play/dealer";
 import { askMs } from "@/features/play/clock";
-import { targetFor, botShot, isHit, type Shot } from "@/features/challenge/rules";
+import { targetFor, botShot, isHit, flightMs, type Shot } from "@/features/challenge/rules";
 import type { PlayItem, RoundResult } from "@/features/play/types";
 import type { BoardEngine, BoardRow, BoardState, Mark } from "@/features/rooms/useBoardRoom";
 // How often the bot gets a question right, by that question's difficulty. It
@@ -173,8 +173,12 @@ export function useSoloBoard<G extends BoardState, R extends BoardRow>(
     if (botAimed.current === seed) return;
     botAimed.current = seed;
     const shot = botShot(target, level, Math.random);
+    // How long the shot takes depends on the shot: one that bounces and rolls
+    // is on screen far longer than one that drops straight in, and a fixed
+    // wait cut the bot's turn off with the ball still in the air.
     const t = setTimeout(() => setBotFires(shot), 420);
-    const t2 = setTimeout(() => commit(engine.answer(game, isHit(shot, target))), 420 + 980);
+    const t2 = setTimeout(() => commit(engine.answer(game, isHit(shot, target))),
+                          420 + flightMs(shot, target) + 260);
     return () => { clearTimeout(t); clearTimeout(t2); };
   }, [challenge, game, engine, target, seed, commit]);
 

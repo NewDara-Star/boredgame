@@ -1,30 +1,35 @@
 import { useEffect, useRef, useState } from "react";
 import {
-  MIN_ANGLE, MAX_ANGLE, arc, clamp, describeShot, isHit, previewDots,
-  type Shot, type Target,
+  BALL_R, MIN_ANGLE, MAX_ANGLE, STEP_MS, clamp, describeShot, isHit, previewDots, simulate,
+  type Flight, type Shot, type Target,
 } from "./rules";
 
 interface Pt { x: number; y: number }
 
 /*
- * The picture is 100 wide and 40 tall, and BOTH axes use the same scale.
+ * The picture is 100 wide and BOTH axes use the same scale.
  *
- * The first version squashed the vertical by 40% so a steep lob would fit,
- * which meant the arc on screen was not the arc the ball flew — you could not
- * learn anything from watching it. The angle is capped at 55° instead, so the
- * tallest useful shot fits an honest picture.
+ * An early version squashed the vertical so a steep lob would fit, which meant
+ * the arc on screen was not the arc the ball flew — you could not learn
+ * anything from watching it. Nothing is squashed here. Firing from the middle
+ * of the field is what makes that affordable: a shot only has to cross half
+ * the width, so the arc it needs is half as tall.
+ *
+ * The launcher is the ball. There was a little machine drawn here, and it was
+ * telling you nothing the ball and its path do not already say.
  */
-const W = 100, H = 40;
-const GROUND = 34;
-const LAUNCH_X = 12;
+const W = 100, H = 74;
+const GROUND = 37;
+const CX = W / 2;
 /** One world unit of distance is this many svg units, horizontally AND up. */
-const SCALE = 84;
-/** A full-power pull, in svg units — about a quarter of the width. */
-const MAX_PULL = 24;
-const FLIGHT_MS = 820;
-
-const sx = (x: number) => LAUNCH_X + x * SCALE;
+const SCALE = 46;
+/** A full-power pull, in svg units. Tolerance scales directly with this, and
+    the pull costs nothing to make longer because it starts wherever the finger
+    lands — so it is as long as the panel is wide. */
+const MAX_PULL = 64;
+const sx = (x: number) => CX + x * SCALE;
 const sy = (y: number) => GROUND - y * SCALE;
+const BALL = BALL_R * SCALE;
 
 /**
  * Aim, pull back, let go.
@@ -47,38 +52,30 @@ export function Catapult({
   const svgRef = useRef<SVGSVGElement>(null);
   /**
    * Where the finger went down, and where it is now — because the pull is
-   * measured from WHERE YOU STARTED, not from the catapult.
+   * measured from WHERE YOU STARTED, not from the launcher.
    *
-   * It used to be measured from the launcher, which sits near the left edge
-   * where it belongs: you are shooting rightwards across the field. That left
-   * no room behind it. To pull back at full power you had to drag your thumb
-   * off the side of the phone, so most of the power range was physically
-   * unreachable and every shot came out weak.
-   *
-   * Now the gesture is a vector, not a position: start anywhere, pull in any
-   * direction, and the full travel is always available.
+   * It used to be measured from the launcher, which sat near the left edge.
+   * That left no room behind it: to pull at full power you had to drag your
+   * thumb off the side of the phone, so most of the power range was physically
+   * unreachable and every shot came out weak. The gesture is a vector, not a
+   * position — start anywhere, pull any way, and the full travel is there.
    */
   const [drag, setDrag] = useState<{ from: Pt; to: Pt } | null>(null);
-  const [flying, setFlying] = useState<Shot | null>(null);
-  const [t, setT] = useState(0);
-  const [landed, setLanded] = useState<Shot | null>(null);
+  const [flight, setFlight] = useState<Flight | null>(null);
+  const [frame, setFrame] = useState(0);
+  const [done, setDone] = useState<Shot | null>(null);
 
   useEffect(() => { if (shot) launch(shot, false); /* eslint-disable-next-line */ }, [shot]);
 
   function launch(s: Shot, report: boolean) {
-    setDrag(null);
-    setLanded(null);
-    setFlying(s);
-    const start = performance.now();
+    const f = simulate(s, target);
+    setDrag(null); setDone(null); setFlight(f); setFrame(0);
+    const start = performance.now(), last = f.samples.length - 1;
     const step = (now: number) => {
-      const p = clamp((now - start) / FLIGHT_MS, 0, 1);
-      setT(p);
-      if (p < 1) requestAnimationFrame(step);
-      else {
-        setFlying(null);
-        setLanded(s);
-        if (report) onFire?.(isHit(s, target), s);
-      }
+      const i = Math.min(last, Math.floor((now - start) / STEP_MS));
+      setFrame(i);
+      if (i < last) requestAnimationFrame(step);
+      else { setDone(s); if (report) onFire?.(isHit(s, target), s); }
     };
     requestAnimationFrame(step);
   }
@@ -91,134 +88,140 @@ export function Catapult({
     };
   }
 
-  /** Drag down and left, fire up and right — a slingshot needs no explaining. */
+  /**
+   * Drag back, fire forward — a slingshot needs no explaining. Pull left to
+   * fire right, and the other way for a pot on the other side.
+   *
+   * Range goes as power², so a raw pull spends its first half on a quarter of
+   * the field: √ on the way in makes pull → distance linear, and a pixel worth
+   * the same everywhere. It is a controller curve, not a change to the flight.
+   */
   const shotFromDrag = (d: { from: Pt; to: Pt }): Shot => {
-    const dx = d.from.x - d.to.x;
-    const dy = d.to.y - d.from.y;
-    const len = Math.hypot(dx, dy);
-    const raw = Math.atan2(Math.max(0, dy), Math.max(0.0001, dx));
+    const dx = d.from.x - d.to.x, dy = d.to.y - d.from.y;
+    const f = clamp(Math.hypot(dx, dy) / MAX_PULL, 0, 1);
     return {
-      angle: clamp(raw, MIN_ANGLE, MAX_ANGLE),
-      power: clamp(len / MAX_PULL, 0, 1),
+      angle: dy <= 0 ? MIN_ANGLE : clamp(Math.atan2(dy, Math.abs(dx)), MIN_ANGLE, MAX_ANGLE),
+      power: Math.sqrt(f),
+      dir: dx >= 0 ? 1 : -1,
     };
   };
+  const pullFraction = (d: { from: Pt; to: Pt }) =>
+    clamp(Math.hypot(d.from.x - d.to.x, d.to.y - d.from.y) / MAX_PULL, 0, 1);
 
   const live = drag ? shotFromDrag(drag) : null;
-  const drawn = flying ?? landed;
-  const path = drawn ? arc(drawn, 40) : [];
-  const ball = flying
-    ? path[Math.min(path.length - 1, Math.round(t * (path.length - 1)))]
-    : landed ? path[path.length - 1] : null;
-
-  const busy = !!flying;
+  const busy = !!flight && !done;
   const canAim = !locked && !busy && !shot;
+  const ball = flight ? flight.samples[Math.min(frame, flight.samples.length - 1)] : null;
   const dots = live ? previewDots(live) : [];
 
-  // The arm is drawn at the catapult whatever the finger is doing, so the thing
-  // you are aiming and the thing you are touching stay visibly connected.
-  const ARM = 16;
-  const armX = live ? LAUNCH_X - live.power * ARM * Math.cos(live.angle) : 0;
-  const armY = live ? GROUND - 3 + live.power * ARM * Math.sin(live.angle) : 0;
+  const hw = (target.half + BALL_R) * SCALE;
+  const depth = Math.min(9, hw * 1.3);
+  const potX = sx(target.x), potY = sy(target.y);
+  const sunk = target.y === 0;
 
   return (
     <div className="space-y-2">
       <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`}
-        className={`w-full rounded-2xl border-[3px] border-ink bg-sand touch-none select-none
+        className={`w-full rounded-2xl border-[3px] border-ink bg-surface touch-none select-none
           ${canAim ? "cursor-grab" : ""}`}
         onPointerDown={(e) => {
           if (!canAim) return;
+          const p0 = at(e);
+          if (p0.y < GROUND) return;      // the upper half is look-only, by design
           // Captured on the svg, not on whichever shape was under the finger,
           // so the pull keeps tracking once the drag leaves the picture.
           svgRef.current?.setPointerCapture?.(e.pointerId);
-          const p0 = at(e);
           setDrag({ from: p0, to: p0 });
         }}
         onPointerMove={(e) => { if (drag) setDrag({ ...drag, to: at(e) }); }}
         onPointerUp={() => {
           if (!drag) return;
-          const s = shotFromDrag(drag);
+          const d = drag, s = shotFromDrag(d);
           setDrag(null);
-          if (s.power > 0.04) launch(s, true);
+          if (pullFraction(d) > 0.03) launch(s, true);
         }}
         // No onPointerLeave: a pull that wanders outside the box is still a
         // pull, and cancelling on leave meant a shot that never happened.
         onPointerCancel={() => setDrag(null)}>
 
-        <defs>
-          {/* The arm is drawn by pulling DOWN from a launcher that sits on the
-              ground, so at full power it reaches below the field. Clipped
-              rather than shortened: the length is the power reading. */}
-          <clipPath id="field"><rect x="0" y="0" width={W} height={H} /></clipPath>
-        </defs>
+        {/* the draw half, so it reads as somewhere to put your thumb */}
+        <rect x="0" y={GROUND} width={W} height={H - GROUND} fill="var(--color-paper)" />
 
-        <line x1="0" y1={GROUND} x2={W} y2={GROUND}
-          stroke="var(--color-ink)" strokeWidth="1.6" />
+        {/* The ground. A pot sunk in the floor is a HOLE — the line stops at
+            its rim, because a ball that lands on the opening goes in. */}
+        <path
+          d={sunk
+            ? `M 0 ${GROUND} H ${potX - hw} M ${potX + hw} ${GROUND} H ${W}`
+            : `M 0 ${GROUND} H ${W}`}
+          stroke="var(--color-ink)" strokeWidth="1.6" fill="none" />
 
-        {/* the target: a bucket on the ground, not a stripe */}
-        <g>
-          <path d={`M ${sx(target.x - target.radius)} ${GROUND}
-                    L ${sx(target.x - target.radius * 0.72)} ${GROUND - 7}
-                    L ${sx(target.x + target.radius * 0.72)} ${GROUND - 7}
-                    L ${sx(target.x + target.radius)} ${GROUND} Z`}
-            fill="var(--color-good)" stroke="var(--color-ink)" strokeWidth="1.4"
-            strokeLinejoin="round" />
-          <ellipse cx={sx(target.x)} cy={GROUND - 7}
-            rx={target.radius * 0.72 * SCALE} ry="1.6"
-            fill="var(--color-paper)" stroke="var(--color-ink)" strokeWidth="1.2" />
-        </g>
-
-        <rect x={LAUNCH_X - 3.5} y={GROUND - 6} width="7" height="6" rx="1.5"
-          fill="var(--color-surface)" stroke="var(--color-ink)" strokeWidth="1.5" />
+        {/* the pot, behind the ball once the ball is in it */}
+        {(!ball || !ball.inside) && <Pot />}
 
         {live && (
-          <g clipPath="url(#field)">
-            <line x1={LAUNCH_X} y1={GROUND - 3} x2={armX} y2={armY}
-              stroke="var(--color-ink)" strokeWidth="1.8" strokeLinecap="round" />
-            <circle cx={armX} cy={armY} r="2.4"
-              fill="var(--color-picto)" stroke="var(--color-ink)" strokeWidth="1.2" />
-            {/* the opening of the real flight path, fading out */}
-            {/* the gesture itself, so it is obvious the drag is being read and
-                where full power sits */}
-            <line x1={drag!.from.x} y1={drag!.from.y} x2={drag!.to.x} y2={drag!.to.y}
-              stroke="var(--color-ink)" strokeWidth="0.7" strokeDasharray="2 2" opacity="0.4" />
-            <circle cx={drag!.from.x} cy={drag!.from.y} r="1.6"
-              fill="none" stroke="var(--color-ink)" strokeWidth="0.8" opacity="0.45" />
-            <g opacity="0.9">
-              <rect x="6" y="4" width="30" height="3" rx="1.5"
-                fill="var(--color-surface)" stroke="var(--color-ink)" strokeWidth="0.8" />
-              <rect x="6" y="4" width={30 * live.power} height="3" rx="1.5"
-                fill={live.power > 0.97 ? "var(--color-hot)" : "var(--color-picto)"} />
-            </g>
+          <>
             {dots.map((p, i) => (
-              <circle key={i} cx={sx(p.x)} cy={sy(p.y)}
-                r={1.5 - (i / Math.max(1, dots.length)) * 0.7}
-                fill="var(--color-ink)"
-                opacity={0.55 - (i / Math.max(1, dots.length)) * 0.35} />
+              <circle key={i} cx={sx(p.x)} cy={sy(p.y) - BALL}
+                r={2 - (i / dots.length) * 1.05}
+                fill="var(--color-picto)"
+                opacity={0.85 - (i / dots.length) * 0.78} />
             ))}
-          </g>
+            <line x1={drag!.from.x} y1={drag!.from.y} x2={drag!.to.x} y2={drag!.to.y}
+              stroke="var(--color-hot)" strokeWidth="0.8" strokeDasharray="2 2" opacity="0.85" />
+            <circle cx={drag!.from.x} cy={drag!.from.y} r="1.4" fill="var(--color-ink)" />
+            {/* the power reading, at the finger's anchor rather than in a corner */}
+            <circle cx={drag!.from.x} cy={drag!.from.y} r="5"
+              fill="none" stroke="var(--color-acid)" strokeWidth="1.6"
+              strokeDasharray={`${pullFraction(drag!) * 31.4} 31.4`}
+              transform={`rotate(-90 ${drag!.from.x} ${drag!.from.y})`} />
+            <circle cx={drag!.to.x} cy={drag!.to.y} r="3.4"
+              fill="var(--color-hot)" stroke="var(--color-ink)" strokeWidth="1" />
+          </>
         )}
 
-        {drawn && (
-          <polyline
-            points={path.slice(0, flying
-              ? Math.max(2, Math.round(t * path.length))
-              : path.length).map((p) => `${sx(p.x)},${sy(p.y)}`).join(" ")}
-            fill="none" stroke="var(--color-ink)" strokeWidth="0.9"
-            strokeDasharray="2 2" opacity="0.45" />
-        )}
-        {ball && (
-          <circle cx={sx(ball.x)} cy={sy(ball.y)} r="2.4"
-            fill="var(--color-picto)" stroke="var(--color-ink)" strokeWidth="1.2" />
-        )}
+        <Ball p={ball ?? { x: 0, y: 0 }} />
+        {ball?.inside && <Pot />}
       </svg>
 
       <p className="text-center text-[13px] font-bold text-soft min-h-[20px]">
         {note ??
-          (landed ? describeShot(landed, target)
+          (done ? describeShot(done, target)
             : busy ? "…"
-            : canAim ? "Drag back anywhere and let go"
+            : canAim ? "Pull back anywhere below the line"
             : "Waiting for their shot")}
       </p>
     </div>
   );
+
+  function Pot() {
+    return (
+      <g>
+        {!sunk && (
+          <line x1={potX} y1={potY + depth} x2={potX} y2={GROUND}
+            stroke="var(--color-ink)" strokeWidth="2.6" strokeLinecap="round" />
+        )}
+        <path d={`M ${potX - hw} ${potY} L ${potX - hw * 0.8} ${potY + depth}
+                  L ${potX + hw * 0.8} ${potY + depth} L ${potX + hw} ${potY} Z`}
+          fill={sunk ? "var(--color-trivia)" : "var(--color-hot)"}
+          stroke="var(--color-ink)" strokeWidth="1.4" strokeLinejoin="round" />
+        <line x1={potX - hw} y1={potY} x2={potX + hw} y2={potY}
+          stroke="var(--color-acid)" strokeWidth="1.2" strokeLinecap="round" />
+        {/* the lips, which are the whole story: clip the near one and it tips
+            in, clip the far one and it rims out */}
+        <circle cx={potX - hw} cy={potY} r="1.5" fill="var(--color-ink)" />
+        <circle cx={potX + hw} cy={potY} r="1.5" fill="var(--color-ink)" />
+      </g>
+    );
+  }
+
+  function Ball({ p }: { p: { x: number; y: number } }) {
+    return (
+      <g>
+        <circle cx={sx(p.x)} cy={sy(p.y) - BALL} r={BALL}
+          fill="var(--color-pop)" stroke="var(--color-ink)" strokeWidth="1.4" />
+        <circle cx={sx(p.x) - BALL * 0.3} cy={sy(p.y) - BALL * 1.32} r={BALL * 0.28}
+          fill="var(--color-surface)" opacity="0.85" />
+      </g>
+    );
+  }
 }

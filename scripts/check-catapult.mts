@@ -1,13 +1,14 @@
 /**
- * The catapult exists so that an eight-year-old and an adult can play the same
- * board game, so the properties that matter are not "does the maths work" but
- * "is every target reachable, do both phones see the same one, and is the bot
- * beatable".
+ * The catapult's rules, held to the properties the game depends on.
+ *
+ * Two of these were written only after the thing they describe had already
+ * shipped broken, which is the honest reason they are here: the solver once
+ * promised pots the ball could not reach, and a miss once froze in mid-air.
  */
 import {
-  targetFor, landingX, isHit, missBy, describeShot, powerFor, arc, botShot,
-  previewDots, PREVIEW, BOT_ACCURACY, MIN_ANGLE, MAX_ANGLE, clamp,
-  type Level, type Shot,
+  BALL_R, BOT_ACCURACY, MIN_ANGLE, MAX_ANGLE, PREVIEW, bodyOf, botShot, ceiling,
+  clamp, describeShot, isHit, lipOf, previewDots, scored, simulate, solve,
+  targetFor, yAt, type Level, type Shot, type Target,
 } from "../src/features/challenge/rules.ts";
 
 let n = 0;
@@ -16,176 +17,278 @@ const ok = (c: boolean, m: string) => {
   if (!c) { console.error("FAIL " + m); process.exit(1); }
 };
 const LEVELS: Level[] = ["easy", "medium", "hard"];
-// A seeded generator, so a failure here is reproducible rather than a rumour.
-let s = 424242;
-const rnd = () => (s = (s * 1103515245 + 12345) % 2147483648) / 2147483648;
+const shotAt = (t: Target, s: { angle: number; power: number }): Shot =>
+  ({ ...s, dir: t.x < 0 ? -1 : 1 });
 
-// --- the target ------------------------------------------------------------
-// Two phones must draw the same target from the same turn, or one of them is
-// playing a different game.
-for (let i = 0; i < 400; i++) {
-  const seed = Math.trunc(rnd() * 2e12);
-  for (const l of LEVELS) {
-    const a = targetFor(seed, l), b = targetFor(seed, l);
-    ok(a.x === b.x && a.radius === b.radius, "the same seed gives the same target");
+// --- the world ---------------------------------------------------------------
+ok(MIN_ANGLE < MAX_ANGLE, "the angle range is not inverted");
+ok(MAX_ANGLE > Math.PI / 4, "and it includes the range-maximising angle");
+ok(BALL_R > 0, "the ball has a size");
+for (const half of [0.048, 0.066, 0.105]) {
+  ok(bodyOf(half) < half + BALL_R, `a pot's body is narrower than its mouth (${half})`);
+  ok(lipOf(half) > 0 && lipOf(half) < half, `and its lip is a fraction of it (${half})`);
+}
+
+// --- the same seed is the same pot, on both phones ---------------------------
+// The pot is laid out from the moment the turn was written, which both clients
+// read off the same row. If it were not a pure function of that number the two
+// of you would be shooting at different things.
+for (const level of LEVELS) {
+  for (const seed of [1, 2, 7, 1000, 1748e6, 1748e6 + 1, Date.now()]) {
+    const a = targetFor(seed, level), b = targetFor(seed, level);
+    ok(a.x === b.x && a.y === b.y && a.half === b.half,
+       `targetFor(${seed}, ${level}) is stable`);
   }
 }
-// Consecutive turns must not sit on top of each other: seeds are timestamps, so
-// nearby values must still spread. This is the reason for the hash.
 {
-  const base = 1788570000000;
-  const xs = Array.from({ length: 60 }, (_, i) => targetFor(base + i * 1000).x);
-  const spread = Math.max(...xs) - Math.min(...xs);
-  ok(spread > 0.4, `nearby timestamps give spread-out targets (got ${spread.toFixed(2)})`);
-  ok(new Set(xs.map((x) => x.toFixed(3))).size > 40, "and they are not all the same few places");
+  const seen = new Set<string>();
+  for (let s = 1_700_000_000_000; s < 1_700_000_000_000 + 400; s++)
+    seen.add(JSON.stringify(targetFor(s, "medium")));
+  ok(seen.size > 300, `consecutive seeds give different pots (${seen.size}/400)`);
 }
 
-// --- every target is actually reachable ------------------------------------
-// A target you cannot physically hit is not difficulty, it is a bug.
-for (let i = 0; i < 800; i++) {
-  const seed = Math.trunc(rnd() * 2e12);
-  for (const l of LEVELS) {
-    const t = targetFor(seed, l);
-    const p = powerFor(t.x, Math.PI / 4);
-    ok(p !== null && p <= 1, `every ${l} target is reachable (x=${t.x.toFixed(3)})`);
-    ok(isHit({ angle: Math.PI / 4, power: p! }, t), "and the solved shot actually hits it");
-    // reachable without maxing out, so there is room to be long as well as short
-    ok(p! < 0.99, "with power to spare, so overshooting is possible too");
+// --- THE GUARANTEE -----------------------------------------------------------
+// Every pot the generator places can be hit, and "can be hit" is measured by
+// running the real simulation rather than by trusting the solver — because the
+// solver was wrong. It asked only whether the ball was falling at the pot's
+// centre, never whether it cleared the near rim on the way in, so the marginal
+// shot arrived level with the mouth and hit the side of the cup.
+{
+  let poles = 0, ground = 0;
+  for (const level of LEVELS) {
+    for (let s = 0; s < 700; s++) {
+      const pot = targetFor(2_000_000 + s * 7919, level);
+      const aim = solve(Math.abs(pot.x), pot.y, pot.half);
+      ok(!!aim, `${level} seed ${s}: a solution exists`);
+      const f = simulate(shotAt(pot, aim!), pot);
+      ok(scored(f.outcome), `${level} seed ${s}: the solved shot scores (${f.outcome})`);
+      pot.y > 0 ? poles++ : ground++;
+    }
+  }
+  ok(poles > 200 && ground > 200, `both kinds of pot get generated (${poles} pole, ${ground} ground)`);
+}
+// and a pot is never placed above what the physics allows
+for (const level of LEVELS) {
+  for (let s = 0; s < 200; s++) {
+    const pot = targetFor(5_000_000 + s * 104729, level);
+    if (pot.y === 0) continue;
+    ok(pot.y <= ceiling(Math.abs(pot.x), pot.half) + 1e-9,
+       `${level} seed ${s}: the pot is under the ceiling`);
   }
 }
 
-// --- the physics -----------------------------------------------------------
-ok(landingX({ angle: Math.PI / 4, power: 1 }) > 0.99, "full power at 45° reaches the far end");
-ok(landingX({ angle: Math.PI / 4, power: 0 }) === 0, "no power goes nowhere");
-for (let i = 0; i < 300; i++) {
-  const shot: Shot = { angle: MIN_ANGLE + rnd() * (MAX_ANGLE - MIN_ANGLE), power: rnd() };
-  const x = landingX(shot);
-  ok(x >= 0 && x <= 1.0001, `a shot always lands on the field (${x})`);
-  // more power, same angle, never lands shorter
-  const stronger = landingX({ ...shot, power: Math.min(1, shot.power + 0.05) });
-  ok(stronger >= x - 1e-12, "more power never lands shorter — the game has to be learnable");
+// --- the ceiling is the ceiling ----------------------------------------------
+for (const x of [0.28, 0.4, 0.55, 0.68]) {
+  const cap = ceiling(x, 0.066);
+  ok(!!solve(x, cap - 1e-3, 0.066), `x=${x}: just under the ceiling is reachable`);
+  ok(!solve(x, cap + 1e-3, 0.066), `x=${x}: just over it is not`);
 }
-// out-of-range inputs are clamped, not obeyed
-ok(landingX({ angle: -5, power: 2 }) === landingX({ angle: MIN_ANGLE, power: 1 }),
-   "a wild input is clamped into the playable range");
-ok(clamp(9, 0, 1) === 1 && clamp(-9, 0, 1) === 0, "clamp does what it says");
+ok(ceiling(0.3, 0.066) > ceiling(0.65, 0.066), "the ceiling falls away with distance");
 
-// --- the arc that gets drawn matches the verdict ----------------------------
-for (let i = 0; i < 200; i++) {
-  const shot: Shot = { angle: MIN_ANGLE + rnd() * (MAX_ANGLE - MIN_ANGLE), power: 0.2 + rnd() * 0.8 };
-  const pts = arc(shot, 30);
-  ok(pts.length === 31, "the arc has the number of points asked for");
-  ok(pts[0].x === 0 && pts[0].y === 0, "it starts at the launcher");
-  ok(Math.abs(pts[pts.length - 1].x - landingX(shot)) < 1e-9,
-     "and it ENDS where landingX says it does — the picture cannot disagree with the verdict");
-  ok(pts.every((p) => p.y >= 0), "nothing dips below the ground");
-  const peak = Math.max(...pts.map((p) => p.y));
-  ok(peak > 0, "and it actually goes up");
-}
-
-// --- hit, miss, and what we say about it -----------------------------------
+// --- the flight always ends --------------------------------------------------
+// A miss that crossed the mouth plane was snapped onto it, read as above it on
+// the next step, and re-crossed for ever. One shot in thirty hung in the air.
 {
-  const t = { x: 0.5, radius: 0.06 };
-  const at = (x: number) => ({ angle: Math.PI / 4, power: Math.sqrt(x) });
-  ok(isHit(at(0.5), t), "dead centre hits");
-  ok(isHit(at(0.5 + 0.059), t), "just inside the edge hits");
-  ok(!isHit(at(0.5 + 0.07), t), "just outside does not");
-  ok(missBy(at(0.6), t) > 0, "long is positive");
-  ok(missBy(at(0.4), t) < 0, "short is negative");
-  ok(describeShot(at(0.5), t) === "Hit!", "a hit says so");
-  ok(describeShot(at(0.56), t) === "Just long.", "a near miss long");
-  ok(describeShot(at(0.44), t) === "Just short.", "a near miss short");
-  ok(describeShot(at(0.9), t) === "Way long.", "a wild miss long");
-  ok(describeShot(at(0.1), t) === "Way short.", "a wild miss short");
-}
-
-// --- the bot ---------------------------------------------------------------
-// Beatable, and honest: the arc it draws is the shot it committed to.
-for (const l of LEVELS) {
-  let hits = 0;
-  const runs = 4000;
-  for (let i = 0; i < runs; i++) {
-    const t = targetFor(Math.trunc(rnd() * 2e12), l);
-    const shot = botShot(t, l, rnd);
-    ok(shot.power >= 0 && shot.power <= 1, "the bot never fires an impossible shot");
-    ok(shot.angle >= MIN_ANGLE - 1e-9 && shot.angle <= MAX_ANGLE + 1e-9,
-       "and never at an impossible angle");
-    if (isHit(shot, t)) hits++;
+  let longest = 0;
+  for (let i = 0; i < 4000; i++) {
+    const level = LEVELS[i % 3];
+    const pot = targetFor(9_000_000 + i * 31, level);
+    const shot: Shot = {
+      angle: MIN_ANGLE + ((i * 0.61803) % 1) * (MAX_ANGLE - MIN_ANGLE),
+      power: 0.05 + ((i * 0.31831) % 1) * 0.95,
+      dir: i % 9 === 0 ? (pot.x < 0 ? 1 : -1) : (pot.x < 0 ? -1 : 1),
+    };
+    const f = simulate(shot, pot);
+    longest = Math.max(longest, f.samples.length);
+    ok(f.samples.length < 900, `shot ${i} settles rather than running to the cap`);
+    const last = f.samples[f.samples.length - 1];
+    ok(Number.isFinite(last.x) && Number.isFinite(last.y), `shot ${i} ends somewhere real`);
+    ok(last.y >= -0.5 && Math.abs(last.x) < 3, `shot ${i} ends on the field`);
   }
-  const rate = hits / runs;
-  // Wide bounds on purpose: this is checking "beatable but worth beating",
-  // not pinning a constant nobody should be free to tune.
-  ok(rate > 0.35 && rate < 0.85, `the ${l} bot hits ${(rate * 100).toFixed(0)}% — beatable`);
-  ok(Math.abs(rate - BOT_ACCURACY[l]) < 0.2,
-     `and lands near its stated accuracy of ${BOT_ACCURACY[l]}`);
-}
-// harder targets are smaller, so a fixed shooter does worse on them
-{
-  const fixed = { angle: Math.PI / 4, power: Math.sqrt(0.6) };
-  const rates = LEVELS.map((l) => {
-    let h = 0;
-    for (let i = 0; i < 3000; i++) if (isHit(fixed, targetFor(Math.trunc(rnd() * 2e12), l))) h++;
-    return h / 3000;
-  });
-  ok(rates[0] > rates[1] && rates[1] > rates[2],
-     `easy is genuinely easier than hard (${rates.map((r) => r.toFixed(2)).join(" > ")})`);
+  ok(longest < 500, `the longest flight is bounded (${longest} samples)`);
 }
 
-// --- the preview cannot lie about the flight -------------------------------
-// The whole point of showing an arc is that it is the arc. Asserting only that
-// the drawn path ENDS in the right place — which is what the first version
-// checked — passes happily while the shape on screen is wrong.
-for (let i = 0; i < 400; i++) {
+// --- what you watch is the arc it flies --------------------------------------
+// Before anything is touched the ball is on the closed-form parabola — the
+// same one the solver reasons about. Stepping from the start instead drifts
+// below the true arc by more than a marginal shot's clearance.
+{
+  const pot = targetFor(4242, "medium");
+  const aim = solve(Math.abs(pot.x), pot.y, pot.half)!;
+  const shot = shotAt(pot, aim);
+  const f = simulate(shot, pot);
+  let checked = 0;
+  for (let i = f.wound; i < f.samples.length; i++) {
+    const p = f.samples[i];
+    if (Math.abs(p.x) < 1e-6 || p.y <= pot.y) break;         // first contact or past it
+    ok(Math.abs(p.y - yAt(Math.abs(p.x), aim.angle, aim.power)) < 1e-9,
+       `free flight sample ${i} is on the analytic parabola`);
+    checked++;
+  }
+  ok(checked > 10, `there is a free-flight stretch to check (${checked} samples)`);
+}
+
+// --- a pot in the floor is a hole, not a lid ---------------------------------
+// A ball that bounced onto the opening used to bounce off it and be called
+// short, which is a rule, and a bad one. Anything arriving at floor level over
+// the mouth goes in.
+{
+  const pot: Target = { x: 0.55, y: 0, half: 0.066 };
+  const outcomes = new Set<string>();
+  for (let i = 0; i < 6000; i++) {
+    const shot: Shot = {
+      angle: MIN_ANGLE + ((i * 0.61803) % 1) * (MAX_ANGLE - MIN_ANGLE),
+      power: 0.2 + ((i * 0.31831) % 1) * 0.8, dir: 1,
+    };
+    outcomes.add(simulate(shot, pot).outcome);
+  }
+  ok(outcomes.has("bounced"), "a short shot can bounce in");
+  ok(outcomes.has("rolled"), "and a shorter one can roll in");
+  ok(outcomes.has("in"), "and a good one drops straight in");
+}
+// a pole pot needs no rule to stay drop-only: physics does the gating
+{
+  let rolledIntoAPole = 0, bouncedIntoAPole = 0, n2 = 0;
+  for (let s = 0; s < 900; s++) {
+    const pot = targetFor(7_000_000 + s * 7907, "hard");
+    if (pot.y === 0) continue;
+    n2++;
+    for (let i = 0; i < 40; i++) {
+      const shot: Shot = {
+        angle: MIN_ANGLE + ((i * 0.61803) % 1) * (MAX_ANGLE - MIN_ANGLE),
+        power: 0.15 + ((i * 0.31831) % 1) * 0.85, dir: pot.x < 0 ? -1 : 1,
+      };
+      const o = simulate(shot, pot).outcome;
+      if (o === "rolled") rolledIntoAPole++;
+      if (o === "bounced") bouncedIntoAPole++;
+    }
+  }
+  ok(n2 > 100, `there are pole pots to check (${n2})`);
+  ok(rolledIntoAPole === 0, "nothing ever rolls into a pot on a pole");
+  ok(bouncedIntoAPole === 0, "and nothing bounces into one off the floor");
+}
+
+// --- short is forgiven, long is not ------------------------------------------
+// The asymmetry is the lesson the game teaches without ever saying it, so it is
+// a property and not a coincidence of tuning. Tested on pots in the floor,
+// where the geometry is clean: a pot on a pole has a body, and a shot aimed a
+// whole lip long clips it on the way up rather than ever reaching the rim.
+{
+  let pairs = 0;
+  for (let s = 0; s < 400; s++) {
+    const pot = targetFor(3_000_000 + s * 6151, "medium");
+    if (pot.y > 0) continue;
+    const ax = Math.abs(pot.x), lip = lipOf(pot.half), dir = (pot.x < 0 ? -1 : 1) as 1 | -1;
+    const near = solve(ax - pot.half - lip * 0.5, 0, pot.half);
+    const far  = solve(ax + pot.half + lip * 0.5, 0, pot.half);
+    if (!near || !far) continue;
+    pairs++;
+    ok(simulate({ ...near, dir }, pot).outcome === "lip",
+       `seed ${s}: short by half a lip tips in off the near rim`);
+    // Not merely "does not score": it must be TURNED AWAY by the far rim.
+    // Deleting the rim-out branch entirely also stops it scoring, and a test
+    // that cannot tell those apart is not testing the rim.
+    ok(simulate({ ...far, dir }, pot).outcome === "rimout",
+       `seed ${s}: long by half a lip rims out`);
+  }
+  ok(pairs > 100, `there are ground pots to compare (${pairs})`);
+}
+
+// --- on a pole, long is punished harder --------------------------------------
+// There is no forgiveness out there at all: the pole is in the way.
+{
+  let checked = 0;
+  for (let s = 0; s < 400; s++) {
+    const pot = targetFor(3_500_000 + s * 6151, "medium");
+    if (pot.y === 0) continue;
+    const ax = Math.abs(pot.x), lip = lipOf(pot.half), dir = (pot.x < 0 ? -1 : 1) as 1 | -1;
+    const far = solve(ax + pot.half + lip * 0.5, pot.y, pot.half);
+    if (!far) continue;
+    checked++;
+    ok(!scored(simulate({ ...far, dir }, pot).outcome),
+       `seed ${s}: long by half a lip onto a pole never scores`);
+  }
+  ok(checked > 40, `there are pole pots to compare (${checked})`);
+}
+
+// --- the wrong way is never right --------------------------------------------
+for (let s = 0; s < 300; s++) {
+  const pot = targetFor(6_000_000 + s * 3571, "easy");
+  const aim = solve(Math.abs(pot.x), pot.y, pot.half)!;
+  const wrong: Shot = { ...aim, dir: pot.x < 0 ? 1 : -1 };
+  ok(!isHit(wrong, pot), `seed ${s}: the mirror-image shot misses`);
+  ok(describeShot(wrong, pot) === "Wrong way.", `seed ${s}: and says so`);
+}
+
+// --- isHit and describeShot agree with the simulation ------------------------
+for (let i = 0; i < 1200; i++) {
+  const pot = targetFor(8_000_000 + i * 2311, LEVELS[i % 3]);
   const shot: Shot = {
-    angle: MIN_ANGLE + rnd() * (MAX_ANGLE - MIN_ANGLE),
-    power: 0.08 + rnd() * 0.92,          // including the weak pulls
+    angle: MIN_ANGLE + ((i * 0.61803) % 1) * (MAX_ANGLE - MIN_ANGLE),
+    power: 0.1 + ((i * 0.31831) % 1) * 0.9, dir: pot.x < 0 ? -1 : 1,
   };
-  const dots = previewDots(shot);
-  ok(dots.length >= 6, `even a gentle pull previews dots (${dots.length})`);
+  const f = simulate(shot, pot);
+  ok(isHit(shot, pot) === scored(f.outcome), `shot ${i}: isHit follows the outcome`);
+  const said = describeShot(shot, pot);
+  ok(said.length > 0, `shot ${i}: the shot is described`);
+  ok(scored(f.outcome) === /in!$/i.test(said), `shot ${i}: only a score reads as one`);
+}
 
-  const vx = shot.power * Math.cos(shot.angle);
-  const vy = shot.power * Math.sin(shot.angle);
-  for (const d of dots) {
-    // Every dot must satisfy the equation of motion the ball will follow.
-    const t = d.x / vx;
-    const y = vy * t - 0.5 * t * t;
-    ok(Math.abs(y - d.y) < 1e-6,
-       `a preview dot sits on the real flight path (${d.y.toFixed(5)} vs ${y.toFixed(5)})`);
-    ok(d.y >= 0, "and never underground");
-  }
-
-  // It shows the opening, not the answer: the last dot stops well short of
-  // where the shot lands, or aiming becomes tracing.
-  const last = dots[dots.length - 1].x;
-  const land = landingX(shot);
-  ok(last < land * 0.98, `the preview stops short of the landing (${last.toFixed(2)} < ${land.toFixed(2)})`);
-  ok(last <= land * PREVIEW + 0.05, "and shows only the opening of the flight");
-
-  // Spaced along the ground, not by time — dots must not bunch at the top.
-  const gaps = dots.slice(1).map((d, k) => d.x - dots[k].x);
-  if (gaps.length > 2) {
-    const min = Math.min(...gaps), max = Math.max(...gaps);
-    // Relative, because the gap now scales with the shot.
-    ok(max <= min * 1.6 + 1e-6,
-       `dots are evenly spaced along the ground (${min.toFixed(4)}..${max.toFixed(4)})`);
+// --- the bot -----------------------------------------------------------------
+{
+  for (const level of LEVELS) {
+    let hits = 0, tries = 0, wrongSide = 0;
+    let seq = 12345;
+    const rand = () => { seq = (Math.imul(seq, 1664525) + 1013904223) >>> 0; return seq / 4294967296; };
+    for (let s = 0; s < 900; s++) {
+      const pot = targetFor(1_100_000 + s * 1543, level);
+      const shot = botShot(pot, level, rand);
+      tries++;
+      if (shot.dir !== (pot.x < 0 ? -1 : 1)) wrongSide++;
+      if (isHit(shot, pot)) hits++;
+      ok(shot.power >= 0 && shot.power <= 1, `${level} ${s}: the bot's power is in range`);
+      ok(shot.angle >= MIN_ANGLE - 1e-9 && shot.angle <= MAX_ANGLE + 1e-9,
+         `${level} ${s}: and so is its angle`);
+    }
+    ok(wrongSide === 0, `${level}: the bot always fires at the side the pot is on`);
+    const rate = hits / tries;
+    // Loose bounds on purpose: the bot aims for a displaced pot, and the lip
+    // means aiming slightly short still goes in. It must be beatable and it
+    // must not be useless.
+    ok(rate > 0.35 && rate < 0.92, `${level}: the bot is beatable but real (${(rate * 100) | 0}%)`);
+    ok(BOT_ACCURACY[level] > 0 && BOT_ACCURACY[level] < 1, `${level}: accuracy is a probability`);
   }
 }
-ok(previewDots({ angle: Math.PI / 4, power: 0 }).length === 0, "no power previews nothing");
 
-// --- the picture fits the box ----------------------------------------------
-// Both axes are drawn at one scale now. If a reachable shot can peak higher
-// than the field is tall, the arc leaves the picture and the honesty is gone.
-// Height of a shot landing at x is x·tan(angle)/4.
+// --- the preview is the opening of the real flight ---------------------------
 {
-  const FIELD = 34 / 84;      // GROUND / SCALE, from Catapult.tsx
-  let worst = 0;
-  for (let i = 0; i < 2000; i++) {
-    const angle = MIN_ANGLE + rnd() * (MAX_ANGLE - MIN_ANGLE);
-    const p = rnd();
-    const peak = Math.pow(p * Math.sin(angle), 2) / 2;
-    if (landingX({ angle, power: p }) <= 1) worst = Math.max(worst, peak);
+  for (let i = 0; i < 200; i++) {
+    const shot: Shot = {
+      angle: MIN_ANGLE + ((i * 0.61803) % 1) * (MAX_ANGLE - MIN_ANGLE),
+      power: 0.1 + ((i * 0.31831) % 1) * 0.9, dir: i % 2 ? 1 : -1,
+    };
+    const dots = previewDots(shot);
+    ok(dots.length > 0, `shot ${i}: a real pull previews something`);
+    for (const d of dots) {
+      ok(d.y >= -1e-9, `shot ${i}: no preview dot is underground`);
+      ok(Math.sign(d.x) === shot.dir || d.x === 0, `shot ${i}: the preview goes the way it will fire`);
+      ok(Math.abs(d.y - yAt(Math.abs(d.x), shot.angle, shot.power)) < 1e-9,
+         `shot ${i}: the preview is on the real flight path`);
+    }
+    const flight = 2 * shot.power * Math.sin(shot.angle);
+    const shown = dots[dots.length - 1].x / (shot.dir * shot.power * Math.cos(shot.angle));
+    ok(Math.abs(shown / flight - PREVIEW) < 1e-6, `shot ${i}: it stops at ${PREVIEW} of the flight`);
   }
-  ok(worst <= FIELD, `the tallest possible shot fits the field (${worst.toFixed(3)} <= ${FIELD.toFixed(3)})`);
+  ok(previewDots({ angle: MIN_ANGLE, power: 0, dir: 1 }).length === 0, "an empty pull previews nothing");
+}
+
+// --- clamping ------------------------------------------------------------------
+ok(clamp(5, 0, 1) === 1 && clamp(-5, 0, 1) === 0 && clamp(0.5, 0, 1) === 0.5, "clamp clamps");
+{
+  const pot = targetFor(99, "medium");
+  const wild: Shot = { angle: 90, power: 40, dir: pot.x < 0 ? -1 : 1 };
+  const f = simulate(wild, pot);
+  ok(f.samples.length < 900, "a shot outside every limit is still simulated to a stop");
 }
 
 console.log(`${n} catapult assertions hold`);
