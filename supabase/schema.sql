@@ -848,3 +848,197 @@ grant execute on function public.log_near_miss(bigint, text) to anon, authentica
 -- Read it with:
 --   select p.answer, n.guess, n.hits from near_misses n
 --   join puzzles p on p.id = n.puzzle_id order by n.hits desc limit 40;
+
+-- ============ Ball Sort, raced across two phones ============
+-- Every other game in here syncs ONE board that both clients write, with a
+-- single-writer rule to stop them racing each other. This is the opposite
+-- shape: two independent boards from one seeded puzzle, and the only thing
+-- being contended is who finished first.
+--
+-- That changes the security question. On a shared board the worst a bad write
+-- does is desync a turn. Here, a plain member-level UPDATE policy would let
+-- either player write the OTHER player's board, or post themselves a solved
+-- one. So this table takes no direct writes at all: SELECT for members, and
+-- every write goes through a definer function that works out your seat from
+-- auth.uid() and touches only your own columns. Proven by impersonation, not
+-- by reading the policy: a member's direct UPDATE matches zero rows.
+
+alter table public.rooms drop constraint if exists rooms_mode_check;
+alter table public.rooms add constraint rooms_mode_check
+  check (mode in ('race','squareoff','tictactoe','connect4','connect4trivia','memory','ballsort'));
+
+create table if not exists public.sort_races (
+  room_id    bigint primary key references public.rooms(id) on delete cascade,
+  -- both phones derive the identical puzzle from this, so the tubes are never
+  -- sent and cannot disagree
+  seed       bigint not null,
+  level      text not null default 'medium' check (level in ('easy','medium','hard')),
+  -- the solver's shortest solution, stored when the race is dealt. Not a
+  -- display number: it is a genuine lower bound, and sort_finish uses it to
+  -- reject a finish that claims fewer moves than the puzzle can be solved in.
+  par        smallint not null check (par >= 6),
+  cap        smallint not null default 4 check (cap between 2 and 8),
+  colours    smallint not null check (colours between 2 and 8),
+  -- tubes as "0123/1032//" — one char per ball, "/" between tubes
+  x_tubes    text not null,
+  o_tubes    text not null,
+  x_moves    int not null default 0 check (x_moves >= 0),
+  o_moves    int not null default 0 check (o_moves >= 0),
+  x_done_at  timestamptz,
+  o_done_at  timestamptz,
+  winner     text check (winner in ('x','o')),
+  x_player   uuid references auth.users(id) on delete set null,
+  o_player   uuid references auth.users(id) on delete set null,
+  started_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table public.sort_races enable row level security;
+
+drop policy if exists "sort races readable by the people in the room" on public.sort_races;
+create policy "sort races readable by the people in the room" on public.sort_races
+  for select using (public.is_room_member(sort_races.room_id));
+
+-- Deliberately NO insert/update/delete policy. The functions below are the
+-- only way in, and each writes one seat's columns and no others.
+
+create or replace function public.sort_seat(p_room bigint)
+returns text language sql stable security definer set search_path to 'public' as $$
+  select case
+    when r.x_player = auth.uid() then 'x'
+    when r.o_player = auth.uid() then 'o'
+  end
+  from public.sort_races r where r.room_id = p_room;
+$$;
+revoke all on function public.sort_seat(bigint) from public, anon;
+grant execute on function public.sort_seat(bigint) to authenticated;
+
+-- Is this string a finished board: every tube empty, or exactly `cap` of one
+-- colour? Cheap enough to run on every finish, and it is the difference
+-- between trusting the client's "I won" and checking it.
+create or replace function public.sort_is_solved(p_tubes text, p_cap int)
+returns boolean language plpgsql immutable set search_path to 'public' as $$
+declare t text;
+begin
+  foreach t in array string_to_array(p_tubes, '/') loop
+    if length(t) > 0 then
+      if length(t) <> p_cap then return false; end if;
+      if length(replace(t, left(t, 1), '')) <> 0 then return false; end if;
+    end if;
+  end loop;
+  return true;
+end $$;
+
+create or replace function public.sort_start(
+  p_room bigint, p_seed bigint, p_level text, p_par int,
+  p_cap int, p_colours int, p_tubes text
+) returns boolean language plpgsql security definer set search_path to 'public' as $$
+declare v_x uuid; v_o uuid;
+begin
+  if not public.is_room_member(p_room) then
+    raise exception 'not a member of room %', p_room;
+  end if;
+  -- The database decides who deals, exactly as the board games do: a
+  -- client-side host check holds against two people but not against one
+  -- client's effect firing twice.
+  if not public.claim_room_start(p_room) then return false; end if;
+
+  select min(user_id), max(user_id) into v_x, v_o
+  from public.room_players where room_id = p_room;
+
+  insert into public.sort_races
+    (room_id, seed, level, par, cap, colours, x_tubes, o_tubes, x_player, o_player)
+  values (p_room, p_seed, p_level, p_par, p_cap, p_colours, p_tubes, p_tubes, v_x, v_o)
+  on conflict (room_id) do nothing;
+  return true;
+end $$;
+revoke all on function public.sort_start(bigint, bigint, text, int, int, int, text) from public, anon;
+grant execute on function public.sort_start(bigint, bigint, text, int, int, int, text) to authenticated;
+
+-- A pour. Writes your seat's board and move count, and nothing else in the row.
+create or replace function public.sort_move(p_room bigint, p_tubes text, p_moves int)
+returns void language plpgsql security definer set search_path to 'public' as $$
+declare v_seat text;
+begin
+  v_seat := public.sort_seat(p_room);
+  if v_seat is null then raise exception 'not seated in race %', p_room; end if;
+
+  update public.sort_races
+     set x_tubes = case when v_seat = 'x' then p_tubes else x_tubes end,
+         x_moves = case when v_seat = 'x' then p_moves else x_moves end,
+         o_tubes = case when v_seat = 'o' then p_tubes else o_tubes end,
+         o_moves = case when v_seat = 'o' then p_moves else o_moves end,
+         updated_at = now()
+   where room_id = p_room and winner is null;
+end $$;
+revoke all on function public.sort_move(bigint, text, int) from public, anon;
+grant execute on function public.sort_move(bigint, text, int) to authenticated;
+
+-- Crossing the line.
+--
+-- Who won is settled HERE and not on either phone: Dublin and Manchester will
+-- disagree about the order of two finishes a second apart, and the database is
+-- the only place with one clock. `coalesce(winner, v_seat)` under the row lock
+-- means the second caller sees the first's answer and cannot overwrite it.
+--
+-- What this checks: you are seated, the race is live, the board you posted is
+-- genuinely sorted, and your move count is at least par — which no legitimate
+-- solve can be under, because par IS the shortest solution. What it does not
+-- check is that you reached that board by legal pours; proving that needs the
+-- move list replayed against the seeded puzzle. Named rather than implied.
+create or replace function public.sort_finish(p_room bigint, p_tubes text, p_moves int)
+returns text language plpgsql security definer set search_path to 'public' as $$
+declare v_seat text; v_row public.sort_races;
+begin
+  v_seat := public.sort_seat(p_room);
+  if v_seat is null then raise exception 'not seated in race %', p_room; end if;
+
+  select * into v_row from public.sort_races where room_id = p_room for update;
+  if v_row.winner is not null then return v_row.winner; end if;
+
+  if not public.sort_is_solved(p_tubes, v_row.cap) then
+    raise exception 'that board is not sorted';
+  end if;
+  if p_moves < v_row.par then
+    raise exception 'a % move solve is below par (%)', p_moves, v_row.par;
+  end if;
+
+  update public.sort_races
+     set x_tubes   = case when v_seat = 'x' then p_tubes else x_tubes end,
+         x_moves   = case when v_seat = 'x' then p_moves else x_moves end,
+         x_done_at = case when v_seat = 'x' then now() else x_done_at end,
+         o_tubes   = case when v_seat = 'o' then p_tubes else o_tubes end,
+         o_moves   = case when v_seat = 'o' then p_moves else o_moves end,
+         o_done_at = case when v_seat = 'o' then now() else o_done_at end,
+         winner     = coalesce(winner, v_seat),
+         updated_at = now()
+   where room_id = p_room
+   returning winner into v_seat;
+  return v_seat;
+end $$;
+revoke all on function public.sort_finish(bigint, text, int) from public, anon;
+grant execute on function public.sort_finish(bigint, text, int) to authenticated;
+
+-- A rematch: new seed, new puzzle, both boards back to the start.
+create or replace function public.sort_rematch(
+  p_room bigint, p_seed bigint, p_par int, p_colours int, p_tubes text
+) returns void language plpgsql security definer set search_path to 'public' as $$
+begin
+  if public.sort_seat(p_room) is null then
+    raise exception 'not seated in race %', p_room;
+  end if;
+  update public.sort_races
+     set seed = p_seed, par = p_par, colours = p_colours,
+         x_tubes = p_tubes, o_tubes = p_tubes,
+         x_moves = 0, o_moves = 0, x_done_at = null, o_done_at = null,
+         winner = null, started_at = now(), updated_at = now()
+   where room_id = p_room;
+end $$;
+revoke all on function public.sort_rematch(bigint, bigint, int, int, text) from public, anon;
+grant execute on function public.sort_rematch(bigint, bigint, int, int, text) to authenticated;
+
+-- c4_games shipped without this once already: the board only moves for whoever
+-- tapped it, and the opponent's screen never hears a thing.
+do $$ begin
+  alter publication supabase_realtime add table public.sort_races;
+exception when duplicate_object then null; end $$;
