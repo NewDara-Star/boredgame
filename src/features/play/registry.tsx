@@ -134,6 +134,33 @@ export const GAMES: GameDef[] = [
     ),
   },
   {
+    slug: "ballsort", name: "Ball Sort Race",
+    tagline: "Same tubes, two boards. First to sort wins.",
+    badge: "Puzzle", bank: null, path: "/ballsort", chip: "bg-hot text-surface",
+    // Solo against the bot for now. The two-phone race is the reason it exists
+    // and it is next; the rules and the seeded puzzle already assume it.
+    room: null,
+    Art: ({ size }) => (
+      <svg viewBox="0 0 100 100" width={size} height={size} className="shrink-0">
+        <defs>
+          <radialGradient id="bs-r" cx="36%" cy="30%" r="72%"><stop offset="0" stopColor="#FF8A96"/><stop offset=".4" stopColor="#E5233B"/><stop offset="1" stopColor="#8E0D1E"/></radialGradient>
+          <radialGradient id="bs-b" cx="36%" cy="30%" r="72%"><stop offset="0" stopColor="#8FA4FF"/><stop offset=".4" stopColor="#2B4BFF"/><stop offset="1" stopColor="#15258F"/></radialGradient>
+          <radialGradient id="bs-y" cx="36%" cy="30%" r="72%"><stop offset="0" stopColor="#FFE98A"/><stop offset=".4" stopColor="#FFD028"/><stop offset="1" stopColor="#B88A00"/></radialGradient>
+        </defs>
+        {[0, 1, 2].map((i) => (
+          <path key={i} d={`M ${16 + i * 26} 22 V 78 A 10 10 0 0 0 ${36 + i * 26} 78 V 22 Z`}
+            fill="rgba(20,16,13,.05)" stroke="var(--color-ink)" strokeWidth="4" strokeLinejoin="round" />
+        ))}
+        {[["bs-r", 0, 0], ["bs-b", 0, 1], ["bs-y", 0, 2], ["bs-b", 1, 0], ["bs-r", 1, 1], ["bs-y", 1, 2], ["bs-y", 2, 0], ["bs-r", 2, 2]]
+          .map(([g, tube, k], n) => (
+            <circle key={n} cx={26 + (tube as number) * 26} cy={74 - (k as number) * 17} r="8" fill={`url(#${g})`} />
+          ))}
+        <ellipse cx="34" cy="70" rx="3" ry="2" fill="#fff" opacity=".8" />
+        <ellipse cx="60" cy="53" rx="3" ry="2" fill="#fff" opacity=".8" />
+      </svg>
+    ),
+  },
+  {
     slug: "catapultsquares", name: "Catapult Squares",
     tagline: "Land the shot, claim the square.",
     badge: "Board game", bank: null, path: "/catapultsquares", chip: "bg-good text-surface",
