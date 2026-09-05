@@ -637,6 +637,22 @@ the seat on 18. A rematch now needs `winner is not null` and RAISES when
 refused, because `end_match` already hid behind a zero-row update once.
 `c4_games` and `memory_games` are still empty. That is not proof they work.
 
+**The schema file is a claim, and it was false.** `supabase/schema.sql` says
+"paste into the SQL Editor and run". It could not rebuild this database: two
+tables and five functions were live and absent from it — the whole username
+system and the whole daily round, both called by the client every day — so a
+rebuild produced an app whose signup could not set a name and whose daily
+round returned nothing. It had also never received a fix applied that morning
+as a migration, so running it would have restored a bug already fixed. Neither
+was visible by reading, because nothing rebuilds from the file in normal work.
+`npm run check:schema` now holds the cheap half offline: every table, view and
+RPC the client names must be declared in the file. It cannot see drift inside
+a function BODY — no shell here can reach the database — so when a body
+changes, compare it against `pg_proc` by hashing both with comments and
+whitespace stripped, which is how the two Ball Sort functions above were
+confirmed identical to what is deployed. Migrations are the database's record;
+this file is a second copy, and a second copy is a thing that drifts.
+
 **A room game is (mode, bank, challenge), not (mode, bank).** Square Off and
 Catapult Squares are the same mode and the same board; only what a move costs
 tells them apart, and Catapult Squares draws on no bank, so on a fresh room the

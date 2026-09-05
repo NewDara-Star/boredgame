@@ -13,6 +13,45 @@ as $$
   select regexp_replace(lower(coalesce(t,'')), '[^a-z0-9]', '', 'g');
 $$;
 
+-- ============ RLS is on by default ============
+-- A table created without `enable row level security` is readable by anyone
+-- with the anon key. Every table in this file turns it on explicitly, so this
+-- is belt as well as braces — it catches the table someone adds later and
+-- forgets. Wrapped because creating an event trigger needs privileges a
+-- restored or local database may not hand out; the explicit lines below still
+-- protect every table here if this one is skipped.
+create or replace function public.rls_auto_enable()
+returns event_trigger language plpgsql security definer
+set search_path to 'pg_catalog' as $$
+declare
+  cmd record;
+begin
+  for cmd in
+    select * from pg_event_trigger_ddl_commands()
+    where command_tag in ('CREATE TABLE', 'CREATE TABLE AS', 'SELECT INTO')
+      and object_type in ('table','partitioned table')
+  loop
+    if cmd.schema_name = 'public' then
+      begin
+        execute format('alter table if exists %s enable row level security', cmd.object_identity);
+        raise log 'rls_auto_enable: enabled RLS on %', cmd.object_identity;
+      exception when others then
+        raise log 'rls_auto_enable: failed to enable RLS on %', cmd.object_identity;
+      end;
+    end if;
+  end loop;
+end $$;
+
+do $$ begin
+  if not exists (select 1 from pg_event_trigger where evtname = 'ensure_rls') then
+    execute $e$create event trigger ensure_rls on ddl_command_end
+              when tag in ('CREATE TABLE', 'CREATE TABLE AS', 'SELECT INTO')
+              execute function public.rls_auto_enable()$e$;
+  end if;
+exception when insufficient_privilege then
+  raise notice 'ensure_rls skipped: needs more privilege. Every table here enables RLS explicitly.';
+end $$;
+
 -- ============ admins ============
 -- Its own table, not a boolean on profiles: a boolean is one loose policy away
 -- from a user promoting themselves. Add rows from the Supabase dashboard only.
@@ -55,6 +94,43 @@ end; $$;
 drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created after insert on auth.users
   for each row execute function handle_new_user();
+
+-- A name of your own.
+--
+-- handle_new_user gives every account a placeholder off its email, which is
+-- fine until two people meet in a room. These two are how a player changes it:
+-- one to ask, one to set. Both are definer because `revoke update on profiles`
+-- below leaves the client only (username, avatar) — and the uniqueness check
+-- has to see rows the caller cannot.
+create or replace function public.username_available(p_name text)
+returns boolean language sql security definer set search_path to 'public' as $$
+  select p_name ~ '^[A-Za-z0-9_]{3,20}$'
+     and not exists (select 1 from public.profiles where lower(username) = lower(p_name));
+$$;
+revoke all on function public.username_available(text) from public;
+grant execute on function public.username_available(text) to anon, authenticated;
+
+-- Returns 'ok' | 'taken' | 'invalid' rather than raising: all three are things
+-- the signup form has to say out loud, and only one of them is an error.
+-- `exception when unique_violation` catches the race between the check and the
+-- write, when two people claim the same name in the same second.
+create or replace function public.set_username(p_name text)
+returns text language plpgsql security definer set search_path to 'public' as $$
+declare uid uuid := auth.uid();
+begin
+  if uid is null then raise exception 'sign in first'; end if;
+  p_name := btrim(p_name);
+  if p_name !~ '^[A-Za-z0-9_]{3,20}$' then return 'invalid'; end if;
+  if exists (select 1 from public.profiles
+             where lower(username) = lower(p_name) and id <> uid) then
+    return 'taken';
+  end if;
+  update public.profiles set username = p_name where id = uid;
+  return 'ok';
+exception when unique_violation then return 'taken';
+end $$;
+revoke all on function public.set_username(text) from public, anon;
+grant execute on function public.set_username(text) to authenticated;
 
 -- ============ content ============
 do $$ begin create type game_key   as enum ('picto','trivia');            exception when duplicate_object then null; end $$;
@@ -283,6 +359,103 @@ end; $$;
 
 revoke all on function public.touch_streak(date) from public, anon;
 grant execute on function public.touch_streak(date) to authenticated;
+
+-- ---------------------------------------------------------------------------
+-- The daily round: ten questions, the same ten for everyone.
+--
+-- The round is STORED, not recomputed. Two people opening the app at the same
+-- second would each draw their own ten from a bank that changes as questions
+-- are retired, and then compare scores on different papers. So the first
+-- caller of the day writes the row and everyone else reads it — including the
+-- one who lost the insert race, which is why the id list is read back out of
+-- the table rather than returned from the draft.
+--
+-- The spread is fixed at 4 easy, 4 medium, 2 hard so the shape of a day is the
+-- same every day, and the order within it is hashed off the date so it is
+-- arbitrary but agreed.
+-- ---------------------------------------------------------------------------
+create table if not exists public.daily_rounds (
+  day         date primary key,
+  puzzle_ids  bigint[] not null,
+  created_at  timestamptz not null default now()
+);
+alter table public.daily_rounds enable row level security;
+drop policy if exists "daily round readable" on public.daily_rounds;
+create policy "daily round readable" on public.daily_rounds for select using (true);
+
+-- One score per player per day, first filing wins: `on conflict do nothing`
+-- and the boolean says whether yours was the one that landed, so a second
+-- submit cannot improve a score by trying again.
+create table if not exists public.daily_scores (
+  day        date not null,
+  user_id    uuid not null references public.profiles(id) on delete cascade,
+  score      int  not null,
+  correct    int  not null,
+  answered   int  not null,
+  ms         int,
+  created_at timestamptz not null default now(),
+  primary key (day, user_id)
+);
+alter table public.daily_scores enable row level security;
+drop policy if exists "daily scores readable" on public.daily_scores;
+create policy "daily scores readable" on public.daily_scores for select using (true);
+-- no insert policy: submit_daily is the only writer
+
+create or replace function public.daily_round(p_day date)
+returns bigint[] language plpgsql security definer set search_path to 'public' as $$
+declare ids bigint[];
+begin
+  select puzzle_ids into ids from public.daily_rounds where day = p_day;
+  if ids is not null then return ids; end if;
+
+  -- A fixed spread so the shape of the day is the same every day, ordered
+  -- deterministically off the date so two people creating it agree.
+  select array_agg(id order by md5(p_day::text || id::text)) into ids
+  from (
+    (select id from public.puzzles
+      where game='trivia' and status='live' and difficulty='easy'
+      order by md5(p_day::text || id::text) limit 4)
+    union all
+    (select id from public.puzzles
+      where game='trivia' and status='live' and difficulty='medium'
+      order by md5(p_day::text || id::text) limit 4)
+    union all
+    (select id from public.puzzles
+      where game='trivia' and status='live' and difficulty='hard'
+      order by md5(p_day::text || id::text) limit 2)
+  ) picked;
+
+  if ids is null or array_length(ids, 1) = 0 then return null; end if;
+
+  insert into public.daily_rounds(day, puzzle_ids) values (p_day, ids)
+  on conflict (day) do nothing;
+
+  -- Whoever lost the race takes the row that landed, not their own draft.
+  select puzzle_ids into ids from public.daily_rounds where day = p_day;
+  return ids;
+end $$;
+revoke all on function public.daily_round(date) from public, anon;
+grant execute on function public.daily_round(date) to authenticated;
+
+create or replace function public.submit_daily(
+  p_day date, p_score int, p_correct int, p_answered int, p_ms int)
+returns boolean language plpgsql security definer set search_path to 'public' as $$
+declare uid uuid := auth.uid(); n int;
+begin
+  if uid is null then raise exception 'sign in first'; end if;
+  -- Yesterday's round cannot be filed today.
+  if p_day <> (now() at time zone 'utc')::date
+     and p_day <> ((now() at time zone 'utc')::date - 1) then
+    return false;
+  end if;
+  insert into public.daily_scores(day, user_id, score, correct, answered, ms)
+  values (p_day, uid, greatest(p_score, 0), p_correct, p_answered, p_ms)
+  on conflict (day, user_id) do nothing;
+  get diagnostics n = row_count;
+  return n = 1;
+end $$;
+revoke all on function public.submit_daily(date, int, int, int, int) from public, anon;
+grant execute on function public.submit_daily(date, int, int, int, int) to authenticated;
 
 -- ============ Square Off ============
 -- Rooms already do "same puzzle, first correct answer wins". Square Off is a
