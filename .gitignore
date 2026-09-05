@@ -15,3 +15,5 @@ _to_delete/
 slopo.db
 slopo-report/
 slopo-agent-configs/
+
+dist2/

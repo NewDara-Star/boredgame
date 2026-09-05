@@ -382,6 +382,27 @@ deadline from the same row without another column to keep in step — which is
 what `check-clock.mts` pins down, along with the rule that the clock always
 stays longer than the reveal pause it would otherwise race.
 
+## The bundle is split by how often things change
+
+Every route below `/` is `lazy()`; only Home is eager. Vendor code is split by
+churn rather than size: `react` (with the router) and `supabase` and
+`framer-motion` are the same bytes for months, so a content-hashed copy of each
+survives every deploy, while app code does not — verified by changing a source
+file and confirming all three vendor hashes stay put.
+
+First paint went from 774 kB in one file to 652 kB across four, which is a
+smaller win than it sounds and worth being straight about: React, framer-motion
+and Supabase are all still needed at boot, because `AuthProvider` calls
+`getSession()` on mount. The real gain is elsewhere. A redeploy now re-downloads
+about 120 kB instead of 774. The admin screen, both room games, solo Square Off,
+the leaderboard and the profile no longer land on someone who opens the home
+page and stops there.
+
+What is left is `@supabase/supabase-js` at 217 kB, a third of first paint.
+Deferring it means the app renders before it knows whether anyone is signed in,
+which is a flash of the signed-out home page on every load — a worse trade than
+the bytes are worth, until the auth check itself gets faster.
+
 ## Brand: sticker on neon, but only where you are not reading
 
 The references are logo boards and packaging — saturated grounds, white fills,
