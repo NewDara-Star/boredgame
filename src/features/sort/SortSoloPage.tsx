@@ -85,61 +85,68 @@ export function SortSoloPage() {
         </div>
       </motion.div>
 
-      <motion.div variants={riseIn} className="grid grid-cols-3 gap-2 text-center">
-        <Stat label="Time" value={clock(elapsed)}
-          sub={r.startedAt === null ? "on first lift" : practice ? "practice" : "server-timed"} />
-        <Stat label="Moves" value={String(r.me.moves)} sub={`par ${r.puzzle.par}`} />
-        {practice
-          ? <Stat label="Board" value="random" sub="not ranked" />
-          : <Stat label="To beat" value={leader ? clock(leader.ms) : "—"} sub={leader ? leader.username : "nobody yet today"} />}
-      </motion.div>
+      {!r.result && (
+        <>
+          <motion.div variants={riseIn} className="grid grid-cols-3 gap-2 text-center">
+            <Stat label="Time" value={clock(elapsed)}
+              sub={r.startedAt === null ? "on first lift" : practice ? "practice" : "server-timed"} />
+            <Stat label="Moves" value={String(r.me.moves)} sub={`par ${r.puzzle.par}`} />
+            {practice
+              ? <Stat label="Board" value="random" sub="not ranked" />
+              : <Stat label="To beat" value={leader ? clock(leader.ms) : "—"} sub={leader ? leader.username : "nobody yet today"} />}
+          </motion.div>
 
-      <motion.div variants={popIn} className="piece bg-surface p-3 pt-1">
-        <Board tubes={r.me.tubes} cap={r.me.cap} selected={r.selected} refused={r.refused}
-          onPick={r.pick} disabled={!!r.result || r.finishing} />
-      </motion.div>
+          {/* The board, while it is yours to play. Once it is sorted the film
+              takes its place — it has the tubes and the clock in it, and a
+              sorted board above a film of the sorted board was the same
+              picture twice on a phone that had to be scrolled past it. */}
+          <motion.div variants={popIn} className="piece bg-surface p-3 pt-1">
+            <Board tubes={r.me.tubes} cap={r.me.cap} selected={r.selected} refused={r.refused}
+              onPick={r.pick} disabled={r.finishing} />
+          </motion.div>
 
-      <motion.p variants={riseIn} className="text-center text-[15px] font-bold text-soft min-h-[24px]">
-        {r.finishing ? "Checking with the referee…"
-          : r.result ? (r.result.server ? "On the board." : practice ? "Practice — not ranked." : "Timed here only.")
-          : r.selected === null ? "Tap a tube to lift its top ball."
-          : "Now tap where it goes."}
-      </motion.p>
+          <motion.p variants={riseIn} className="text-center text-[15px] font-bold text-soft min-h-[24px]">
+            {r.finishing ? "Checking with the referee…"
+              : r.selected === null ? "Tap a tube to lift its top ball."
+              : "Now tap where it goes."}
+          </motion.p>
+        </>
+      )}
 
       {r.error && (
         <motion.p variants={riseIn} className="piece bg-pop p-3 text-[13px] font-bold text-center">{r.error}</motion.p>
       )}
 
       {r.result ? (
-        <motion.div variants={popIn} className="space-y-4">
-          <div className="piece p-6 text-center bg-good text-surface">
-            <p className="text-[12px] font-black uppercase tracking-widest opacity-70">Sorted</p>
-            <p className="font-display text-6xl font-semibold tabular-nums mt-1">{clock(r.result.ms)}</p>
-            <p className="text-sm font-bold mt-2 opacity-85">
-              {r.result.moves} moves — par {r.puzzle.par}{overPar <= 0 ? ". On the nose." : ` (+${overPar}).`}
-              {rank ? ` #${rank} today.` : ""}
-            </p>
-            <div className="grid grid-cols-2 gap-2.5 mt-5">
-              <button onClick={r.again}
-                className="piece press py-3.5 font-display text-lg font-semibold bg-surface text-ink">
-                Go again
-              </button>
-              <button onClick={() => (practice ? r.shuffle() : setLevel(LEVELS[(LEVELS.indexOf(level) + 1) % 3]))}
-                className="piece press py-3.5 font-display text-lg font-semibold bg-surface text-ink">
-                {practice ? "New board" : "Next level"}
-              </button>
-            </div>
-            <p className="text-[13px] font-bold opacity-70 mt-2">
-              {practice ? "Same board again, or a new one." : "Same board. Your best time stands."}
+        <motion.div variants={popIn} className="space-y-3">
+          {/* one line, not a panel: the film above it already says the time big */}
+          <div className="piece px-4 py-3 bg-good text-surface flex items-baseline justify-between gap-3">
+            <p className="font-display text-2xl font-semibold tabular-nums">{clock(r.result.ms)}</p>
+            <p className="text-[13px] font-bold opacity-90 text-right">
+              {r.result.moves} moves, {overPar <= 0 ? "par" : `par ${r.puzzle.par}`}
+              {rank ? ` · #${rank} today` : practice ? " · practice" : r.result.server ? " · on the board" : " · timed here"}
             </p>
           </div>
-          {film && <ReplayPlayer replay={film} />}
-          {card && (
-            <button onClick={() => saveCard(card.file)}
-              className="block mx-auto text-[13px] font-black uppercase tracking-wider text-soft underline underline-offset-4">
-              Or save a still image
-            </button>
+          {film && (
+            <ReplayPlayer replay={film}>
+              <button onClick={r.again}
+                className="piece press py-4 font-display text-lg font-semibold bg-surface">
+                Go again
+              </button>
+            </ReplayPlayer>
           )}
+          <div className="flex justify-center gap-5">
+            <button onClick={() => (practice ? r.shuffle() : setLevel(LEVELS[(LEVELS.indexOf(level) + 1) % 3]))}
+              className="text-[13px] font-black uppercase tracking-wider text-soft underline underline-offset-4">
+              {practice ? "New board" : "Next level"}
+            </button>
+            {card && (
+              <button onClick={() => saveCard(card.file)}
+                className="text-[13px] font-black uppercase tracking-wider text-soft underline underline-offset-4">
+                Still image
+              </button>
+            )}
+          </div>
         </motion.div>
       ) : (
         <motion.div variants={riseIn} className="grid grid-cols-2 gap-2.5">
