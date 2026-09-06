@@ -65,7 +65,15 @@ export function Catapult({
   const [frame, setFrame] = useState(0);
   const [done, setDone] = useState<Shot | null>(null);
 
-  useEffect(() => { if (shot) launch(shot, false); /* eslint-disable-next-line */ }, [shot]);
+  const rafRef = useRef<number | null>(null);
+  useEffect(() => {
+    if (shot) launch(shot, false);
+    // Cancel any in-flight animation on unmount or when a new shot arrives. The
+    // loop used to keep running after the component was gone (TurnPanel remounts
+    // this per target via `key`), firing setState -- and onFire -- into nothing.
+    return () => { if (rafRef.current !== null) cancelAnimationFrame(rafRef.current); };
+    /* eslint-disable-next-line */
+  }, [shot]);
 
   function launch(s: Shot, report: boolean) {
     const f = simulate(s, target);
@@ -74,10 +82,11 @@ export function Catapult({
     const step = (now: number) => {
       const i = Math.min(last, Math.floor((now - start) / STEP_MS));
       setFrame(i);
-      if (i < last) requestAnimationFrame(step);
-      else { setDone(s); if (report) onFire?.(isHit(s, target), s); }
+      if (i < last) rafRef.current = requestAnimationFrame(step);
+      else { rafRef.current = null; setDone(s); if (report) onFire?.(isHit(s, target), s); }
     };
-    requestAnimationFrame(step);
+    if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+    rafRef.current = requestAnimationFrame(step);
   }
 
   function at(e: React.PointerEvent): Pt {

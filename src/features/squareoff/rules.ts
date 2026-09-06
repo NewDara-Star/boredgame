@@ -102,7 +102,10 @@ export function answer(g: Game, correct: boolean): Game {
   const win = winnerOf(board);
   if (win) return { ...done, winner: win.mark, line: win.line };
   if (openSquares(board).length === 0) return { ...done, winner: "draw" as const };
-  return { ...g, board, phase: "revealed", answerer: null, last };
+  // A claimed square is not contested -- clear `target` here too (matching the
+  // win/draw branch) so the just-taken square stops pulsing as "in play" through
+  // the reveal pause.
+  return { ...g, board, phase: "revealed", target: null, answerer: null, last };
 }
 
 /**

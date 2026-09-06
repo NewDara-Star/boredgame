@@ -160,6 +160,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       };
     }
     if (username) await setUsername(username);
+    // `is_anonymous` is a JWT claim, so `isGuest` keeps reading true until the
+    // token is reissued. Refresh it now, or a freshly-claimed account still sees
+    // the guest "claim your account" prompts until the next refresh.
+    await supabase.auth.refreshSession();
     await refreshProfile();
     return { error: null };
   }

@@ -48,13 +48,19 @@ export function SortRaceRoom({
   const rowMoves = w === "x" ? (r.row?.x_moves ?? 0) : w === "o" ? (r.row?.o_moves ?? 0) : 0;
   const par = r.row?.par ?? 0, level = r.row?.level ?? "medium";
   const tubes = r.puzzle?.tubes, capp = r.puzzle?.cap;
+  // Depend on the winner's NAME (a primitive), never the `names` object, which
+  // useMatchChrome rebuilds every render -- including the 1s match-clock tick
+  // that keeps firing after the race is won. A fresh `names` identity rebuilt
+  // `film`, and ReplayPlayer restarts playback (dropping any in-flight GIF) on
+  // every new `replay`, so the film reset to frame zero every second.
+  const winnerName = w ? names[w] : "";
   const film: Replay | null = useMemo(
     () => (w && wLog && wDone && tubes ? {
       tubes, cap: capp!, log: decodeLog(wLog),
       ms: Math.max(1, Date.parse(wDone) - Date.parse(startedAt)),
-      moves: rowMoves, par, name: names[w], level, where: `ROOM ${code}`,
+      moves: rowMoves, par, name: winnerName, level, where: `ROOM ${code}`,
     } : null),
-    [w, wLog, wDone, tubes, capp, startedAt, rowMoves, par, level, names, code],
+    [w, wLog, wDone, tubes, capp, startedAt, rowMoves, par, level, winnerName, code],
   );
 
   if (done) return <MatchOver sides={sides} myMark={r.seat ?? "x"} card={card} />;

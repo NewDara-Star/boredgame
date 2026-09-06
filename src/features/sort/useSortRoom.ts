@@ -86,7 +86,12 @@ export function useSortRoom(roomId: number | null, userId: string | undefined) {
     const channel = supabase.channel(`sort:${roomId}`)
       .on("postgres_changes",
         { event: "*", schema: "public", table: "sort_races", filter: `room_id=eq.${roomId}` },
-        (payload) => { if (alive && payload.new) setRow(payload.new as SortRow); })
+        (payload) => {
+          // A DELETE delivers `new` as `{}` (truthy), which decodeTubes(undefined)
+          // would crash on -- take only a real race row.
+          if (payload.eventType === "DELETE" || !(payload.new as SortRow)?.room_id) return;
+          if (alive) setRow(payload.new as SortRow);
+        })
       .subscribe();
     return () => { alive = false; void supabase!.removeChannel(channel); };
   }, [roomId]);

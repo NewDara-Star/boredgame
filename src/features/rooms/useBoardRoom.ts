@@ -116,7 +116,13 @@ export function useBoardRoom<G extends BoardState, R extends BoardRow>(
         .channel(`${engine.channel}:${roomId}`)
         .on("postgres_changes",
           { event: "*", schema: "public", table: engine.table, filter: `room_id=eq.${roomId}` },
-          (p) => remember(p.new as R))
+          (p) => {
+            // A DELETE (the room row cascades to the game row) delivers `new` as
+            // `{}`, not null -- remembering it and decoding an empty row crashes
+            // the screen. Only take a payload that is an actual game row.
+            if (p.eventType === "DELETE" || !(p.new as R)?.room_id) return;
+            remember(p.new as R);
+          })
         .subscribe();
     })();
     return () => { cancelled = true; if (channel) void supabase!.removeChannel(channel); };
@@ -177,6 +183,7 @@ export function useBoardRoom<G extends BoardState, R extends BoardRow>(
     setWriteError(msg);
     // A refused move must not leave a board on screen that no one else can see.
     if (msg && before) remember(before);
+    return msg;
   }, [roomId, nextPuzzleId, remember, engine, challenge]);
 
   /** The client that wrote the winning move books the win, so the tally moves
@@ -194,8 +201,12 @@ export function useBoardRoom<G extends BoardState, R extends BoardRow>(
   }, [roomId]);
 
   const apply = useCallback(async (next: G) => {
-    await write(next);
-    await bookWin(next);
+    // Only book the win if the winning board actually landed. `write` reverts its
+    // optimistic row and returns the error when the update is refused; on that
+    // path the opponent never sees the win, so crediting the score would leave
+    // the tally ahead of a game that, to everyone else, is still going.
+    const msg = await write(next);
+    if (!msg) await bookWin(next);
   }, [write, bookWin]);
 
   const choose = useCallback((cell: number) => {

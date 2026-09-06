@@ -76,12 +76,16 @@ export function DailyPage() {
     );
   }
   if (d.loading) return <Dealing what="today's round" />;
-  if (d.error) return <p className="text-sm text-bad font-bold">{d.error}</p>;
 
-  // Already played, or just finished: the board is the screen.
+  // Already played, or just finished: the board is the screen. A submit error
+  // must NOT wipe the result the player just earned -- it shows as a banner here,
+  // while a genuine load error (no result to show) falls through below.
   if (d.mine || r.phase === "done") {
     return (
       <motion.div variants={stagger(0.07)} initial="hidden" animate="show" className="space-y-4">
+        {d.error && (
+          <motion.p variants={riseIn} className="text-sm text-bad font-bold">{d.error}</motion.p>
+        )}
         <motion.div variants={riseIn}>
           <p className="text-[12px] font-black uppercase tracking-widest text-soft">Today's round</p>
           <h1 className="font-display text-[30px] leading-none font-semibold mt-1">
@@ -99,6 +103,7 @@ export function DailyPage() {
     );
   }
 
+  if (d.error) return <p className="text-sm text-bad font-bold">{d.error}</p>;
   if (r.phase === "loading") return <Dealing what="the round" />;
   if (r.phase === "empty") return <p className="text-sm text-soft font-bold">No round today.</p>;
 

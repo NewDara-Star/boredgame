@@ -77,7 +77,9 @@ export function useRound(
       ? given === current.answer
       : isCorrect(given, current.answer, current.accept);
     const gained = ok ? scoreAnswer(ms, streak, hintsUsed) : 0;
-    const near = !ok && closeness(given, current.answer, current.accept) > 0.7;
+    // A multiple-choice miss is a wrong pick, never a "so close" typo -- only
+    // typed answers can be near misses.
+    const near = !ok && !current.choices && closeness(given, current.answer, current.accept) > 0.7;
 
     setScore((s) => s + gained);
     setStreak((s) => {

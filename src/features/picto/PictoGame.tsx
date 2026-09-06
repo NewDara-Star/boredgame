@@ -93,7 +93,7 @@ export function PictoGame() {
           <form onSubmit={(e) => { e.preventDefault(); if (guess.trim()) r.submit(guess); }}
             className="mt-4 flex gap-2.5">
             <input ref={inputRef} value={guess} onChange={(e) => setGuess(e.target.value)}
-              placeholder="What phrase is this?" autoComplete="off" autoCapitalize="none"
+              aria-label="Your guess" placeholder="What phrase is this?" autoComplete="off" autoCapitalize="none"
               className="flex-1 bg-surface border-[2.5px] border-ink rounded-2xl px-4 py-3.5
                 font-bold text-ink placeholder:text-soft/60 outline-none
                 focus:shadow-[0_5px_0_var(--color-ink)] transition-shadow" />

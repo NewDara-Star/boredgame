@@ -5,6 +5,7 @@ import { loadByIds } from "@/features/play/content";
 import type { PlayItem } from "@/features/play/types";
 import { today } from "@/features/play/streak";
 import { attempt } from "@/shared/lib/write";
+import { withTimeout } from "@/shared/lib/timeout";
 
 export interface DailyStanding {
   user_id: string;
@@ -75,15 +76,34 @@ export function useDaily() {
     let cancelled = false;
     (async () => {
       setLoading(true);
-      const { data: ids, error: e } = await supabase!.rpc("daily_round", { p_day: day });
+      // Bounded like loadContent: a daily_round/loadByIds/readBoard call that
+      // simply never returns (captive-portal wifi, dropped signal) used to leave
+      // the screen stuck on "Dealing today's round..." for as long as it was open.
+      const ids = await withTimeout(
+        (async () => {
+          const { data, error } = await supabase!.rpc("daily_round", { p_day: day });
+          if (error) throw error;
+          return data as number[] | null;
+        })(),
+        8000, () => null,
+      );
       if (cancelled) return;
-      if (e) { setError(`Today's round didn't load: ${e.message}`); setLoading(false); return; }
-      if (!ids || (ids as number[]).length === 0) {
+      if (ids === null) {
+        setError("Today's round didn't load. Check your connection and try again.");
+        setLoading(false); return;
+      }
+      if (ids.length === 0) {
         setError("There aren't enough live questions for a daily round yet.");
         setLoading(false); return;
       }
-      setItems(await loadByIds(ids as number[]));
-      await readBoard();
+      const its = await withTimeout(loadByIds(ids), 8000, () => [] as PlayItem[]);
+      if (cancelled) return;
+      if (its.length === 0) {
+        setError("Today's round didn't load. Check your connection and try again.");
+        setLoading(false); return;
+      }
+      setItems(its);
+      await withTimeout(readBoard(), 8000, () => {});
       if (!cancelled) setLoading(false);
     })();
     return () => { cancelled = true; };

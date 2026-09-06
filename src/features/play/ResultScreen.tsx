@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { motion } from "framer-motion";
 import { popIn } from "@/shared/ui/motion";
 import { saveCard, type MatchCard } from "@/shared/card/frame";
@@ -24,6 +24,15 @@ export function ResultScreen({ headline, score, tone, card, alt, children }: {
   children?: ReactNode;
 }) {
   const bg = tone === "draw" ? "bg-sand" : tone === "win" ? "bg-good text-surface" : "bg-bad text-surface";
+  // `card` is null while the canvas draws -- but drawCard can fail and swallow
+  // the error, leaving this null for good. Rather than sit on "Drawing..." forever,
+  // fall back to a plain note after a few seconds (the score is shown above anyway).
+  const [slow, setSlow] = useState(false);
+  useEffect(() => {
+    if (card) { setSlow(false); return; }
+    const t = setTimeout(() => setSlow(true), 6000);
+    return () => clearTimeout(t);
+  }, [card]);
   return (
     <motion.div variants={popIn} initial="hidden" animate="show" className="play-surface">
       <div className={`piece shrink-0 px-4 py-3 flex items-baseline justify-between gap-3 ${bg}`}>
@@ -37,8 +46,10 @@ export function ResultScreen({ headline, score, tone, card, alt, children }: {
           <img src={card.url} alt={alt}
             className="max-h-full w-auto max-w-full rounded-2xl border-[3px] border-ink" />
         ) : (
-          <div className="piece grid place-items-center h-full aspect-square bg-surface">
-            <p className="text-sm font-bold text-soft">Drawing the result…</p>
+          <div className="piece grid place-items-center h-full aspect-square bg-surface p-6 text-center">
+            <p className="text-sm font-bold text-soft">
+              {slow ? "Couldn't draw the result card — your score is shown above." : "Drawing the result…"}
+            </p>
           </div>
         )}
       </div>

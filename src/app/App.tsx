@@ -1,4 +1,5 @@
 import { lazy, Suspense } from "react";
+import { MotionConfig } from "framer-motion";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/app/providers/AuthProvider";
 import { Shell } from "@/app/layout/Shell";
@@ -42,6 +43,7 @@ function Loading() {
 
 export function App() {
   return (
+    <MotionConfig reducedMotion="user">
     <AuthProvider>
       <BrowserRouter>
         <Suspense fallback={<Loading />}>
@@ -71,5 +73,6 @@ export function App() {
         </Suspense>
       </BrowserRouter>
     </AuthProvider>
+    </MotionConfig>
   );
 }

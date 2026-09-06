@@ -73,6 +73,10 @@ export function useLeaderboard(userId?: string, limit = 50): Board {
       if (cancelled || !me || typeof me.total_answered !== "number") { setLoading(false); return; }
       const { count } = await supabase
         .from("profiles").select("id", { count: "exact", head: true })
+        // Match the board's population: it excludes guests, so the "people ahead"
+        // count must too, or an off-page player sees a rank inflated by guests
+        // the board never shows.
+        .eq("is_guest", false)
         .gt("total_answered", me.total_answered);
       if (cancelled) return;
       setYou({
