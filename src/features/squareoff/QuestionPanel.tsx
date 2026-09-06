@@ -57,10 +57,12 @@ export function QuestionPanel({
               disabled={locked}
               onClick={() => onAnswer(opt)}
               className={`piece ${locked ? "" : "press"} flex items-center gap-3 text-left px-4 py-3 ${bg}`}>
-              <span aria-hidden className="text-base shrink-0"
+              <span aria-hidden={!(revealed && (isAnswer || isMine))} className="text-base shrink-0"
                 style={{ color: revealed && (isAnswer || isMine) ? "currentColor" : HUES[i % 4] }}>
-                {SHAPES[i % 4]}
+                {revealed && isAnswer ? "✓" : revealed && isMine ? "✗" : SHAPES[i % 4]}
               </span>
+              {revealed && isAnswer && <span className="sr-only">Correct answer: </span>}
+              {revealed && isMine && !isAnswer && <span className="sr-only">Your incorrect answer: </span>}
               <span className="text-[15px] font-bold">{opt}</span>
             </motion.button>
           );

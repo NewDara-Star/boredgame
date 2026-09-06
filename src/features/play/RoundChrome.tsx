@@ -57,7 +57,7 @@ export function HintBar({ item, used, onUse }:
       </AnimatePresence>
       {used < hints.length && (
         <button onClick={onUse}
-          className="piece press text-xs font-black uppercase tracking-wider px-3 py-2 rounded-xl bg-sand">
+          className="piece press text-xs font-black uppercase tracking-wider px-4 min-h-[44px] inline-flex items-center rounded-xl bg-sand">
           {used === 0 ? "Need a clue?  −100" : "One more  −100"}
         </button>
       )}

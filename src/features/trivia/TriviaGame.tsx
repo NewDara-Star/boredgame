@@ -106,10 +106,12 @@ export function TriviaGame() {
                   disabled={revealed || isBurned} onClick={() => r.submit(opt)}
                   whileTap={revealed ? undefined : { scale: 0.97 }}
                   className={`piece ${revealed ? "" : "press"} flex items-center gap-3 text-left px-4 py-3.5 ${bg}`}>
-                  <span aria-hidden className="text-base shrink-0"
+                  <span aria-hidden={!(revealed && (isAnswer || isMine))} className="text-base shrink-0"
                     style={{ color: revealed && (isAnswer || isMine) ? "currentColor" : HUES[i % 4] }}>
-                    {SHAPES[i % 4]}
+                    {revealed && isAnswer ? "✓" : revealed && isMine ? "✗" : SHAPES[i % 4]}
                   </span>
+                  {revealed && isAnswer && <span className="sr-only">Correct answer: </span>}
+                  {revealed && isMine && !isAnswer && <span className="sr-only">Your incorrect answer: </span>}
                   <span className="text-[15px] font-bold">{opt}</span>
                 </motion.button>
               );
@@ -121,7 +123,7 @@ export function TriviaGame() {
       {r.phase === "playing" ? (
         r.hintsUsed === 0 && (
           <button onClick={r.useHint}
-            className="piece press mt-4 text-xs font-black uppercase tracking-wider px-3 py-2 rounded-xl bg-pop">
+            className="piece press mt-4 text-xs font-black uppercase tracking-wider px-4 min-h-[44px] inline-flex items-center rounded-xl bg-pop">
             50 / 50 — burn two wrong answers · −100
           </button>
         )

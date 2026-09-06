@@ -131,6 +131,16 @@ h1, h2, h3, .display { font-family: var(--font-display); font-weight: 600; lette
   .no-scrollbar::-webkit-scrollbar { display: none; }
 }
 
+/* Short viewports (a landscape phone) -- UNLAYERED so it beats Tailwind's
+   flex-1 / min-h-0 utilities, which win over @layer components by cascade
+   layer order no matter the selector's specificity. A definite height still
+   (never auto -- that starves the board); the surface scrolls and the board
+   box takes a real size instead of flex-1's tiny leftover. */
+@media (max-height: 560px) {
+  .play-surface { height: calc(100dvh - var(--chrome)); overflow-y: auto; }
+  .play-surface .play-board { flex: 0 0 auto; height: 68vh; min-height: 260px; }
+}
+
 :focus-visible { outline: 3px solid var(--color-trivia); outline-offset: 3px; }
 
 @media (prefers-reduced-motion: reduce) {

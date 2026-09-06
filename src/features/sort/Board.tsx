@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import type { Tube } from "./rules";
 
@@ -27,6 +27,9 @@ export const BALL: [string, string, string][] = [
   ["#C4A2FF", "#7B3FE4", "#41208A"],   // purple
   ["#FFB08C", "#FF5A1F", "#9E2E05"],   // orange
 ];
+
+/** ball colours as words, for the screen reader -- same order as BALL. */
+const COLOUR = ["red", "blue", "green", "yellow", "purple", "orange"];
 
 const TW = 40, GAP = 9, R = 14.5, SLOT = 31.5;
 const LIFT = 44;                               // headroom for the lifted ball
@@ -62,6 +65,14 @@ export function Board({
 }) {
   const g = tubeGeometry(tubes.length, cap);
   const interactive = !!onPick && !disabled;
+  const [focused, setFocused] = useState<number | null>(null);
+  const label = (i: number) => {
+    const t = tubes[i];
+    if (t.length === 0) return `Tube ${i + 1}, empty`;
+    const top = COLOUR[t[t.length - 1] % COLOUR.length];
+    const base = `Tube ${i + 1}, ${t.length} ball${t.length > 1 ? "s" : ""}, top ${top}`;
+    return selected === i ? `${base}, lifted` : base;
+  };
 
   // the lifted ball, so it can be drawn floating
   const liftCount = (i: number) => (selected === i && tubes[i].length > 0 ? 1 : 0);
@@ -108,10 +119,25 @@ export function Board({
         const full = t.length === cap && t.every((c) => c === t[0]);
         return (
           <g key={i} ref={(el) => { groups.current[i] = el; }}
+            role={interactive ? "button" : undefined}
+            tabIndex={interactive ? 0 : undefined}
+            aria-label={interactive ? label(i) : undefined}
             onPointerDown={interactive ? (e) => { e.preventDefault(); onPick!(i); } : undefined}
-            style={{ cursor: interactive ? "pointer" : "default" }}>
+            onKeyDown={interactive ? (e) => {
+              // Space and Enter are how a button is pressed from the keyboard.
+              if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onPick!(i); }
+            } : undefined}
+            onFocus={interactive ? () => setFocused(i) : undefined}
+            onBlur={interactive ? () => setFocused((f) => (f === i ? null : f)) : undefined}
+            style={{ cursor: interactive ? "pointer" : "default", outline: "none" }}>
             {/* a generous hit area, because the tube is narrow and the thumb is not */}
             <rect x={x - GAP / 2} y={0} width={TW + GAP} height={g.h} fill="transparent" />
+            {/* keyboard focus ring -- the board draws no other focus, so this is it */}
+            {focused === i && (
+              <rect x={x - GAP / 2 + 1} y={1} width={TW + GAP - 2} height={g.h - 2}
+                rx="10" fill="none" stroke="var(--color-ink)" strokeWidth="2.5"
+                strokeDasharray="5 4" pointerEvents="none" />
+            )}
 
             {/* the tube: a rounded-bottom glass */}
             <path d={`M ${x} ${g.top} V ${g.top + g.tubeH - TW / 2}

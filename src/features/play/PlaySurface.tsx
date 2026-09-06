@@ -66,7 +66,7 @@ export function PlayBoard({ ratio = 1, min = 0, children }: {
     return () => ro.disconnect();
   }, [ratio, min]);
   return (
-    <div ref={box} className="flex-1 min-h-0 grid place-items-center overflow-hidden">
+    <div ref={box} className="play-board flex-1 min-h-0 grid place-items-center overflow-hidden">
       {width > 0 && children(width)}
     </div>
   );

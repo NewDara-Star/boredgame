@@ -70,7 +70,7 @@ export function Shell() {
               badge, which read as "you are already logged in". */}
           {user || offline ? (
             <NavLink to="/profile" aria-label="Profile"
-              className="shrink-0 grid place-items-center h-9 w-9 ml-1">
+              className="shrink-0 grid place-items-center h-11 w-11 ml-1">
               <RankBadge rank={rank.key} size={30} />
             </NavLink>
           ) : (
