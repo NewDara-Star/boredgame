@@ -312,7 +312,9 @@ alter table public.profiles
 -- signed-in player set total_answered to whatever they liked; nobody saw it, so
 -- it did not matter. It does now. Only the display fields are theirs to write.
 revoke update on public.profiles from authenticated, anon;
-grant update (username, avatar) on public.profiles to authenticated;
+-- Username and avatar are changed ONLY through set_username (which validates
+-- format + uniqueness); no direct column grant, or a client bypasses that RPC.
+-- (Applied live 2026-09-06.) A future avatar editor must go through a validating RPC.
 
 -- Streak is advanced server-side for the same reason.
 create or replace function public.touch_streak(p_local_date date default null)
@@ -1291,12 +1293,21 @@ begin
   v_was_open := true;  -- winner was null under the lock, so this caller wins it
 
   -- Belt as well as braces. The edge function has already proven the board by
-  -- replay; these two hold even if it is ever bypassed or rewritten badly.
+  -- replay; these hold even if it is ever bypassed or rewritten badly.
   if not public.sort_is_solved(p_tubes, v_row.cap) then
     raise exception 'that board is not sorted';
   end if;
   if p_moves < v_row.par then
     raise exception 'a % move solve is below par (%)', p_moves, v_row.par;
+  end if;
+  -- Time floor (applied live 2026-09-06). A real race takes seconds of tapping;
+  -- without this a scripted client could read the seed, replay the bundled
+  -- solution line and POST a solved board within milliseconds of the deal.
+  -- Mirrors the solo floor of 150ms/move (~3s at par). started_at is reset on
+  -- every sort_start and sort_rematch, so it always measures this game.
+  if v_row.started_at is not null
+     and greatest(1, (extract(epoch from (now() - v_row.started_at)) * 1000)::int) < p_moves * 150 then
+    raise exception 'too fast to have been played';
   end if;
 
   update public.sort_races

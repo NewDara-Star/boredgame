@@ -109,6 +109,19 @@ player *can currently lie about how well they did*. Fixing these changes the liv
 DB and the running client together, so I'm bringing them to you rather than
 shipping them:
 
+### Done — applied to live production 2026-09-06 (migrations, verified)
+- **Username/avatar direct-write loophole CLOSED.** Revoked the column UPDATE
+  grant on `profiles`; renames now only go through `set_username` (validated).
+  Verified: no UPDATE grants remain; client never wrote those columns directly.
+- **Room-race time floor ADDED** to `sort_finish` (150ms/move, ~3s at par,
+  mirroring solo). A replay-bot POSTing the bundled solution in ~0ms is now
+  rejected ("too fast to have been played"). `started_at` resets every start/
+  rematch so it can't be gamed. Security advisor shows no new issues.
+- `schema.sql` updated to match; the change is live regardless of git (recorded
+  in Supabase migration history). Merge this branch to keep the doc file current.
+
+### Still open — need a decision (NOT touched)
+
 - **CRITICAL — `bump_room_score(p_room, p_user)`** (schema.sql ~520). Verifies the
   caller is a member, then increments the *caller-supplied* `p_user`'s score with
   no proof of a win. A losing player can loop it from the console and win the
@@ -128,11 +141,11 @@ shipping them:
   `answer_normalised` are readable by any client, and all trivia/daily judging is
   client-side. This is the architectural root of the two criticals — a real fix
   moves judging server-side and stops shipping answers.
-- **HIGH — direct `update(username,avatar)` grant** (schema.sql ~315). Bypasses
+- **[DONE ✓] HIGH — direct `update(username,avatar)` grant** (schema.sql ~315). Bypasses
   `set_username` validation/uniqueness (impersonation, oversized/control-char
   names, `javascript:` avatars). The client only ever uses the RPC, so **revoking
   this grant is low-risk** and is the easiest of the set to do safely.
-- **MEDIUM — Ball Sort solutions shipped in `bank.ts` + no room time floor.** A
+- **[time floor DONE ✓; bank-shipping still open] MEDIUM — Ball Sort solutions shipped in `bank.ts` + no room time floor.** A
   script can replay the canned solution and "win" a race in ~0ms.
 - Lower: `join_room` username unvalidated; `daily_round`/`touch_streak` callable
   for arbitrary dates; edge fn leaks raw DB error strings; `sort_solo_start`
