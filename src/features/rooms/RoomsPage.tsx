@@ -18,6 +18,7 @@ import { startSortRace } from "@/features/sort/useSortRoom";
 import { Lobby } from "./Lobby";
 import { InviteCard } from "./InviteCard";
 import { PeerNotice } from "./matchUi";
+import { VoiceControl } from "@/features/voice/VoiceControl";
 import { AuthCard } from "@/features/profile/AuthCard";
 import { GuestCard, ClaimCard } from "@/features/profile/GuestCard";
 import { Avatar } from "@/shared/ui/Avatar";
@@ -225,6 +226,13 @@ export function RoomsPage() {
       <Note>{error ?? startError}</Note>
 
       {iAmIn && <PeerNotice players={players} present={present} userId={user.id} waiting={waiting} />}
+
+      {iAmIn && (() => {
+        const other = players.find((pl) => pl.user_id !== user.id);
+        return other
+          ? <VoiceControl roomId={room.id} userId={user.id} peerId={other.user_id} peerName={other.username} />
+          : null;
+      })()}
 
       {!iAmIn && (
         <div className="space-y-2">
