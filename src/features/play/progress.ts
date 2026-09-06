@@ -87,12 +87,15 @@ export async function recordRound(
   const rows = results
     .filter((r) => /^\d+$/.test(r.item.id))
     .map((r) => ({
-      user_id: userId,
       puzzle_id: Number(r.item.id),
-      correct: r.correct,
-      ms_taken: r.msTaken,
+      given: r.given,
+      ms: r.msTaken,
     }));
-  if (rows.length) await supabase.from("attempts").insert(rows);
+  // The server judges each answer against the puzzle and files the attempt with
+  // its OWN verdict -- the client no longer declares its own `correct`. Filing a
+  // correct row for a question you never answered was how the lifetime counters,
+  // and so the leaderboard, could be inflated. See record_round.
+  if (rows.length) await supabase.rpc("record_round", { p_rows: rows });
 
   const { data: after } = await supabase
     .rpc("touch_streak", { p_local_date: now }).single<Profile>();

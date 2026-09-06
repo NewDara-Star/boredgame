@@ -207,8 +207,13 @@ create index if not exists attempts_user_idx on attempts (user_id, created_at de
 alter table attempts enable row level security;
 drop policy if exists "own attempts readable" on attempts;
 create policy "own attempts readable" on attempts for select using (auth.uid() = user_id);
-drop policy if exists "own attempts insert" on attempts;
-create policy "own attempts insert" on attempts for insert with check (auth.uid() = user_id);
+-- Attempts are written ONLY by record_round below, which judges the answer
+-- server-side. The client used to insert its own rows carrying its own
+-- `correct`, so the counter trigger could be fed correct=true for questions
+-- that were never answered -- lifetime stats, and the leaderboard, inflated
+-- with a single call. Direct writes are revoked; the insert policy goes with
+-- them (the excess update/delete/truncate grants too).
+revoke insert, update, delete, truncate on attempts from anon, authenticated;
 
 create or replace function bump_profile_counters()
 returns trigger language plpgsql security definer set search_path = public as $$
@@ -222,6 +227,52 @@ end; $$;
 drop trigger if exists on_attempt_created on attempts;
 create trigger on_attempt_created after insert on attempts
   for each row execute function bump_profile_counters();
+
+-- The only path a round takes to the counters. Judges each answer against the
+-- puzzle (the same rule claim_round uses), writes the attempt with the SERVER's
+-- verdict, and lets the trigger above bump the totals. security definer, so it
+-- inserts despite the revoke above; a player's own token cannot.
+create or replace function public.record_round(p_rows jsonb)
+returns void language plpgsql security definer set search_path to 'public' as $$
+declare
+  uid uuid := auth.uid();
+  r jsonb; v_pid bigint; v_given text; v_ms int;
+  v_answer text; v_accept text[]; g text; v_correct boolean;
+begin
+  if uid is null then raise exception 'sign in first'; end if;
+  if p_rows is null or jsonb_typeof(p_rows) <> 'array' then
+    raise exception 'rows must be a json array';
+  end if;
+  if jsonb_array_length(p_rows) > 50 then raise exception 'too many rows'; end if;
+
+  for r in select value from jsonb_array_elements(p_rows) loop
+    v_pid := nullif(r->>'puzzle_id','')::bigint;
+    if v_pid is null then continue; end if;
+    v_given := coalesce(r->>'given','');
+    v_ms := nullif(r->>'ms','')::int;
+
+    -- Only live puzzles; the answer is read here, never sent by the client. An
+    -- unknown id is skipped, not failed, so one bad row can't sink the round.
+    select answer, accept into v_answer, v_accept
+      from public.puzzles where id = v_pid and status = 'live';
+    if v_answer is null then continue; end if;
+
+    g := public.normalise_answer(v_given);
+    v_correct := g <> '' and exists (
+      select 1 from unnest(array[v_answer] || coalesce(v_accept, '{}'::text[])) w
+      cross join lateral (select public.normalise_answer(w) as nw) x
+      where x.nw <> '' and (
+        g = x.nw or extensions.levenshtein(g, x.nw) <=
+          (case when length(x.nw) < 8 then 0 when length(x.nw) < 14 then 1 else 2 end)
+      )
+    );
+
+    insert into public.attempts (user_id, puzzle_id, correct, ms_taken)
+      values (uid, v_pid, v_correct, v_ms);
+  end loop;
+end $$;
+revoke all on function public.record_round(jsonb) from public, anon;
+grant execute on function public.record_round(jsonb) to authenticated;
 
 -- ============ head-to-head ============
 do $$ begin create type room_status as enum ('waiting','playing','finished','abandoned'); exception when duplicate_object then null; end $$;
