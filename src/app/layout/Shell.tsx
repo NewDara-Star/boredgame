@@ -7,6 +7,7 @@ import { RankBadge } from "@/features/play/RankBadge";
 import { IconHome, IconPlay, IconRooms, IconRanks, IconFlame } from "./Icons";
 import { Wordmark } from "@/shared/ui/Wordmark";
 import { ErrorBoundary } from "@/app/ErrorBoundary";
+import { PushOnboarding } from "@/features/push/PushOnboarding";
 
 // Sections, not games. One tab per game works at three and falls over at six,
 // and the catalogue behind /play scales to as many as we ever write.
@@ -121,6 +122,8 @@ export function Shell() {
           })}
         </div>
       </nav>
+
+      <PushOnboarding />
     </div>
   );
 }

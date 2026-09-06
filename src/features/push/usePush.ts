@@ -38,15 +38,19 @@ export function usePush() {
 
   const [state, setState] = useState<PushState>(supported ? "default" : "unsupported");
   const [busy, setBusy] = useState(false);
+  // false until the first getSubscription() settles, so UI can wait instead of
+  // flashing an "enable" prompt at someone who is already subscribed.
+  const [ready, setReady] = useState(false);
 
   const sync = useCallback(async () => {
-    if (!supported) { setState("unsupported"); return; }
-    if (Notification.permission === "denied") { setState("denied"); return; }
+    if (!supported) { setState("unsupported"); setReady(true); return; }
+    if (Notification.permission === "denied") { setState("denied"); setReady(true); return; }
     try {
       const reg = await navigator.serviceWorker.ready;
       const sub = await reg.pushManager.getSubscription();
       setState(sub ? "subscribed" : Notification.permission === "granted" ? "granted" : "default");
     } catch { setState("default"); }
+    finally { setReady(true); }
   }, [supported]);
 
   useEffect(() => { void sync(); }, [sync]);
@@ -97,5 +101,5 @@ export function usePush() {
   // bare "not supported".
   const needsInstall = !supported && isIOS() && !isStandalone();
 
-  return { supported, state, busy, enable, disable, needsInstall, signedIn: !!user };
+  return { supported, state, busy, ready, enable, disable, needsInstall, signedIn: !!user };
 }
