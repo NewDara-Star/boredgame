@@ -34,7 +34,7 @@ export function RoomsPage() {
 
   const {
     room, players, round, currentPuzzle, error, categories, levels,
-    join, startNextRound, claimRound, setup, setReady,
+    join, startNextRound, claimRound, setup, setReady, leave,
   } = useRoom(code, user?.id);
 
   // Race deals a puzzle a round and scores in room_players. The board games own
@@ -256,7 +256,7 @@ export function RoomsPage() {
       {iAmIn && isGuest && (waiting || room.status === "finished") && <ClaimCard />}
 
       {iAmIn && (
-        <button onClick={() => nav("/rooms")}
+        <button onClick={async () => { await leave(); nav("/rooms"); }}
           className="block mx-auto text-[13px] font-black uppercase tracking-wider
             text-soft underline underline-offset-4 pt-2">
           Leave this room
@@ -275,7 +275,7 @@ export function RoomsPage() {
             <p className="font-display text-5xl font-semibold tabular-nums mt-3">
               {ranked.map((p) => p.score).join(" — ")}
             </p>
-            <button onClick={() => nav("/rooms")}
+            <button onClick={async () => { await leave(); nav("/rooms"); }}
               className="piece press w-full mt-5 py-3.5 font-display text-lg font-semibold bg-surface text-ink">
               New room
             </button>

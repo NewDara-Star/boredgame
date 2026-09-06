@@ -172,9 +172,18 @@ export function useRoom(code: string | undefined, userId: string | undefined) {
       .update({ ready }).eq("room_id", room.id).eq("user_id", userId)));
   }, [room, userId]);
 
+  /** Actually leave: give up the seat so the room stops counting you. The
+      button used to only navigate away, which left the row behind and the room
+      full forever. The server frees the seat, hands on the host if it was you,
+      and abandons the room if you were the last one out. */
+  const leave = useCallback(async () => {
+    if (!supabase || !room) return;
+    await supabase.rpc("leave_room", { p_room: room.id });
+  }, [room]);
+
   return {
     room, players, round, currentPuzzle, error, categories, levels,
-    join, startNextRound, claimRound, setup, setReady,
+    join, startNextRound, claimRound, setup, setReady, leave,
   };
 }
 

@@ -646,6 +646,40 @@ end $$;
 revoke all on function public.join_room(bigint, text) from public, anon;
 grant execute on function public.join_room(bigint, text) to authenticated;
 
+-- Leaving frees the seat. "Leave this room" used to only navigate away, so the
+-- room_players row stayed and join_room still counted the seat taken -- the room
+-- read as full forever, and a friend could never take the spot someone left.
+-- This removes the caller's row, hands on the host if it was them, resets a room
+-- that was mid-match back to its lobby, and abandons a room left empty (so its
+-- now-stale host_id can't strand the next person to join).
+create or replace function public.leave_room(p_room bigint)
+returns void language plpgsql security definer set search_path to 'public' as $$
+declare uid uuid := auth.uid(); v_host uuid; v_remaining int; v_new_host uuid;
+begin
+  if uid is null then raise exception 'sign in first'; end if;
+  select host_id into v_host from public.rooms where id = p_room for update;
+  if v_host is null then return; end if;
+
+  delete from public.room_players where room_id = p_room and user_id = uid;
+  select count(*) into v_remaining from public.room_players where room_id = p_room;
+
+  if v_remaining = 0 then
+    update public.rooms set status = 'abandoned' where id = p_room;
+    return;
+  end if;
+
+  if v_host = uid then
+    select user_id into v_new_host from public.room_players
+      where room_id = p_room order by joined_at, user_id limit 1;
+    update public.rooms set host_id = v_new_host where id = p_room;
+  end if;
+
+  update public.rooms set status = 'waiting' where id = p_room and status <> 'waiting';
+  update public.room_players set ready = false, score = 0 where room_id = p_room;
+end $$;
+revoke all on function public.leave_room(bigint) from public, anon;
+grant execute on function public.leave_room(bigint) to authenticated;
+
 -- ============ three more room modes ============
 -- Plain Tic Tac Toe, plain Connect 4 and Connect 4 Trivia. The two plain ones
 -- draw on no bank at all; rooms.game stays NOT NULL and is simply ignored.
