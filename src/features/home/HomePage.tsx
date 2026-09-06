@@ -13,6 +13,7 @@ import { stagger, riseIn, popIn } from "@/shared/ui/motion";
 import { WeekStrip } from "./WeekStrip";
 import { StatCarousel, type Stat } from "./StatCarousel";
 import { Carousel } from "@/shared/ui/Carousel";
+import { Invites } from "@/features/friends/Friends";
 
 const greeting = () => {
   const h = new Date().getHours();
@@ -54,6 +55,7 @@ export function HomePage() {
 
   return (
     <motion.div variants={stagger(0.07)} initial="hidden" animate="show" className="pb-4">
+      <Invites />
       <motion.div variants={riseIn} className="flex items-center gap-3">
         <div className="min-w-0 flex-1">
           <p className="text-[13px] font-bold text-soft">

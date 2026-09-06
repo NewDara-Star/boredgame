@@ -209,7 +209,7 @@ export function useMyRooms(userId: string | undefined) {
 
 /** Creates an empty room. What is played, and from which categories, is settled
     in the lobby with the other person rather than guessed at before they arrive. */
-export async function createRoom(userId: string, username: string): Promise<string | null> {
+export async function createRoom(userId: string, username: string): Promise<{ code: string; id: number } | null> {
   if (!supabase) return null;
   const code = Array.from({ length: 6 }, () =>
     "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"[Math.floor(Math.random() * 32)]).join("");
@@ -225,5 +225,5 @@ export async function createRoom(userId: string, username: string): Promise<stri
   // join_room like everyone else — the open insert policy is gone, because that
   // is what let a third person walk in.
   await supabase.rpc("join_room", { p_room: data.id, p_username: username });
-  return code;
+  return { code, id: data.id as number };
 }

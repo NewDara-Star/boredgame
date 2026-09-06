@@ -71,6 +71,8 @@ create table if not exists profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   username text unique not null,
   avatar text,
+  -- the code a friend types to add you; minted lazily by my_friend_code()
+  friend_code text unique,
   total_answered int not null default 0,
   total_correct int not null default 0,
   created_at timestamptz default now()
@@ -1895,3 +1897,132 @@ begin
 end $$;
 revoke all on function public.claim_round(bigint, text) from public, anon;
 grant execute on function public.claim_round(bigint, text) to authenticated;
+
+-- ============================================================================
+-- Friends: a code you share, the people who've added you, and "come play"
+-- invites. Reads are RLS-gated to your own rows; every write goes through a
+-- security-definer RPC, so the tables carry read policies only -- an INSERT or
+-- UPDATE straight from a client is denied for want of a policy.
+-- ============================================================================
+
+-- Two rows per friendship (a->b and b->a), so "my friends" is a plain filter
+-- on user_id with no OR across two columns.
+create table if not exists public.friendships (
+  user_id    uuid not null references public.profiles(id) on delete cascade,
+  friend_id  uuid not null references public.profiles(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  primary key (user_id, friend_id)
+);
+alter table public.friendships enable row level security;
+drop policy if exists "see your own friendships" on public.friendships;
+create policy "see your own friendships" on public.friendships
+  for select using (user_id = auth.uid());
+
+-- A pending "come play" from one friend to another, tied to a room.
+create table if not exists public.game_invites (
+  id         bigint generated always as identity primary key,
+  room_id    bigint not null references public.rooms(id) on delete cascade,
+  room_code  text   not null,
+  from_user  uuid   not null references public.profiles(id) on delete cascade,
+  to_user    uuid   not null references public.profiles(id) on delete cascade,
+  status     text   not null default 'pending'
+                    check (status in ('pending','accepted','declined')),
+  created_at timestamptz not null default now()
+);
+create index if not exists game_invites_to_idx on public.game_invites (to_user, status);
+alter table public.game_invites enable row level security;
+drop policy if exists "see invites you sent or got" on public.game_invites;
+create policy "see invites you sent or got" on public.game_invites
+  for select using (from_user = auth.uid() or to_user = auth.uid());
+
+grant select on public.friendships  to authenticated;
+grant select on public.game_invites to authenticated;
+
+-- Your shareable code, minted on first ask and stable after. The alphabet
+-- drops the confusable glyphs (0/O, 1/I/L) so a code read off a screen types back.
+create or replace function public.my_friend_code()
+ returns text
+ language plpgsql
+ security definer
+ set search_path to 'public'
+as $function$
+declare uid uuid := auth.uid(); v_code text; v_try text;
+begin
+  if uid is null then raise exception 'sign in first'; end if;
+  select friend_code into v_code from public.profiles where id = uid;
+  if v_code is not null then return v_code; end if;
+  loop
+    v_try := (select string_agg(
+                substr('ABCDEFGHJKLMNPQRSTUVWXYZ23456789', (floor(random()*32)+1)::int, 1), '')
+              from generate_series(1, 8));
+    begin
+      update public.profiles set friend_code = v_try where id = uid;
+      return v_try;
+    exception when unique_violation then
+      -- astronomically rare; draw again
+    end;
+  end loop;
+end $function$;
+grant execute on function public.my_friend_code() to authenticated;
+
+-- Add by code. Writes both directions so the friendship is mutual the instant
+-- either side adds the other.
+create or replace function public.add_friend(p_code text)
+ returns jsonb
+ language plpgsql
+ security definer
+ set search_path to 'public'
+as $function$
+declare uid uuid := auth.uid(); v_target uuid; v_name text;
+begin
+  if uid is null then raise exception 'sign in first'; end if;
+  select id, username into v_target, v_name from public.profiles
+    where friend_code = upper(btrim(coalesce(p_code, '')));
+  if v_target is null then return jsonb_build_object('ok', false, 'reason', 'no such code'); end if;
+  if v_target = uid then return jsonb_build_object('ok', false, 'reason', 'that is your own code'); end if;
+  insert into public.friendships(user_id, friend_id)
+    values (uid, v_target), (v_target, uid)
+    on conflict do nothing;
+  return jsonb_build_object('ok', true, 'name', v_name, 'friend_id', v_target);
+end $function$;
+grant execute on function public.add_friend(text) to authenticated;
+
+-- Invite a friend into a room you're in. One live invite per room per friend.
+create or replace function public.invite_friend(p_room bigint, p_friend uuid)
+ returns void
+ language plpgsql
+ security definer
+ set search_path to 'public'
+as $function$
+declare uid uuid := auth.uid(); v_code text;
+begin
+  if uid is null then raise exception 'sign in first'; end if;
+  if not public.is_room_member(p_room) then raise exception 'not in that room'; end if;
+  if not exists (select 1 from public.friendships where user_id = uid and friend_id = p_friend) then
+    raise exception 'not your friend';
+  end if;
+  select code into v_code from public.rooms where id = p_room;
+  if v_code is null then raise exception 'no such room'; end if;
+  insert into public.game_invites(room_id, room_code, from_user, to_user)
+    select p_room, v_code, uid, p_friend
+    where not exists (
+      select 1 from public.game_invites
+       where room_id = p_room and to_user = p_friend and status = 'pending');
+end $function$;
+grant execute on function public.invite_friend(bigint, uuid) to authenticated;
+
+-- Accept or decline an invite addressed to you.
+create or replace function public.respond_invite(p_invite bigint, p_accept boolean)
+ returns void
+ language plpgsql
+ security definer
+ set search_path to 'public'
+as $function$
+declare uid uuid := auth.uid();
+begin
+  if uid is null then raise exception 'sign in first'; end if;
+  update public.game_invites
+     set status = case when p_accept then 'accepted' else 'declined' end
+   where id = p_invite and to_user = uid and status = 'pending';
+end $function$;
+grant execute on function public.respond_invite(bigint, boolean) to authenticated;

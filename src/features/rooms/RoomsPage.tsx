@@ -22,6 +22,7 @@ import { GuestCard, ClaimCard } from "@/features/profile/GuestCard";
 import { Avatar } from "@/shared/ui/Avatar";
 import { Note, Dealing } from "@/shared/ui/Note";
 import { ROOM_GAMES } from "@/features/play/registry";
+import { FriendsPanel } from "@/features/friends/Friends";
 
 export function RoomsPage() {
   const { code } = useParams();
@@ -161,8 +162,10 @@ export function RoomsPage() {
       <div className="space-y-5">
         <h1 className="font-display text-[32px] leading-none font-semibold">Head-to-head</h1>
         <p className="text-sm text-soft font-semibold">
-          Make a room, send the code, then settle what you're playing together.
+          Play someone you've added with one tap, or make a room and send the code.
         </p>
+
+        <FriendsPanel />
 
         {myRooms.length > 0 && (
           <div className="space-y-2">
@@ -180,7 +183,7 @@ export function RoomsPage() {
         )}
 
         <Button className="w-full"
-          onClick={async () => { const c = await createRoom(user.id, uname); if (c) nav(`/rooms/${c}`); }}>
+          onClick={async () => { const c = await createRoom(user.id, uname); if (c) nav(`/rooms/${c.code}`); }}>
           Create a room
         </Button>
 

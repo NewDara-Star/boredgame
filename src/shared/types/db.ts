@@ -73,6 +73,8 @@ export interface Profile {
   last_played: string | null;
   /** Signed in anonymously — playing, but not on the leaderboard yet. */
   is_guest: boolean;
+  /** shareable code behind /add/<code>; generated on first friends-screen visit */
+  friend_code: string | null;
   created_at: string;
 }
 

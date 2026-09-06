@@ -30,6 +30,7 @@ const SquareOffCatapultPage = lazy(() => import("@/features/squareoff/SquareOffC
 const MemorySoloPage = lazy(() => import("@/features/memory/MemorySoloPage").then((m) => ({ default: m.MemorySoloPage })));
 const SortSoloPage = lazy(() => import("@/features/sort/SortSoloPage").then((m) => ({ default: m.SortSoloPage })));
 const RoomsPage = lazy(() => import("@/features/rooms/RoomsPage").then((m) => ({ default: m.RoomsPage })));
+const AddFriendPage = lazy(() => import("@/features/friends/AddFriendPage").then((m) => ({ default: m.AddFriendPage })));
 
 /**
  * Deliberately plain, and deliberately NOT the shared `Dealing` note — that one
@@ -67,6 +68,7 @@ export function App() {
               <Route path="/admin" element={<AdminPage />} />
               <Route path="/rooms" element={<RoomsPage />} />
               <Route path="/rooms/:code" element={<RoomsPage />} />
+              <Route path="/add/:code" element={<AddFriendPage />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Route>
           </Routes>
