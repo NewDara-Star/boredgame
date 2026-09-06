@@ -1,14 +1,13 @@
 import { Link } from "react-router-dom";
 import { Dealing } from "@/shared/ui/Note";
-import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/app/providers/AuthProvider";
-import { useRound } from "@/features/play/useRound";
 import { Hud, Reveal } from "@/features/play/RoundChrome";
 import { QuestionPanel } from "@/features/squareoff/QuestionPanel";
 import { Avatar } from "@/shared/ui/Avatar";
 import { stagger, riseIn, popIn } from "@/shared/ui/motion";
 import { useDaily, type DailyStanding } from "./useDaily";
+import { useDailyPlay } from "./useDailyPlay";
 
 const secs = (ms: number) => `${Math.round(ms / 1000)}s`;
 
@@ -48,16 +47,7 @@ export function DailyPage() {
   const d = useDaily();
   // Only play the round when it is still to be played; otherwise the board.
   const playable = !!d.items && !d.mine;
-  const r = useRound("trivia", 10, [], playable ? d.items : null);
-
-  const filed = useRef(false);
-  useEffect(() => {
-    if (r.phase !== "done" || filed.current || !playable) return;
-    filed.current = true;
-    const correct = r.results.filter((x) => x.correct).length;
-    const ms = r.results.reduce((n, x) => n + x.msTaken, 0);
-    void d.submit(r.score, correct, r.results.length, ms);
-  }, [r.phase, r.results, r.score, playable, d]);
+  const r = useDailyPlay(d, playable);
 
   if (offline) {
     return <p className="text-sm text-soft font-bold">The daily round needs a database. Single-player works without one.</p>;
@@ -119,14 +109,14 @@ export function DailyPage() {
       <Hud index={r.index} total={r.items.length} score={r.score} streak={r.streak} accent="#FF2E88" />
       <div className="mt-5">
         <QuestionPanel
-          item={item} options={item.choices ?? []} chosen={r.last?.given ?? null}
-          revealed={revealed} locked={revealed}
-          onAnswer={(opt) => r.submit(opt)} />
+          item={item} options={item.choices ?? []} chosen={r.chosen ?? null}
+          revealed={revealed} locked={revealed || r.pending !== null}
+          onAnswer={(opt) => void r.submit(opt)} />
       </div>
-      {revealed && (
-        <Reveal correct={r.last!.correct} near={false} answer={item.answer}
-          gained={r.last!.gained} onNext={r.next} isLast={r.index + 1 >= r.items.length}
-          explanation={item.explanation} />
+      {revealed && r.last && (
+        <Reveal correct={r.last.correct} near={false} answer={r.last.answer}
+          gained={r.last.gained} onNext={r.next} isLast={r.index + 1 >= r.items.length}
+          explanation={r.last.explanation} />
       )}
     </div>
   );

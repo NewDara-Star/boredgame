@@ -1467,3 +1467,153 @@ begin
 end $$;
 revoke all on function public.set_room_setup(bigint, text, text, text[], text[], text) from public, anon;
 grant execute on function public.set_room_setup(bigint, text, text, text[], text[], text) to authenticated;
+
+-- ============================================================================
+-- Server-authoritative daily round (2026-09-06, Phase 1 of the competitive fix)
+--
+-- The daily leaderboard is the one board where "the same ten for everyone" has
+-- to mean something. Judging used to happen in the browser and the score was
+-- posted as a number the server trusted, so any client could top the board
+-- without playing. Now the answer never leaves the server: daily_puzzles()
+-- serves the questions without answers, daily_answer() judges each pick, and
+-- submit_daily(date) tallies the round from the recorded picks and times it.
+-- ============================================================================
+
+-- One row per answered question. First answer per (day,user,puzzle) is final;
+-- writes happen only through daily_answer(). No direct client access.
+create table if not exists public.daily_picks (
+  day         date        not null,
+  user_id     uuid        not null references auth.users(id) on delete cascade,
+  puzzle_id   bigint      not null references public.puzzles(id) on delete cascade,
+  given       text,
+  correct     boolean     not null,
+  answered_at timestamptz not null default now(),
+  primary key (day, user_id, puzzle_id)
+);
+alter table public.daily_picks enable row level security;
+revoke all on public.daily_picks from anon, authenticated;
+
+-- When each player's clock started, so time-to-finish is measured here, not
+-- sent up by the client. First fetch wins; a re-fetch never resets it.
+create table if not exists public.daily_starts (
+  day        date        not null,
+  user_id    uuid        not null references auth.users(id) on delete cascade,
+  started_at timestamptz not null default now(),
+  primary key (day, user_id)
+);
+alter table public.daily_starts enable row level security;
+revoke all on public.daily_starts from anon, authenticated;
+
+-- The day's questions WITHOUT answers, in the round's order; records the start
+-- of this player's clock on first fetch.
+create or replace function public.daily_puzzles(p_day date)
+returns jsonb language plpgsql security definer set search_path to 'public' as $$
+declare uid uuid := auth.uid(); v_ids bigint[]; v_out jsonb;
+begin
+  if uid is null then raise exception 'sign in first'; end if;
+  v_ids := public.daily_round(p_day);            -- builds/reads the fixed round
+  if v_ids is null then return '[]'::jsonb; end if;
+  insert into public.daily_starts(day, user_id) values (p_day, uid)
+    on conflict (day, user_id) do nothing;
+  select jsonb_agg(
+           (to_jsonb(p) - 'answer' - 'answer_normalised' - 'accept' - 'explanation'
+              - 'created_by' - 'status' - 'category_id')
+           || jsonb_build_object('category', coalesce(c.name, ''))
+           order by array_position(v_ids, p.id))
+    into v_out
+  from public.puzzles p
+  left join public.categories c on c.id = p.category_id
+  where p.id = any(v_ids);
+  return coalesce(v_out, '[]'::jsonb);
+end $$;
+
+-- Judge one pick. First answer per puzzle is final; a repeat call returns the
+-- stored verdict rather than re-judging, so a client cannot probe for answers.
+-- The correct answer + explanation come back for the reveal -- after the pick
+-- is committed, never before.
+create or replace function public.daily_answer(p_day date, p_puzzle bigint, p_given text)
+returns jsonb language plpgsql security definer set search_path to 'public' as $$
+declare uid uuid := auth.uid();
+        v_ids bigint[]; v_answer text; v_ansnorm text; v_expl text;
+        v_correct boolean; v_have public.daily_picks;
+begin
+  if uid is null then raise exception 'sign in first'; end if;
+  if p_day <> (now() at time zone 'utc')::date
+     and p_day <> ((now() at time zone 'utc')::date - 1) then
+    raise exception 'that round is closed';
+  end if;
+  select puzzle_ids into v_ids from public.daily_rounds where day = p_day;
+  if v_ids is null or not (p_puzzle = any(v_ids)) then
+    raise exception 'not in today''s round';
+  end if;
+  insert into public.daily_starts(day, user_id) values (p_day, uid)
+    on conflict (day, user_id) do nothing;
+  select answer, answer_normalised, explanation into v_answer, v_ansnorm, v_expl
+    from public.puzzles where id = p_puzzle;
+  select * into v_have from public.daily_picks
+    where day = p_day and user_id = uid and puzzle_id = p_puzzle;
+  if v_have.puzzle_id is not null then
+    return jsonb_build_object('correct', v_have.correct, 'answer', v_answer,
+                              'explanation', v_expl, 'locked', true);
+  end if;
+  v_correct := p_given is not null
+               and public.normalise_answer(p_given) = v_ansnorm;
+  insert into public.daily_picks(day, user_id, puzzle_id, given, correct)
+    values (p_day, uid, p_puzzle, p_given, v_correct);
+  return jsonb_build_object('correct', v_correct, 'answer', v_answer,
+                            'explanation', v_expl, 'locked', false);
+end $$;
+
+-- Finalise: tally the recorded picks (the server times it) and file one board
+-- row. One score per day per player; a second call is a no-op.
+create or replace function public.submit_daily(p_day date)
+returns jsonb language plpgsql security definer set search_path to 'public' as $$
+declare uid uuid := auth.uid(); v_ids bigint[]; v_started timestamptz;
+        v_correct int := 0; v_answered int := 0; v_ms int := 0;
+        v_score int := 0; v_streak int := 0; v_pid bigint; v_ok boolean;
+        v_speed numeric; v_base int;
+begin
+  if uid is null then raise exception 'sign in first'; end if;
+  if p_day <> (now() at time zone 'utc')::date
+     and p_day <> ((now() at time zone 'utc')::date - 1) then
+    return jsonb_build_object('ok', false);
+  end if;
+  select puzzle_ids into v_ids from public.daily_rounds where day = p_day;
+  if v_ids is null then raise exception 'no round'; end if;
+  select started_at into v_started from public.daily_starts
+    where day = p_day and user_id = uid;
+  v_ms := case when v_started is null then 0
+               else greatest(0, (extract(epoch from (now() - v_started)) * 1000)::int) end;
+  foreach v_pid in array v_ids loop
+    select correct into v_ok from public.daily_picks
+      where day = p_day and user_id = uid and puzzle_id = v_pid;
+    if v_ok is null then continue; end if;          -- not answered
+    v_answered := v_answered + 1;
+    if v_ok then
+      v_correct := v_correct + 1;
+      v_streak := v_streak + 1;
+      -- mirrors scoreAnswer(): base 500 + up to 500 for speed, +60/streak (cap 5)
+      v_speed := greatest(0, 1 - (v_ms::numeric / greatest(v_answered, 1)) / 45000);
+      v_base := 500 + round(500 * v_speed)::int + least(v_streak, 5) * 60;
+      v_score := v_score + greatest(150, v_base);
+    else
+      v_streak := 0;
+    end if;
+  end loop;
+  insert into public.daily_scores(day, user_id, score, correct, answered, ms)
+    values (p_day, uid, v_score, v_correct, v_answered, v_ms)
+    on conflict (day, user_id) do nothing;
+  return jsonb_build_object('ok', true, 'correct', v_correct,
+                            'answered', v_answered, 'ms', v_ms, 'score', v_score);
+end $$;
+
+revoke all on function public.daily_puzzles(date)              from public, anon;
+revoke all on function public.daily_answer(date, bigint, text) from public, anon;
+revoke all on function public.submit_daily(date)              from public, anon;
+grant execute on function public.daily_puzzles(date)              to authenticated;
+grant execute on function public.daily_answer(date, bigint, text) to authenticated;
+grant execute on function public.submit_daily(date)              to authenticated;
+
+-- NOTE: the old client-trusted submit_daily(date,int,int,int,int) is dropped
+-- once the new client is live -- it is the last forgeable path into
+-- daily_scores. Kept until then so an in-flight old client can still file.
