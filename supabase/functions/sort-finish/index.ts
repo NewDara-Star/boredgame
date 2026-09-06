@@ -129,25 +129,28 @@ Deno.serve(async (req: Request) => {
     && logSolves(puzzle, decodeLog(body.log)) ? body.log : null;
 
   const admin = createClient(URL_, SERVICE, { auth: { persistSession: false } });
+
+  // The ranked/compared time is the player's OWN solve time, measured on their
+  // phone -- the only clock the finish round-trip does not warp. Never trusted:
+  // the settle caps it at the server wall-clock and floors it at 150ms/move.
+  // Measuring it here (now() - started_at) would count this request's latency
+  // -- the verify round-trip and the replay -- against a millisecond board.
+  const solveMs = Number(body.ms);
+  const ms_ = Number.isFinite(solveMs) && solveMs > 0 ? Math.round(solveMs) : null;
+
   if (race) {
+    // Provisional: the room settle records this seat's time and names a winner
+    // only once both have finished (or one has conceded) -- lowest time wins, so
+    // a faster solve that arrives second still takes it.
     const { data: winner, error: settleError } = await admin.rpc("sort_finish", {
-      p_room: room, p_user: user.id, p_tubes: encodeTubes(g.tubes), p_moves: settled, p_log: log,
+      p_room: room, p_user: user.id, p_tubes: encodeTubes(g.tubes),
+      p_moves: settled, p_log: log, p_ms: ms_,
     });
     if (settleError) return json({ error: settleError.message }, 400);
     return json({ winner, moves: settled, par: race.par, tubes: encodeTubes(g.tubes) });
   }
-  // The time is the database's — now() against the row's started_at — and it
-  // refuses one too fast for a thumb, so a script playing the stored line is
-  // told no rather than given a rank.
-  // The ranked time is the player's own solve time, bounded server-side by the
-  // bot floor and the wall-clock. Measuring it here (now() - started_at) instead
-  // would count this request's latency -- the verify round-trip and the replay --
-  // against a millisecond board.
-  const solveMs = Number(body.ms);
   const { data: ms, error: settleError } = await admin.rpc("sort_solo_finish", {
-    p_id: solo, p_user: user.id, p_moves: settled,
-    p_ms: Number.isFinite(solveMs) && solveMs > 0 ? Math.round(solveMs) : null,
-    p_log: log,
+    p_id: solo, p_user: user.id, p_moves: settled, p_ms: ms_, p_log: log,
   });
   if (settleError) return json({ error: settleError.message }, 400);
   return json({ ms, moves: settled, par: puzzle.par });

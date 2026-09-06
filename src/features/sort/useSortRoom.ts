@@ -24,6 +24,12 @@ export interface SortRow {
   o_moves: number;
   x_done_at: string | null;
   o_done_at: string | null;
+  /** each seat's own bounded solve time; the winner is the lower of the two */
+  x_ms: number | null;
+  o_ms: number | null;
+  /** conceding hands the other player the race, finished or not */
+  x_gave_up: boolean;
+  o_gave_up: boolean;
   winner: Seat | null;
   x_player: string | null;
   o_player: string | null;
@@ -40,14 +46,17 @@ export interface SortRow {
  * Every other room in here syncs ONE board that both players write, and the
  * hard part is stopping them writing it at the same time. This is the other
  * shape entirely: two independent boards from one seeded puzzle, and the only
- * contended thing is who finished. So there is no turn, no stall rescue and no
- * single-writer rule — just your board, hers arriving over realtime, and a
- * finish the server adjudicates.
+ * contended thing is who was faster.
+ *
+ * Faster, not first-to-arrive. Both phones start from the SAME dealt instant
+ * (`started_at`) and each times its own solve locally — the one clock the finish
+ * round-trip cannot warp. The server compares those two times, not which packet
+ * landed first, so the player on worse wifi is not punished for their ping. A
+ * finish is therefore PROVISIONAL: it says "I'm done in 12.4s" and waits for the
+ * other board to finish or give up before anyone is called the winner.
  *
  * Your own board is authoritative LOCALLY. Pours apply instantly and are then
- * posted; the row is how she sees you, not how you see yourself. A round trip
- * to Dublin before a ball moves would make the game feel broken, and there is
- * nothing to reconcile because nobody else can write your columns.
+ * posted; the row is how she sees you, not how you see yourself.
  */
 export function useSortRoom(roomId: number | null, userId: string | undefined) {
   const [row, setRow] = useState<SortRow | null>(null);
@@ -56,6 +65,10 @@ export function useSortRoom(roomId: number | null, userId: string | undefined) {
   const [selected, setSelected] = useState<number | null>(null);
   const [refused, setRefused] = useState<Refusal | null>(null);
   const [finishing, setFinishing] = useState(false);
+  // The clock stops HERE, at the solve, not after the referee has replayed the
+  // moves. This is the time that gets compared, and the on-screen clock freezes
+  // on it while you wait for the other board.
+  const [solvedMs, setSolvedMs] = useState<number | null>(null);
 
   const seat: Seat | null = !row || !userId ? null
     : row.x_player === userId ? "x" : row.o_player === userId ? "o" : null;
@@ -73,7 +86,7 @@ export function useSortRoom(roomId: number | null, userId: string | undefined) {
     dealtFor.current = Number(row.seed);
     setMe(newGame(puzzle));
     setSelected(null); setRefused(null);
-    setFinishing(false);
+    setFinishing(false); setSolvedMs(null);
   }, [puzzle, row?.seed]);
 
   // the row, then every change to it
@@ -108,10 +121,12 @@ export function useSortRoom(roomId: number | null, userId: string | undefined) {
 
   /**
    * Crossing the line. The move list goes with it, and the server replays it
-   * against the puzzle the seed generates before it will call anyone a winner
-   * — so this is a claim being submitted for checking, not a result.
+   * against the puzzle the seed generates before it will keep the time — so this
+   * is a claim being submitted for checking, not a result. The time is my own
+   * (`ms`), measured from the shared deal; the server bounds it and, when the
+   * other board is also in, decides who was faster.
    */
-  const finish = useCallback(async (g: Game) => {
+  const finish = useCallback(async (g: Game, ms: number) => {
     if (!supabase || !roomId || finishing) return;
     setFinishing(true);
     const { error: err } = await supabase.functions.invoke("sort-finish", {
@@ -119,6 +134,7 @@ export function useSortRoom(roomId: number | null, userId: string | undefined) {
         room: roomId,
         moves: g.history.map((h) => [h.from, h.to]),
         claimed: g.moves,
+        ms,
         log: encodeLog(g.log),
       },
     });
@@ -126,6 +142,9 @@ export function useSortRoom(roomId: number | null, userId: string | undefined) {
       const why = await refusal(err);
       setError(why ? `That finish was not accepted: ${why}`
                    : "Could not post that finish — try tapping again.");
+      // The finish did not land: let them try again rather than stranding the
+      // board frozen on a solve the server never recorded.
+      setSolvedMs(null);
     }
     setFinishing(false);
   }, [roomId, finishing]);
@@ -134,28 +153,37 @@ export function useSortRoom(roomId: number | null, userId: string | undefined) {
       tube that cannot take it — only ever a full one — refuses visibly and the
       ball stays lifted. */
   const pick = useCallback((i: number) => {
-    if (!me || row?.winner) return;
+    if (!me || row?.winner || solvedMs !== null) return;
     if (selected === null) {
       if (me.tubes[i].length > 0) setSelected(i);
       return;
     }
     if (selected === i) { setSelected(null); return; }
     if (whyNot(me.tubes, me.cap, selected, i)) { setRefused({ tube: i, at: Date.now() }); return; }
-    // the race's clock, not the phone's: the film counts from the deal
-    const next = pour(me, selected, i, Date.now() - Date.parse(row?.started_at ?? "") || 0);
+    // the race's clock, not the phone's: measured from the shared deal
+    const at = Date.now() - Date.parse(row?.started_at ?? "") || 0;
+    const next = pour(me, selected, i, at);
     setSelected(null);
     setMe(next);
-    if (isSolved(next.tubes, next.cap)) void finish(next);
+    if (isSolved(next.tubes, next.cap)) { setSolvedMs(at); void finish(next, at); }
     else post(next);
-  }, [me, selected, row?.winner, row?.started_at, post, finish]);
+  }, [me, selected, row?.winner, row?.started_at, solvedMs, post, finish]);
 
   const takeBack = useCallback(() => {
-    if (!me || row?.winner) return;
+    if (!me || row?.winner || solvedMs !== null) return;
     setSelected(null);
     const back = undo(me, Date.now() - Date.parse(row?.started_at ?? "") || 0);
     setMe(back);
     post(back);
-  }, [me, row?.winner, row?.started_at, post]);
+  }, [me, row?.winner, row?.started_at, solvedMs, post]);
+
+  /** Give up the race. The other player wins now, whether or not they have
+      finished — there is no replay to check, so this goes straight to the row. */
+  const concede = useCallback(async () => {
+    if (!supabase || !roomId) return;
+    setError(await attempt("Giving up the race",
+      supabase.rpc("sort_concede", { p_room: roomId })));
+  }, [roomId]);
 
   const rematch = useCallback(async () => {
     if (!supabase || !roomId) return;
@@ -176,14 +204,24 @@ export function useSortRoom(roomId: number | null, userId: string | undefined) {
     : decodeTubes(seat === "x" ? row.o_tubes : row.x_tubes);
   const theirMoves = !row || !seat ? 0 : seat === "x" ? row.o_moves : row.x_moves;
 
+  const myMs = !row || !seat ? null : seat === "x" ? row.x_ms : row.o_ms;
+  const theirMs = !row || !seat ? null : seat === "x" ? row.o_ms : row.x_ms;
+  const theyGaveUp = !row || !seat ? false : seat === "x" ? row.o_gave_up : row.x_gave_up;
+
   return {
-    row, seat, puzzle, me, selected, refused, error, finishing,
+    row, seat, puzzle, me, selected, refused, error, finishing, solvedMs,
     theirTubes, theirMoves,
+    // My solve is in the moment I finish; the row catches up a beat later.
+    myMs: solvedMs ?? myMs,
+    theirMs,
+    iFinished: solvedMs !== null || myMs !== null,
+    theyFinished: theirMs !== null,
+    theyGaveUp,
     myProgress: me ? solvedCount(me.tubes, me.cap) : 0,
     theirProgress: theirTubes && row ? solvedCount(theirTubes, row.cap) : 0,
     won: row?.winner ?? null,
     iWon: !!row?.winner && row.winner === seat,
-    pick, takeBack, rematch, quit,
+    pick, takeBack, concede, rematch, quit,
   };
 }
 

@@ -11,13 +11,25 @@ import { ReplayPlayer } from "./ReplayPlayer";
 import { decodeLog, type Replay } from "./rules";
 import { useSortRoom } from "./useSortRoom";
 
+/** ms -> "12.3s", or "1:04.2" once it runs past a minute. */
+function clock(ms: number): string {
+  const s = ms / 1000;
+  if (s < 60) return `${s.toFixed(1)}s`;
+  return `${Math.floor(s / 60)}:${(s % 60).toFixed(1).padStart(4, "0")}`;
+}
+
 /**
- * The same tubes in Dublin and Manchester, first to sort them.
+ * The same tubes in Dublin and Manchester — faster solve wins.
  *
  * Her board is small and live beside yours — the point of showing it at all is
  * the moment you glance across and see she is a tube ahead. There is no turn
- * indicator because there are no turns: you are both playing at once, which is
- * the only room in here that works that way.
+ * indicator because there are no turns: you are both playing at once.
+ *
+ * Finishing does not end it. You post your time and then wait: the winner is
+ * whoever's clock is lower once both boards are in (or the other gives up), so a
+ * clean solve that lands a second late still beats a slower one that arrived
+ * first. That is the whole point — the result is a comparison, not a race to the
+ * server.
  */
 export function SortRaceRoom({
   roomId, code, status, players, userId,
@@ -38,39 +50,38 @@ export function SortRaceRoom({
   // MEMOISED, and that is not an optimisation, and it sits ABOVE the early
   // returns because a hook must run every render. The match clock re-renders
   // this component every second; a fresh `film` object each time is a new
-  // identity, and ReplayPlayer restarts playback on `[replay]` — so the film's
-  // clock reset to zero every second and the GIF ("Making it…") never
-  // finished. The deps are primitives that stop changing once the race is won.
+  // identity, and ReplayPlayer restarts playback on `[replay]`. The deps are
+  // primitives that stop changing once the race is won.
   const w = r.row?.winner ?? null;
   const wLog = w === "x" ? r.row?.x_log : w === "o" ? r.row?.o_log : null;
   const wDone = w === "x" ? r.row?.x_done_at : w === "o" ? r.row?.o_done_at : null;
+  const wMs = w === "x" ? r.row?.x_ms : w === "o" ? r.row?.o_ms : null;
   const startedAt = r.row?.started_at ?? "";
   const rowMoves = w === "x" ? (r.row?.x_moves ?? 0) : w === "o" ? (r.row?.o_moves ?? 0) : 0;
   const par = r.row?.par ?? 0, level = r.row?.level ?? "medium";
   const tubes = r.puzzle?.tubes, capp = r.puzzle?.cap;
-  // Depend on the winner's NAME (a primitive), never the `names` object, which
-  // useMatchChrome rebuilds every render -- including the 1s match-clock tick
-  // that keeps firing after the race is won. A fresh `names` identity rebuilt
-  // `film`, and ReplayPlayer restarts playback (dropping any in-flight GIF) on
-  // every new `replay`, so the film reset to frame zero every second.
   const winnerName = w ? names[w] : "";
   const film: Replay | null = useMemo(
     () => (w && wLog && wDone && tubes ? {
       tubes, cap: capp!, log: decodeLog(wLog),
-      ms: Math.max(1, Date.parse(wDone) - Date.parse(startedAt)),
+      // the winner's own recorded time; done_at-started_at only for legacy rows
+      ms: wMs ?? Math.max(1, Date.parse(wDone) - Date.parse(startedAt)),
       moves: rowMoves, par, name: winnerName, level, where: `ROOM ${code}`,
     } : null),
-    [w, wLog, wDone, tubes, capp, startedAt, rowMoves, par, level, winnerName, code],
+    [w, wLog, wDone, wMs, tubes, capp, startedAt, rowMoves, par, level, winnerName, code],
   );
 
   if (done) return <MatchOver sides={sides} myMark={r.seat ?? "x"} card={card} />;
   if (!r.row || !r.me) return <Dealing what="the tubes" />;
 
-  const seconds = Math.max(0, Math.floor(
-    ((r.won ? new Date(r.row.updated_at).getTime() : now) -
-      new Date(r.row.started_at).getTime()) / 1000));
   const them = r.seat === "x" ? names.o : names.x;
-  const overPar = r.me.moves - r.row.par;
+
+  // My clock: frozen on my solve, otherwise ticking from the shared deal.
+  const liveMs = Math.max(0, now - new Date(r.row.started_at).getTime());
+  const myMs = r.myMs ?? liveMs;
+
+  // Only truly playing (not won, not already finished) shows the board.
+  const playing = !r.won && !r.iFinished;
 
   return (
     <PlaySurface>
@@ -85,22 +96,20 @@ export function SortRaceRoom({
 
       <div className="grid grid-cols-3 gap-2 text-center">
         <Stat label="Moves" value={String(r.me.moves)} sub={`par ${r.row.par}`} />
-        <Stat label="Time"
-          value={`${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`}
-          sub="first to sort" />
+        <Stat label="Your time" value={clock(myMs)} sub="lower time wins" />
         <Stat label="Tubes home" value={String(r.myProgress)}
           sub={`${them} ${r.theirProgress}`} />
       </div>
       </PlayRow>
 
-      {!r.won && (() => {
+      {playing && (() => {
         const me = r.me;
         return (
           <PlayBoard ratio={TUBES_RATIO} min={0}>
             {(width) => (
               <div className="piece bg-surface p-3 pt-1" style={{ width }}>
                 <Board tubes={me.tubes} cap={me.cap} selected={r.selected} refused={r.refused}
-                  width={width - 26} onPick={r.pick} disabled={!!r.won} />
+                  width={width - 26} onPick={r.pick} disabled={!playing} />
               </div>
             )}
           </PlayBoard>
@@ -109,15 +118,20 @@ export function SortRaceRoom({
 
       <PlayRow className="space-y-3">
       <p className="text-center text-[15px] font-bold text-soft">
-        {r.won ? (r.iWon ? "You sorted it first." : `${them} got there first.`)
-          : r.finishing ? "Checking that finish…"
-          : r.selected === null ? "Tap a tube to lift its top ball."
-          : "Now tap where it goes."}
+        {r.won
+          ? (r.iWon ? "You were faster." : `${them} was faster.`)
+          : r.iFinished
+            ? (r.finishing ? "Posting your finish…"
+               : `Done in ${clock(myMs)} — waiting for ${them}.`)
+            : r.theyFinished
+              ? `${them} finished in ${r.theirMs != null ? clock(r.theirMs) : "—"}. Beat it or give up.`
+              : r.selected === null ? "Tap a tube to lift its top ball."
+              : "Now tap where it goes."}
       </p>
 
       <Note>{r.error}</Note>
 
-      {!r.won && (
+      {playing && (
         <div className="flex items-center gap-3">
           {r.theirTubes && (
             <div className="piece bg-sand p-2 shrink-0" style={{ width: 150 }}>
@@ -134,6 +148,14 @@ export function SortRaceRoom({
         </div>
       )}
 
+      {playing && (
+        <button onClick={() => void r.concede()}
+          className="block mx-auto text-[13px] font-black uppercase tracking-wider
+            text-bad underline underline-offset-4 pt-1">
+          Give up this race
+        </button>
+      )}
+
       <AwayNotice players={players} userId={userId} now={now} />
 
       {!r.won && <EndMatchLink onQuit={() => void r.quit()} />}
@@ -143,9 +165,7 @@ export function SortRaceRoom({
         <>
           <PlayRow>
             <p className="text-center text-[13px] font-bold text-soft">
-              {r.iWon
-                ? `Solved in ${r.me.moves} — par ${r.row.par}${overPar <= 0 ? ". On the nose." : ` (+${overPar}).`}`
-                : `You were ${r.myProgress} of ${r.row.colours} tubes home.`}
+              You {r.myMs != null ? clock(r.myMs) : "—"} · {them} {r.theirMs != null ? clock(r.theirMs) : "gave up"}
             </p>
           </PlayRow>
           {film && <div className="flex-1 min-h-0 overflow-y-auto"><ReplayPlayer replay={film} /></div>}

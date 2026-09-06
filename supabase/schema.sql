@@ -1041,7 +1041,13 @@ create table if not exists public.sort_races (
   winner     text check (winner in ('x','o')),
   x_player   uuid references auth.users(id) on delete set null,
   o_player   uuid references auth.users(id) on delete set null,
-  -- the winner's replay (see sort_solo.log); the other seat never finishes
+  -- each seat's own bounded solve time in ms; the lower one wins the race
+  x_ms       int,
+  o_ms       int,
+  -- conceding hands the other player the race, finished or not
+  x_gave_up  boolean not null default false,
+  o_gave_up  boolean not null default false,
+  -- each seat's replay (see sort_solo.log); either seat can finish now
   x_log      text check (char_length(x_log) <= 6000),
   o_log      text check (char_length(o_log) <= 6000),
   started_at timestamptz not null default now(),
@@ -1132,6 +1138,8 @@ begin
     x_player = excluded.x_player, o_player = excluded.o_player,
     x_moves = 0, o_moves = 0,
     x_done_at = null, o_done_at = null,
+    x_ms = null, o_ms = null,
+    x_gave_up = false, o_gave_up = false,
     -- last match's film is not this match's film
     x_log = null, o_log = null,
     winner = null,
@@ -1226,6 +1234,7 @@ begin
      set seed = p_seed, par = p_par, colours = p_colours,
          x_tubes = p_tubes, o_tubes = p_tubes,
          x_moves = 0, o_moves = 0, x_done_at = null, o_done_at = null,
+         x_ms = null, o_ms = null, x_gave_up = false, o_gave_up = false,
          -- a new board's film is not the old board's
          x_log = null, o_log = null,
          winner = null, started_at = now(), updated_at = now()
@@ -1236,29 +1245,49 @@ end $$;
 revoke all on function public.sort_rematch(bigint, bigint, int, int, text) from public, anon;
 grant execute on function public.sort_rematch(bigint, bigint, int, int, text) to authenticated;
 
--- Finishing a race is no longer something a client may assert.
+-- Finishing a race is not something a client may assert, and it is no longer
+-- decided by who reaches the server first.
 --
--- The three-argument sort_finish above took your word that a sorted board was
--- one you had played to. It checked the board really was sorted and that the
--- move count was at least par, which stops the lazy cheat, but anyone who read
--- the client could call it from a console with "0000/1111/2222/3333//" and win
--- without touching a tube.
+-- The move-replay stays the real check and lives only in the sort-finish edge
+-- function, which imports the very src/features/sort/rules.ts both phones run
+-- (check-sort.mts fails the build if the deployed copy drifts). What changed is
+-- WHO WINS. Both phones start from the same dealt instant and time their own
+-- solve locally -- the one clock the finish round-trip cannot warp -- and send
+-- that time. A finish is provisional: it records this seat's time and names a
+-- winner only once BOTH seats are resolved (finished or conceded). The winner is
+-- the lower time, so a clean solve that lands a second late still beats a slower
+-- one that arrived first. Server timing (now() - started_at) would have counted
+-- each player's ping against a millisecond board; this does not.
 --
--- The only caller now is the sort-finish edge function, which REPLAYS your
--- move list against the puzzle the seed generates — importing the very same
--- src/features/sort/rules.ts both phones run, so there is no second
--- implementation free to drift. A drifted referee would be worse than a
--- trusting one: it would reject honest finishes. check-sort.mts fails the
--- build if the deployed copy stops matching byte for byte.
---
--- `create or replace` with a new signature would leave the old three-argument
--- version callable, which is the entire thing being fixed, so it is dropped.
+-- Both older signatures are dropped: the three-arg client-trusted one, and the
+-- five-arg winner-on-arrival one this replaces.
 drop function if exists public.sort_finish(bigint, text, int);
+drop function if exists public.sort_finish(bigint, uuid, text, int, text);
+
+-- Who won, from the two seats' state. Pure, and the ONE place the rule lives so
+-- sort_finish and sort_concede cannot disagree.
+create or replace function public.sort_resolve(
+  p_x_ms int, p_o_ms int, p_x_up boolean, p_o_up boolean
+) returns text language sql immutable set search_path to 'public' as $$
+  select case
+    when p_x_up and p_o_up then null            -- both conceded: no winner
+    when p_x_up then 'o'                         -- x conceded -> o wins
+    when p_o_up then 'x'                         -- o conceded -> x wins
+    when p_x_ms is not null and p_o_ms is not null then
+      case when p_x_ms <= p_o_ms then 'x' else 'o' end   -- lower time (tie -> x)
+    else null                                   -- still provisional
+  end
+$$;
+revoke all on function public.sort_resolve(int, int, boolean, boolean) from public, anon, authenticated;
 
 create or replace function public.sort_finish(
-  p_room bigint, p_user uuid, p_tubes text, p_moves int, p_log text default null
+  p_room bigint, p_user uuid, p_tubes text, p_moves int,
+  p_log text default null, p_ms int default null
 ) returns text language plpgsql security definer set search_path to 'public' as $$
-declare v_seat text; v_row public.sort_races; v_was_open boolean;
+declare
+  v_seat text; v_row public.sort_races; v_wall int; v_ms int;
+  v_x_ms int; v_o_ms int; v_x_up boolean; v_o_up boolean;
+  v_win text; v_flipped int := 0;
 begin
   select * into v_row from public.sort_races where room_id = p_room for update;
   if v_row.room_id is null then raise exception 'no race in room %', p_room; end if;
@@ -1266,57 +1295,106 @@ begin
   v_seat := case when v_row.x_player = p_user then 'x'
                  when v_row.o_player = p_user then 'o' end;
   if v_seat is null then raise exception 'not seated in race %', p_room; end if;
-  if v_row.winner is not null then return v_row.winner; end if;
-  v_was_open := true;  -- winner was null under the lock, so this caller wins it
 
-  -- Belt as well as braces. The edge function has already proven the board by
-  -- replay; these hold even if it is ever bypassed or rewritten badly.
+  -- Belt as well as braces: the edge already proved the board by replay.
   if not public.sort_is_solved(p_tubes, v_row.cap) then
     raise exception 'that board is not sorted';
   end if;
   if p_moves < v_row.par then
     raise exception 'a % move solve is below par (%)', p_moves, v_row.par;
   end if;
-  -- Time floor (applied live 2026-09-06). A real race takes seconds of tapping;
-  -- without this a scripted client could read the seed, replay the bundled
-  -- solution line and POST a solved board within milliseconds of the deal.
-  -- Mirrors the solo floor of 150ms/move (~3s at par). started_at is reset on
-  -- every sort_start and sort_rematch, so it always measures this game.
-  if v_row.started_at is not null
-     and greatest(1, (extract(epoch from (now() - v_row.started_at)) * 1000)::int) < p_moves * 150 then
-    raise exception 'too fast to have been played';
+
+  -- The client's own time, never trusted: capped at the server wall-clock since
+  -- the deal, floored at 150ms/move (~3s at par) so a replay bot cannot post an
+  -- instant solve. started_at resets on every deal, so it measures this game.
+  v_wall := greatest(1, (extract(epoch from (now() - v_row.started_at)) * 1000)::int);
+  if p_ms is not null then
+    v_ms := least(p_ms, v_wall);
+    if v_ms < p_moves * 150 then raise exception 'too fast to have been played'; end if;
   end if;
+
+  -- A legacy caller (no ms, e.g. a stale tab mid-deploy) keeps first-to-arrive.
+  if p_ms is null and v_row.winner is not null then return v_row.winner; end if;
 
   update public.sort_races
      set x_tubes   = case when v_seat = 'x' then p_tubes else x_tubes end,
          x_moves   = case when v_seat = 'x' then p_moves else x_moves end,
          x_done_at = case when v_seat = 'x' then now() else x_done_at end,
          x_log     = case when v_seat = 'x' then p_log else x_log end,
+         x_ms      = case when v_seat = 'x' then coalesce(v_ms, x_ms) else x_ms end,
          o_tubes   = case when v_seat = 'o' then p_tubes else o_tubes end,
          o_moves   = case when v_seat = 'o' then p_moves else o_moves end,
          o_done_at = case when v_seat = 'o' then now() else o_done_at end,
          o_log     = case when v_seat = 'o' then p_log else o_log end,
-         winner     = coalesce(winner, v_seat),
+         o_ms      = case when v_seat = 'o' then coalesce(v_ms, o_ms) else o_ms end,
          updated_at = now()
    where room_id = p_room
-   returning winner into v_seat;
+   returning x_ms, o_ms, x_gave_up, o_gave_up, winner
+        into v_x_ms, v_o_ms, v_x_up, v_o_up, v_win;
 
-  -- The winner takes a point. room_players.score is what the seats, the
-  -- session card and MatchOver read; without this a race showed 0-0 and said
-  -- "All square". Once: only the caller that found winner null. A rematch
-  -- clears the race but not the tally, so wins accumulate across a session.
-  if v_was_open then
-    update public.room_players set score = score + 1
-     where room_id = p_room and user_id = p_user;
+  if v_win is null then
+    v_win := case when p_ms is null then v_seat            -- legacy: arrival wins
+                  else public.sort_resolve(v_x_ms, v_o_ms, v_x_up, v_o_up) end;
+    if v_win is not null then
+      update public.sort_races set winner = v_win, updated_at = now()
+       where room_id = p_room and winner is null;
+      get diagnostics v_flipped = row_count;
+    end if;
   end if;
-  return v_seat;
+
+  -- The point, to the winner, once: only the call that flips winner from null.
+  if v_flipped > 0 then
+    update public.room_players set score = score + 1
+     where room_id = p_room
+       and user_id = case when v_win = 'x' then v_row.x_player else v_row.o_player end;
+  end if;
+
+  return v_win;   -- null while still provisional; the row carries the truth
 end $$;
 
--- Only the edge function's service role may run it. A player's own token
--- cannot, which is the fix. Verified by impersonation: a member calling it
--- directly gets "permission denied for function sort_finish".
-revoke all on function public.sort_finish(bigint, uuid, text, int, text) from public, anon, authenticated;
-grant execute on function public.sort_finish(bigint, uuid, text, int, text) to service_role;
+-- Only the edge function's service role may settle a finish: a player's own
+-- token cannot, so the move-replay cannot be skipped.
+revoke all on function public.sort_finish(bigint, uuid, text, int, text, int)
+  from public, anon, authenticated;
+grant execute on function public.sort_finish(bigint, uuid, text, int, text, int) to service_role;
+
+-- Giving up. The other player wins now, finished or not -- conceding has no
+-- cheat to gain, so the client calls this directly rather than via the edge.
+create or replace function public.sort_concede(p_room bigint)
+returns text language plpgsql security definer set search_path to 'public' as $$
+declare
+  v_seat text; v_row public.sort_races; v_win text; v_flipped int := 0;
+  v_x_ms int; v_o_ms int; v_x_up boolean; v_o_up boolean;
+begin
+  select * into v_row from public.sort_races where room_id = p_room for update;
+  if v_row.room_id is null then raise exception 'no race in room %', p_room; end if;
+  v_seat := case when v_row.x_player = auth.uid() then 'x'
+                 when v_row.o_player = auth.uid() then 'o' end;
+  if v_seat is null then raise exception 'not seated in race %', p_room; end if;
+  if v_row.winner is not null then return v_row.winner; end if;
+
+  update public.sort_races
+     set x_gave_up = case when v_seat = 'x' then true else x_gave_up end,
+         o_gave_up = case when v_seat = 'o' then true else o_gave_up end,
+         updated_at = now()
+   where room_id = p_room
+   returning x_ms, o_ms, x_gave_up, o_gave_up into v_x_ms, v_o_ms, v_x_up, v_o_up;
+
+  v_win := public.sort_resolve(v_x_ms, v_o_ms, v_x_up, v_o_up);
+  if v_win is not null then
+    update public.sort_races set winner = v_win, updated_at = now()
+     where room_id = p_room and winner is null;
+    get diagnostics v_flipped = row_count;
+    if v_flipped > 0 then
+      update public.room_players set score = score + 1
+       where room_id = p_room
+         and user_id = case when v_win = 'x' then v_row.x_player else v_row.o_player end;
+    end if;
+  end if;
+  return v_win;
+end $$;
+revoke all on function public.sort_concede(bigint) from public, anon;
+grant execute on function public.sort_concede(bigint) to authenticated;
 
 -- c4_games shipped without this once already: the board only moves for whoever
 -- tapped it, and the opponent's screen never hears a thing.
