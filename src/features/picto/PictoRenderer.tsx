@@ -23,7 +23,7 @@ export function PictoRenderer({
 
   return (
     <svg viewBox="0 0 100 100" className={`w-full h-full ${className}`} role="img" aria-label="Rebus puzzle">
-      {spec.items.map((it, i) => {
+      {(spec.items ?? []).map((it, i) => {
         const size = it.size ?? 14;
         const rotate = it.rotate ?? 0;
         // textLength cannot coexist with tspans, so a fixed width is ignored

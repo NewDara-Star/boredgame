@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/shared/lib/supabase";
 import { loadContent, shuffle } from "@/features/play/content";
 import type { PlayItem } from "@/features/play/types";
@@ -122,7 +122,7 @@ export function useBoardRoom<G extends BoardState, R extends BoardRow>(
     return () => { cancelled = true; if (channel) void supabase!.removeChannel(channel); };
   }, [roomId, remember, engine.table, engine.channel]);
 
-  const game: G | null = row ? engine.decode(row) : null;
+  const game: G | null = useMemo(() => (row ? engine.decode(row) : null), [row, engine]);
   const myMark: Mark | null =
     !row || !userId ? null : row.x_player === userId ? "x" : row.o_player === userId ? "o" : null;
   const item = row?.puzzle_id != null

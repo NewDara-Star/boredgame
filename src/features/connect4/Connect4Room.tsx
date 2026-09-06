@@ -66,7 +66,7 @@ export function Connect4Room({
   const stall = g && !plain
     ? stallWriter(g, elapsed, { ask, reveal: REVEAL_MS, grace: GRACE_MS })
     : null;
-  useStallRescue(stall, t.myMark, t.askedAt, !!t.item, t);
+  useStallRescue(stall, t.myMark, t.askedAt, challenge === "catapult" || !!t.item, t);
 
   if (done) return <MatchOver sides={sides} myMark={t.myMark} card={card} />;
 

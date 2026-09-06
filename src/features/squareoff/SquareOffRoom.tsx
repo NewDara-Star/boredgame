@@ -63,7 +63,7 @@ export function SquareOffRoom({
   const elapsed = now - t.askedAt;
   const left = ask - elapsed;
   const stall = g ? stallWriter(g, elapsed, { ask, reveal: REVEAL_MS, grace: GRACE_MS }) : null;
-  useStallRescue(stall, t.myMark, t.askedAt, !!t.item, t);
+  useStallRescue(stall, t.myMark, t.askedAt, challenge === "catapult" || !!t.item, t);
 
   // The result card is drawn as soon as the match ends and shown on screen, not
   // hidden behind a download. A file you have to save before you can look at it

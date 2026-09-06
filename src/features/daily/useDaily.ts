@@ -49,7 +49,25 @@ export function useDaily() {
       ms: (r.ms as number) ?? 0,
     }));
     setBoard(rows);
-    setMine(rows.find((r) => r.user_id === user?.id) ?? null);
+    const found = rows.find((r) => r.user_id === user?.id) ?? null;
+    if (found || !user) { setMine(found); return; }
+    // A player ranked past the top 50 is still someone who has played today.
+    // Relying on the truncated board to spot them let a low-scorer replay the
+    // round; fetch their own row directly so the "already played" gate holds.
+    const { data: own } = await supabase
+      .from("daily_scores")
+      .select("user_id, score, correct, ms, profiles(username)")
+      .eq("day", day)
+      .eq("user_id", user.id)
+      .maybeSingle();
+    const o = own as Record<string, unknown> | null;
+    setMine(o ? {
+      user_id: o.user_id as string,
+      username: (o.profiles as { username?: string } | null)?.username ?? "you",
+      score: o.score as number,
+      correct: o.correct as number,
+      ms: (o.ms as number) ?? 0,
+    } : null);
   }, [day, user?.id]);
 
   useEffect(() => {
