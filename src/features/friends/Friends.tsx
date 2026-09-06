@@ -76,9 +76,15 @@ export function FriendsPanel() {
     if (name) setPaste("");
   };
 
+  // A pending invite FROM this friend means they already opened a room and are
+  // waiting -- meet them there instead of opening a second room and crossing.
+  const pendingFrom = (friendId: string) => invites.find((i) => i.from_id === friendId);
+
   const play = async (friendId: string) => {
     if (!user || busy) return;
     setBusy(true);
+    const waiting = pendingFrom(friendId);
+    if (waiting) { await respond(waiting.id, true); nav(`/rooms/${waiting.room_code}`); return; }
     const r = await createRoom(user.id, uname);
     if (r) { await invite(r.id, friendId); nav(`/rooms/${r.code}`); }
     else setBusy(false);
@@ -100,7 +106,7 @@ export function FriendsPanel() {
               <span className="min-w-0 flex-1 font-bold truncate">{f.username}</span>
               <button onClick={() => void play(f.id)} disabled={busy}
                 className="piece press bg-ink text-paper px-4 min-h-[44px] inline-flex items-center font-display font-semibold">
-                Play
+                {pendingFrom(f.id) ? "Join" : "Play"}
               </button>
             </div>
           ))}
