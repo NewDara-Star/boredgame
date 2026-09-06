@@ -696,6 +696,23 @@ tall, no children. The surface keeps a definite height at every width now, and
 PlayBoard treats a zero height as UNBOUNDED rather than as no room, so the
 cycle cannot close again. `npm run check:layout` holds both.
 
+**A game that borrows another game's lifecycle inherits its wrong answers.**
+The Ball Sort room reused the board games' match chrome, and three bugs fell
+out of the mismatch, all found playing on two real phones with the database
+open underneath. `sort_finish` settled the race winner but never touched
+`room_players.score` — the board games bump it per round, Ball Sort never did
+— so the seats, the session card and MatchOver read 0-0 and said "All square"
+after a plain win. The bump lives in `sort_finish` now, under the same
+`for update` lock, guarded by "winner was null before this call": scored once,
+server-side, unspoofable; a rematch clears the race but not the tally. The
+winner's film "looped" because SortRaceRoom rebuilt the `film` object every
+render and the match clock re-renders every second, so ReplayPlayer restarted
+playback on `[replay]` each tick — clock reset to zero, GIF never finished. It
+is `useMemo`'d on primitives now, the hook lifted ABOVE the early returns. And
+the room board vanished mid-race because `min={120}` hid it whenever the away
+banner pushed the fixed rows over budget on a phone; a race board is `min={0}`
+— a small board beats no board.
+
 **A room game is (mode, bank, challenge), not (mode, bank).** Square Off and
 Catapult Squares are the same mode and the same board; only what a move costs
 tells them apart, and Catapult Squares draws on no bank, so on a fresh room the

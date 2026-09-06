@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import type { RoomPlayer, RoomStatus } from "@/shared/types/db";
 import { Note, Dealing } from "@/shared/ui/Note";
 import {
@@ -32,6 +33,30 @@ export function SortRaceRoom({
     { hero: () => sortArt("BALL SORT"), glyph: ballGlyph,
       caption: () => r.me && r.row ? `Last race: ${r.me.moves} moves, par ${r.row.par}` : undefined });
 
+  // The winner's solve, as a film, once the referee has kept one.
+  //
+  // MEMOISED, and that is not an optimisation, and it sits ABOVE the early
+  // returns because a hook must run every render. The match clock re-renders
+  // this component every second; a fresh `film` object each time is a new
+  // identity, and ReplayPlayer restarts playback on `[replay]` — so the film's
+  // clock reset to zero every second and the GIF ("Making it…") never
+  // finished. The deps are primitives that stop changing once the race is won.
+  const w = r.row?.winner ?? null;
+  const wLog = w === "x" ? r.row?.x_log : w === "o" ? r.row?.o_log : null;
+  const wDone = w === "x" ? r.row?.x_done_at : w === "o" ? r.row?.o_done_at : null;
+  const startedAt = r.row?.started_at ?? "";
+  const rowMoves = w === "x" ? (r.row?.x_moves ?? 0) : w === "o" ? (r.row?.o_moves ?? 0) : 0;
+  const par = r.row?.par ?? 0, level = r.row?.level ?? "medium";
+  const tubes = r.puzzle?.tubes, capp = r.puzzle?.cap;
+  const film: Replay | null = useMemo(
+    () => (w && wLog && wDone && tubes ? {
+      tubes, cap: capp!, log: decodeLog(wLog),
+      ms: Math.max(1, Date.parse(wDone) - Date.parse(startedAt)),
+      moves: rowMoves, par, name: names[w], level, where: `ROOM ${code}`,
+    } : null),
+    [w, wLog, wDone, tubes, capp, startedAt, rowMoves, par, level, names, code],
+  );
+
   if (done) return <MatchOver sides={sides} myMark={r.seat ?? "x"} card={card} />;
   if (!r.row || !r.me) return <Dealing what="the tubes" />;
 
@@ -40,17 +65,6 @@ export function SortRaceRoom({
       new Date(r.row.started_at).getTime()) / 1000));
   const them = r.seat === "x" ? names.o : names.x;
   const overPar = r.me.moves - r.row.par;
-
-  // the winner's solve, as a film, once the referee has kept one
-  const w = r.row.winner;
-  const wLog = w === "x" ? r.row.x_log : w === "o" ? r.row.o_log : null;
-  const wDone = w === "x" ? r.row.x_done_at : w === "o" ? r.row.o_done_at : null;
-  const film: Replay | null = w && wLog && wDone && r.puzzle ? {
-    tubes: r.puzzle.tubes, cap: r.puzzle.cap, log: decodeLog(wLog),
-    ms: Math.max(1, Date.parse(wDone) - Date.parse(r.row.started_at)),
-    moves: w === "x" ? r.row.x_moves : r.row.o_moves, par: r.row.par,
-    name: names[w], level: r.row.level, where: `ROOM ${code}`,
-  } : null;
 
   return (
     <PlaySurface>
@@ -76,7 +90,7 @@ export function SortRaceRoom({
       {!r.won && (() => {
         const me = r.me;
         return (
-          <PlayBoard ratio={TUBES_RATIO} min={120}>
+          <PlayBoard ratio={TUBES_RATIO} min={0}>
             {(width) => (
               <div className="piece bg-surface p-3 pt-1" style={{ width }}>
                 <Board tubes={me.tubes} cap={me.cap} selected={r.selected} refused={r.refused}

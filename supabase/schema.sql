@@ -1279,7 +1279,7 @@ drop function if exists public.sort_finish(bigint, text, int);
 create or replace function public.sort_finish(
   p_room bigint, p_user uuid, p_tubes text, p_moves int, p_log text default null
 ) returns text language plpgsql security definer set search_path to 'public' as $$
-declare v_seat text; v_row public.sort_races;
+declare v_seat text; v_row public.sort_races; v_was_open boolean;
 begin
   select * into v_row from public.sort_races where room_id = p_room for update;
   if v_row.room_id is null then raise exception 'no race in room %', p_room; end if;
@@ -1288,6 +1288,7 @@ begin
                  when v_row.o_player = p_user then 'o' end;
   if v_seat is null then raise exception 'not seated in race %', p_room; end if;
   if v_row.winner is not null then return v_row.winner; end if;
+  v_was_open := true;  -- winner was null under the lock, so this caller wins it
 
   -- Belt as well as braces. The edge function has already proven the board by
   -- replay; these two hold even if it is ever bypassed or rewritten badly.
@@ -1311,6 +1312,15 @@ begin
          updated_at = now()
    where room_id = p_room
    returning winner into v_seat;
+
+  -- The winner takes a point. room_players.score is what the seats, the
+  -- session card and MatchOver read; without this a race showed 0-0 and said
+  -- "All square". Once: only the caller that found winner null. A rematch
+  -- clears the race but not the tally, so wins accumulate across a session.
+  if v_was_open then
+    update public.room_players set score = score + 1
+     where room_id = p_room and user_id = p_user;
+  end if;
   return v_seat;
 end $$;
 
