@@ -76,8 +76,8 @@ export function SortRaceRoom({
 
   const them = r.seat === "x" ? names.o : names.x;
 
-  // My clock: frozen on my solve, otherwise ticking from the shared deal.
-  const liveMs = Math.max(0, now - new Date(r.row.started_at).getTime());
+  // My clock: 0 until my first lift, then ticking from it, then frozen on my solve.
+  const liveMs = r.startedMs === null ? 0 : Math.max(0, now - r.startedMs);
   const myMs = r.myMs ?? liveMs;
 
   // Only truly playing (not won, not already finished) shows the board.

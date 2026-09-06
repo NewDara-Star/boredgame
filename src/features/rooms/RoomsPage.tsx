@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "@/app/providers/AuthProvider";
-import { useRoom, createRoom } from "./useRoom";
+import { useRoom, useMyRooms, createRoom } from "./useRoom";
 import { PictoRenderer } from "@/features/picto/PictoRenderer";
 import { Button } from "@/shared/ui/Button";
 import { Card } from "@/shared/ui/Card";
@@ -36,6 +36,7 @@ export function RoomsPage() {
     room, players, round, currentPuzzle, error, categories, levels,
     join, startNextRound, claimRound, setup, setReady, leave,
   } = useRoom(code, user?.id);
+  const myRooms = useMyRooms(user?.id);
 
   // Race deals a puzzle a round and scores in room_players. The board games own
   // their own row and their own writer, so everything the race UI does below is
@@ -162,6 +163,21 @@ export function RoomsPage() {
         <p className="text-sm text-soft font-semibold">
           Make a room, send the code, then settle what you're playing together.
         </p>
+
+        {myRooms.length > 0 && (
+          <div className="space-y-2">
+            <p className="text-[12px] font-black uppercase tracking-widest text-soft">Rooms you're in</p>
+            {myRooms.map((r) => (
+              <button key={r.id} onClick={() => nav(`/rooms/${r.code}`)}
+                className="piece press w-full flex items-center justify-between px-4 py-3.5 bg-surface text-left">
+                <span className="font-display text-lg font-semibold tracking-[0.2em]">{r.code}</span>
+                <span className="text-[12px] font-black uppercase tracking-wider text-soft">
+                  {r.status === "playing" ? "in progress" : "waiting"} · rejoin →
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
 
         <Button className="w-full"
           onClick={async () => { const c = await createRoom(user.id, uname); if (c) nav(`/rooms/${c}`); }}>

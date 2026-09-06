@@ -187,6 +187,26 @@ export function useRoom(code: string | undefined, userId: string | undefined) {
   };
 }
 
+/** The rooms you are already in, so coming back to Head-to-head is a tap, not a
+    retyped code. rooms' RLS returns only rooms you host or belong to, so an
+    unfiltered read already IS "your rooms"; keep it to the ones still live. */
+export function useMyRooms(userId: string | undefined) {
+  const [rooms, setRooms] = useState<Pick<Room, "id" | "code" | "status">[]>([]);
+  useEffect(() => {
+    if (!supabase || !userId) { setRooms([]); return; }
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase!.from("rooms")
+        .select("id, code, status")
+        .in("status", ["waiting", "playing"])
+        .order("created_at", { ascending: false });
+      if (!cancelled) setRooms((data as Pick<Room, "id" | "code" | "status">[]) ?? []);
+    })();
+    return () => { cancelled = true; };
+  }, [userId]);
+  return rooms;
+}
+
 /** Creates an empty room. What is played, and from which categories, is settled
     in the lobby with the other person rather than guessed at before they arrive. */
 export async function createRoom(userId: string, username: string): Promise<string | null> {
