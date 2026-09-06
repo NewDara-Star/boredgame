@@ -6,7 +6,6 @@ import { PictoRenderer } from "@/features/picto/PictoRenderer";
 import { Button } from "@/shared/ui/Button";
 import { Card } from "@/shared/ui/Card";
 import { Field, Input } from "@/shared/ui/Field";
-import { isCorrect } from "@/shared/lib/normalise";
 import { SquareOffRoom } from "@/features/squareoff/SquareOffRoom";
 import { startSquareOff } from "@/features/squareoff/useTttRoom";
 import { TicTacToeRoom } from "@/features/tictactoe/TicTacToeRoom";
@@ -35,7 +34,7 @@ export function RoomsPage() {
 
   const {
     room, players, round, currentPuzzle, error, categories, levels,
-    join, startNextRound, claimWin, setup, setReady,
+    join, startNextRound, claimRound, setup, setReady,
   } = useRoom(code, user?.id);
 
   // Race deals a puzzle a round and scores in room_players. The board games own
@@ -306,7 +305,7 @@ export function RoomsPage() {
             <div className="grid gap-2.5">
               {currentPuzzle.choices.map((opt, i) => (
                 <button key={opt}
-                  onClick={() => { if (opt === currentPuzzle.answer) void claimWin(); }}
+                  onClick={() => void claimRound(opt)}
                   className="piece press flex items-center gap-3 text-left px-4 py-4 bg-surface">
                   <span aria-hidden style={{ color: ["#FF5A1F","#2B4BFF","#FFD028","#10A04E"][i % 4] }}>
                     {["▲","◆","●","■"][i % 4]}
@@ -334,7 +333,7 @@ export function RoomsPage() {
             <form className="flex gap-2"
               onSubmit={(e) => {
                 e.preventDefault();
-                if (isCorrect(guess, currentPuzzle.answer, currentPuzzle.accept)) { void claimWin(); }
+                void claimRound(guess);
                 setGuess("");
               }}>
               <Input value={guess} onChange={(e) => setGuess(e.target.value)}

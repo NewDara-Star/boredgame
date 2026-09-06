@@ -275,9 +275,10 @@ create policy "update own score" on room_players for update using (user_id = aut
 drop policy if exists "rounds readable" on room_rounds;
 create policy "rounds readable" on room_rounds for select using (true);
 drop policy if exists "members write rounds" on room_rounds;
-create policy "members write rounds" on room_rounds for all
-  using (exists (select 1 from room_players p where p.room_id = room_rounds.room_id and p.user_id = auth.uid()))
-  with check (true);
+drop policy if exists "members deal rounds" on room_rounds;
+-- Members may DEAL a round (insert); the winner is set only by claim_round().
+create policy "members deal rounds" on room_rounds for insert
+  with check (exists (select 1 from room_players p where p.room_id = room_rounds.room_id and p.user_id = auth.uid()));
 
 -- This is the entire "websocket" implementation. Both browsers subscribe;
 -- Postgres pushes the changes. No socket code exists in the app.
@@ -504,20 +505,10 @@ alter table public.room_players
 revoke update on public.room_players from authenticated, anon;
 grant update (ready) on public.room_players to authenticated;
 
-create or replace function public.bump_room_score(p_room bigint, p_user uuid)
-returns int language plpgsql security definer set search_path to 'public' as $$
-declare new_score int;
-begin
-  if not exists (select 1 from public.room_players p
-                 where p.room_id = p_room and p.user_id = auth.uid()) then
-    raise exception 'not a member of room %', p_room;
-  end if;
-  update public.room_players set score = score + 1
-   where room_id = p_room and user_id = p_user returning score into new_score;
-  return coalesce(new_score, 0);
-end $$;
-revoke all on function public.bump_room_score(bigint, uuid) from public, anon;
-grant execute on function public.bump_room_score(bigint, uuid) to authenticated;
+-- bump_room_score(bigint,uuid) removed 2026-09-06: it credited a caller-named
+-- user with no proof of a win and could be looped. Board points are booked by
+-- claim_board_win() and trivia rounds by claim_round(), both server-verified and
+-- idempotent, defined at the end of this file.
 
 -- Either member can change the setup, and doing so clears both ready flags —
 -- that is what makes "ready" mean "I agree to this".
@@ -854,9 +845,10 @@ create policy "players readable by the people in the room" on public.room_player
   for select using (user_id = auth.uid() or public.is_room_member(room_players.room_id));
 
 drop policy if exists "members write rounds" on public.room_rounds;
-create policy "members write rounds" on public.room_rounds
-  for all using (public.is_room_member(room_rounds.room_id))
-      with check (public.is_room_member(room_rounds.room_id));
+drop policy if exists "members deal rounds" on public.room_rounds;
+-- Members may DEAL a round (insert); the winner is set only by claim_round().
+create policy "members deal rounds" on public.room_rounds
+  for insert with check (public.is_room_member(room_rounds.room_id));
 
 drop policy if exists "rounds readable" on public.room_rounds;
 drop policy if exists "rounds readable by the people in the room" on public.room_rounds;
@@ -1638,3 +1630,97 @@ grant execute on function public.submit_daily(date)              to authenticate
 
 -- The old client-trusted submit_daily(date,int,int,int,int) was dropped
 -- 2026-09-06 once this client went live -- it was the last forgeable path in.
+
+-- ============================================================================
+-- Room win-crediting, server-verified (2026-09-06, first step of room integrity)
+--
+-- Two one-command console forgeries used to be possible:
+--   * trivia rooms: update room_rounds set winner_id = me   (no answer needed)
+--   * any room:     bump_room_score(room, me) in a loop, crediting a named user
+-- Both are gone. A trivia round's winner is set only by claim_round() judging
+-- the answer; a board point is booked only by claim_board_win() reading the
+-- game's OWN winner, once. Ceiling for a later pass: trivia answers are still
+-- served to the client and board MOVES are still client-written, so a scripted
+-- client could still cheat WHILE playing -- this closes the forgeries, not
+-- move-level cheating.
+-- ============================================================================
+
+-- levenshtein(), so the server judges a typed answer with the same slack the
+-- client does (picto rooms). Trivia rooms are exact multiple choice.
+create extension if not exists fuzzystrmatch with schema extensions;
+
+alter table public.ttt_games    add column if not exists scored boolean not null default false;
+alter table public.c4_games     add column if not exists scored boolean not null default false;
+alter table public.memory_games add column if not exists scored boolean not null default false;
+
+-- Book the board point: read the game's OWN winner and pay that seat, once.
+-- `scored` is reset to false when a board is dealt/rematched (client writes it).
+-- No seat is passed in, so a caller cannot name who to pay, and a repeat call
+-- (both browsers watching, or a stall rescue) adds nothing.
+create or replace function public.claim_board_win(p_room bigint)
+returns int language plpgsql security definer set search_path to 'public' as $$
+declare v_tbl text; v_winner text; v_x uuid; v_o uuid; v_scored boolean; v_seat uuid; new_score int;
+begin
+  if auth.uid() is null then raise exception 'sign in first'; end if;
+  if not public.is_room_member(p_room) then raise exception 'not a member of room %', p_room; end if;
+  select 'ttt', winner, x_player, o_player, scored into v_tbl, v_winner, v_x, v_o, v_scored
+    from public.ttt_games where room_id = p_room;
+  if v_tbl is null then
+    select 'c4', winner, x_player, o_player, scored into v_tbl, v_winner, v_x, v_o, v_scored
+      from public.c4_games where room_id = p_room;
+  end if;
+  if v_tbl is null then
+    select 'memory', winner, x_player, o_player, scored into v_tbl, v_winner, v_x, v_o, v_scored
+      from public.memory_games where room_id = p_room;
+  end if;
+  if v_tbl is null or v_winner is null or v_winner = 'draw' or v_scored then
+    return 0;
+  end if;
+  v_seat := case v_winner when 'x' then v_x when 'o' then v_o end;
+  if v_seat is null then return 0; end if;
+  if    v_tbl = 'ttt' then update public.ttt_games    set scored = true where room_id = p_room;
+  elsif v_tbl = 'c4'  then update public.c4_games     set scored = true where room_id = p_room;
+  else                     update public.memory_games set scored = true where room_id = p_room;
+  end if;
+  update public.room_players set score = score + 1
+   where room_id = p_room and user_id = v_seat returning score into new_score;
+  return coalesce(new_score, 0);
+end $$;
+revoke all on function public.claim_board_win(bigint) from public, anon;
+grant execute on function public.claim_board_win(bigint) to authenticated;
+
+-- Claim the trivia round: judge the submitted answer against the round's puzzle
+-- server-side (exact for multiple choice, with the client's spelling slack for
+-- typed picto), and only a correct FIRST-in answer sets the winner and the point
+-- together. The client never writes the winner.
+create or replace function public.claim_round(p_room bigint, p_given text)
+returns jsonb language plpgsql security definer set search_path to 'public' as $$
+declare uid uuid := auth.uid(); v_round public.room_rounds;
+        v_answer text; v_accept text[]; g text; v_correct boolean; v_upd int;
+begin
+  if uid is null then raise exception 'sign in first'; end if;
+  if not public.is_room_member(p_room) then raise exception 'not a member of room %', p_room; end if;
+  select * into v_round from public.room_rounds
+    where room_id = p_room and winner_id is null
+    order by round_no desc limit 1;
+  if v_round.id is null then return jsonb_build_object('won', false, 'reason', 'no open round'); end if;
+  select answer, accept into v_answer, v_accept from public.puzzles where id = v_round.puzzle_id;
+  g := public.normalise_answer(p_given);
+  v_correct := g <> '' and exists (
+    select 1 from unnest(array[v_answer] || coalesce(v_accept, '{}'::text[])) w
+    cross join lateral (select public.normalise_answer(w) as nw) x
+    where x.nw <> '' and (
+      g = x.nw or extensions.levenshtein(g, x.nw) <=
+        (case when length(x.nw) < 8 then 0 when length(x.nw) < 14 then 1 else 2 end)
+    )
+  );
+  if not v_correct then return jsonb_build_object('won', false); end if;
+  update public.room_rounds set winner_id = uid, ended_at = now()
+    where id = v_round.id and winner_id is null;
+  get diagnostics v_upd = row_count;
+  if v_upd = 0 then return jsonb_build_object('won', false, 'reason', 'taken'); end if;
+  update public.room_players set score = score + 1 where room_id = p_room and user_id = uid;
+  return jsonb_build_object('won', true);
+end $$;
+revoke all on function public.claim_round(bigint, text) from public, anon;
+grant execute on function public.claim_round(bigint, text) to authenticated;

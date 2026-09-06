@@ -192,12 +192,12 @@ export function useBoardRoom<G extends BoardState, R extends BoardRow>(
       players list, which can lag realtime across a rematch. */
   const bookWin = useCallback(async (next: G) => {
     if (next.phase !== "over" || !next.winner || next.winner === "draw") return;
-    const r = rowRef.current;
-    if (!supabase || !r || !roomId) return;
-    const seat = next.winner === "x" ? r.x_player : r.o_player;
-    if (!seat) return;
+    if (!supabase || !roomId) return;
+    // The server reads the board and credits the ACTUAL winner, once. No seat is
+    // sent -- the client cannot name who to pay, and a repeat call (both browsers
+    // watching, or a rescue) scores nothing further.
     setWriteError(await attempt("Recording the win",
-      supabase.rpc("bump_room_score", { p_room: roomId, p_user: seat })));
+      supabase.rpc("claim_board_win", { p_room: roomId })));
   }, [roomId]);
 
   const apply = useCallback(async (next: G) => {
@@ -289,7 +289,7 @@ export function useBoardRoom<G extends BoardState, R extends BoardRow>(
       : row.turn === "x" ? "o" : "x";
     setWriteError(await attempt("Starting the rematch",
       supabase.from(engine.table)
-        .update({ ...engine.encode(engine.newGame(first)), puzzle_id: null })
+        .update({ ...engine.encode(engine.newGame(first)), puzzle_id: null, scored: false })
         .eq("room_id", roomId)));
   }, [roomId, row, engine]);
 
@@ -321,6 +321,6 @@ export async function startBoard<G extends BoardState, R extends BoardRow>(
   if (won !== true) return null;
   return await attempt("Dealing the board", supabase.from(engine.table).upsert({
     room_id: roomId, ...engine.encode(engine.newGame("x")),
-    puzzle_id: null, x_player: xId, o_player: oId,
+    puzzle_id: null, x_player: xId, o_player: oId, scored: false,
   }));
 }

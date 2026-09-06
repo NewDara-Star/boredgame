@@ -130,18 +130,14 @@ export function useRoom(code: string | undefined, userId: string | undefined) {
     })));
   }, [room, round, pool]);
 
-  /** First correct answer wins: the null filter means only one update can land. */
-  const claimWin = useCallback(async () => {
+  /** The server judges the answer and, on a correct first-in one, sets the round
+      winner and the point together. The client no longer writes the winner (it
+      could be set without answering) or names who to pay. */
+  const claimRound = useCallback(async (given: string) => {
     if (!supabase || !round || !userId || !room) return;
-    const { data } = await supabase
-      .from("room_rounds")
-      .update({ winner_id: userId, ended_at: new Date().toISOString() })
-      .eq("id", round.id).is("winner_id", null).select();
-    if (data && data.length > 0) {
-      setError(await attempt("Recording the point",
-        supabase.rpc("bump_room_score", { p_room: room.id, p_user: userId })));
-    }
-  }, [round, userId, room, players]);
+    setError(await attempt("Answering the round",
+      supabase.rpc("claim_round", { p_room: room.id, p_given: given })));
+  }, [round, userId, room]);
 
   const currentPuzzle = round ? pool.find((i) => i.id === String(round.puzzle_id)) ?? null : null;
 
@@ -178,7 +174,7 @@ export function useRoom(code: string | undefined, userId: string | undefined) {
 
   return {
     room, players, round, currentPuzzle, error, categories, levels,
-    join, startNextRound, claimWin, setup, setReady,
+    join, startNextRound, claimRound, setup, setReady,
   };
 }
 
