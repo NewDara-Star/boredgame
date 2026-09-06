@@ -70,6 +70,50 @@ export function AwayNotice({ players, userId, now }: {
   );
 }
 
+/**
+ * The immediate "they're gone" notice, driven by realtime presence rather than a
+ * stale heartbeat. A member whose row vanished LEFT the room (tapped Leave, or a
+ * disconnect that reset the match); a member still listed but no longer connected
+ * lost their connection. The drop case is surfaced in the lobby only -- in a live
+ * game AwayNotice owns it, with the end-match option. Rendered once above the
+ * room, so lobby and every game get it without each wiring their own.
+ */
+export function PeerNotice({ players, present, userId, waiting }: {
+  players: RoomPlayer[]; present: Set<string>; userId: string; waiting: boolean;
+}) {
+  const other = players.find((p) => p.user_id !== userId) ?? null;
+  const last = useRef<{ id: string; name: string } | null>(null);
+  const seen = useRef<Set<string>>(new Set());
+  useEffect(() => {
+    if (other) last.current = { id: other.user_id, name: other.username };
+  }, [other?.user_id, other?.username]);
+  // Remember everyone we have seen connected, so a not-yet-synced start is never
+  // mistaken for a disconnect.
+  useEffect(() => { for (const id of present) seen.current.add(id); }, [present]);
+
+  const peer = last.current;
+  if (!peer) return null; // there was never a second player to lose
+
+  const stillMember = players.some((p) => p.user_id === peer.id);
+  const connected = present.has(peer.id);
+  if (stillMember && connected) return null; // they are here
+
+  const left = !stillMember;
+  const dropped = stillMember && !connected && seen.current.has(peer.id);
+  if (!left && !(dropped && waiting)) return null;
+
+  return (
+    <div className="piece bg-bad text-surface p-3.5 text-center space-y-1">
+      <p className="text-[14px] font-bold">
+        {left ? `${peer.name} left the room.` : `${peer.name} lost connection.`}
+      </p>
+      <p className="text-[12px] font-semibold opacity-90">
+        {left ? "Invite someone, or head back." : "Hang on — they may be back in a moment."}
+      </p>
+    </div>
+  );
+}
+
 export function OverPanel({
   headline, mine, draw, onRematch, onQuit, onChangeGame,
 }: {

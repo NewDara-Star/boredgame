@@ -17,6 +17,8 @@ export function useRoom(code: string | undefined, userId: string | undefined) {
   const [round, setRound] = useState<RoomRound | null>(null);
   const [pool, setPool] = useState<PlayItem[]>([]);
   const [error, setError] = useState<string | null>(null);
+  // user_ids currently connected to this room over the realtime socket.
+  const [present, setPresent] = useState<Set<string>>(new Set());
 
   const refresh = useCallback(async (roomId: number) => {
     if (!supabase) return;
@@ -58,19 +60,33 @@ export function useRoom(code: string | undefined, userId: string | undefined) {
       setRoom(r);
       await refresh(r.id);
 
-      channel = supabase!
-        .channel(`room:${r.id}`)
+      // Presence rides the same socket: when a phone closes the tab, taps Leave,
+      // or loses signal, its connection drops and the OTHER phone hears a
+      // `leave` within a second or two -- far faster and surer than waiting for
+      // a heartbeat row to go stale. `present` is who is actually connected now.
+      const ch = supabase!.channel(`room:${r.id}`, {
+        config: { presence: { key: userId ?? "anon" } },
+      });
+      channel = ch
         .on("postgres_changes", { event: "*", schema: "public", table: "room_players", filter: `room_id=eq.${r.id}` },
           () => void refresh(r.id))
         .on("postgres_changes", { event: "*", schema: "public", table: "room_rounds", filter: `room_id=eq.${r.id}` },
           () => void refresh(r.id))
         .on("postgres_changes", { event: "UPDATE", schema: "public", table: "rooms", filter: `id=eq.${r.id}` },
           (payload) => setRoom(payload.new as Room))
-        .subscribe();
+        .on("presence", { event: "sync" }, () => {
+          const state = ch.presenceState<{ user_id?: string }>();
+          const ids = new Set<string>();
+          for (const key in state) for (const m of state[key]) if (m.user_id) ids.add(m.user_id);
+          setPresent(ids);
+        })
+        .subscribe((status) => {
+          if (status === "SUBSCRIBED" && userId) void ch.track({ user_id: userId });
+        });
     })();
 
     return () => { cancelled = true; if (channel) void supabase!.removeChannel(channel); };
-  }, [code, refresh]);
+  }, [code, refresh, userId]);
 
   // The bank follows the room's game rather than being read once on arrival.
   // Loading it with the room meant that changing the game in the lobby left the
@@ -182,7 +198,7 @@ export function useRoom(code: string | undefined, userId: string | undefined) {
   }, [room]);
 
   return {
-    room, players, round, currentPuzzle, error, categories, levels,
+    room, players, present, round, currentPuzzle, error, categories, levels,
     join, startNextRound, claimRound, setup, setReady, leave,
   };
 }

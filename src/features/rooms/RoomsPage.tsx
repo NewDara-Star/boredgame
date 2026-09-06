@@ -17,6 +17,7 @@ import { SortRaceRoom } from "@/features/sort/SortRaceRoom";
 import { startSortRace } from "@/features/sort/useSortRoom";
 import { Lobby } from "./Lobby";
 import { InviteCard } from "./InviteCard";
+import { PeerNotice } from "./matchUi";
 import { AuthCard } from "@/features/profile/AuthCard";
 import { GuestCard, ClaimCard } from "@/features/profile/GuestCard";
 import { Avatar } from "@/shared/ui/Avatar";
@@ -34,7 +35,7 @@ export function RoomsPage() {
   const uname = profile?.username ?? user?.email?.split("@")[0] ?? "player";
 
   const {
-    room, players, round, currentPuzzle, error, categories, levels,
+    room, players, present, round, currentPuzzle, error, categories, levels,
     join, startNextRound, claimRound, setup, setReady, leave,
   } = useRoom(code, user?.id);
   const myRooms = useMyRooms(user?.id);
@@ -222,6 +223,8 @@ export function RoomsPage() {
       </div>
 
       <Note>{error ?? startError}</Note>
+
+      {iAmIn && <PeerNotice players={players} present={present} userId={user.id} waiting={waiting} />}
 
       {!iAmIn && (
         <div className="space-y-2">
