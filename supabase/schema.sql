@@ -488,8 +488,9 @@ begin
   select puzzle_ids into ids from public.daily_rounds where day = p_day;
   return ids;
 end $$;
-revoke all on function public.daily_round(date) from public, anon;
-grant execute on function public.daily_round(date) to authenticated;
+-- Only daily_next (a security-definer caller) needs daily_round; no client does,
+-- and a direct call could seed a daily_rounds row for an arbitrary future day.
+revoke all on function public.daily_round(date) from public, anon, authenticated;
 
 -- submit_daily(date,int,int,int,int) was removed 2026-09-06: it trusted a
 -- client-supplied score and was the last forgeable path into daily_scores. The
@@ -627,9 +628,16 @@ drop policy if exists "join a room" on public.room_players;
 
 create or replace function public.join_room(p_room bigint, p_username text)
 returns text language plpgsql security definer set search_path to 'public' as $$
-declare uid uuid := auth.uid(); seats int; taken int;
+declare uid uuid := auth.uid(); seats int; taken int; v_name text;
 begin
   if uid is null then raise exception 'sign in first'; end if;
+
+  -- The display name is client-supplied and went into room_players.username
+  -- unchecked; a blank or a pasted essay could land in the seat label. Clamp it.
+  v_name := nullif(btrim(coalesce(p_username, '')), '');
+  if v_name is null then v_name := 'player'; end if;
+  if length(v_name) > 24 then v_name := left(v_name, 24); end if;
+
   -- Locks the room row, so two people reaching for the last seat are serialised
   -- rather than both counting 1 and both inserting.
   select capacity into seats from public.rooms where id = p_room for update;
@@ -640,7 +648,7 @@ begin
   select count(*) into taken from public.room_players where room_id = p_room;
   if taken >= seats then return 'full'; end if;
   insert into public.room_players(room_id, user_id, username, ready)
-  values (p_room, uid, p_username, false);
+  values (p_room, uid, v_name, false);
   return 'joined';
 end $$;
 revoke all on function public.join_room(bigint, text) from public, anon;
