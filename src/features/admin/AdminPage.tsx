@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { Navigate } from "react-router-dom";
 import { supabase } from "@/shared/lib/supabase";
 import { useAuth } from "@/app/providers/AuthProvider";
 import { PictoRenderer } from "@/features/picto/PictoRenderer";
@@ -22,6 +23,19 @@ export function AdminPage() {
   const [touched, setTouched] = useState(false);
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
+  // Admin is checked server-side (the puzzles RLS is is_admin()), but the page
+  // itself was shown to anyone who typed /admin — a non-admin got the whole
+  // editor and a raw "row-level security" error on Publish. Ask the database
+  // once: null while asking, false redirects, true renders the tool. The gate
+  // is a courtesy; the RLS is the guarantee.
+  const [allowed, setAllowed] = useState<boolean | null>(null);
+  useEffect(() => {
+    if (!supabase) { setAllowed(true); return; }  // offline design mode, no DB to gate on
+    if (!user) { setAllowed(false); return; }
+    let live = true;
+    void supabase.rpc("is_admin").then(({ data }) => { if (live) setAllowed(data === true); });
+    return () => { live = false; };
+  }, [user]);
 
   const errors = useMemo(() => validate(d), [d]);
   const ok = isValid(errors);
@@ -50,6 +64,9 @@ export function AdminPage() {
     setMsg(error ? error.message : "Published.");
     if (!error) setD(EMPTY);
   }
+
+  if (allowed === false) return <Navigate to="/" replace />;
+  if (allowed === null) return <p className="text-sm text-soft">One moment…</p>;
 
   return (
     <div className="space-y-5">
