@@ -54,10 +54,11 @@ for (const p of PLAY_SCREENS) {
   const css = read("src/index.css");
   const shell = read("src/app/layout/Shell.tsx");
   ok(css.includes(".play-surface"), "the play surface is defined in one place");
-  ok(/--chrome:\s*calc\(62px \+ 1rem \+ 5rem \+ 6px\)/.test(css),
-     "the chrome is the header, main's padding and the bottom bar");
+  ok(/--chrome:\s*calc\(62px \+ 1rem \+ 5rem \+ 6px \+ env\(safe-area-inset-bottom\)\)/.test(css),
+     "the chrome is the header, main's padding, the bottom bar and its safe area");
   ok(/h-\[62px\]/.test(shell), "the header is the 62px the chrome subtracts");
-  ok(/pt-4 pb-20 sm:py-6/.test(shell), "main's padding is the 1rem and 5rem the chrome subtracts");
+  ok(/pt-4 pb-\[calc\(5rem\+env\(safe-area-inset-bottom\)\)\] sm:py-6/.test(shell),
+     "main's padding is the 1rem and 5rem (plus the safe area) the chrome subtracts");
   ok(css.includes("100dvh"), "and it is the dynamic viewport, so Safari's bars are counted");
 }
 

@@ -38,7 +38,7 @@ html, body, #root { height: 100%; }
 /* What the app itself takes off the screen before a page gets any: the sticky
    header, main's own padding, and — on a phone — the bottom bar. Measured, not
    guessed: see the screen survey in STATUS.md. */
-:root { --chrome: calc(62px + 1rem + 5rem + 6px); }
+:root { --chrome: calc(62px + 1rem + 5rem + 6px + env(safe-area-inset-bottom)); }
 @media (min-width: 640px) { :root { --chrome: calc(62px + 3rem); } }
 /* the 6px is the hard shadow: every .piece casts 0 5px 0, so a surface sized
    to the pixel scrolls by five of them. */
