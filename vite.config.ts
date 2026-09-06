@@ -33,6 +33,9 @@ export default defineConfig({
         navigateFallback: "/index.html",
         navigateFallbackDenylist: [/^\/contact/],
         cleanupOutdatedCaches: true,
+        // The generated SW imports the push + notificationclick handlers so
+        // precaching (above) and Web Push live in one service worker.
+        importScripts: ["/push-sw.js"],
       },
       devOptions: { enabled: false },
     }),

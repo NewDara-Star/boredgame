@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/shared/lib/supabase";
+import { fire } from "@/shared/lib/fire";
 import { useAuth } from "@/app/providers/AuthProvider";
 
 export interface Friend { id: string; username: string; avatar: string | null; }
@@ -92,6 +93,11 @@ export function useFriends() {
   const invite = useCallback(async (roomId: number, friendId: string) => {
     if (!supabase) return;
     await supabase.rpc("invite_friend", { p_room: roomId, p_friend: friendId });
+    // Fire-and-forget a push so an invite reaches them even with the app closed;
+    // the in-app banner already covers the app-open case, and no-subscription is
+    // a no-op server-side.
+    fire(supabase.functions.invoke("notify-invite", { body: { room: roomId, to: friendId } }),
+      "Pinging your friend");
   }, []);
 
   const respond = useCallback(async (inviteId: number, accept: boolean) => {

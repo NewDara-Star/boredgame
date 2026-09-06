@@ -2054,3 +2054,51 @@ as $function$
 $function$;
 revoke all on function public.my_invites() from public, anon;
 grant execute on function public.my_invites() to authenticated;
+
+-- ============================================================================
+-- Web Push: a browser's push endpoint, plus the server-only VAPID key the edge
+-- sender signs with. Writes via definer RPCs; the sender reads subscriptions
+-- with the service role. Push is deferred behind an installed PWA on iOS.
+-- ============================================================================
+create table if not exists public.push_subscriptions (
+  user_id    uuid not null references public.profiles(id) on delete cascade,
+  endpoint   text not null,
+  p256dh     text not null,
+  auth       text not null,
+  created_at timestamptz not null default now(),
+  primary key (user_id, endpoint)
+);
+alter table public.push_subscriptions enable row level security;
+drop policy if exists "see your own push subs" on public.push_subscriptions;
+create policy "see your own push subs" on public.push_subscriptions
+  for select using (user_id = auth.uid());
+grant select on public.push_subscriptions to authenticated;
+
+create or replace function public.save_push_subscription(p_endpoint text, p_p256dh text, p_auth text)
+ returns void language plpgsql security definer set search_path to 'public' as $function$
+declare uid uuid := auth.uid();
+begin
+  if uid is null then raise exception 'sign in first'; end if;
+  insert into public.push_subscriptions(user_id, endpoint, p256dh, auth)
+    values (uid, p_endpoint, p_p256dh, p_auth)
+    on conflict (user_id, endpoint)
+      do update set p256dh = excluded.p256dh, auth = excluded.auth, created_at = now();
+end $function$;
+grant execute on function public.save_push_subscription(text, text, text) to authenticated;
+
+create or replace function public.delete_push_subscription(p_endpoint text)
+ returns void language plpgsql security definer set search_path to 'public' as $function$
+begin
+  delete from public.push_subscriptions where user_id = auth.uid() and endpoint = p_endpoint;
+end $function$;
+grant execute on function public.delete_push_subscription(text) to authenticated;
+
+-- Server-only config (the VAPID private key). RLS on with no policy denies every
+-- client; grants revoked too. Only the service role (the edge sender) reads it.
+-- Values are inserted out of band and are NOT stored in this file.
+create table if not exists public.app_secrets (
+  key text primary key,
+  value text not null
+);
+alter table public.app_secrets enable row level security;
+revoke all on public.app_secrets from anon, authenticated;

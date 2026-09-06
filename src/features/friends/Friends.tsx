@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/app/providers/AuthProvider";
 import { createRoom } from "@/features/rooms/useRoom";
 import { useFriends, type Invite } from "./useFriends";
+import { NotificationsCard } from "@/features/push/Notifications";
 import { Avatar } from "@/shared/ui/Avatar";
 import { Button } from "@/shared/ui/Button";
 import { Input } from "@/shared/ui/Field";
@@ -95,6 +96,7 @@ export function FriendsPanel() {
 
   return (
     <div className="space-y-4">
+      <NotificationsCard />
       <InviteCards invites={invites} onJoin={join} onDismiss={dismiss} />
 
       {friends.length > 0 && (
