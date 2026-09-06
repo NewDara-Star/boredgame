@@ -42,6 +42,10 @@ export function useSortSolo(level: Level, userId: string | undefined, practice =
   const [selected, setSelected] = useState<number | null>(null);
   const [refused, setRefused] = useState<Refusal | null>(null);
   const [startedAt, setStartedAt] = useState<number | null>(null);
+  // The clock stops HERE, at the solve, not after the referee has replayed the
+  // moves. It is the time that gets ranked (confirmed, not re-measured, on the
+  // server), and the on-screen clock freezes on it while the replay runs.
+  const [solvedMs, setSolvedMs] = useState<number | null>(null);
   const [result, setResult] = useState<{ ms: number; moves: number; server: boolean } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [finishing, setFinishing] = useState(false);
@@ -52,7 +56,7 @@ export function useSortSolo(level: Level, userId: string | undefined, practice =
 
   const reset = useCallback(() => {
     setMe(newGame(puzzle)); setSelected(null); setRefused(null);
-    setStartedAt(null); setResult(null); setError(null); setFinishing(false);
+    setStartedAt(null); setSolvedMs(null); setResult(null); setError(null); setFinishing(false);
     attempt.current = null;
   }, [puzzle]);
   useEffect(() => { reset(); }, [reset]);
@@ -99,7 +103,7 @@ export function useSortSolo(level: Level, userId: string | undefined, practice =
       return;
     }
     const { data, error: e } = await supabase.functions.invoke("sort-finish", {
-      body: { solo: id, moves: g.history.map((h) => [h.from, h.to]), claimed: g.moves, log: encodeLog(g.log) },
+      body: { solo: id, moves: g.history.map((h) => [h.from, h.to]), claimed: g.moves, ms: localMs, log: encodeLog(g.log) },
     });
     if (e || !data?.ms) {
       const why = await refusal(e);
@@ -126,10 +130,11 @@ export function useSortSolo(level: Level, userId: string | undefined, practice =
     if (selected === i) { setSelected(null); return; }
     if (whyNot(me.tubes, me.cap, selected, i)) { setRefused({ tube: i, at: Date.now() }); return; }
     const now = Date.now();
-    const next = pour(me, selected, i, now - (startedAt ?? now));
+    const localMs = now - (startedAt ?? now);
+    const next = pour(me, selected, i, localMs);
     setSelected(null);
     setMe(next);
-    if (isSolved(next.tubes, next.cap)) void finish(next, now - (startedAt ?? now));
+    if (isSolved(next.tubes, next.cap)) { setSolvedMs(localMs); void finish(next, localMs); }
   }, [me, selected, result, finishing, startedAt, start, finish]);
 
   const takeBack = useCallback(() => {
@@ -142,7 +147,7 @@ export function useSortSolo(level: Level, userId: string | undefined, practice =
   const shuffle = useCallback(() => setRandomSeed(Date.now()), []);
 
   return {
-    day, puzzle, me, selected, refused, startedAt, result, error, finishing,
+    day, puzzle, me, selected, refused, startedAt, solvedMs, result, error, finishing,
     board, mine, practice,
     progress: solvedCount(me.tubes, me.cap),
     pick, takeBack, again: reset, shuffle,

@@ -28,14 +28,18 @@ export function SortSoloPage() {
   const [level, setLevel] = useState<Level>("medium");
   const [practice, setPractice] = useState(false);
   const r = useSortSolo(level, user?.id, practice);
-  const running = r.startedAt !== null && !r.result;
+  // The clock stops at the solve (r.solvedMs), not when the referee replies --
+  // otherwise it kept ticking through the verify round-trip.
+  const running = r.startedAt !== null && !r.result && r.solvedMs === null;
   const [now, setNow] = useState(Date.now());
   useEffect(() => {
-    if (r.startedAt === null || r.result) return;
+    if (r.startedAt === null || r.result || r.solvedMs !== null) return;
     const t = setInterval(() => setNow(Date.now()), 100);
     return () => clearInterval(t);
-  }, [r.startedAt, r.result]);
-  const elapsed = r.result ? r.result.ms : r.startedAt === null ? 0 : now - r.startedAt;
+  }, [r.startedAt, r.result, r.solvedMs]);
+  const elapsed = r.result ? r.result.ms
+    : r.solvedMs !== null ? r.solvedMs
+    : r.startedAt === null ? 0 : now - r.startedAt;
 
   // the result card: the tubes as they finished, and where the time landed
   const [card, setCard] = useState<MatchCard | null>(null);

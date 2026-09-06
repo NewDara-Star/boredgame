@@ -73,7 +73,7 @@ Deno.serve(async (req: Request) => {
 
   // Two kinds of finish: a room race (`room`) or a solo attempt at today's
   // board (`solo`, the attempt id). Same replay, different settle.
-  let body: { room?: number; solo?: number; moves?: [number, number][]; claimed?: number; log?: string };
+  let body: { room?: number; solo?: number; moves?: [number, number][]; claimed?: number; ms?: number; log?: string };
   try { body = await req.json(); } catch { return json({ error: "bad body" }, 400); }
   const room = Number(body.room), solo = Number(body.solo);
   const moves = body.moves;
@@ -139,8 +139,15 @@ Deno.serve(async (req: Request) => {
   // The time is the database's — now() against the row's started_at — and it
   // refuses one too fast for a thumb, so a script playing the stored line is
   // told no rather than given a rank.
+  // The ranked time is the player's own solve time, bounded server-side by the
+  // bot floor and the wall-clock. Measuring it here (now() - started_at) instead
+  // would count this request's latency -- the verify round-trip and the replay --
+  // against a millisecond board.
+  const solveMs = Number(body.ms);
   const { data: ms, error: settleError } = await admin.rpc("sort_solo_finish", {
-    p_id: solo, p_user: user.id, p_moves: settled, p_log: log,
+    p_id: solo, p_user: user.id, p_moves: settled,
+    p_ms: Number.isFinite(solveMs) && solveMs > 0 ? Math.round(solveMs) : null,
+    p_log: log,
   });
   if (settleError) return json({ error: settleError.message }, 400);
   return json({ ms, moves: settled, par: puzzle.par });

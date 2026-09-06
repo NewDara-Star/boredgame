@@ -1373,6 +1373,16 @@ begin
     raise exception 'that is not today';
   end if;
   if p_level not in ('easy','medium','hard') then raise exception 'no such level'; end if;
+  -- Reuse an unfinished attempt for today rather than piling up an orphan row on
+  -- every abandoned first lift; a real retry just resets its clock. Finished
+  -- attempts are kept -- your best stands.
+  update public.sort_solo set started_at = now()
+    where id = (
+      select id from public.sort_solo
+       where user_id = auth.uid() and day = p_day and level = p_level and finished_at is null
+       order by started_at desc limit 1)
+    returning id into v_id;
+  if v_id is not null then return v_id; end if;
   insert into public.sort_solo (user_id, day, level)
     values (auth.uid(), p_day, p_level) returning id into v_id;
   return v_id;
@@ -1382,20 +1392,28 @@ grant execute on function public.sort_solo_start(date, text) to authenticated;
 -- Service role only, called by the edge function after the replay. The time
 -- is measured here. The floor is a thumb's: two taps a move faster than 150ms
 -- each is a script playing the bank's stored line, and it does not get a time.
-create or replace function public.sort_solo_finish(p_id bigint, p_user uuid, p_moves int, p_log text default null)
+create or replace function public.sort_solo_finish(p_id bigint, p_user uuid, p_moves int, p_ms int, p_log text default null)
 returns int language plpgsql security definer set search_path to 'public' as $$
-declare v public.sort_solo; v_ms int;
+declare v public.sort_solo; v_wall int; v_ms int;
 begin
   select * into v from public.sort_solo where id = p_id for update;
   if v.id is null or v.user_id <> p_user then raise exception 'not your attempt'; end if;
   if v.finished_at is not null then return v.ms; end if;
-  v_ms := greatest(1, (extract(epoch from (now() - v.started_at)) * 1000)::int);
+  -- The server wall-clock from first lift INCLUDES this request's round-trip and
+  -- the move-replay, so it is a ceiling, not the time: the solve happened before
+  -- this call landed. Ball Sort is a millisecond board, so the honest number is
+  -- the client's own solve time -- measuring it here billed everyone for the
+  -- verify latency (the bug this fixes). Trust the client, but only within proven
+  -- bounds: never below the bot floor, never above the wall-clock. The replay in
+  -- the edge function is what proves the solve was real.
+  v_wall := greatest(1, (extract(epoch from (now() - v.started_at)) * 1000)::int);
+  v_ms := least(coalesce(p_ms, v_wall), v_wall);
   if v_ms < p_moves * 150 then raise exception 'too fast to have been played'; end if;
   update public.sort_solo set finished_at = now(), moves = p_moves, ms = v_ms, log = p_log where id = p_id;
   return v_ms;
 end $$;
-revoke all on function public.sort_solo_finish(bigint, uuid, int, text) from public, anon, authenticated;
-grant execute on function public.sort_solo_finish(bigint, uuid, int, text) to service_role;
+revoke all on function public.sort_solo_finish(bigint, uuid, int, int, text) from public, anon, authenticated;
+grant execute on function public.sort_solo_finish(bigint, uuid, int, int, text) to service_role;
 
 -- Each player's best finished attempt on a day's level. security_invoker so
 -- the caller's own read rights on sort_solo and profiles apply.
