@@ -108,9 +108,22 @@ h1, h2, h3, .display { font-family: var(--font-display); font-weight: 600; lette
     overflow-y: auto;
     overscroll-behavior: contain;
   }
-  /* On a laptop there is no bottom bar and no shortage of height; let it flow. */
+  /*
+   * A laptop has no bottom bar and no shortage of height, so this used to be
+   * `height: auto`. That removed the board from every game screen above 640px.
+   *
+   * PlayBoard measures its own box to size the board, and renders nothing
+   * until that measurement is positive. Its box is `flex-1` inside this
+   * column — and a flex child of an AUTO-height column is sized by its
+   * content, which was nothing. No content, so no height; no height, so no
+   * measurement; no measurement, so no content. A deadlock, and the board
+   * simply never appeared. Measured at 1440x900: box 736x0, zero children.
+   *
+   * So the height stays definite here too, just a roomier one: the viewport
+   * less the desktop header, capped so a board does not sprawl on a monitor.
+   */
   @media (min-width: 640px) {
-    .play-surface { height: auto; overflow: visible; }
+    .play-surface { height: min(calc(100dvh - 8rem), 40rem); overflow: visible; }
   }
 
   /* Carousels are swiped, not scrolled with a bar. */

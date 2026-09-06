@@ -79,4 +79,27 @@ for (const p of PLAY_SCREENS) {
   }
 }
 
+// The surface keeps a DEFINITE height at every width.
+//
+// `@media (min-width:640px) { .play-surface { height: auto } }` looked like a
+// courtesy to laptops and removed the board from every game screen above
+// 640px. PlayBoard's box is flex-1 in this column, a flex child of an
+// auto-height column is sized by its content, and PlayBoard renders no
+// content until it has measured a height. Nothing broke the cycle. Measured
+// in a browser at 1440x900: the box was 736 wide, 0 tall, with no children.
+{
+  const css = read("src/index.css");
+  const rules = [...css.matchAll(/\.play-surface\s*\{([^}]*)\}/g)].map((m) => m[1]);
+  ok(rules.length >= 2, "the surface is defined at more than one width");
+  for (const body of rules) {
+    ok(!/height\s*:\s*auto/.test(body),
+      "a .play-surface rule sets height:auto — its board box then measures 0 and no board renders");
+    ok(/height\s*:/.test(body), "every .play-surface rule states a height");
+  }
+
+  const src = read("src/features/play/PlaySurface.tsx");
+  ok(/r\.height > 0/.test(src),
+    "PlayBoard treats a zero height as unbounded rather than as no room, so it cannot deadlock again");
+}
+
 console.log(`${n} layout assertions hold`);

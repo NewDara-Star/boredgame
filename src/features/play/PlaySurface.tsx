@@ -50,7 +50,14 @@ export function PlayBoard({ ratio = 1, min = 0, children }: {
     if (!el) return;
     const measure = () => {
       const r = el.getBoundingClientRect();
-      const w = Math.floor(Math.min(r.width, r.height * ratio));
+      // A box with no height is not a small box, it is an unbounded one: this
+      // is `flex-1` in a column whose height is auto, so it is sized by its
+      // own content — which is nothing until a width is measured. Sizing by
+      // width alone breaks that deadlock, and a board slightly too large is
+      // in every way better than no board, which is what shipped.
+      const w = r.height > 0
+        ? Math.floor(Math.min(r.width, r.height * ratio))
+        : Math.floor(r.width);
       setWidth(w < min ? 0 : w);
     };
     measure();

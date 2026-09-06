@@ -684,6 +684,18 @@ referee's actual message and showed one sentence for every possible failure.
 `refusal()` reads it out of the error's Response now. When a feature is quiet
 rather than broken, look for the request that is missing from the logs.
 
+**A flex child of an auto-height column has no height, and a board that
+measures itself then has nowhere to be.** `@media (min-width:640px)
+{ .play-surface { height: auto } }` read as a courtesy to laptops and removed
+the board from EVERY game screen above 640px. PlayBoard sizes itself from its
+own box and renders nothing until that measurement is positive; its box is
+`flex-1` in that column; a flex child of an auto-height column is sized by its
+content, which was nothing. No content, no height; no height, no measurement;
+no measurement, no content. Measured at 1440x900: the box was 736 wide, 0
+tall, no children. The surface keeps a definite height at every width now, and
+PlayBoard treats a zero height as UNBOUNDED rather than as no room, so the
+cycle cannot close again. `npm run check:layout` holds both.
+
 **A room game is (mode, bank, challenge), not (mode, bank).** Square Off and
 Catapult Squares are the same mode and the same board; only what a move costs
 tells them apart, and Catapult Squares draws on no bank, so on a fresh room the
