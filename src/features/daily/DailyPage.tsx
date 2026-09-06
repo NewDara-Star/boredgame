@@ -45,9 +45,9 @@ function Board({ rows, meId }: { rows: DailyStanding[]; meId?: string }) {
 export function DailyPage() {
   const { user, offline } = useAuth();
   const d = useDaily();
-  // Only play the round when it is still to be played; otherwise the board.
-  const playable = !!d.items && !d.mine;
-  const r = useDailyPlay(d, playable);
+  // Play only when the round is still to be played; otherwise show the board.
+  const enabled = !d.loading && !d.mine;
+  const r = useDailyPlay(d, enabled);
 
   if (offline) {
     return <p className="text-sm text-soft font-bold">The daily round needs a database. Single-player works without one.</p>;
@@ -106,7 +106,7 @@ export function DailyPage() {
       <p className="text-[12px] font-black uppercase tracking-widest text-soft mb-2">
         Today's round · one go
       </p>
-      <Hud index={r.index} total={r.items.length} score={r.score} streak={r.streak} accent="#FF2E88" />
+      <Hud index={r.index} total={r.total} score={r.score} streak={r.streak} accent="#FF2E88" />
       <div className="mt-5">
         <QuestionPanel
           item={item} options={item.choices ?? []} chosen={r.chosen ?? null}
@@ -115,7 +115,7 @@ export function DailyPage() {
       </div>
       {revealed && r.last && (
         <Reveal correct={r.last.correct} near={false} answer={r.last.answer}
-          gained={r.last.gained} onNext={r.next} isLast={r.index + 1 >= r.items.length}
+          gained={r.last.gained} onNext={() => void r.next()} isLast={r.index + 1 >= r.total}
           explanation={r.last.explanation} />
       )}
     </div>
