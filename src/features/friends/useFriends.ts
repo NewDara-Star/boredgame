@@ -33,21 +33,19 @@ export function useFriends() {
 
   const loadInvites = useCallback(async () => {
     if (!supabase || !user) { setInvites([]); return; }
-    const { data } = await supabase.from("game_invites")
-      .select("id, room_id, room_code, from_user, from:profiles!from_user(username), room:rooms!room_id(game, mode, status)")
-      .eq("to_user", user.id).eq("status", "pending")
-      .order("created_at", { ascending: false });
-    setInvites(((data ?? []) as Record<string, unknown>[])
-      .filter((r) => { const room = r.room as { status?: string } | null; return room?.status === "waiting" || room?.status === "playing"; })
-      .map((r) => ({
-        id: r.id as number,
-        room_id: r.room_id as number,
-        room_code: r.room_code as string,
-        from_id: r.from_user as string,
-        from_name: (r.from as { username?: string } | null)?.username ?? "someone",
-        game: (r.room as { game?: string } | null)?.game ?? "",
-        mode: (r.room as { mode?: string } | null)?.mode ?? "",
-      })));
+    // Not an embed: the invitee cannot READ the room they were invited to
+    // (rooms RLS returns only rooms you're in), so `room:rooms(...)` came back
+    // null and every card was filtered out. my_invites() joins it server-side.
+    const { data } = await supabase.rpc("my_invites");
+    setInvites(((data ?? []) as Record<string, unknown>[]).map((r) => ({
+      id: r.id as number,
+      room_id: r.room_id as number,
+      room_code: r.room_code as string,
+      from_id: r.from_id as string,
+      from_name: (r.from_name as string) ?? "someone",
+      game: (r.game as string) ?? "",
+      mode: (r.mode as string) ?? "",
+    })));
   }, [user?.id]);
 
   // Your code, generated on the server the first time it is asked for.

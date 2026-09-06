@@ -2026,3 +2026,31 @@ begin
    where id = p_invite and to_user = uid and status = 'pending';
 end $function$;
 grant execute on function public.respond_invite(bigint, boolean) to authenticated;
+
+-- The invitee can read their game_invites row but NOT the room it points to
+-- (rooms RLS returns rooms you're already in). The come-play card needs the
+-- room's live status to know the invite is still joinable, so it must be read
+-- past that wall. This definer RPC joins the two server-side and returns only
+-- YOUR pending invites to rooms that are still open.
+create or replace function public.my_invites()
+returns table (
+  id bigint, room_id bigint, room_code text,
+  from_id uuid, from_name text, game text, mode text, status text
+)
+language sql
+security definer
+set search_path to 'public'
+stable
+as $function$
+  select gi.id, gi.room_id, gi.room_code,
+         gi.from_user, pf.username, r.game, r.mode, r.status
+  from public.game_invites gi
+  join public.rooms r on r.id = gi.room_id
+  left join public.profiles pf on pf.id = gi.from_user
+  where gi.to_user = auth.uid()
+    and gi.status = 'pending'
+    and r.status in ('waiting', 'playing')
+  order by gi.created_at desc
+$function$;
+revoke all on function public.my_invites() from public, anon;
+grant execute on function public.my_invites() to authenticated;
