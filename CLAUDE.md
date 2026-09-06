@@ -713,6 +713,19 @@ the room board vanished mid-race because `min={120}` hid it whenever the away
 banner pushed the fixed rows over budget on a phone; a race board is `min={0}`
 — a small board beats no board.
 
+**"Play something else" restarted the same game instead of opening the lobby.**
+A realtime event-ordering race, found playing a Connect 4 room then trying to
+switch games. `reopen_room` resets `status→waiting` and both `ready→false` in
+one transaction, but the client receives the `rooms` and `room_players`
+changes as SEPARATE realtime messages. When the status→waiting message landed
+while `players` still held the stale `ready=true` from the just-finished game,
+the host's auto-deal effect saw waiting+everyoneReady and re-dealt the SAME
+game before the ready→false messages arrived. The room bounced straight back
+into a fresh board; the lobby never showed. The fix is to deal only on the
+RISING edge of everyoneReady — a real ready-up in the lobby — so the stale
+window, where everyoneReady was already true, cannot trigger a deal. rematch
+is unaffected: it writes the game row directly, not through this effect.
+
 **A room game is (mode, bank, challenge), not (mode, bank).** Square Off and
 Catapult Squares are the same mode and the same board; only what a move costs
 tells them apart, and Catapult Squares draws on no bank, so on a fresh room the

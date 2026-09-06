@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "@/app/providers/AuthProvider";
 import { useRoom, createRoom } from "./useRoom";
@@ -63,8 +63,20 @@ export function RoomsPage() {
 
   // One writer: the host turns agreement into a started game. Both clients see
   // the same ready flags, so letting either start would race to deal twice.
+  //
+  // Deal only on the RISING edge of everyoneReady. reopen_room ("Play something
+  // else") resets status and both ready flags in one transaction, but the
+  // client receives those as SEPARATE realtime events. When status→waiting
+  // arrived while `players` still held the stale ready=true from the finished
+  // game, this fired and re-dealt the same game before the ready→false events
+  // landed — so "Play something else" restarted the game instead of opening the
+  // lobby. A rising edge is a real ready-up in the lobby; the stale window,
+  // where everyoneReady was already true, is not one.
+  const wasReady = useRef(false);
   useEffect(() => {
-    if (!room || !isHost || !everyoneReady || room.status !== "waiting") return;
+    const rising = everyoneReady && !wasReady.current;
+    wasReady.current = everyoneReady;
+    if (!room || !isHost || !rising || room.status !== "waiting") return;
     if (!board) { void startNextRound(); return; }
     const guest = players.find((p) => p.user_id !== room.host_id);
     if (!guest) return;
