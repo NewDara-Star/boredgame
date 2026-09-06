@@ -439,25 +439,10 @@ end $$;
 revoke all on function public.daily_round(date) from public, anon;
 grant execute on function public.daily_round(date) to authenticated;
 
-create or replace function public.submit_daily(
-  p_day date, p_score int, p_correct int, p_answered int, p_ms int)
-returns boolean language plpgsql security definer set search_path to 'public' as $$
-declare uid uuid := auth.uid(); n int;
-begin
-  if uid is null then raise exception 'sign in first'; end if;
-  -- Yesterday's round cannot be filed today.
-  if p_day <> (now() at time zone 'utc')::date
-     and p_day <> ((now() at time zone 'utc')::date - 1) then
-    return false;
-  end if;
-  insert into public.daily_scores(day, user_id, score, correct, answered, ms)
-  values (p_day, uid, greatest(p_score, 0), p_correct, p_answered, p_ms)
-  on conflict (day, user_id) do nothing;
-  get diagnostics n = row_count;
-  return n = 1;
-end $$;
-revoke all on function public.submit_daily(date, int, int, int, int) from public, anon;
-grant execute on function public.submit_daily(date, int, int, int, int) to authenticated;
+-- submit_daily(date,int,int,int,int) was removed 2026-09-06: it trusted a
+-- client-supplied score and was the last forgeable path into daily_scores. The
+-- daily is filed by submit_daily(date) in the server-authoritative daily round
+-- section at the end of this file, which tallies server-recorded picks.
 
 -- ============ Square Off ============
 -- Rooms already do "same puzzle, first correct answer wins". Square Off is a
@@ -1633,5 +1618,5 @@ grant execute on function public.daily_next(date)                to authenticate
 grant execute on function public.daily_answer(date, bigint, text) to authenticated;
 grant execute on function public.submit_daily(date)              to authenticated;
 
--- NOTE: the old client-trusted submit_daily(date,int,int,int,int) is dropped
--- once the new client is live -- it is the last forgeable path into daily_scores.
+-- The old client-trusted submit_daily(date,int,int,int,int) was dropped
+-- 2026-09-06 once this client went live -- it was the last forgeable path in.
