@@ -23,7 +23,7 @@ export function Timer({ fraction }: { fraction: number }) {
  * answering, and the moment after an answer lands.
  */
 export function QuestionPanel({
-  item, options, chosen, revealed, locked, onAnswer,
+  item, options, chosen, revealed, locked, onAnswer, answer,
 }: {
   item: PlayItem;
   options: string[];
@@ -32,7 +32,13 @@ export function QuestionPanel({
   revealed: boolean;
   locked: boolean;
   onAnswer: (opt: string) => void;
+  /** the correct answer, for modes that don't ship it on the item. The daily
+      serves questions answer-free (item.answer is ""), so the reveal takes the
+      correct answer from the server verdict instead -- without it, the right
+      option never turns green and a correct pick shows the red ✗. */
+  answer?: string;
 }) {
+  const correctAnswer = answer ?? item.answer;
   return (
     <div>
       <span className="inline-block text-[12px] font-black uppercase tracking-widest
@@ -45,7 +51,7 @@ export function QuestionPanel({
 
       <motion.div variants={stagger(0.05)} initial="hidden" animate="show" className="mt-4 grid gap-2">
         {options.map((opt, i) => {
-          const isAnswer = opt === item.answer;
+          const isAnswer = opt === correctAnswer;
           const isMine = chosen === opt;
           const bg = !revealed
             ? (isMine ? "bg-pop" : "bg-surface")

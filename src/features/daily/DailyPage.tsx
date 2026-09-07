@@ -111,7 +111,7 @@ export function DailyPage() {
         <QuestionPanel
           item={item} options={item.choices ?? []} chosen={r.chosen ?? null}
           revealed={revealed} locked={revealed || r.pending !== null}
-          onAnswer={(opt) => void r.submit(opt)} />
+          answer={r.last?.answer} onAnswer={(opt) => void r.submit(opt)} />
       </div>
       {revealed && r.last && (
         <Reveal correct={r.last.correct} near={false} answer={r.last.answer}
