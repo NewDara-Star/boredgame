@@ -230,7 +230,7 @@ export function RoomsPage() {
       {iAmIn && (() => {
         const other = players.find((pl) => pl.user_id !== user.id);
         return other
-          ? <VoiceControl roomId={room.id} userId={user.id} peerId={other.user_id} peerName={other.username} />
+          ? <VoiceControl roomId={room.id} code={room.code} peerId={other.user_id} peerName={other.username} />
           : null;
       })()}
 

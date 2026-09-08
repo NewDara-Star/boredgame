@@ -3,6 +3,7 @@ import { MotionConfig } from "framer-motion";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/app/providers/AuthProvider";
 import { Shell } from "@/app/layout/Shell";
+import { VoiceProvider } from "@/features/voice/VoiceProvider";
 import { HomePage } from "@/features/home/HomePage";
 
 /**
@@ -47,6 +48,7 @@ export function App() {
     <MotionConfig reducedMotion="user">
     <AuthProvider>
       <BrowserRouter>
+        <VoiceProvider>
         <Suspense fallback={<Loading />}>
           <Routes>
             <Route element={<Shell />}>
@@ -73,6 +75,7 @@ export function App() {
             </Route>
           </Routes>
         </Suspense>
+        </VoiceProvider>
       </BrowserRouter>
     </AuthProvider>
     </MotionConfig>
