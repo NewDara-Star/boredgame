@@ -883,25 +883,8 @@ drop trigger if exists on_auth_user_claimed on auth.users;
 create trigger on_auth_user_claimed after update on auth.users
   for each row execute function public.sync_guest_flag();
 
--- Every "just play" creates a permanent row. Run by hand, never scheduled:
---   select public.sweep_stale_guests(30);
-create or replace function public.sweep_stale_guests(p_days int default 30)
-returns int language plpgsql security definer set search_path to 'public', 'auth' as $$
-declare n int;
-begin
-  with doomed as (
-    select u.id from auth.users u
-    join public.profiles p on p.id = u.id
-    where coalesce(u.is_anonymous, false) and p.is_guest
-      and u.created_at < now() - make_interval(days => p_days)
-      and coalesce(p.total_answered, 0) = 0
-      and not exists (select 1 from public.room_players rp where rp.user_id = u.id)
-  )
-  delete from auth.users u using doomed d where u.id = d.id;
-  get diagnostics n = row_count;
-  return n;
-end $$;
-revoke all on function public.sweep_stale_guests(int) from public, anon, authenticated;
+-- Every "just play" creates a permanent row: sweep_stale_guests (F11, at the
+-- end of this file) deletes guests 30 days after they last played, nightly.
 
 -- ============ a room is not a public directory ============
 -- Anonymous sign-in turned two theoretical holes into free ones, because a
@@ -2482,3 +2465,43 @@ alter policy "see your own friendships" on public.friendships using (user_id = (
 alter policy "see invites you sent or got" on public.game_invites
   using (from_user = (select auth.uid()) or to_user = (select auth.uid()));
 alter policy "see your own push subs" on public.push_subscriptions using (user_id = (select auth.uid()));
+
+-- ============================================================================
+-- Guests are kept 30 days after they last played, then deleted, nightly (F11).
+-- Migration guests_kept_thirty_days_nightly. The earlier sweep only took guests
+-- who had never answered anything and never sat in a room, counted from
+-- sign-up; it was never scheduled, and a round a guest had won stopped it.
+-- ============================================================================
+-- A round a guest won must not stop the guest being deleted: the win stays,
+-- the winner becomes nobody.
+alter table public.room_rounds drop constraint room_rounds_winner_id_fkey;
+alter table public.room_rounds add constraint room_rounds_winner_id_fkey
+  foreign key (winner_id) references auth.users(id) on delete set null;
+
+-- "Last played" is the latest sign of them: signing in, a solo or daily answer,
+-- a streak day, a room.
+create or replace function public.sweep_stale_guests(p_days integer default 30)
+returns integer language plpgsql security definer set search_path to 'public', 'auth' as $$
+declare n int;
+begin
+  with seen as (
+    select u.id, greatest(
+      u.created_at,
+      u.last_sign_in_at,
+      (select (p.last_played + 1)::timestamptz from public.profiles p where p.id = u.id),
+      (select max(a.created_at) from public.attempts a where a.user_id = u.id),
+      (select max(d.served_at) from public.daily_picks d where d.user_id = u.id),
+      (select max(r.last_seen) from public.room_players r where r.user_id = u.id)
+    ) as last
+    from auth.users u
+    where coalesce(u.is_anonymous, false)
+  )
+  delete from auth.users u using seen s
+   where u.id = s.id and s.last < now() - make_interval(days => p_days);
+  get diagnostics n = row_count;
+  return n;
+end $$;
+revoke execute on function public.sweep_stale_guests(integer) from public, anon, authenticated;
+
+-- Nightly at 03:30 UTC, after the rooms are tidied. Replaces a job of the same name.
+select cron.schedule('sweep-stale-guests', '30 3 * * *', 'select public.sweep_stale_guests(30)');

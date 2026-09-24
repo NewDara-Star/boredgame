@@ -21,6 +21,7 @@ declare
   ids bigint[]; n int; n2 int; j jsonb; err text;
   sa int; sb int; got int; again int;
   results text[] := '{}'; broken text[] := '{}';
+  g31 uuid := gen_random_uuid(); g29 uuid := gen_random_uuid(); gwin uuid := gen_random_uuid(); rr bigint;
 begin
   -- ---- borrowed rows -------------------------------------------------------
   select p1.user_id, p2.user_id, p1.room_id into a, b, r
@@ -166,6 +167,25 @@ begin
   then broken := broken || results[cardinality(results)]; end if;
   results := array_append(results, 'DB2 someone signed out can''t save a push address'::text);
   if has_function_privilege('anon', 'public.save_push_subscription(text,text,text)', 'execute')
+  then broken := broken || results[cardinality(results)]; end if;
+
+  -- ---- G30 (F11): a guest goes 30 days after they last played ------------
+  insert into auth.users(id, instance_id, aud, role, is_anonymous, created_at, updated_at, last_sign_in_at, raw_user_meta_data) values
+    (g31,  '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', true, now() - interval '31 days', now(), now() - interval '31 days', '{"username":"zzRulesG31"}'),
+    (g29,  '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', true, now() - interval '29 days', now(), now() - interval '29 days', '{"username":"zzRulesG29"}'),
+    (gwin, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', true, now() - interval '45 days', now(), now() - interval '45 days', '{"username":"zzRulesGWin"}');
+  insert into public.room_rounds(room_id, puzzle_id, round_no, winner_id) values (r, mc, 999, gwin) returning id into rr;
+  err := null;
+  begin perform public.sweep_stale_guests(30); exception when others then err := sqlerrm; end;
+  results := array_append(results, 'G30 a guest idle 31 days is deleted, one idle 29 days is kept'::text);
+  if err is not null or exists (select 1 from auth.users where id = g31) or not exists (select 1 from auth.users where id = g29)
+  then broken := broken || results[cardinality(results)]; end if;
+  results := array_append(results, 'G30 a round the guest won doesn''t stop the sweep (the round stays, won by nobody)'::text);
+  if err is not null or exists (select 1 from auth.users where id = gwin)
+     or (select winner_id from public.room_rounds where id = rr) is not null
+  then broken := broken || results[cardinality(results)]; end if;
+  results := array_append(results, 'G30 the sweep runs every night'::text);
+  if not exists (select 1 from cron.job where jobname = 'sweep-stale-guests' and active)
   then broken := broken || results[cardinality(results)]; end if;
 
   -- ---- verdict (always an error, so everything above rolls back) -----------

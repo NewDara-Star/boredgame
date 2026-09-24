@@ -41,7 +41,8 @@ export function GuestCard({ note }: { note?: string }) {
         </Button>
       </form>
       <p className="text-[13px] font-bold opacity-70 mt-3">
-        You can turn this into a proper account later and keep your games.
+        You can turn this into a proper account later and keep your games. Guest games are kept
+        for 30 days after you last play.
       </p>
     </div>
   );
@@ -83,7 +84,8 @@ export function ClaimCard() {
         className="card tap w-full bg-mist px-4 py-3 text-left">
         <span className="block font-display text-base font-semibold">Keep this name</span>
         <span className="block text-[12px] font-bold text-soft mt-0.5">
-          Add a password and your games, streak and rank stick around.
+          Add a password and your games, streak and rank stick around. As a guest, they go 30 days
+          after you last play.
         </span>
       </button>
     );
