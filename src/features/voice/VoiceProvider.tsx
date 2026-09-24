@@ -2,7 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useRef, useState } f
 import { useLocation, useNavigate } from "react-router-dom";
 import { supabase } from "@/shared/lib/supabase";
 import { useAuth } from "@/app/providers/AuthProvider";
-import { RTC, type CallTarget, type Sig, type SigBody, type VoiceState } from "./useVoice";
+import { RTC, troubleText, type CallTarget, type Sig, type SigBody, type VoiceState, type VoiceTrouble } from "./useVoice";
 
 /**
  * A room voice call that outlives the room screen.
@@ -19,6 +19,12 @@ import { RTC, type CallTarget, type Sig, type SigBody, type VoiceState } from ".
  */
 interface VoiceCtx {
   state: VoiceState;
+  /** Why the call is in "error"; null otherwise. */
+  trouble: VoiceTrouble | null;
+  /** The phone refused to play their voice until a tap (iPhone, V3). */
+  blocked: boolean;
+  /** Call from a tap: starts their audio when the phone held it back. */
+  hear: () => void;
   muted: boolean;
   target: CallTarget | null;
   start: (t: CallTarget) => void;
@@ -40,6 +46,8 @@ export function VoiceProvider({ children }: { children: React.ReactNode }) {
 
   const [state, setState] = useState<VoiceState>("idle");
   const [muted, setMuted] = useState(false);
+  const [trouble, setTrouble] = useState<VoiceTrouble | null>(null);
+  const [blocked, setBlocked] = useState(false);
   const [target, setTarget] = useState<CallTarget | null>(null);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -50,6 +58,10 @@ export function VoiceProvider({ children }: { children: React.ReactNode }) {
   const remoteSet = useRef(false);
   const offered = useRef(false);
   const sawPeer = useRef(false);
+  const wentLive = useRef(false);
+  // Which call attempt is current. A mic prompt answered after Cancel, or an
+  // event from a torn-down call, must not act on the next one.
+  const run = useRef(0);
 
   const cleanup = useCallback(() => {
     try { pcRef.current?.close(); } catch { /* already closed */ }
@@ -62,24 +74,53 @@ export function VoiceProvider({ children }: { children: React.ReactNode }) {
     remoteSet.current = false;
     offered.current = false;
     sawPeer.current = false;
+    wentLive.current = false;
+    setBlocked(false);
     if (audioRef.current) audioRef.current.srcObject = null;
   }, []);
 
   const hangup = useCallback(() => {
+    run.current++;
     cleanup();
     setState("idle");
     setMuted(false);
+    setTrouble(null);
     setTarget(null);
   }, [cleanup]);
+
+  // The call failed: release the mic and say why. The target stays, so the
+  // room's control (or the floating bar) can show the sentence and Try again.
+  const fail = useCallback((why: VoiceTrouble) => {
+    run.current++;
+    cleanup();
+    setMuted(false);
+    setTrouble(why);
+    setState("error");
+  }, [cleanup]);
+
+  const hear = useCallback(() => {
+    const a = audioRef.current;
+    if (!a) return;
+    a.play().then(() => setBlocked(false)).catch(() => { /* still refused; the tap stays offered */ });
+  }, []);
 
   const start = useCallback((t: CallTarget) => {
     if (!supabase || !user) return;
     if (state !== "idle" && state !== "error") return;
     setTarget(t);
+    setTrouble(null);
     setState("connecting");
+    const me = ++run.current;
     (async () => {
+      let local: MediaStream;
       try {
-        const local = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+        local = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+      } catch {
+        if (run.current === me) fail("mic");
+        return;
+      }
+      if (run.current !== me) { local.getTracks().forEach((tr) => tr.stop()); return; }
+      try {
         localRef.current = local;
 
         // Private: the database only lets the room's seated players on this
@@ -98,17 +139,23 @@ export function VoiceProvider({ children }: { children: React.ReactNode }) {
         pc.ontrack = (e) => {
           if (audioRef.current) {
             audioRef.current.srcObject = e.streams[0];
-            void audioRef.current.play().catch(() => { /* a tap will start it */ });
+            // iPhone can refuse to play until a tap: offer "Tap to hear" (V3).
+            audioRef.current.play().then(() => setBlocked(false)).catch(() => {
+              if (run.current === me) setBlocked(true);
+            });
           }
         };
         pc.onicecandidate = (e) => { if (e.candidate) send({ kind: "ice", candidate: e.candidate.toJSON() }); };
         pc.onconnectionstatechange = () => {
+          if (run.current !== me) return;
           const cs = pc.connectionState;
-          if (cs === "connected") setState("live");
-          // The peer hung up or dropped for good -> end the call cleanly rather
-          // than sitting "live" on dead audio. "disconnected" can be a blip, so
-          // it is left to recover.
-          else if (cs === "failed" || cs === "closed") hangup();
+          if (cs === "connected") { wentLive.current = true; setState("live"); }
+          // Never connected: usually mobile data with no relay (V1). Connected
+          // and then failed: the line dropped. Either way, say so rather than
+          // falling back to 'Voice call'. "disconnected" can be a blip, so it
+          // is left to recover.
+          else if (cs === "failed") fail(wentLive.current ? "dropped" : "connect");
+          else if (cs === "closed") hangup();
         };
 
         const initiator = user.id < t.peerId;
@@ -152,13 +199,19 @@ export function VoiceProvider({ children }: { children: React.ReactNode }) {
           else if (sawPeer.current) hangup();
         });
 
-        chan.subscribe((status) => { if (status === "SUBSCRIBED") void chan.track({ user_id: user.id }); });
+        let joined = false;
+        chan.subscribe((status) => {
+          if (run.current !== me) return;
+          if (status === "SUBSCRIBED") { joined = true; void chan.track({ user_id: user.id }); }
+          // Refused (not seated in the room, F44) or unreachable before we ever
+          // got on: without this the call sat on 'Connecting…' for ever.
+          else if (!joined && (status === "CHANNEL_ERROR" || status === "TIMED_OUT")) fail("line");
+        });
       } catch {
-        cleanup();
-        setState("error");
+        if (run.current === me) fail("connect");
       }
     })();
-  }, [user, state, cleanup, hangup]);
+  }, [user, state, hangup, fail]);
 
   const toggleMute = useCallback(() => {
     const local = localRef.current;
@@ -180,28 +233,39 @@ export function VoiceProvider({ children }: { children: React.ReactNode }) {
   const showBar = state !== "idle" && !!target && !onCallScreen;
 
   return (
-    <Ctx.Provider value={{ state, muted, target, start, hangup, toggleMute }}>
+    <Ctx.Provider value={{ state, trouble, blocked, hear, muted, target, start, hangup, toggleMute }}>
       {children}
       <audio ref={audioRef} autoPlay playsInline hidden />
       {showBar && (
         <div className="fixed inset-x-0 z-40 flex justify-center px-3
           bottom-[calc(62px+env(safe-area-inset-bottom)+8px)] sm:bottom-4">
           <div className="card bg-ink text-ground w-full max-w-md p-2 flex items-center gap-2">
-            <button onClick={() => nav(`/rooms/${target!.code}`)}
-              className="min-w-0 flex-1 text-left px-2 py-1">
-              <span className="block text-[12px] font-black text-ground/70">
-                {state === "live" ? "On call — tap to return" : "Connecting…"}
-              </span>
-              <span className="block text-[14px] font-bold truncate">{target!.peerName}</span>
-            </button>
-            <button onClick={toggleMute}
+            {state === "error" ? (
+              <p className="min-w-0 flex-1 px-2 py-1 text-[13px] font-bold leading-snug">
+                {troubleText(trouble, target!.peerName)}
+              </p>
+            ) : state === "live" && blocked ? (
+              <button onClick={hear} className="min-w-0 flex-1 text-left px-2 py-1">
+                <span className="block text-[12px] font-black text-ground/70">On call</span>
+                <span className="block text-[14px] font-bold truncate">Tap to hear {target!.peerName}</span>
+              </button>
+            ) : (
+              <button onClick={() => nav(`/rooms/${target!.code}`)}
+                className="min-w-0 flex-1 text-left px-2 py-1">
+                <span className="block text-[12px] font-black text-ground/70">
+                  {state === "live" ? "On call — tap to return" : "Connecting…"}
+                </span>
+                <span className="block text-[14px] font-bold truncate">{target!.peerName}</span>
+              </button>
+            )}
+            {state !== "error" && <button onClick={toggleMute}
               className={`cut tap px-3 min-h-[38px] inline-flex items-center font-display font-semibold text-[13px] ${
                 muted ? "cut-ember text-ink" : "bg-leaf-hi text-ink"}`}>
               {muted ? "Unmute" : "Mute"}
-            </button>
+            </button>}
             <button onClick={hangup}
               className="cut tap px-3 min-h-[38px] inline-flex items-center cut-petal text-ink font-display font-semibold text-[13px]">
-              Leave
+              {state === "error" ? "Close" : "Leave"}
             </button>
           </div>
         </div>

@@ -1,4 +1,5 @@
 import { useVoiceCall } from "./VoiceProvider";
+import { troubleText } from "./useVoice";
 
 /** The in-room voice control. It no longer owns the call -- it drives the shared
     one in VoiceProvider, so leaving the room screen keeps it running (the
@@ -7,7 +8,7 @@ import { useVoiceCall } from "./VoiceProvider";
 export function VoiceControl({ roomId, code, peerId, peerName }: {
   roomId: number; code: string; peerId: string; peerName: string;
 }) {
-  const { state, muted, target, start, hangup, toggleMute } = useVoiceCall();
+  const { state, trouble, blocked, hear, muted, target, start, hangup, toggleMute } = useVoiceCall();
   const active = !!target && target.roomId === roomId;
 
   // A call is up for a different room -> the global bar owns it; show nothing here.
@@ -36,7 +37,14 @@ export function VoiceControl({ roomId, code, peerId, peerName }: {
       )}
       {state === "live" && (
         <>
-          <span className="min-w-0 flex-1 text-[13px] font-bold truncate">On call with {peerName}</span>
+          {blocked ? (
+            <button onClick={hear}
+              className="cut tap bg-leaf-hi min-w-0 flex-1 px-3 min-h-[40px] inline-flex items-center font-display font-semibold text-[13px]">
+              Tap to hear {peerName}
+            </button>
+          ) : (
+            <span className="min-w-0 flex-1 text-[13px] font-bold truncate">On call with {peerName}</span>
+          )}
           <button onClick={toggleMute}
             className={`cut tap px-3 min-h-[40px] inline-flex items-center font-display font-semibold text-[13px] ${
               muted ? "cut-ember text-ink" : "bg-leaf-hi"}`}>
@@ -50,9 +58,11 @@ export function VoiceControl({ roomId, code, peerId, peerName }: {
       )}
       {state === "error" && (
         <>
-          <span className="min-w-0 flex-1 text-[13px] font-bold truncate">Couldn't start — allow microphone access.</span>
+          <p className="min-w-0 flex-1 text-[13px] font-bold leading-snug">{troubleText(trouble, peerName)}</p>
           <button onClick={() => start({ roomId, code, peerId, peerName })}
-            className="text-[12px] font-black text-ink/60 px-3 py-2">Retry</button>
+            className="shrink-0 text-[12px] font-black text-ink/60 px-2 py-2">Try again</button>
+          <button onClick={hangup}
+            className="shrink-0 text-[12px] font-black text-ink/50 px-2 py-2">Close</button>
         </>
       )}
     </div>

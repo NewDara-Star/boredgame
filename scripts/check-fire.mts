@@ -121,5 +121,21 @@ ok(filings >= 1, `found ${filings} record_round calls — the scan is broken`);
   ok(/cache\.get\(game\)/.test(lc) && /CACHE_MS/.test(lc), "loadContent keeps the bank for the visit");
 }
 
+
+// ---- 5. a call that fails says so ---------------------------------------------
+// A refused channel sat on 'Connecting…' for ever; a connection that never came
+// up, or dropped, went back to 'Voice call' without a word; iPhone could hold
+// the other voice back until a tap nobody was asked for (F45, V1, V3).
+{
+  const vp = readFileSync(join(root, "src/features/voice/VoiceProvider.tsx"), "utf8");
+  const vc = readFileSync(join(root, "src/features/voice/VoiceControl.tsx"), "utf8");
+  for (const why of ["mic", "line", "connect", "dropped"]) ok(vp.includes(`fail("${why}")`) || vp.includes(`"${why}" : `) || vp.includes(`? "${why}"`), `a call can fail with the reason "${why}"`);
+  ok(/status === "CHANNEL_ERROR" \|\| status === "TIMED_OUT"\)\) fail\("line"\)/.test(vp), "a refused or unreachable call line ends 'Connecting…'");
+  ok(!/cs === "failed"[^\n]*hangup\(\)/.test(vp), "a failed connection is reported, not hung up in silence");
+  ok(/setBlocked\(true\)/.test(vp) && /Tap to hear/.test(vc) && /Tap to hear/.test(vp), "held-back audio offers 'Tap to hear' in the room and in the bar");
+  ok(/troubleText\(trouble/.test(vc) && /troubleText\(trouble/.test(vp), "the room and the bar both say why");
+  ok(/if \(run\.current !== me\) \{ local\.getTracks\(\)\.forEach\(\(tr\) => tr\.stop\(\)\); return; \}/.test(vp), "Cancel during the mic prompt turns the mic back off");
+}
+
 if (bad) { console.error(`\n${bad} of ${n} delivery assertions failed`); process.exit(1); }
 console.log(`${n} delivery assertions hold (${voids} void-supabase sites, ${checked} edge functions)`);
