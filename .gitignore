@@ -38,3 +38,8 @@ app.tgz
 
 # tsc -b writes its build cache here on every build; a tracked copy is always "changed"
 tsconfig.tsbuildinfo
+
+# archives, including the build tarballs an agent stages to the cloud
+*.tgz
+# the Supabase CLI's local link state
+supabase/.temp/
