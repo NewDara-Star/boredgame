@@ -20,6 +20,9 @@ function run(file) {
   return new Promise((done) => {
     const p = spawn(process.execPath, args, { stdio: ["ignore", "pipe", "pipe"] });
     let out = "";
+    // A check that never ends must not hang the build: a minute is 20 times the slowest.
+    const timer = setTimeout(() => { out += "\nTIMED OUT after 60 s"; p.kill("SIGKILL"); }, 60_000);
+    p.on("close", () => clearTimeout(timer));
     p.stdout.on("data", (d) => (out += d));
     p.stderr.on("data", (d) => (out += d));
     p.on("close", (code) => done({ file, code, out, ms: performance.now() - started }));

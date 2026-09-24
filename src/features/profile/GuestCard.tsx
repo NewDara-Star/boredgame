@@ -24,7 +24,7 @@ export function GuestCard({ note }: { note?: string }) {
       <p className="text-sm font-semibold mt-1 opacity-80">
         {note ?? "Type a name and you're in. No password, nothing to remember."}
       </p>
-      <form className="space-y-3 mt-4"
+      <form className="space-y-3 mt-4" noValidate
         onSubmit={async (e) => {
           e.preventDefault();
           setError(null); setBusy(true);
@@ -33,8 +33,8 @@ export function GuestCard({ note }: { note?: string }) {
           if (error) setError(error);
         }}>
         <Field label="What should we call you?" error={error}>
-          <Input required value={name} placeholder="Tayo" autoCapitalize="words"
-            maxLength={20} minLength={3} onChange={(e) => setName(e.target.value)} />
+          <Input value={name} placeholder="Tayo" autoCapitalize="words"
+            maxLength={20} onChange={(e) => setName(e.target.value)} />
         </Field>
         <Button type="submit" disabled={busy} className="w-full">
           {busy ? "One second…" : "Start playing"}
@@ -73,7 +73,7 @@ export function ClaimCard() {
   }
 
   return (
-    <form className="card p-5 space-y-3"
+    <form className="card p-5 space-y-3" noValidate
       onSubmit={async (e) => {
         e.preventDefault();
         setError(null); setBusy(true);
@@ -83,7 +83,7 @@ export function ClaimCard() {
       }}>
       <p className="font-display text-lg font-semibold">Keep this name</p>
       <Field label="Name" error={error}>
-        <Input required value={name} autoCapitalize="none" maxLength={20}
+        <Input value={name} autoCapitalize="none" maxLength={20}
           onChange={(e) => setName(e.target.value)} />
       </Field>
       <Field label="Password" hint="At least 6 characters">

@@ -200,7 +200,7 @@ function MemberView() {
             ? "This one was made up for you at signup. Pick something before anyone sees you on the leaderboard."
             : "How you appear in rooms and on the leaderboard."}
         </p>
-        <form className="flex gap-2 mt-3"
+        <form className="flex gap-2 mt-3" noValidate
           onSubmit={async (e) => {
             e.preventDefault();
             setNameErr(null); setNameMsg(null); setNameBusy(true);

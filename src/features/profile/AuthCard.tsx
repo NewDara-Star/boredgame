@@ -37,7 +37,7 @@ export function AuthCard({ kept }: { kept?: string }) {
           : "Sign in to pick up where you left off."}
       </p>
 
-      <form className="space-y-3 mt-4"
+      <form className="space-y-3 mt-4" noValidate
         onSubmit={async (e) => {
           e.preventDefault();
           setError(null); setBusy(true);

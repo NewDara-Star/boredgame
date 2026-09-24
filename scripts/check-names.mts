@@ -1,0 +1,52 @@
+/**
+ * A name that can't be used says why (F3, J, P8).
+ *
+ * "Jo" got the browser's grey tooltip; "Tobi!" and "Tayo B" were told the name
+ * was taken; a taken name got no way forward. The sentences live in
+ * src/shared/lib/names.ts, every name form asks the same question through the
+ * AuthProvider, and the rule itself is the server's.
+ */
+import { readFileSync } from "node:fs";
+import { nameProblem, nameIdeas, takenSentence, NAME_RULE } from "../src/shared/lib/names.ts";
+
+let n = 0, bad = 0;
+const ok = (c: boolean, m: string) => { n++; if (!c) { console.error("FAIL " + m); bad++; } };
+const read = (p: string) => readFileSync(new URL("../" + p, import.meta.url), "utf8");
+
+ok(nameProblem("Jo") === "At least 3 letters or numbers.", `"Jo" is too short: ${nameProblem("Jo")}`);
+ok(nameProblem("Tobi!") === "Letters, numbers and _ only.", `"Tobi!" has a stray character: ${nameProblem("Tobi!")}`);
+ok(nameProblem("Tayo B") === "No spaces. Tayo_B would work.", `"Tayo B" has a space, and gets one that works: ${nameProblem("Tayo B")}`);
+ok(nameProblem("   ") === "Pick a name first.", "an empty name asks for one");
+ok(nameProblem("a".repeat(21)) === "20 characters at most.", "21 characters is too long");
+for (const good of ["Dara", "Dara_7", "abc", "x".repeat(20), "  Tayo  "]) ok(nameProblem(good) === null, `"${good}" can be used`);
+ok(nameProblem("Tobi ! x")?.startsWith("No spaces") ?? false, "spaces are named before stray characters");
+
+const ideas = nameIdeas("Dara", () => 0.5);
+ok(ideas.length >= 1 && ideas.every((i) => NAME_RULE.test(i) && i.startsWith("Dara_")), `ideas for a taken name are usable: ${ideas}`);
+ok(nameIdeas("A_very_long_name_here").every((i) => i.length <= 20 && NAME_RULE.test(i)), "ideas for a long name still fit 20");
+ok(takenSentence("Dara_52") === "Taken. Dara_52 is free.", "a taken name comes with a free one");
+
+// The rule is the server's: the same pattern in all three places it's enforced.
+const schema = read("supabase/schema.sql");
+ok(NAME_RULE.source === "^[A-Za-z0-9_]{3,20}$", "names.ts holds the server's pattern");
+ok((schema.match(/'\^\[A-Za-z0-9_\]\{3,20\}\$'/g) ?? []).length >= 3, "schema.sql enforces the same pattern (trigger, username_available, set_username)");
+
+// Every way to pick a name goes through the one check.
+const auth = read("src/app/providers/AuthProvider.tsx");
+for (const fn of ["signUp", "signInAsGuest", "claimAccount", "setUsername"]) {
+  const at = auth.indexOf(`async function ${fn}(`);
+  const body = auth.slice(at, auth.indexOf("\n  }\n", at));
+  ok(at >= 0 && /nameBlocked\(/.test(body), `${fn} checks the name with nameBlocked`);
+}
+ok(!/isn't 3–20 letters|already using that name/.test(auth), "the old catch-all sentences are gone");
+
+// Our words, not the browser's tooltip: the name forms don't let it speak.
+for (const f of ["src/features/profile/AuthCard.tsx", "src/features/profile/GuestCard.tsx", "src/features/profile/ProfilePage.tsx"]) {
+  const src = read(f);
+  const forms = src.match(/<form[^>]*>/g) ?? [];
+  const nameForms = f.endsWith("ProfilePage.tsx") ? forms.slice(0, 1) : forms;
+  ok(nameForms.length > 0 && nameForms.every((t) => /noValidate/.test(t)), `${f}: every name form is noValidate`);
+}
+
+if (bad) { console.error(`\n${bad} of ${n} name assertions failed`); process.exit(1); }
+console.log(`${n} name assertions hold`);

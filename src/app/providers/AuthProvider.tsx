@@ -16,6 +16,9 @@ export const asLogin = (id: string) =>
 export const isSynthetic = (email?: string | null) => !!email?.endsWith(`@${HOME}`);
 import type { Profile } from "@/shared/types/db";
 import { sayError, NO_SERVER } from "@/shared/lib/sayError";
+import { nameProblem, nameIdeas, takenSentence } from "@/shared/lib/names";
+
+const SHORT_PASSWORD = "Use at least 6 characters for your password.";
 
 /** Every profile column a player may read (the grant in schema.sql, F48). */
 const PROFILE_COLUMNS = "id, username, avatar, total_answered, total_correct, created_at, streak, best_streak, last_played, is_guest, best_round";
@@ -83,8 +86,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
    * roughly two messages an hour and is documented as test-only, so magic links
    * cannot be the only way in until custom SMTP exists.
    */
+  /**
+   * The one question every name form asks: can this name be used? A sentence
+   * if not, null if so. The shape is checked here, so "Tobi!" isn't told it's
+   * taken; a name that's only taken comes back with a free one beside it.
+   * `mine` is the name you already have, which is never "taken" from you.
+   */
+  async function nameBlocked(name: string, mine?: string): Promise<string | null> {
+    const problem = nameProblem(name);
+    if (problem) return problem;
+    const want = name.trim();
+    if (mine && mine.toLowerCase() === want.toLowerCase()) return null;
+    const { data: free, error } = await supabase!.rpc("username_available", { p_name: want });
+    if (error) return sayError(error, "Couldn't check that name. Try again.");
+    if (free !== false) return null;
+    for (const idea of nameIdeas(want)) {
+      const { data: ok } = await supabase!.rpc("username_available", { p_name: idea });
+      if (ok === true) return takenSentence(idea);
+    }
+    return takenSentence(null);
+  }
+
   async function signIn(id: string, password: string) {
     if (!supabase) return { error: NO_SERVER };
+    if (!id.trim() || !password) return { error: "Type your name and your password." };
     const { error } = await supabase.auth.signInWithPassword({ email: asLogin(id), password });
     if (!error) return { error: null };
     return {
@@ -98,12 +123,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!supabase) return { error: NO_SERVER };
     const username = id.includes("@") ? undefined : id.trim();
 
-    if (username) {
-      const { data: free } = await supabase.rpc("username_available", { p_name: username });
-      if (free === false) {
-        return { error: "That name is taken, or it isn't 3–20 letters, numbers and underscores." };
-      }
+    if (username !== undefined) {
+      const blocked = await nameBlocked(username);
+      if (blocked) return { error: blocked };
     }
+    if (password.length < 6) return { error: SHORT_PASSWORD };
 
     const { error } = await supabase.auth.signUp({
       email: asLogin(id), password,
@@ -123,14 +147,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   async function signInAsGuest(name: string) {
     if (!supabase) return { error: NO_SERVER };
     const username = name.trim();
-    if (username) {
-      // Same check the real sign-up does. Without it the trigger silently falls
-      // back to guest_ab12 and the player wonders who that is.
-      const { data: free } = await supabase.rpc("username_available", { p_name: username });
-      if (free === false) {
-        return { error: "Someone's already using that name — try another." };
-      }
-    }
+    // Same check the real sign-up does. Without it the trigger silently falls
+    // back to guest_ab12 and the player wonders who that is.
+    const blocked = await nameBlocked(username);
+    if (blocked) return { error: blocked };
     const { error } = await supabase.auth.signInAnonymously({
       options: { data: username ? { username } : undefined },
     });
@@ -152,10 +172,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   async function claimAccount(name: string, password: string) {
     if (!supabase || !user) return { error: NO_SERVER };
     const username = name.trim();
-    const { data: free } = await supabase.rpc("username_available", { p_name: username });
-    if (free === false && profile?.username.toLowerCase() !== username.toLowerCase()) {
-      return { error: "That name is already taken." };
-    }
+    const blocked = await nameBlocked(username, profile?.username);
+    if (blocked) return { error: blocked };
+    if (password.length < 6) return { error: SHORT_PASSWORD };
     const { error } = await supabase.auth.updateUser({
       email: asLogin(username), password, data: { username },
     });
@@ -198,10 +217,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   async function setUsername(name: string) {
     if (!supabase) return { error: NO_SERVER };
-    const { data, error } = await supabase.rpc("set_username", { p_name: name });
+    const blocked = await nameBlocked(name, profile?.username);
+    if (blocked) return { error: blocked };
+    const { data, error } = await supabase.rpc("set_username", { p_name: name.trim() });
     if (error) return { error: sayError(error, "Couldn't save your name. Try again.") };
-    if (data === "taken") return { error: "That name is already taken." };
-    if (data === "invalid") return { error: "3–20 characters, letters, numbers and underscores only." };
+    // Both already checked above; these are the race where it changed between.
+    if (data === "taken") return { error: takenSentence(null) };
+    if (data === "invalid") return { error: nameProblem(name) ?? "Letters, numbers and _ only." };
     await refreshProfile();
     return { error: null };
   }
