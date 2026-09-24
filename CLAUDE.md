@@ -39,6 +39,13 @@ each other. Verify any new puzzle by rendering the contact sheet.
 player is fully playable before any database exists. Do not make the app depend
 on Supabase to boot.
 
+## Checks
+
+`npm run check` runs every `scripts/check-*` file in parallel (about 4 s), and
+`npm run build` runs it first, so a broken rule stops a deploy. A new check file
+is picked up by its name; there is nothing to register. One check alone:
+`npm run check:<name>`.
+
 ## Adding rebus puzzles
 
 Run the gate before anything reaches the database:
