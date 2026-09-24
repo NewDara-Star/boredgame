@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { fire } from "@/shared/lib/fire";
 import { supabase } from "@/shared/lib/supabase";
 import { attempt } from "@/shared/lib/write";
+import { useMarkPlayed } from "@/features/play/played";
 import { sayError } from "@/shared/lib/sayError";
 import type { Room, RoomPlayer, RoomRound } from "@/shared/types/db";
 import { shuffle } from "@/features/play/content";
@@ -151,11 +152,14 @@ export function useRoom(code: string | undefined, userId: string | undefined) {
   /** The server judges the answer and, on a correct first-in one, sets the round
       winner and the point together. The client no longer writes the winner (it
       could be set without answering) or names who to pay. */
+  const markPlayed = useMarkPlayed();
   const claimRound = useCallback(async (given: string) => {
     if (!supabase || !round || !userId || !room) return;
+    // claim_round judges it, and files it for your totals too (talk item 1).
     setError(await attempt("Answering the round",
       supabase.rpc("claim_round", { p_room: room.id, p_given: given })));
-  }, [round, userId, room]);
+    void markPlayed();
+  }, [round, userId, room, markPlayed]);
 
   const currentPuzzle = round ? pool.find((i) => i.id === String(round.puzzle_id)) ?? null : null;
 

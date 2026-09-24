@@ -166,5 +166,18 @@ ok(filings >= 1, `found ${filings} record_round calls — the scan is broken`);
   ok(!/setUser\((data\.session|session)\?\.user/.test(auth), "every change of person goes through takeUser, which clears the last one's profile");
 }
 
+// ---- 8. rooms count, and any game keeps the streak (talk item 1) -------------
+{
+  const rd = (p: string) => readFileSync(join(root, p), "utf8");
+  const board = rd("src/features/rooms/useBoardRoom.ts");
+  ok(/fileRoomAnswer\(row\.puzzle_id, given,/.test(board), "a board-room answer is filed for your totals (server-judged)");
+  for (const f of ["src/features/squareoff/SquareOffRoom.tsx", "src/features/connect4/Connect4Room.tsx"])
+    ok(/t\.submit\(correct, given\)/.test(rd(f)), `${f} hands the picked option on`);
+  ok(/void markPlayed\(\);/.test(board) && /void markPlayed\(\);/.test(rd("src/features/rooms/useRoom.ts")) && /void markPlayed\(\);/.test(rd("src/features/sort/useSortRoom.ts")),
+     "every room game keeps the streak");
+  ok(!/results\.length === 0\) return;/.test(rd("src/features/play/useSoloBoard.ts")), "a solo game with no questions still keeps the streak");
+  ok(/recordRound\("trivia", \[\], null, userId\)/.test(rd("src/features/sort/useSortSolo.ts")), "a Ball Sort solve keeps the streak");
+}
+
 if (bad) { console.error(`\n${bad} of ${n} delivery assertions failed`); process.exit(1); }
 console.log(`${n} delivery assertions hold (${voids} void-supabase sites, ${checked} edge functions)`);

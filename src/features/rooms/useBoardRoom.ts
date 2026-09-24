@@ -7,6 +7,7 @@ import { deal } from "@/features/play/dealer";
 import { scopePool, emptyReason, type Scope } from "@/features/play/scope";
 export type { Scope };
 import { attempt } from "@/shared/lib/write";
+import { useMarkPlayed, fileRoomAnswer } from "@/features/play/played";
 
 export type Mark = "x" | "o";
 export type Phase = "picking" | "asking" | "revealed" | "over";
@@ -133,6 +134,7 @@ export function useBoardRoom<G extends BoardState, R extends BoardRow>(
   const game: G | null = useMemo(() => (row ? engine.decode(row) : null), [row, engine]);
   const myMark: Mark | null =
     !row || !userId ? null : row.x_player === userId ? "x" : row.o_player === userId ? "o" : null;
+  const markPlayed = useMarkPlayed();
   const item = row?.puzzle_id != null
     ? pool.find((i) => i.id === String(row.puzzle_id)) ?? null
     : null;
@@ -223,7 +225,8 @@ export function useBoardRoom<G extends BoardState, R extends BoardRow>(
     if (!game || !myMark || game.phase !== "over" || bookedFor.current === row) return;
     bookedFor.current = row;
     void bookWin(game);
-  }, [game, myMark, row, bookWin]);
+    void markPlayed();                       // any finished game keeps the streak (talk item 1)
+  }, [game, myMark, row, bookWin, markPlayed]);
 
   const choose = useCallback((cell: number) => {
     // No phase check here on purpose. Memory's second tap lands during
@@ -236,10 +239,18 @@ export function useBoardRoom<G extends BoardState, R extends BoardRow>(
     void apply(next);
   }, [game, myMark, plain, apply, engine]);
 
-  const submit = useCallback((correct: boolean) => {
+  const submit = useCallback((correct: boolean, given?: string) => {
     if (!game || game.phase !== "asking" || engine.answerer(game) !== myMark) return;
     void apply(engine.answer(game, correct));
-  }, [game, myMark, apply, engine]);
+    // A question answered in a room counts like one answered solo (talk item 1):
+    // the server judges what was picked and files it. The catapult has nothing
+    // to file: it hands in no answer.
+    if (given !== undefined && row?.puzzle_id != null) {
+      const asked = row.stamped_at ? serverToLocal(row.stamped_at) : Date.parse(row.updated_at);
+      void fileRoomAnswer(row.puzzle_id, given, Date.now() - asked);
+    }
+    void markPlayed();
+  }, [game, myMark, apply, engine, row, markPlayed]);
 
   /** Move on now rather than sitting out the pause. The timer stays as the
       fallback so an idle player cannot stall the board, but a pause you can

@@ -7,6 +7,7 @@ import {
   type Game, type Level,
 } from "./rules";
 import type { Refusal } from "./Board";
+import { recordRound } from "@/features/play/progress";
 
 export interface Standing {
   user_id: string; username: string; ms: number; moves: number;
@@ -138,8 +139,11 @@ export function useSortSolo(level: Level, userId: string | undefined, practice =
     const next = pour(me, selected, i, localMs);
     setSelected(null);
     setMe(next);
-    if (isSolved(next.tubes, next.cap)) { setSolvedMs(localMs); void finish(next, localMs); }
-  }, [me, selected, result, finishing, startedAt, start, finish]);
+    if (isSolved(next.tubes, next.cap)) {
+      setSolvedMs(localMs); void finish(next, localMs);
+      void recordRound("trivia", [], null, userId);   // a solve keeps the streak (talk item 1)
+    }
+  }, [me, selected, result, finishing, startedAt, start, finish, userId]);
 
   const takeBack = useCallback(() => {
     if (result || finishing) return;

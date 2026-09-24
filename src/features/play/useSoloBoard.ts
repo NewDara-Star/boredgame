@@ -236,10 +236,11 @@ export function useSoloBoard<G extends BoardState, R extends BoardRow>(
 
   // Questions answered here are questions answered: they feed the streak, the
   // rank and the leaderboard exactly like a normal round. A plain game answers
-  // none, so it records nothing rather than recording a zero.
+  // none, but playing it still keeps the streak (talk item 1), so it's filed
+  // too, with no answers in it.
   const saved = useRef(false);
   useEffect(() => {
-    if (game.phase !== "over" || saved.current || results.length === 0) return;
+    if (game.phase !== "over" || saved.current) return;
     saved.current = true;
     // Counted like any answers (totals, streak, rank), but no best score: a board
     // game isn't a Star Trivia round.

@@ -7,6 +7,7 @@ import {
   type Game, type Level, type Tube,
 } from "./rules";
 import type { Refusal } from "./Board";
+import { useMarkPlayed } from "@/features/play/played";
 
 export type Seat = "x" | "o";
 
@@ -60,6 +61,7 @@ export interface SortRow {
  * posted; the row is how she sees you, not how you see yourself.
  */
 export function useSortRoom(roomId: number | null, userId: string | undefined) {
+  const markPlayed = useMarkPlayed();
   const [row, setRow] = useState<SortRow | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [me, setMe] = useState<Game | null>(null);
@@ -189,9 +191,9 @@ export function useSortRoom(roomId: number | null, userId: string | undefined) {
     const next = pour(me, selected, i, at);
     setSelected(null);
     setMe(next);
-    if (isSolved(next.tubes, next.cap)) { setSolvedMs(at); void finish(next, at); }
+    if (isSolved(next.tubes, next.cap)) { setSolvedMs(at); void finish(next, at); void markPlayed(); }
     else post(next);
-  }, [me, selected, row?.winner, solvedMs, post, finish]);
+  }, [me, selected, row?.winner, solvedMs, post, finish, markPlayed]);
 
   const takeBack = useCallback(() => {
     if (!me || row?.winner || solvedMs !== null) return;

@@ -22,6 +22,7 @@ declare
   sa int; sb int; got int; again int;
   results text[] := '{}'; broken text[] := '{}';
   g31 uuid := gen_random_uuid(); g29 uuid := gen_random_uuid(); gwin uuid := gen_random_uuid(); rr bigint;
+  mc2 bigint; mc2_answer text; mc2_choices text[];
 begin
   -- ---- borrowed rows -------------------------------------------------------
   select p1.user_id, p2.user_id, p1.room_id into a, b, r
@@ -167,6 +168,23 @@ begin
   then broken := broken || results[cardinality(results)]; end if;
   results := array_append(results, 'DB2 someone signed out can''t save a push address'::text);
   if has_function_privilege('anon', 'public.save_push_subscription(text,text,text)', 'execute')
+  then broken := broken || results[cardinality(results)]; end if;
+
+  -- ---- R1 (F16b): a question answered in a room counts, once --------------
+  -- A question a hasn't answered in this run (the run's writes all share one
+  -- clock, so the Q12 answers above would read as this round's).
+  select id, answer, choices into mc2, mc2_answer, mc2_choices from public.puzzles
+   where game = 'trivia' and status = 'live' and cardinality(choices) = 4 and id <> mc order by id limit 1;
+  update public.room_rounds set winner_id = coalesce(winner_id, a) where room_id = r;
+  insert into public.room_rounds(room_id, puzzle_id, round_no) values (r, mc2, 950);
+  select total_answered into n from public.profiles where id = a;
+  perform set_config('request.jwt.claims', json_build_object('sub', a, 'role', 'authenticated')::text, true);
+  set local role authenticated;
+  perform public.claim_round(r, (select o from unnest(mc2_choices) o where o <> mc2_answer limit 1));
+  perform public.claim_round(r, (select o from unnest(mc2_choices) o where o <> mc2_answer limit 1));
+  reset role;
+  results := array_append(results, 'R1 a room pick counts towards your totals, once per round'::text);
+  if (select total_answered from public.profiles where id = a) <> n + 1
   then broken := broken || results[cardinality(results)]; end if;
 
   -- ---- G30 (F11): a guest goes 30 days after they last played ------------

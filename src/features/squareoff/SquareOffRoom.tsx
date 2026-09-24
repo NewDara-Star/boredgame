@@ -141,7 +141,7 @@ export function SquareOffRoom({
           challenge={challenge === "catapult" ? "catapult" : "trivia"}
           item={t.item} options={t.item?.choices ?? []}
           chosen={chosen} setChosen={setChosen}
-          onAnswer={(correct: boolean) => t.submit(correct)}
+          onAnswer={(correct: boolean, given?: string) => t.submit(correct, given)}
           asking={asking} revealed={revealed} mine={!!mine}
           fraction={Math.max(0, left / ask)} askedAt={t.askedSeed}
           waitingOn={names[other]}

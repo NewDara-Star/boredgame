@@ -2075,6 +2075,12 @@ grant execute on function public.server_now() to anon, authenticated;
 -- server-side (exact for multiple choice, with the client's spelling slack for
 -- typed picto), and only a correct FIRST-in answer sets the winner and the point
 -- together. The client never writes the winner.
+-- F16b (talk item 1): a question answered in a room counts like one answered
+-- solo. claim_round already judges every room answer on the server; it now
+-- also files it as an attempt (totals, rank, leaderboard), once per player per
+-- round: a multiple-choice pick right or wrong (one pick is all there is), a
+-- typed answer when it's right (wrong guesses on the way aren't filed, as a
+-- solo round files only the answer you finish on).
 create or replace function public.claim_round(p_room bigint, p_given text)
 returns jsonb language plpgsql security definer set search_path to 'public' as $$
 declare uid uuid := auth.uid(); v_round public.room_rounds;
@@ -2088,6 +2094,14 @@ begin
   if v_round.id is null then return jsonb_build_object('won', false, 'reason', 'no open round'); end if;
   select answer, accept, choices into v_answer, v_accept, v_choices from public.puzzles where id = v_round.puzzle_id;
   v_correct := public.judge_answer(p_given, v_answer, v_accept, v_choices);
+  if (v_correct or cardinality(coalesce(v_choices, '{}'::text[])) > 0)
+     and not exists (select 1 from public.attempts a
+                      where a.user_id = uid and a.puzzle_id = v_round.puzzle_id
+                        and a.created_at >= v_round.started_at) then
+    insert into public.attempts (user_id, puzzle_id, correct, ms_taken)
+      values (uid, v_round.puzzle_id, v_correct,
+              least(greatest(extract(epoch from now() - v_round.started_at) * 1000, 0), 600000)::int);
+  end if;
   if not v_correct then return jsonb_build_object('won', false); end if;
   update public.room_rounds set winner_id = uid, ended_at = now()
     where id = v_round.id and winner_id is null;
