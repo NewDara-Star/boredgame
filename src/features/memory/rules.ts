@@ -26,8 +26,9 @@ export const SIZE = PAIRS * 2;      // 16 tiles, a 4x4 grid
 export const COLS = 4;
 
 /** Faces are content, not logic. Kept here so both clients render the same
-    deck from the same stored string and nothing has to be fetched. */
-export const FACES = ["🍉", "🚀", "🐙", "⚽", "🎸", "🍩", "🦊", "⭐"];
+    deck from the same stored string and nothing has to be fetched. These are the
+    faces' names; Faces.tsx draws them (index order is the deck's). */
+export const FACES = ["sunflower", "flame", "house", "star", "heart", "raindrop", "leaf", "moon"];
 
 export interface Game {
   /** what each tile is, as an index into FACES */

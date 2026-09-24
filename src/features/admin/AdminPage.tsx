@@ -76,7 +76,7 @@ export function AdminPage() {
       <div className="flex gap-2">
         {(["picto", "trivia"] as const).map((g) => (
           <button key={g} onClick={() => set("game", g)}
-            className={`px-4 py-2 rounded-xl text-sm font-semibold border ${d.game === g ? "bg-mist border-ink" : "border-ink text-soft"}`}>
+            className={`px-4 py-2 rounded-xl text-sm font-semibold ${d.game === g ? "bg-mist shadow-lift-sm" : "shadow-lift-sm text-soft"}`}>
             {g === "picto" ? "Picto Phrase" : "Star Trivia"}
           </button>
         ))}
@@ -87,7 +87,7 @@ export function AdminPage() {
           <div className="flex gap-2">
             {(["text", "image"] as const).map((rd) => (
               <button key={rd} onClick={() => set("render", rd)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold border ${d.render === rd ? "bg-mist border-ink" : "border-ink text-soft"}`}>
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold ${d.render === rd ? "bg-mist shadow-lift-sm" : "shadow-lift-sm text-soft"}`}>
                 {rd === "text" ? "Drawn from text" : "Uploaded image"}
               </button>
             ))}
@@ -161,13 +161,13 @@ export function AdminPage() {
       <div className="grid grid-cols-2 gap-3">
         <Field label="Difficulty">
           <select value={d.difficulty} onChange={(e) => set("difficulty", e.target.value as DraftPuzzle["difficulty"])}
-            className="w-full bg-board border-[2.5px] border-ink rounded-2xl px-3 py-2.5 text-ink">
+            className="w-full bg-board shadow-lift-sm rounded-2xl px-3 py-2.5 text-ink">
             <option value="easy">Easy</option><option value="medium">Medium</option><option value="hard">Hard</option>
           </select>
         </Field>
         <Field label="Category" error={touched ? errors.category : null}>
           <select value={d.category} onChange={(e) => set("category", e.target.value)}
-            className="w-full bg-board border-[2.5px] border-ink rounded-2xl px-3 py-2.5 text-ink">
+            className="w-full bg-board shadow-lift-sm rounded-2xl px-3 py-2.5 text-ink">
             <option value="">Select…</option>
             {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
           </select>

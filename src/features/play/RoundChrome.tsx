@@ -16,7 +16,7 @@ export function Hud({ index, total, score, streak, accent }:
       <div className="flex gap-1.5 flex-1">
         {Array.from({ length: total }, (_, i) => (
           <motion.span key={i}
-            className="h-2.5 flex-1 rounded-full border-2 border-ink"
+            className="h-2.5 flex-1 rounded-full shadow-lift-sm"
             initial={false}
             animate={{ backgroundColor: i <= index ? accent : MIST }}
             transition={{ duration: 0.25 }} />
@@ -26,7 +26,7 @@ export function Hud({ index, total, score, streak, accent }:
         {streak >= 2 && (
           <motion.span key="streak" variants={popIn} initial="hidden" animate="show"
             exit={{ opacity: 0, scale: 0.6 }}
-            className="text-[13px] font-black bg-petal border-2 border-ink rounded-full px-2 py-0.5">
+            className="text-[13px] font-black bg-petal shadow-lift-sm rounded-full px-2 py-0.5">
             {streak}×
           </motion.span>
         )}
@@ -48,8 +48,7 @@ export function HintBar({ item, used, onUse }:
             initial={{ opacity: 0, height: 0, y: -6 }}
             animate={{ opacity: 1, height: "auto", y: 0 }}
             className="text-sm text-soft font-semibold mb-1.5 overflow-hidden">
-            <span className="text-[12px] font-black bg-mist
-              border-2 border-ink rounded-full px-2 py-0.5 mr-2">
+            <span className="text-[12px] font-black bg-mist shadow-lift-sm rounded-full px-2 py-0.5 mr-2">
               {i === 0 ? "Clue" : "Letters"}
             </span>
             {h}
@@ -79,7 +78,7 @@ export function Burst({ show }: { show: boolean }) {
             const a = (i / bits.length) * Math.PI * 2;
             return (
               <motion.span key={i}
-                className="absolute w-3 h-3 rounded-sm border-2 border-ink"
+                className="absolute w-3 h-3 rounded-sm shadow-lift-sm"
                 style={{ background: c }}
                 initial={{ opacity: 1, x: 0, y: 0, scale: 0.4, rotate: 0 }}
                 animate={{
@@ -148,7 +147,7 @@ function RoundCard({ title, results, score, outcome }:
   return (
     <motion.div variants={riseIn} className="mt-6 space-y-2.5">
       <img src={card.url} alt={`${title}: ${right} of ${results.length}, ${score} points`}
-        className="w-full rounded-2xl border-[3px] border-ink" />
+        className="w-full rounded-2xl shadow-lift-sm" />
       <button onClick={() => saveCard(card.file)}
         className="cut tap w-full py-3.5 font-display text-lg font-semibold cut-petal">
         Save the image
@@ -177,7 +176,7 @@ export function Summary({ score, results, outcome, onAgain, children, title }:
       {!!outcome?.streak && (
         <motion.p variants={popIn}
           className="inline-block mt-3 text-[13px] font-black
-            bg-petal border-[2.5px] border-ink rounded-full px-3 py-1">
+            bg-petal shadow-lift-sm rounded-full px-3 py-1">
           Day {outcome.streak} streak
         </motion.p>
       )}

@@ -85,7 +85,7 @@ export function SortSoloPage() {
           {LEVELS.map((l) => (
             <button key={l} onClick={() => setLevel(l)} aria-pressed={level === l}
               disabled={running}
-              className={`text-[12px] font-black px-2.5 py-1.5 rounded-full border-2 border-ink
+              className={`text-[12px] font-black px-2.5 py-1.5 rounded-full shadow-lift-sm
                 disabled:opacity-40 ${level === l ? "bg-ink text-ground" : "bg-board text-ink"}`}>
               {l}
             </button>

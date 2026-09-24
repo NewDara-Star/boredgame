@@ -44,7 +44,7 @@ export function ResultScreen({ headline, score, tone, card, alt, children }: {
       <div className="flex-1 min-h-0 grid place-items-center">
         {card ? (
           <img src={card.url} alt={alt}
-            className="max-h-full w-auto max-w-full rounded-2xl border-[3px] border-ink" />
+            className="max-h-full w-auto max-w-full rounded-2xl shadow-lift-sm" />
         ) : (
           <div className="card grid place-items-center h-full aspect-square bg-board p-6 text-center">
             <p className="text-sm font-bold text-soft">

@@ -41,7 +41,7 @@ export function PictoGame() {
               initial={{ opacity: 0, x: -14 }} animate={{ opacity: 1, x: 0 }}
               transition={{ ...SPRING, delay: 0.3 + i * 0.05 }}
               className="card p-3 flex items-center gap-3">
-              <div className={`w-14 h-14 shrink-0 rounded-xl border-2 border-ink p-1
+              <div className={`w-14 h-14 shrink-0 rounded-xl shadow-lift-sm p-1
                 ${res.correct ? "bg-leaf text-ink" : "bg-mist text-ink"}`}>
                 {res.item.spec && <PictoRenderer spec={res.item.spec} />}
               </div>
@@ -95,7 +95,7 @@ export function PictoGame() {
             className="mt-4 flex gap-2.5">
             <input ref={inputRef} value={guess} onChange={(e) => setGuess(e.target.value)}
               aria-label="Your guess" placeholder="What phrase is this?" autoComplete="off" autoCapitalize="none"
-              className="flex-1 bg-board border-[2.5px] border-ink rounded-2xl px-4 py-3.5
+              className="flex-1 bg-board shadow-lift-sm rounded-2xl px-4 py-3.5
                 font-bold text-ink placeholder:text-soft/60 outline-none
                 focus:shadow-[0_5px_0_var(--color-ink)] transition-shadow" />
             <button type="submit" disabled={!guess.trim()}

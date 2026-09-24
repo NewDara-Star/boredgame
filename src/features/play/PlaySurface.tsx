@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { SEAT_CSS } from "@/shared/brand/seats";
 import { PieceMark, type PieceKind } from "@/shared/brand/Pieces";
 import { motion } from "framer-motion";
 import { SPRING } from "@/shared/ui/motion";
@@ -99,7 +100,7 @@ export function PlayHead({ title, seats }: {
           animate={{ scale: s.active ? 1 : 0.94, opacity: s.active ? 1 : 0.55 }}
           transition={SPRING}
           className={`card flex items-center gap-1.5 px-2.5 py-1.5 ${s.active ? "bg-petal" : "bg-board"}`}>
-          <PieceMark kind={s.glyph} colour={s.mark === "x" ? "var(--color-ember)" : "var(--color-sky)"} size={18} />
+          <PieceMark kind={s.glyph} colour={SEAT_CSS[s.mark]} size={18} />
           <span className="text-[12px] font-black truncate max-w-[72px]">{s.name}</span>
           <span className="font-display text-base font-semibold tabular-nums leading-none">{s.score}</span>
         </motion.div>

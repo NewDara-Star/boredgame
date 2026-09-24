@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { RAMPS } from "@/shared/brand/tokens";
+import { BOARD, INK, RAMPS } from "@/shared/brand/tokens";
 import { motion } from "framer-motion";
 import type { Tube } from "./rules";
 
@@ -104,14 +104,14 @@ export function Board({
           </radialGradient>
         ))}
         <radialGradient id={`spec-${size}`} cx="50%" cy="50%" r="50%">
-          <stop offset="0" stopColor="#fff" stopOpacity=".9" />
-          <stop offset="1" stopColor="#fff" stopOpacity="0" />
+          <stop offset="0" stopColor={BOARD} stopOpacity=".9" />
+          <stop offset="1" stopColor={BOARD} stopOpacity="0" />
         </radialGradient>
         <linearGradient id={`glass-${size}`} x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0" stopColor="#fff" stopOpacity=".55" />
-          <stop offset=".25" stopColor="#fff" stopOpacity=".08" />
-          <stop offset=".8" stopColor="#fff" stopOpacity=".05" />
-          <stop offset="1" stopColor="#000" stopOpacity=".10" />
+          <stop offset="0" stopColor={BOARD} stopOpacity=".55" />
+          <stop offset=".25" stopColor={BOARD} stopOpacity=".08" />
+          <stop offset=".8" stopColor={BOARD} stopOpacity=".05" />
+          <stop offset="1" stopColor={INK} stopOpacity=".10" />
         </linearGradient>
       </defs>
 
@@ -167,7 +167,7 @@ export function Board({
                   style={{ pointerEvents: "none" }}>
                   {k === 0 && !inLift && (
                     <ellipse cx={x + TW / 2 + 1.5} cy={restY + R - 1} rx={R * 0.85} ry="3.5"
-                      fill="#000" opacity=".22" />
+                      fill={INK} opacity=".22" />
                   )}
                   <circle cx={x + TW / 2} cy={restY} r={R} fill={`url(#ball-${size}-${c % BALL.length})`} />
                   <path d={`M ${x + TW / 2 - R * 0.86} ${restY + R * 0.42}

@@ -17,7 +17,7 @@ const PLINTH = [
 
 function Podium({ top, meId }: { top: Standing[]; meId?: string }) {
   return (
-    <div className="flex items-end justify-center gap-2.5 sm:gap-4 mt-6 border-b-[3px] border-ink">
+    <div className="flex items-end justify-center gap-2.5 sm:gap-4 mt-6 shadow-lift-sm">
       {PODIUM_ORDER.map((i, slot) => {
         const p = top[i];
         if (!p) return null;

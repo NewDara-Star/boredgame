@@ -160,6 +160,7 @@ h1, h2, h3, .display { font-family: var(--font-display); font-weight: 400; lette
 html[data-sky="night"] body { --color-ink: var(--color-ink-night); --color-soft: var(--color-soft-night); }
 html[data-sky="night"] :where(.card, .cut, .chip, header, nav, [role="dialog"] > div, input, textarea, select) {
   --color-ink: var(--color-ink-day); --color-soft: var(--color-soft-day);
+  color: var(--color-ink-day);
 }
 
 :focus-visible { outline: 3px solid var(--color-sky); outline-offset: 3px; }

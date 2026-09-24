@@ -186,7 +186,7 @@ export function VoiceProvider({ children }: { children: React.ReactNode }) {
           <div className="card bg-ink text-ground w-full max-w-md p-2 flex items-center gap-2">
             <button onClick={() => nav(`/rooms/${target!.code}`)}
               className="min-w-0 flex-1 text-left px-2 py-1">
-              <span className="block text-[11px] font-black text-ground/50">
+              <span className="block text-[12px] font-black text-ground/70">
                 {state === "live" ? "On call — tap to return" : "Connecting…"}
               </span>
               <span className="block text-[14px] font-bold truncate">{target!.peerName}</span>

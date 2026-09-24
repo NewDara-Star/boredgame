@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { MemoryFace } from "./Faces";
 import { SPRING } from "@/shared/ui/motion";
 import { COLS, FACES, faceUp, type Game } from "./rules";
 
@@ -33,17 +34,16 @@ export function Board({ game, canFlip, width, onFlip }: {
             transition={SPRING}
             aria-label={shown ? `${FACES[face]}${owner ? ", claimed" : ""}` : `Tile ${i + 1}, face down`}
             className={`cut tap aspect-square grid place-items-center leading-none
-              ${width ? "" : "text-[30px]"}
-              disabled:opacity-100
-              ${owner === "x" ? "bg-ember/25" : owner === "o" ? "bg-sky/25"
-                : shown ? "cut-petal" : "bg-board"}`}>
-            <motion.span
+              disabled:opacity-100 [--c:10px]
+              ${owner === "x" ? "cut-petal" : owner === "o" ? "cut-sky"
+                : shown ? "cut-board" : "cut-grape"}`}>
+            <motion.span className="w-full h-full grid place-items-center"
               // The flip itself, rather than the face simply appearing: turning
               // a tile over is the entire verb of this game.
               initial={false}
               animate={{ rotateY: shown ? 0 : 180, opacity: shown ? 1 : 0 }}
               transition={{ duration: 0.22 }}>
-              {shown ? FACES[face] : ""}
+              {shown ? <MemoryFace face={face} /> : ""}
             </motion.span>
           </motion.button>
         );

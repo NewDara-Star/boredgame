@@ -40,7 +40,7 @@ export function CategoryBar({
                 const on = selected.includes(c.name);
                 return (
                   <button key={c.name} onClick={() => toggle(c.name)}
-                    className={`border-2 border-ink rounded-full px-2.5 py-1 text-[13px] font-bold
+                    className={` shadow-lift-sm rounded-full px-2.5 py-1 text-[13px] font-bold
                       ${on ? "bg-ink text-ground" : "bg-board text-ink"}`}>
                     {c.name} <span className="opacity-60 tabular-nums">{c.count}</span>
                   </button>
@@ -48,7 +48,7 @@ export function CategoryBar({
               })}
               {selected.length > 0 && (
                 <button onClick={() => onChange([])}
-                  className="border-2 border-ink rounded-full px-2.5 py-1 text-[13px] font-black bg-petal">
+                  className=" shadow-lift-sm rounded-full px-2.5 py-1 text-[13px] font-black bg-petal">
                   Clear
                 </button>
               )}

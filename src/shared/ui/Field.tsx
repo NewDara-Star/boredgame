@@ -21,7 +21,7 @@ export function Input(props: InputHTMLAttributes<HTMLInputElement>) {
   return (
     <input
       {...props}
-      className={`w-full bg-board border-[2.5px] border-ink rounded-2xl px-4 py-3 font-semibold
+      className={`w-full bg-board border-2 border-hair rounded-2xl px-4 py-3 font-semibold
         text-ink placeholder:text-soft/60 outline-none focus:shadow-[0_4px_0_var(--color-ink)]
         transition-shadow ${props.className ?? ""}`}
     />

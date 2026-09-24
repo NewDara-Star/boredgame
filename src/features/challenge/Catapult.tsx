@@ -131,7 +131,7 @@ export function Catapult({
   return (
     <div className="space-y-2">
       <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`}
-        className={`w-full rounded-2xl border-[3px] border-ink bg-board touch-none select-none
+        className={`w-full rounded-2xl shadow-lift-sm bg-board touch-none select-none
           ${canAim ? "cursor-grab" : ""}`}
         onPointerDown={(e) => {
           if (!canAim) return;

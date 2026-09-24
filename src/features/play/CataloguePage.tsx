@@ -31,7 +31,7 @@ export function CataloguePage() {
       {GAMES.length > SEARCH_AT && (
         <motion.input variants={riseIn} value={q} onChange={(e) => setQ(e.target.value)}
           placeholder="Search games" type="search"
-          className="w-full mt-4 bg-board border-[2.5px] border-ink rounded-2xl px-4 py-3
+          className="w-full mt-4 bg-board shadow-lift-sm rounded-2xl px-4 py-3
             font-bold text-ink placeholder:text-soft/60 outline-none
             focus:shadow-[0_5px_0_var(--color-ink)] transition-shadow" />
       )}

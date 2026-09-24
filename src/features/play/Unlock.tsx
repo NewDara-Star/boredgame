@@ -47,7 +47,7 @@ function Confetti() {
         const drift = ((i % 5) - 2) * 16;
         return (
           <motion.span key={i}
-            className="absolute top-0 w-2.5 h-3 rounded-[3px] border-2 border-ink"
+            className="absolute top-0 w-2.5 h-3 rounded-[3px] shadow-lift-sm"
             style={{ left: `${left}%`, background: BITS[i % BITS.length] }}
             initial={{ y: -30, opacity: 0, rotate: 0 }}
             animate={{ y: 420, opacity: [0, 1, 1, 0], x: drift, rotate: 540 * (i % 2 ? 1 : -1) }}

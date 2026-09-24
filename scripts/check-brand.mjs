@@ -73,6 +73,8 @@ const BANS = [
     re: /[\u{1F300}-\u{1FAFF}\u{2600}-\u{26FF}]/gu, in: [".tsx", ".ts"] },
   { id: "old-card-frame", why: "old share-card frame: artStage, hot-pink ground, sticker headline",
     re: /\bartStage\b|\b(?:HOT|POP|PICTO|TRIVIA|SAND)\b(?=[,\s}])/g, in: [".ts", ".tsx"] },
+  { id: "ui-outline", why: "an ink outline on UI (cards, chips, bars, inputs); the world has no outlines, only subjects do",
+    re: /\bborder(?:-[trblxy])?-ink\b|\bborder(?:-[trblxy])?-\[\d+px\][^"'`]*?\bborder-ink\b|\bring-ink\b|\boutline-ink\b/g, in: [".tsx", ".ts"] },
   { id: "white-on-colour", why: "letters on colour are ink (grape takes white)",
     re: new RegExp(`["'\`][^"'\`]*?\\b(?:${COLOURED_BG})\\b[^"'\`]*?\\btext-(?:white|surface|paper|board|ground)\\b[^"'\`]*["'\`]|["'\`][^"'\`]*?\\btext-(?:white|surface|paper|board|ground)\\b[^"'\`]*?\\b(?:${COLOURED_BG})\\b[^"'\`]*["'\`]`, "g"), in: [".tsx", ".ts"] },
   { id: "old-theme-meta", why: "theme-color / manifest colours still the old pink or cream",

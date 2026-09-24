@@ -9,6 +9,7 @@ import { RankBadge } from "@/features/play/RankBadge";
 import { useDailyStatus } from "@/features/daily/useDaily";
 import { Avatar } from "@/shared/ui/Avatar";
 import { Starburst } from "@/shared/ui/Wordmark";
+import { Sunflower } from "@/shared/brand/Sunflower";
 import { stagger, riseIn, popIn } from "@/shared/ui/motion";
 import { WeekStrip } from "./WeekStrip";
 import { StatCarousel, type Stat } from "./StatCarousel";
@@ -63,12 +64,12 @@ export function HomePage() {
           </p>
           <h1 className="font-display text-[32px] leading-[1.05] font-semibold truncate">
             {greeting()}{user ? "," : ""}<br />
-            {user ? <span className="text-petal">{name}</span> : <span className="text-petal">stranger</span>}
+            {user ? name : "stranger"}
           </h1>
         </div>
-        <Link to="/profile" aria-label="Profile" className="shrink-0">
-          {user ? <Avatar id={user.id} name={name} size={52} />
-                : <RankBadge rank={current.key} size={46} />}
+        {/* The flower says how the day is going: bored until you've played today. */}
+        <Link to="/play" aria-label="Play something" className="shrink-0 -mb-2">
+          <Sunflower state={p.playedToday ? "awake" : "bored"} size={74} />
         </Link>
       </motion.div>
 

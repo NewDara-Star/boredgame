@@ -76,7 +76,7 @@ export function Lobby({
                     c.game === room.game ? picked : [], levelsOn, c.challenge ?? challenge)}
                 className={`cut tap text-left p-3.5 ${on ? "cut-petal text-ink" : "bg-board"}`}>
                 <span className="flex items-center gap-2">
-                  <span className={`grid place-items-center h-5 w-5 rounded-full border-[3px] border-ink shrink-0
+                  <span className={`grid place-items-center h-5 w-5 rounded-full shadow-lift-sm shrink-0
                     ${on ? "bg-board" : "bg-mist"}`}>
                     {on && <span className="h-2 w-2 rounded-full bg-ink" />}
                   </span>
@@ -110,7 +110,7 @@ export function Lobby({
                 <button key={c.name} disabled={c.count === 0 && !on}
                   onClick={() => onSetup(room.mode, room.game,
                     on ? picked.filter((n) => n !== c.name) : [...picked, c.name], levelsOn, challenge)}
-                  className={`border-2 border-ink rounded-full px-2.5 py-1 text-[12px] font-bold
+                  className={` shadow-lift-sm rounded-full px-2.5 py-1 text-[12px] font-bold
                     disabled:opacity-40
                     ${on ? "bg-ink text-ground" : "bg-board text-ink"}`}>
                   {c.name} <span className="opacity-60 tabular-nums">{c.count}</span>
@@ -125,7 +125,7 @@ export function Lobby({
             </p>
             {picked.length > 0 && (
               <button onClick={() => onSetup(room.mode, room.game, [], levelsOn, challenge)}
-                className="border-2 border-ink rounded-full px-2.5 py-1 text-[13px] font-black bg-petal">Clear</button>
+                className=" shadow-lift-sm rounded-full px-2.5 py-1 text-[13px] font-black bg-petal">Clear</button>
             )}
           </div>
         </div>

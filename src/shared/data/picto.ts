@@ -1,4 +1,9 @@
 import type { RebusItem } from "@/shared/types/db";
+import { HAIR, INK, RAMPS } from "../brand/tokens.ts";
+
+/** Colour is the clue in some rebuses ("feeling blue"), so these must read as
+    the plain colour word, taken from the brand's darker planes. */
+const BLUE = RAMPS.sky.lo, GREEN = RAMPS.leaf.lo, RED = RAMPS.ember.lo, BLACK = INK, GREY = HAIR;
 
 /**
  * Rebus puzzles as data. Each is drawn by PictoRenderer on a 100x100 canvas,
@@ -323,41 +328,41 @@ export const PICTO_SEED: PictoSeed[] = [
     answer: "spanner in the works",
     accept: ["wrench in the works", "a spanner in the works", "spanner in works", "throw a spanner in the works"], alt_hint: "One word has been placed inside another", char_hint: "4 words · something that ruins the plan", difficulty: "hard", category: "Idioms" },
 
-  { slug: "feeling-blue", items: [t("FEELING", 50, 50, { size: 20, w: 79, color: "#4B5BD6" })],
+  { slug: "feeling-blue", items: [t("FEELING", 50, 50, { size: 20, w: 79, color: BLUE })],
     answer: "feeling blue",
     accept: ["feel blue", "im feeling blue"], alt_hint: "The colour is the clue, not the word", char_hint: "2 words · low spirits", difficulty: "easy", category: "Idioms" },
 
-  { slug: "green-with-envy", items: [t("ENVY", 50, 50, { size: 20, w: 49.6, color: "#17914B" })],
+  { slug: "green-with-envy", items: [t("ENVY", 50, 50, { size: 20, w: 49.6, color: GREEN })],
     answer: "green with envy",
     accept: ["green with nv"], alt_hint: "The colour is the clue", char_hint: "3 words · jealous", difficulty: "easy", category: "Idioms" },
 
-  { slug: "caught-red-handed", items: [t("HANDED", 50, 50, { size: 20, w: 74.4, color: "#D93A34" })],
+  { slug: "caught-red-handed", items: [t("HANDED", 50, 50, { size: 20, w: 74.4, color: RED })],
     answer: "caught red handed",
     accept: ["red handed", "caught red hand"], alt_hint: "The colour is the clue", char_hint: "3 words · caught in the act", difficulty: "medium", category: "Idioms" },
 
-  { slug: "out-of-the-blue", items: [t("OUT", 50, 50, { size: 20, w: 36.4, color: "#4B5BD6" })],
+  { slug: "out-of-the-blue", items: [t("OUT", 50, 50, { size: 20, w: 36.4, color: BLUE })],
     answer: "out of the blue",
     accept: ["out the blue", "outta the blue"], alt_hint: "The colour is the clue", char_hint: "4 words · completely unexpected", difficulty: "medium", category: "Idioms" },
 
-  { slug: "black-sheep", items: [t("SHEEP", 18, 50, { size: 10, w: 28, color: "#C9C2B6" }), t("SHEEP", 50, 50, { size: 10, w: 28, color: "#191510" }), t("SHEEP", 82, 50, { size: 10, w: 28, color: "#C9C2B6" })],
+  { slug: "black-sheep", items: [t("SHEEP", 18, 50, { size: 10, w: 28, color: GREY }), t("SHEEP", 50, 50, { size: 10, w: 28, color: BLACK }), t("SHEEP", 82, 50, { size: 10, w: 28, color: GREY })],
     answer: "black sheep",
     accept: ["the black sheep", "black sheep of the family", "the black sheep of the family"], alt_hint: "The colour is the clue", char_hint: "2 words · the odd one in a family", difficulty: "easy", category: "Idioms" },
 
-  { slug: "red-tape", items: [t("TAPE", 50, 50, { size: 20, w: 48.8, color: "#D93A34" })],
+  { slug: "red-tape", items: [t("TAPE", 50, 50, { size: 20, w: 48.8, color: RED })],
     answer: "red tape", alt_hint: "The colour is the clue", char_hint: "2 words · bureaucracy", difficulty: "easy", category: "Everyday" },
 
-  { slug: "green-thumb", items: [t("THUMB", 50, 50, { size: 20, w: 66.4, color: "#17914B" })],
+  { slug: "green-thumb", items: [t("THUMB", 50, 50, { size: 20, w: 66.4, color: GREEN })],
     answer: "green thumb",
     accept: ["green thumbs", "green fingers", "green fingered"], alt_hint: "The colour is the clue", char_hint: "2 words · a knack for plants", difficulty: "easy", category: "Everyday" },
 
-  { slug: "blueprint", items: [t("PRINT", 50, 50, { size: 20, w: 54.8, color: "#4B5BD6" })],
+  { slug: "blueprint", items: [t("PRINT", 50, 50, { size: 20, w: 54.8, color: BLUE })],
     answer: "blueprint", alt_hint: "The colour is the clue", char_hint: "1 word · a technical drawing", difficulty: "easy", category: "Design" },
 
-  { slug: "green-light", items: [t("LIGHT", 50, 50, { size: 20, w: 53.4, color: "#17914B" })],
+  { slug: "green-light", items: [t("LIGHT", 50, 50, { size: 20, w: 53.4, color: GREEN })],
     answer: "green light",
     accept: ["give the green light", "green lights"], alt_hint: "The colour is the clue", char_hint: "2 words · permission to go", difficulty: "easy", category: "Everyday" },
 
-  { slug: "red-alert", items: [t("ALERT", 50, 50, { size: 20, w: 59.8, color: "#D93A34" })],
+  { slug: "red-alert", items: [t("ALERT", 50, 50, { size: 20, w: 59.8, color: RED })],
     answer: "red alert",
     accept: ["on red alert"], alt_hint: "The colour is the clue", char_hint: "2 words · highest urgency", difficulty: "easy", category: "Everyday" },
 

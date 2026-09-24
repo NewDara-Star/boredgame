@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { SEAT_CSS } from "@/shared/brand/seats";
 import { PieceMark, type PieceKind } from "@/shared/brand/Pieces";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
@@ -9,10 +10,8 @@ import { ResultScreen } from "@/features/play/ResultScreen";
 
 export type Mark = "x" | "o";
 
-export const SEAT_COLOUR: Record<Mark, string> = {
-  x: "var(--color-ember)",
-  o: "var(--color-sky)",
-};
+/** Seat x is petal, seat o is sky (src/shared/brand/seats.ts). */
+export const SEAT_COLOUR: Record<Mark, string> = SEAT_CSS;
 
 /** No heartbeat for this long and we say so on screen. */
 export const AWAY_MS = 50_000;

@@ -6,7 +6,7 @@ import type { PlayItem } from "@/features/play/types";
 
 export function Timer({ fraction }: { fraction: number }) {
   return (
-    <div className="h-3 bg-mist rounded-full overflow-hidden border-2 border-ink">
+    <div className="h-3 bg-mist rounded-full overflow-hidden shadow-lift-sm">
       <motion.div
         className="h-full"
         style={{ background: fraction < 0.3 ? "var(--color-ember)" : "var(--color-petal)" }}

@@ -131,7 +131,7 @@ function MemberView() {
             {next ? `${next.min - p.answered} to ${next.name}` : "Top rank"}
           </span>
         </div>
-        <div className="h-3.5 bg-mist rounded-full mt-2.5 overflow-hidden border-2 border-ink">
+        <div className="h-3.5 bg-mist rounded-full mt-2.5 overflow-hidden shadow-lift-sm">
           <motion.div className="h-full bg-petal"
             initial={{ width: 0 }} animate={{ width: `${Math.round(progress * 100)}%` }}
             transition={{ type: "spring", stiffness: 90, damping: 18, delay: 0.3 }} />

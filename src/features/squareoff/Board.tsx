@@ -1,23 +1,26 @@
 import { motion } from "framer-motion";
 import { SPRING } from "@/shared/ui/motion";
 import type { Cell, Mark } from "./rules";
+import { SEAT_CSS } from "@/shared/brand/seats";
 
-const COLOUR: Record<Mark, string> = { x: "var(--color-ember)", o: "var(--color-sky)" };
-
-/** Drawn, not typed. A letter X and the letter O sit at different optical weights. */
+/** Drawn, not typed, and outlined: a piece is a subject (BRAND.md rule 1). The ink
+    stroke underneath is the outline; the seat colour sits on top with a glint. */
 function Glyph({ mark }: { mark: Mark }) {
-  const common = {
-    fill: "none", stroke: COLOUR[mark], strokeWidth: 11,
-    strokeLinecap: "round" as const,
-  };
+  const line = { fill: "none", strokeLinecap: "round" as const };
+  const shape = (stroke: string, w: number, dy = 0) => mark === "x"
+    ? <g transform={`translate(0 ${dy})`}><path d="M24 24 L76 76" stroke={stroke} strokeWidth={w} {...line} /><path d="M76 24 L24 76" stroke={stroke} strokeWidth={w} {...line} /></g>
+    : <circle cx="50" cy={50 + dy} r="27" stroke={stroke} strokeWidth={w} {...line} />;
   return (
-    <motion.svg viewBox="0 0 100 100" className="w-[62%] h-[62%]"
+    <motion.svg viewBox="0 0 100 100" className="w-[64%] h-[64%] overflow-visible"
       initial={{ scale: 0.3, rotate: mark === "x" ? -30 : 30, opacity: 0 }}
       animate={{ scale: 1, rotate: 0, opacity: 1 }}
       transition={{ type: "spring", stiffness: 300, damping: 15 }}>
-      {mark === "x"
-        ? <><path d="M22 22 L78 78" {...common} /><path d="M78 22 L22 78" {...common} /></>
-        : <circle cx="50" cy="50" r="29" {...common} />}
+      {shape("var(--color-ink-day)", 22, 5)}
+      {shape("var(--color-ink-day)", 22)}
+      {shape(SEAT_CSS[mark], 12)}
+      {mark === "o"
+        ? <ellipse cx="33" cy="30" rx="5" ry="3" transform="rotate(-40 33 30)" fill="white" opacity=".85" />
+        : <ellipse cx="30" cy="27" rx="4" ry="2.4" transform="rotate(45 30 27)" fill="white" opacity=".8" />}
     </motion.svg>
   );
 }
@@ -38,7 +41,7 @@ export function Board({
     // below the fold, and you cannot judge whether a square is worth fighting
     // for without seeing the board it belongs to.
     <motion.div
-      className={`grid grid-cols-3 mx-auto ${width ? "" : "w-full"}`}
+      className={`card grid grid-cols-3 mx-auto p-[3%] ${width ? "" : "w-full"}`}
       style={width ? { width } : undefined}
       animate={{ maxWidth: width ?? (compact ? 188 : 336), gap: width ? Math.max(4, width * 0.03) : compact ? 6 : 10 }}
       transition={SPRING}>
@@ -53,10 +56,9 @@ export function Board({
             disabled={!pickable}
             onClick={() => pickable && onPick(i)}
             aria-label={cell ? `Square ${i + 1}, taken` : `Square ${i + 1}, open`}
-            className={`cut ${pickable ? "tap" : ""} aspect-square grid place-items-center
-              ${compact ? "rounded-[14px]" : ""}
-              ${won ? "cut-leaf" : contested ? "bg-petal" : "bg-board"}
-              ${pickable ? "cursor-pointer" : "cursor-default"}`}
+            className={`${pickable ? "tap" : ""} aspect-square grid place-items-center rounded-[14px]
+              ${won ? "bg-leaf-hi" : contested ? "bg-petal-hi" : open ? "bg-mist" : "bg-board"}
+              ${pickable ? "cursor-pointer hover:bg-sky-hi/40" : "cursor-default"}`}
             style={{ opacity: 1 }}
             animate={won ? { scale: [1, 1.1, 1] } : contested ? { scale: [1, 1.04, 1] } : { scale: 1 }}
             transition={won ? { ...SPRING, delay: (line?.indexOf(i) ?? 0) * 0.09 }

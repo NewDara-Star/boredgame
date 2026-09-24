@@ -42,7 +42,7 @@ export function WeekStrip({ streak, lastPlayed }: { streak: number; lastPlayed: 
         <motion.div key={d.key}
           initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
           transition={{ ...SPRING, delay: i * 0.035 }}
-          className={`flex-1 rounded-2xl border-[2.5px] border-ink py-2 text-center
+          className={`flex-1 rounded-2xl shadow-lift-sm py-2 text-center
             ${d.played ? "bg-petal" : d.isToday ? "bg-board" : "bg-mist/60"}`}>
           <span className="block text-[12px] font-black text-soft">
             {d.label}
