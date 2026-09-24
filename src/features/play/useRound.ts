@@ -29,8 +29,12 @@ export function useRound(
   const [available, setAvailable] = useState<{ name: string; count: number }[]>([]);
   const [last, setLast] = useState<{ correct: boolean; given: string; gained: number; near: boolean } | null>(null);
   const startedAt = useRef(Date.now());
+  /** Which round this is. Anything that finishes late (a load, a save) checks it
+      and is dropped if a newer round has started since. */
+  const roundNo = useRef(0);
 
   const build = useCallback(async () => {
+    const mine = ++roundNo.current;
     setPhase("loading");
     if (fixed) {
       // No shuffle, no seen-filter: everyone plays the same list in the same
@@ -43,6 +47,9 @@ export function useRound(
       return;
     }
     const everything = await loadContent(game);
+    // Changing categories while this loaded started a newer load; that one
+    // deals, this one would deal from the filter you just left.
+    if (mine !== roundNo.current) return;
     // Derived from the pool we already have rather than a second query, so the
     // counts can never disagree with what the round can actually serve.
     const tally = new Map<string, number>();
@@ -113,9 +120,13 @@ export function useRound(
   useEffect(() => {
     if (phase === "done" && !saved.current) {
       saved.current = true;
+      const mine = roundNo.current;
       void recordRound(game, results, score, userId).then((o) => {
-        setOutcome(o);
+        // The profile is the account's, true whenever it lands. The outcome
+        // (streak, rank-up) belongs to that round's summary only: after a quick
+        // Play again it would open the new round with the old celebration.
         if (o.profile) applyProfile(o.profile);
+        if (mine === roundNo.current) setOutcome(o);
       });
     }
     if (phase === "playing") saved.current = false;
