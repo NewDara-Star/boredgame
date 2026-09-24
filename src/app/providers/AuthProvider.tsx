@@ -40,6 +40,13 @@ interface AuthValue {
   /** Turns that same account into a real one, keeping its id, so a guest who
       decides to stay does not lose the games they already played. */
   claimAccount(name: string, password: string): Promise<{ error: string | null }>;
+  /** The name a guest just saved their account under, for the "Saved" card;
+      null otherwise. Cleared by clearClaimed or signing out. */
+  claimedAs: string | null;
+  clearClaimed(): void;
+  /** The live check a name field runs as you type: a sentence, or null when
+      the name can be used. Your own current name always can. */
+  checkName(name: string): Promise<string | null>;
   /** True while the session is anonymous. Guests are kept off the leaderboard. */
   isGuest: boolean;
   setPassword(password: string): Promise<{ error: string | null }>;
@@ -58,6 +65,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(isConfigured);
+  const [claimedAs, setClaimedAs] = useState<string | null>(null);
 
   useEffect(() => {
     if (!supabase) return;
@@ -175,22 +183,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const blocked = await nameBlocked(username, profile?.username);
     if (blocked) return { error: blocked };
     if (password.length < 6) return { error: SHORT_PASSWORD };
+    // The name first (F4, K). set_username is the race-safe step: the server
+    // takes it or says it went, and nothing else has changed yet. Only then the
+    // login, which is built from the name. The other way round, a name taken in
+    // the moment between left a login of one name on a profile of another.
+    const before = profile?.username ?? null;
+    const named = await setUsername(username);
+    if (named.error) return named;
     const { error } = await supabase.auth.updateUser({
       email: asLogin(username), password, data: { username },
     });
     if (error) {
-      return {
-        error: /already registered|already been/i.test(error.message)
-          ? "That name is already taken."
-          : sayError(error, "Couldn't save your account. Try again."),
-      };
+      if (/already registered|already been/i.test(error.message)) {
+        // An old account still signs in with this name. The name can't be your
+        // login, so it doesn't stay your name either: put the old one back.
+        if (before && before !== username) await supabase.rpc("set_username", { p_name: before });
+        await refreshProfile();
+        return { error: "That name is kept for an older account's sign-in. Pick another." };
+      }
+      // The name is yours now; only the password didn't save. Trying again
+      // keeps the name (it's already yours) and sends the login again.
+      return { error: sayError(error, "Your name is saved, but your password isn't. Try again.") };
     }
-    if (username) await setUsername(username);
     // `is_anonymous` is a JWT claim, so `isGuest` keeps reading true until the
     // token is reissued. Refresh it now, or a freshly-claimed account still sees
     // the guest "claim your account" prompts until the next refresh.
     await supabase.auth.refreshSession();
     await refreshProfile();
+    setClaimedAs(username);
     return { error: null };
   }
 
@@ -233,11 +253,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await releasePush();
     await supabase?.auth.signOut();
     setProfile(null);
+    setClaimedAs(null);
   }
 
   return (
     <Ctx.Provider value={{ user, profile, loading, offline: !isConfigured, isGuest: !!user?.is_anonymous,
       signIn, signUp, signInWithLink, signInAsGuest, claimAccount,
+      claimedAs, clearClaimed: () => setClaimedAs(null),
+      checkName: (name: string) => supabase ? nameBlocked(name, profile?.username) : Promise.resolve(nameProblem(name)),
       setPassword, setUsername, signOut, refreshProfile, applyProfile: setProfile }}>
       {children}
     </Ctx.Provider>

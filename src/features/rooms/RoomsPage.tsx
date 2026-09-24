@@ -32,7 +32,7 @@ import { FriendsPanel } from "@/features/friends/Friends";
 export function RoomsPage() {
   const { code } = useParams();
   const nav = useNavigate();
-  const { user, profile, offline, isGuest } = useAuth();
+  const { user, profile, offline, isGuest, claimedAs } = useAuth();
   const [joinCode, setJoinCode] = useState("");
   const [guess, setGuess] = useState("");
   /** the option you tapped in the race, lit while the server judges it */
@@ -295,7 +295,7 @@ export function RoomsPage() {
           plain={room.mode === "connect4"} />
       )}
 
-      {iAmIn && isGuest && (waiting || room.status === "finished") && <ClaimCard />}
+      {iAmIn && (isGuest || claimedAs) && (waiting || room.status === "finished") && <ClaimCard />}
 
       {iAmIn && (
         <button onClick={async () => { await leave(); nav("/rooms"); }}

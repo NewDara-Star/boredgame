@@ -40,6 +40,21 @@ for (const fn of ["signUp", "signInAsGuest", "claimAccount", "setUsername"]) {
 }
 ok(!/isn't 3–20 letters|already using that name/.test(auth), "the old catch-all sentences are gone");
 
+// Keeping a guest account: the name first, then the login (F4, K). The other
+// way round, a name taken in the moment between left a login of one name on a
+// profile of another.
+{
+  const at = auth.indexOf("async function claimAccount(");
+  const body = auth.slice(at, auth.indexOf("\n  }\n", at));
+  const name = body.indexOf("await setUsername("), login = body.indexOf("supabase.auth.updateUser(");
+  ok(name > 0 && login > 0 && name < login, "claimAccount saves the name before the login");
+  ok(/if \(named\.error\) return named;/.test(body), "and stops if the name didn't save");
+  ok(/set_username", \{ p_name: before \}/.test(body), "a name that can't be a login is given back");
+  ok(/setClaimedAs\(username\)/.test(body), "success leaves a 'Saved' card");
+  const card = read("src/features/profile/GuestCard.tsx");
+  ok(/useNameCheck\(/.test(card) && /Next time, sign in as/.test(card), "the claim form checks the name as you type and says what to sign in as");
+}
+
 // Our words, not the browser's tooltip: the name forms don't let it speak.
 for (const f of ["src/features/profile/AuthCard.tsx", "src/features/profile/GuestCard.tsx", "src/features/profile/ProfilePage.tsx"]) {
   const src = read(f);

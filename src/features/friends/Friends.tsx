@@ -55,7 +55,7 @@ export function Invites() {
 
 /** Head-to-head panel: invites, your people (one tap to play), and your link. */
 export function FriendsPanel() {
-  const { user, profile, isGuest } = useAuth();
+  const { user, profile, isGuest, claimedAs } = useAuth();
   const uname = profile?.username ?? user?.email?.split("@")[0] ?? "player";
   const { code, friends, invites, error, setError, addFriend, invite, respond } = useFriends();
   const nav = useNavigate();
@@ -138,7 +138,7 @@ export function FriendsPanel() {
         <Note>{error}</Note>
       </div>
 
-      {isGuest && friends.length > 0 && (
+      {((isGuest && friends.length > 0) || claimedAs) && (
         <div className="space-y-2">
           <p className="text-[13px] font-bold text-soft">
             You're playing as a guest — claim your account so you don't lose your friends.

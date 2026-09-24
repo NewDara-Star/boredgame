@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/app/providers/AuthProvider";
 import { Button } from "@/shared/ui/Button";
 import { Field, Input } from "@/shared/ui/Field";
@@ -51,14 +51,31 @@ export function GuestCard({ note }: { note?: string }) {
  * Shown to a guest once they have something to lose. Deliberately not shown on
  * arrival: asking someone to make an account before they have played is the
  * thing this whole flow exists to avoid.
+ *
+ * Name first, then the login (F4, K): the name is checked as you type, Save
+ * takes it on the server before anything else, and only then the password.
+ * If the password step fails, the name stays yours and Save tries again.
  */
 export function ClaimCard() {
-  const { profile, claimAccount } = useAuth();
+  const { profile, claimAccount, checkName, claimedAs, clearClaimed } = useAuth();
   const [name, setName] = useState(profile?.username ?? "");
   const [password, setPassword] = useState("");
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const live = useNameCheck(open ? name : "", checkName);
+
+  if (claimedAs) {
+    return (
+      <div className="card bg-leaf-hi p-5" role="status">
+        <p className="font-display text-lg font-semibold">Saved.</p>
+        <p className="text-sm font-semibold mt-1">Next time, sign in as {claimedAs}.</p>
+        <button onClick={clearClaimed} className="text-[13px] font-black underline underline-offset-4 mt-3">
+          Got it
+        </button>
+      </div>
+    );
+  }
 
   if (!open) {
     return (
@@ -79,12 +96,13 @@ export function ClaimCard() {
         setError(null); setBusy(true);
         const { error } = await claimAccount(name, password);
         setBusy(false);
-        if (error) setError(error); else setOpen(false);
+        if (error) setError(error);
       }}>
       <p className="font-display text-lg font-semibold">Keep this name</p>
-      <Field label="Name" error={error}>
+      <Field label="Name" error={error ?? (live.state === "bad" ? live.text : null)}
+        hint={error ? undefined : live.state === "ok" ? live.text : live.state === "checking" ? "Checking…" : undefined}>
         <Input value={name} autoCapitalize="none" maxLength={20}
-          onChange={(e) => setName(e.target.value)} />
+          onChange={(e) => { setName(e.target.value); setError(null); }} />
       </Field>
       <Field label="Password" hint="At least 6 characters">
         <Input type="password" required minLength={6} value={password} placeholder="••••••••"
@@ -95,4 +113,30 @@ export function ClaimCard() {
       </Button>
     </form>
   );
+}
+
+/**
+ * The live check under a name field: quiet while you type, then either the
+ * name is free or the sentence that says why not. Only the latest answer is
+ * shown, however the requests come back.
+ */
+function useNameCheck(name: string, check: (n: string) => Promise<string | null>) {
+  const [res, setRes] = useState<{ state: "idle" | "checking" | "ok" | "bad"; text: string; for: string }>(
+    { state: "idle", text: "", for: "" });
+  // The provider hands over a new function every render; only the name matters.
+  const checkRef = useRef(check);
+  checkRef.current = check;
+  useEffect(() => {
+    const n = name.trim();
+    if (!n) { setRes({ state: "idle", text: "", for: "" }); return; }
+    let live = true;
+    setRes({ state: "checking", text: "", for: n });
+    const t = setTimeout(() => {
+      void checkRef.current(n).then((why) => {
+        if (live) setRes(why ? { state: "bad", text: why, for: n } : { state: "ok", text: `${n} is yours to keep.`, for: n });
+      });
+    }, 400);
+    return () => { live = false; clearTimeout(t); };
+  }, [name]);
+  return res;
 }
