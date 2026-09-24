@@ -110,6 +110,28 @@ for (const fn of ["daily_next", "daily_answer", "submit_daily"]) {
   }
 }
 
+// Friend codes are readable by nobody over the API (F48). Every profile column
+// the app asks for must be in the grant, or the read is refused outright.
+{
+  const m = schema.match(/grant select \(([^)]*)\) on public\.profiles to anon, authenticated;/);
+  ok(!!m, "profiles is granted column by column");
+  const granted = new Set((m?.[1] ?? "").split(",").map((c) => c.trim()));
+  ok(!granted.has("friend_code") && granted.has("username"), "friend_code is not in the grant; the rest is");
+  ok(/revoke select on public\.profiles from anon, authenticated;/.test(schema), "the whole-table read is revoked");
+  const asked: string[] = [];
+  for (const f of files) {
+    const src = readFileSync(f, "utf8");
+    if (f.includes("supabase/functions")) continue; // the edge sender uses the service role
+    for (const x of src.matchAll(/from\("profiles"\)\s*\.select\("([^"]*)"/g)) asked.push(...x[1].split(","));
+    for (const x of src.matchAll(/profiles(?:![a-z_]+)?\(([^)]*)\)/g)) asked.push(...x[1].split(","));
+    for (const x of src.matchAll(/PROFILE_COLUMNS = "([^"]*)"/g)) asked.push(...x[1].split(","));
+  }
+  const cols = asked.map((c) => c.trim()).filter(Boolean);
+  ok(cols.length >= 10, `found ${cols.length} profile columns asked for — the scan is broken`);
+  for (const c of new Set(cols)) ok(granted.has(c), `the app reads profiles.${c}, which the grant doesn't cover`);
+  ok(!files.some((f) => /from\("profiles"\)\s*\.select\("\*/.test(readFileSync(f, "utf8"))), "nothing reads profiles with select(*)");
+}
+
 // Every assertion above counts; exit only once they have all run.
 if (bad) { console.error(`\n${bad} of ${n} schema assertions failed`); process.exit(1); }
 console.log(`${n} schema assertions hold (${rpcs.size} rpcs, ${rels.size} relations)`);

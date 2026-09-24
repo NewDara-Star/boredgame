@@ -16,6 +16,9 @@ export const asLogin = (id: string) =>
 export const isSynthetic = (email?: string | null) => !!email?.endsWith(`@${HOME}`);
 import type { Profile } from "@/shared/types/db";
 
+/** Every profile column a player may read (the grant in schema.sql, F48). */
+const PROFILE_COLUMNS = "id, username, avatar, total_answered, total_correct, created_at, streak, best_streak, last_played, is_guest, best_round";
+
 interface AuthValue {
   user: User | null;
   profile: Profile | null;
@@ -66,7 +69,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   async function refreshProfile() {
     if (!supabase || !user) { setProfile(null); return; }
-    const { data } = await supabase.from("profiles").select("*").eq("id", user.id).single();
+    // Named columns, not "*": friend_code is readable by nobody over the API
+    // (F48), so a "*" would be refused outright. PROFILE_COLUMNS matches the grant.
+    const { data } = await supabase.from("profiles").select(PROFILE_COLUMNS).eq("id", user.id).single();
     setProfile((data as Profile | null) ?? null);
   }
 

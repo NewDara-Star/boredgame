@@ -2405,3 +2405,16 @@ create policy "voice: room members talk" on realtime.messages
   for insert to authenticated
   with check (realtime.messages.extension in ('broadcast', 'presence')
               and public.voice_topic_ok((select realtime.topic())));
+
+-- ============================================================================
+-- Friend codes are private (F48, DB1). profiles was readable column by column
+-- by everyone, signed out included, and add_friend befriends both ways on a
+-- code alone, so anyone could befriend (and ping) anyone. Players read every
+-- column but friend_code; your own comes from my_friend_code(), and a code
+-- someone shares with you still works through add_friend() (both definer).
+-- A NEW profiles column is unreadable to the app until it is added here, and
+-- to PROFILE_COLUMNS in AuthProvider (check-schema compares them).
+-- ============================================================================
+revoke select on public.profiles from anon, authenticated;
+grant select (id, username, avatar, total_answered, total_correct, created_at, streak, best_streak,
+              last_played, is_guest, best_round) on public.profiles to anon, authenticated;
