@@ -47,3 +47,23 @@ export function deal<T>(
   seen.add(idOf(item));
   return { item, recycled };
 }
+
+/**
+ * A solo round of `size`: every question you haven't seen goes in first, and
+ * only then is it topped up with ones you have, the longest-ago first. It used
+ * to deal the whole round from everything as soon as fewer than `size` were
+ * new, so a category with 6 unseen questions could hand you none of them.
+ * `seen` is oldest first, as the progress store keeps it. `shuffle` is passed in
+ * so the checks can run it without randomness.
+ */
+export function pickRound<T>(
+  all: T[], idOf: (t: T) => string, seen: string[], size: number,
+  shuffle: <U>(xs: U[]) => U[],
+): T[] {
+  const when = new Map(seen.map((id, i) => [id, i]));
+  const fresh = shuffle(all.filter((t) => !when.has(idOf(t))));
+  const old = all.filter((t) => when.has(idOf(t)))
+    .sort((a, b) => when.get(idOf(a))! - when.get(idOf(b))!);
+  // Mixed afterwards, so the repeats don't all arrive at the end.
+  return shuffle([...fresh, ...old].slice(0, size));
+}

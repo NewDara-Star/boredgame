@@ -4,7 +4,7 @@
  * nothing in it. Both were one line of fallback. This checks the replacement.
  * Run: node --experimental-strip-types scripts/check-dealer.mts
  */
-import { deal } from "../src/features/play/dealer.ts";
+import { deal, pickRound } from "../src/features/play/dealer.ts";
 
 let failed = 0;
 const ok = (name: string, cond: boolean, detail = "") => {
@@ -61,6 +61,24 @@ console.log("\nedges");
   const seen = new Set<string>(["a", "b", "c", "d", "e"]);
   deal(POOL, id, seen);
   ok("a recycle clears the seen set", seen.size === 1);
+}
+
+// --- a solo round: unseen first, then the longest-ago -------------------------
+{
+  const same = <U,>(xs: U[]) => xs.slice();              // no randomness in a check
+  const ids = (xs: string[]) => xs.slice().sort().join(",");
+  const bank = Array.from({ length: 30 }, (_, k) => "q" + k);
+  const seenAll = bank.filter((id) => !["q3", "q9", "q14", "q20", "q21", "q27"].includes(id));  // 6 unseen
+  const r = pickRound(bank, (x) => x, seenAll, 10, same);
+  ok("a round has its size", r.length === 10);
+  ok("all 6 unseen questions are in it", ["q3", "q9", "q14", "q20", "q21", "q27"].every((q) => r.includes(q)));
+  ok("topped up with the 4 seen longest ago", ids(r.filter((q) => seenAll.includes(q))) === ids(seenAll.slice(0, 4)));
+  ok("no question twice", new Set(r).size === r.length);
+  const allNew = pickRound(bank, (x) => x, [], 10, same);
+  ok("with plenty unseen, only unseen", allNew.length === 10);
+  const small = pickRound(bank.slice(0, 4), (x) => x, ["q0"], 10, same);
+  ok("a pool smaller than a round gives the whole pool", ids(small) === ids(bank.slice(0, 4)));
+  ok("an empty pool gives an empty round", pickRound([], (x: string) => x, [], 10, same).length === 0);
 }
 
 console.log(failed === 0 ? "\ndealing is sound" : `\n${failed} FAILED`);

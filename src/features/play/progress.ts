@@ -63,7 +63,10 @@ export async function recordRound(
 
   p.answered += results.length;
   p.correct += results.filter((r) => r.correct).length;
-  p.seen = Array.from(new Set([...p.seen, ...results.map((r) => r.item.id)])).slice(-500);
+  // Most recent last: a question seen again moves to the end, so a round that
+  // has to repeat can take the ones seen longest ago (pickRound).
+  const now_ids = new Set(results.map((r) => r.item.id));
+  p.seen = [...p.seen.filter((id) => !now_ids.has(id)), ...now_ids].slice(-500);
   p.bestScore[game] = Math.max(p.bestScore[game] ?? 0, score);
   p.streak = advance(p.streak, p.lastPlayed, now);
   p.bestStreak = Math.max(p.bestStreak, p.streak);

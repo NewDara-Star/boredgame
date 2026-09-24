@@ -4,6 +4,7 @@ import type { GameKey } from "@/shared/types/db";
 import { isCorrect, closeness } from "@/shared/lib/normalise";
 import { logNearMiss } from "@/features/play/nearMiss";
 import { loadContent, shuffle } from "./content";
+import { pickRound } from "./dealer";
 import { readLocal, recordRound, type RoundOutcome } from "./progress";
 import { scoreAnswer } from "./scoring";
 import type { PlayItem, RoundResult } from "./types";
@@ -63,10 +64,7 @@ export function useRound(
     if (all.length === 0) { setPhase("empty"); return; }
     // Scoped to the account, not the browser: an unscoped seen-list meant one
     // account's history quietly suppressed questions for another on the same machine.
-    const seen = new Set(readLocal(userId).seen);
-    const fresh = all.filter((i) => !seen.has(i.id));
-    const pool = fresh.length >= size ? fresh : all;
-    setItems(shuffle(pool).slice(0, Math.min(size, pool.length)));
+    setItems(pickRound(all, (i) => i.id, readLocal(userId).seen, size, shuffle));
     setIndex(0); setScore(0); setStreak(0); setBestStreak(0);
     setResults([]); setLast(null); setHintsUsed(0); setOutcome(null);
     startedAt.current = Date.now();
