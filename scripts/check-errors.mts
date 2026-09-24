@@ -25,6 +25,7 @@ function walk(dir: string, out: string[] = []): string[] {
   return out;
 }
 
+const read = (p: string) => readFileSync(join(root, p), "utf8");
 let n = 0, bad = 0;
 const ok = (c: boolean, m: string) => { n++; if (!c) { console.error("FAIL " + m); bad++; } };
 
@@ -60,6 +61,16 @@ ok(reads >= 5, `found ${reads} .message reads — the scan is broken`);
 const src = readFileSync(join(root, "src/shared/lib/sayError.ts"), "utf8");
 ok(!/return[^;]*\be\.message\b/.test(src) && !/return[^;]*\bm\b[^.]/.test(src.replace(/return `Use at least \$\{min\[1\]\}/, "")),
    "sayError never returns the message it was given");
+
+// A failed email link: read the moment the app starts, whatever page it lands
+// on, and said in our words, not Supabase's error_description (F14, P2).
+{
+  const main = read("src/main.tsx").split("\n").find((l) => l.startsWith("import "));
+  ok(main === 'import "@/shared/lib/linkError";', "the failed-link reason is read before anything else in the app");
+  ok(!/error_description/.test(read("src/shared/lib/linkError.ts").replace(/^\s*(\*|\/\/).*$/gm, "")) && !/error_description/.test(read("src/features/profile/ProfilePage.tsx")),
+     "Supabase's own description of a failed link never reaches the screen");
+  ok(/hasLinkError\(\) && pathname !== "\/profile"/.test(read("src/app/layout/Shell.tsx")), "a failed link that lands on Home goes on to the You screen");
+}
 
 const FB = "Couldn't do that. Try again.";
 const says = (message: string, extra: Record<string, unknown> = {}) => sayError({ message, ...extra }, FB);

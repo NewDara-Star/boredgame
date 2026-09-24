@@ -1,4 +1,6 @@
-import { NavLink, Outlet, useLocation } from "react-router-dom";
+import { useEffect } from "react";
+import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { hasLinkError } from "@/shared/lib/linkError";
 import { motion } from "framer-motion";
 import { useAuth } from "@/app/providers/AuthProvider";
 import { useProgress } from "@/features/play/useProgress";
@@ -25,6 +27,12 @@ const isActive = (pathname: string, to: string, exact?: boolean) =>
 export function Shell() {
   const { offline, user } = useAuth();
   const { pathname } = useLocation();
+  const nav = useNavigate();
+  // A failed email link lands wherever it was sent (usually Home); its reason
+  // is shown on the You screen, so go there (F14).
+  useEffect(() => {
+    if (hasLinkError() && pathname !== "/profile") nav("/profile", { replace: true });
+  }, [pathname, nav]);
   const p = useProgress();
   const rank = rankFor(p.answered).current;
 

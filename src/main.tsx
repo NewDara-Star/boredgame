@@ -1,3 +1,5 @@
+// First, so a failed sign-in link's reason is read before anything clears the address (F14).
+import "@/shared/lib/linkError";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { App } from "@/app/App";

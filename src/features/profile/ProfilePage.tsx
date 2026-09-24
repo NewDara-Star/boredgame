@@ -12,6 +12,7 @@ import { Field, Input } from "@/shared/ui/Field";
 import { stagger, riseIn, popIn } from "@/shared/ui/motion";
 import { AuthCard } from "./AuthCard";
 import { ClaimCard } from "./GuestCard";
+import { takeLinkError } from "@/shared/lib/linkError";
 
 /** A number worth looking at, with a word under it. That is the whole card. */
 function Stat({ value, label, accent = "" }:
@@ -29,18 +30,9 @@ function Stat({ value, label, accent = "" }:
 /** Supabase reports a failed magic link in the URL fragment. Without reading it,
     a broken link looks identical to never having clicked one. */
 function useLinkError() {
-  const [authError, setAuthError] = useState<string | null>(null);
-  useEffect(() => {
-    const hash = new URLSearchParams(window.location.hash.replace(/^#/, ""));
-    const code = hash.get("error_code");
-    if (!code && !hash.get("error")) return;
-    setAuthError(
-      code === "otp_expired"
-        ? "That sign-in link had already been used or expired. Mail providers sometimes open links to scan them, which spends the one-time code before you get there. Request a fresh one."
-        : hash.get("error_description")?.replace(/\+/g, " ") ?? "Sign-in failed."
-    );
-    history.replaceState(null, "", window.location.pathname);
-  }, []);
+  // Read when the app started (shared/lib/linkError), whichever page the link
+  // landed on; taken once, so it doesn't come back on the next visit.
+  const [authError] = useState<string | null>(takeLinkError);
   return authError;
 }
 
