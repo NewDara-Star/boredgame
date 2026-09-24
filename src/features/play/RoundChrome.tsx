@@ -1,4 +1,5 @@
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { sayParts, type ScoreParts } from "./scoring";
 import { MIST, RAMPS } from "@/shared/brand/tokens";
 import { useEffect, useState, type ReactNode } from "react";
 import { drawCard, type MatchCard } from "@/shared/card/frame";
@@ -98,9 +99,11 @@ export function Burst({ show }: { show: boolean }) {
   );
 }
 
-export function Reveal({ correct, near, answer, gained, onNext, isLast, explanation }:
+export function Reveal({ correct, near, answer, gained, parts, onNext, isLast, explanation }:
   { correct: boolean; near: boolean; answer: string; gained: number; onNext: () => void;
-    isLast: boolean; explanation?: string }) {
+    isLast: boolean; explanation?: string;
+    /** what the points were for; the clock is never shown while you answer (talk item 4) */
+    parts?: ScoreParts | null }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 26 }} animate={{ opacity: 1, y: 0 }} transition={SPRING}
@@ -109,6 +112,9 @@ export function Reveal({ correct, near, answer, gained, onNext, isLast, explanat
         <p className={`font-display text-lg font-semibold ${near && !correct ? "text-ink" : "text-board"}`}>
           {correct ? `Correct  +${gained}` : near ? "So close" : "Missed"}
         </p>
+        {correct && parts && (
+          <p className="text-[13px] font-bold text-board opacity-90 mt-0.5 tabular-nums">{sayParts(parts)}</p>
+        )}
         {!correct && (
           <p className={`text-[15px] font-bold mt-0.5 ${near ? "text-ink" : "text-board"}`}>
             {answer}

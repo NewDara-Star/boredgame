@@ -8,6 +8,7 @@ import { normalise, isCorrect, closeness, nearMiss, slack, levenshtein, clashesW
   from "../src/shared/lib/normalise.ts";
 import { PICTO_SEED } from "../src/shared/data/picto.ts";
 import { readFileSync } from "node:fs";
+import * as scoring from "../src/features/play/scoring.ts";
 
 let n = 0;
 const ok = (c: boolean, m: string) => {
@@ -179,6 +180,38 @@ ok(closeness("", "water") === 0, "empty is 0");
   ok(/if \(!bank\) \{/.test(admin), "and refuses to publish when it can't read the bank");
   ok(/category_id: Number\(d\.category\)/.test(admin), "the editor saves the category's id");
   ok(/from\("categories"\)/.test(admin) && !/const CATEGORIES = \[/.test(admin), "the editor's categories come from the database, not a list in the code");
+}
+
+// --- points for a right answer (talk item 4) ---------------------------------
+// No clock while you answer; the reveal says what the speed earned. And the
+// phone counts the streak bonus the way the daily's server does (this answer
+// included): it used to be one behind, +0 for a first right answer, not +60.
+{
+  const { scoreParts, partsOf, sayParts } = scoring as unknown as {
+    scoreParts?: (ms: number, s: number, h: number) => { right: number; speed: number; streak: number; hints: number; total: number };
+    partsOf?: (g: number, s: number) => { speed: number; streak: number };
+    sayParts?: (p: object) => string };
+  ok(typeof scoreParts === "function" && typeof partsOf === "function" && typeof sayParts === "function", "the points come in parts the reveal can name");
+  if (scoreParts && partsOf && sayParts) {
+    const first = scoreParts(9000, 1, 0);
+    ok(first.speed === 400 && first.streak === 60 && first.total === 960, "a first right answer at 9 s: 500 + 400 speed + 60 streak");
+    ok(scoreParts(60_000, 7, 1).total === 500 + 0 + 300 - 100, "past 45 s no speed; the streak bonus stops at 5; a hint costs 100");
+    ok(sayParts(scoreParts(9000, 1, 1)) === "500 right · +400 speed · +60 streak · −100 hint", "the reveal's line says each part");
+    // the daily's server: think time -> 500 + round(500 * speed) + least(streak, 5) * 60
+    for (const [ms, st] of [[0, 1], [9000, 2], [30_000, 6], [50_000, 3]]) {
+      const server = 500 + Math.round(500 * Math.max(0, 1 - ms / 45000)) + Math.min(st, 5) * 60;
+      ok(scoreParts(ms, st, 0).total === server, `the phone scores like daily_tally (${ms} ms, streak ${st})`);
+      const p = partsOf(server, st);
+      ok(p.speed === scoreParts(ms, st, 0).speed && p.streak === Math.min(st, 5) * 60, "the daily's parts follow from its total");
+    }
+  }
+  const src = (f: string) => readFileSync(new URL(`../src/${f}`, import.meta.url), "utf8");
+  ok(/scoreParts\(ms, streak \+ 1, hintsUsed\)/.test(src("features/play/useRound.ts")), "a solo answer counts in its own streak");
+  const schema = readFileSync(new URL("../supabase/schema.sql", import.meta.url), "utf8");
+  ok(/streak := streak \+ 1;[\s\S]{0,300}least\(streak, 5\) \* 60/.test(schema), "the daily's server counts the answer in its streak before the bonus");
+  for (const f of ["features/trivia/TriviaGame.tsx", "features/picto/PictoGame.tsx"])
+    ok(/parts=\{r\.last!\.parts\}/.test(src(f)) && !/ROUND_MS|askMs/.test(src(f)), `${f}: parts on the reveal, no clock while answering`);
+  ok(/parts=\{r\.last\.correct \? partsOf\(/.test(src("features/daily/DailyPage.tsx")), "the daily's reveal names its parts too");
 }
 
 console.log(`${n} answer-matching assertions hold`);

@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { partsOf } from "@/features/play/scoring";
 import { RAMPS } from "@/shared/brand/tokens";
 import { Dealing } from "@/shared/ui/Note";
 import { motion } from "framer-motion";
@@ -198,7 +199,8 @@ export function DailyPage() {
       </div>
       {revealed && r.last && (
         <Reveal correct={r.last.correct} near={false} answer={r.last.answer}
-          gained={r.last.gained} onNext={() => void r.next()} isLast={r.index + 1 >= r.total}
+          gained={r.last.gained} parts={r.last.correct ? partsOf(r.last.gained, r.last.streak) : null}
+          onNext={() => void r.next()} isLast={r.index + 1 >= r.total}
           explanation={r.last.explanation} />
       )}
     </div>

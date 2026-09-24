@@ -14,6 +14,8 @@ interface Last {
   near: boolean;
   answer: string;
   explanation?: string;
+  /** right answers in a row, this one included, as the server counts them */
+  streak: number;
 }
 
 /**
@@ -81,7 +83,7 @@ export function useDailyPlay(d: DailyApi, enabled: boolean) {
     // when it served the question, so the phone's own estimate could differ.
     setScore(v.score);
     setStreak(v.streak);
-    setLast({ correct: v.correct, given, gained: v.gained, near: false, answer: v.answer, explanation: v.explanation });
+    setLast({ correct: v.correct, given, gained: v.gained, near: false, answer: v.answer, explanation: v.explanation, streak: v.streak });
     setGrid((g0) => { const g1 = [...(readGrid(d.day) ?? g0), v.correct]; keepGrid(d.day, g1); return g1; });
     setPending(null);
     setPhase("revealed");

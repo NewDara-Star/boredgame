@@ -6,7 +6,7 @@ import { logNearMiss } from "@/features/play/nearMiss";
 import { loadContent, shuffle } from "./content";
 import { pickRound } from "./dealer";
 import { readLocal, recordRound, type RoundOutcome } from "./progress";
-import { scoreAnswer } from "./scoring";
+import { scoreParts, type ScoreParts } from "./scoring";
 import type { PlayItem, RoundResult } from "./types";
 
 export type Phase = "loading" | "empty" | "playing" | "revealed" | "done";
@@ -28,7 +28,7 @@ export function useRound(
   const [results, setResults] = useState<RoundResult[]>([]);
   const [outcome, setOutcome] = useState<RoundOutcome | null>(null);
   const [available, setAvailable] = useState<{ name: string; count: number }[]>([]);
-  const [last, setLast] = useState<{ correct: boolean; given: string; gained: number; near: boolean } | null>(null);
+  const [last, setLast] = useState<{ correct: boolean; given: string; gained: number; near: boolean; parts: ScoreParts | null } | null>(null);
   const startedAt = useRef(Date.now());
   /** Which round this is. Anything that finishes late (a load, a save) checks it
       and is dropped if a newer round has started since. */
@@ -83,7 +83,8 @@ export function useRound(
     const ok = current.choices
       ? given === current.answer
       : isCorrect(given, current.answer, current.accept);
-    const gained = ok ? scoreAnswer(ms, streak, hintsUsed) : 0;
+    const parts = ok ? scoreParts(ms, streak + 1, hintsUsed) : null;   // this answer counts in its own streak
+    const gained = parts?.total ?? 0;
     // A multiple-choice miss is a wrong pick, never a "so close" typo -- only
     // typed answers can be near misses.
     const near = !ok && !current.choices && closeness(given, current.answer, current.accept) > 0.7;
@@ -97,7 +98,7 @@ export function useRound(
     // Every accept list in the bank is a guess until this has something in it.
     if (!ok) logNearMiss(current, given);
     setResults((r) => [...r, { item: current, correct: ok, given, msTaken: ms, hintsUsed }]);
-    setLast({ correct: ok, given, gained, near });
+    setLast({ correct: ok, given, gained, near, parts });
     setPhase("revealed");
   }, [phase, current, streak, hintsUsed]);
 
