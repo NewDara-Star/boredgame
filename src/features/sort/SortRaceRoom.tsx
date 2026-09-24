@@ -130,6 +130,12 @@ export function SortRaceRoom({
       </p>
 
       <Note>{r.error}</Note>
+      {r.finishDropped && !r.finishing && (
+        <button onClick={r.retryFinish}
+          className="cut tap w-full py-3.5 font-display text-lg font-semibold cut-petal">
+          Send my finish again
+        </button>
+      )}
 
       {playing && (
         <div className="flex items-center gap-3">
@@ -176,7 +182,7 @@ export function SortRaceRoom({
             draw={false}
             onRematch={() => void r.rematch()}
             onQuit={() => void r.quit()}
-            onChangeGame={() => void r.quit()} />
+            onChangeGame={() => void r.changeGame()} />
           </PlayRow>
         </>
       )}

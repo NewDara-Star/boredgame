@@ -132,9 +132,14 @@ export function useSortRoom(roomId: number | null, userId: string | undefined) {
    * (`ms`), measured from my first lift; the server bounds it and, when the
    * other board is also in, decides who was faster.
    */
+  /** the last finish sent, so a dropped one can be sent again as it was */
+  const lastFinish = useRef<{ g: Game; ms: number } | null>(null);
+  const [finishDropped, setFinishDropped] = useState(false);
+
   const finish = useCallback(async (g: Game, ms: number) => {
     if (!supabase || !roomId || finishing) return;
-    setFinishing(true);
+    lastFinish.current = { g, ms };
+    setFinishing(true); setFinishDropped(false); setError(null);
     const { error: err } = await supabase.functions.invoke("sort-finish", {
       body: {
         room: roomId,
@@ -146,14 +151,24 @@ export function useSortRoom(roomId: number | null, userId: string | undefined) {
     });
     if (err) {
       const why = await refusal(err);
-      setError(why ? `That finish was not accepted: ${why}`
-                   : "Could not post that finish — try tapping again.");
-      // The finish did not land: let them try again rather than stranding the
-      // board frozen on a solve the server never recorded.
-      setSolvedMs(null);
+      if (why) {
+        // The referee said no (the replay didn't hold): the board opens again.
+        setError(`That finish was not accepted: ${why}`);
+        setSolvedMs(null);
+      } else {
+        // It never arrived. The solve is still good, so keep the board as it is
+        // and send the same finish again. It used to say "try tapping again"
+        // with nothing to tap: the only way was to unsort a tube and redo it.
+        setError("Your finish didn't reach the server.");
+        setFinishDropped(true);
+      }
     }
     setFinishing(false);
   }, [roomId, finishing]);
+
+  const retryFinish = useCallback(() => {
+    if (lastFinish.current) void finish(lastFinish.current.g, lastFinish.current.ms);
+  }, [finish]);
 
   /** Tap a tube: the first lifts its top ball, the second drops it there. A
       tube that cannot take it — only ever a full one — refuses visibly and the
@@ -205,6 +220,13 @@ export function useSortRoom(roomId: number | null, userId: string | undefined) {
     })));
   }, [roomId, row?.level]);
 
+  /** 'Play something else': back to the lobby, same room and code, like every
+      other room game. It was wired to Quit, which ended the match. */
+  const changeGame = useCallback(async () => {
+    if (!supabase || !roomId) return;
+    setError(await attempt("Reopening the room", supabase.rpc("reopen_room", { p_room: roomId })));
+  }, [roomId]);
+
   const quit = useCallback(async () => {
     if (!supabase || !roomId) return;
     setError(await attempt("Ending the match", supabase.rpc("end_match", { p_room: roomId })));
@@ -232,7 +254,8 @@ export function useSortRoom(roomId: number | null, userId: string | undefined) {
     theirProgress: theirTubes && row ? solvedCount(theirTubes, row.cap) : 0,
     won: row?.winner ?? null,
     iWon: !!row?.winner && row.winner === seat,
-    pick, takeBack, concede, rematch, quit,
+    pick, takeBack, concede, rematch, quit, changeGame,
+    finishDropped, retryFinish,
   };
 }
 
