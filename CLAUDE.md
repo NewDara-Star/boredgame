@@ -46,6 +46,14 @@ on Supabase to boot.
 is picked up by its name; there is nothing to register. One check alone:
 `npm run check:<name>`.
 
+The server's rules have a test of their own, `supabase/tests/rules.sql`: the
+bugs the sweeps proved (multiple choice judged on the exact option, the daily's
+date window and served-only answers, board wins after switching games, the
+voice channel, friend codes, push). It needs the database, so the build can't
+run it: run the whole file in the SQL Editor after changing any function it
+names. It always ends in an error on purpose, which rolls everything back; the
+message says `RULES HOLD: n of n` or names each broken rule.
+
 ## Adding rebus puzzles
 
 Run the gate before anything reaches the database:

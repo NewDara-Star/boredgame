@@ -1,0 +1,178 @@
+-- ============================================================================
+-- Server rules that have broken before (F54, T2). One test per proven bug.
+--
+-- Run the whole file against the database (SQL Editor, or execute_sql) after
+-- changing any function it names: judge_answer, record_round, daily_next,
+-- daily_answer, submit_daily, daily_round, claim_board_win,
+-- save_push_subscription, voice_topic_ok, or the profiles and puzzles grants.
+--
+-- It ALWAYS ends in an error, on purpose: the error rolls every write back, so
+-- it can run against the live database. Read the message:
+--   "RULES HOLD: n of n"             everything is as it should be
+--   "RULES BROKEN: k of n" + names   each broken rule, with the bug it guards
+-- It borrows real rows (two players who share a room, a player who hasn't
+-- played today's daily, a live multiple-choice question) and changes nothing.
+-- ============================================================================
+do $rules$
+declare
+  today date := (now() at time zone 'utc')::date;
+  a uuid; b uuid; c uuid; r bigint;
+  mc bigint; mc_answer text; mc_choices text[]; slip text;
+  ids bigint[]; n int; n2 int; j jsonb; err text;
+  sa int; sb int; got int; again int;
+  results text[] := '{}'; broken text[] := '{}';
+begin
+  -- ---- borrowed rows -------------------------------------------------------
+  select p1.user_id, p2.user_id, p1.room_id into a, b, r
+    from public.room_players p1 join public.room_players p2
+      on p2.room_id = p1.room_id and p2.user_id > p1.user_id
+   where (select count(*) from public.room_players x where x.room_id = p1.room_id) = 2
+   order by p1.room_id desc limit 1;
+  select id into c from public.profiles pr
+   where id not in (a, b)
+     and not exists (select 1 from public.admins ad where ad.user_id = pr.id)
+     and not exists (select 1 from public.room_players x where x.room_id = r and x.user_id = pr.id)
+     and not exists (select 1 from public.daily_picks d where d.user_id = pr.id and d.day = today)
+   limit 1;
+  select id, answer, choices into mc, mc_answer, mc_choices from public.puzzles
+   where game = 'trivia' and status = 'live' and cardinality(choices) = 4
+     and length(public.normalise_answer(answer)) >= 8
+   order by id limit 1;
+  -- one letter off: inside the typo allowance a TYPED answer gets
+  slip := left(mc_answer, -1) || case when right(mc_answer, 1) = 'x' then 'y' else 'x' end;
+  if a is null or b is null or c is null or mc is null then
+    raise exception 'RULES NOT RUN: couldn''t borrow the rows the tests need';
+  end if;
+
+  -- ---- Q12, D3: multiple choice is judged on the exact option --------------
+  results := array_append(results, 'Q12 a near miss of the right option is wrong (multiple choice)'::text);
+  if public.judge_answer(slip, mc_answer, null, mc_choices) then broken := broken || results[cardinality(results)]; end if;
+  results := array_append(results, 'Q12 the right option is right'::text);
+  if not public.judge_answer(mc_answer, mc_answer, null, mc_choices) then broken := broken || results[cardinality(results)]; end if;
+  results := array_append(results, 'Q12 a typed answer keeps its typo allowance'::text);
+  if not public.judge_answer(slip, mc_answer, null, null) then broken := broken || results[cardinality(results)]; end if;
+
+  select count(*) filter (where correct), count(*) filter (where not correct) into n, n2
+    from public.attempts where user_id = a and puzzle_id = mc;
+  perform set_config('request.jwt.claims', json_build_object('sub', a, 'role', 'authenticated')::text, true);
+  set local role authenticated;
+  perform public.record_round(jsonb_build_array(
+    jsonb_build_object('puzzle_id', mc, 'given', slip, 'ms', 4000),
+    jsonb_build_object('puzzle_id', mc, 'given', mc_answer, 'ms', 4000)));
+  reset role;
+  results := array_append(results, 'Q12 record_round files a near-miss option as wrong and the option as right'::text);
+  if (select count(*) filter (where correct) from public.attempts where user_id = a and puzzle_id = mc) <> n + 1
+  or (select count(*) filter (where not correct) from public.attempts where user_id = a and puzzle_id = mc) <> n2 + 1
+  then broken := broken || results[cardinality(results)]; end if;
+
+  -- ---- D1: the daily takes a day either side of UTC, and no further --------
+  ids := public.daily_round(today);
+  perform set_config('request.jwt.claims', json_build_object('sub', c, 'role', 'authenticated')::text, true);
+  set local role authenticated;
+  results := array_append(results, 'D1 yesterday''s and tomorrow''s daily open (phones ahead of or behind UTC)'::text);
+  begin
+    perform public.daily_next(today - 1); perform public.daily_next(today + 1);
+  exception when others then broken := broken || results[cardinality(results)]; end;
+  results := array_append(results, 'D1 two days out is closed (daily_next, daily_answer, submit_daily)'::text);
+  n := 0;
+  begin perform public.daily_next(today + 2); exception when others then n := n + 1; end;
+  begin perform public.daily_answer(today - 2, ids[1], 'x'); exception when others then n := n + 1; end;
+  begin j := public.submit_daily(today + 2);          -- refuses by answering ok: false
+    if j->>'ok' = 'false' then n := n + 1; end if;
+  exception when others then n := n + 1; end;
+  if n <> 3 then broken := broken || results[cardinality(results)]; end if;
+
+  -- ---- D2: only a question the server served can be answered ---------------
+  perform public.daily_next(today);                       -- serves ids[1]
+  results := array_append(results, 'D2 answering a question that was never served is refused'::text);
+  err := null;
+  begin perform public.daily_answer(today, ids[2], 'x'); exception when others then err := sqlerrm; end;
+  if err is null or err not like '%served%' then broken := broken || results[cardinality(results)]; end if;
+  results := array_append(results, 'D2 the served question can be answered'::text);
+  begin
+    j := public.daily_answer(today, ids[1], 'x');
+    if j ? 'correct' is not true then broken := broken || results[cardinality(results)]; end if;
+  exception when others then broken := broken || results[cardinality(results)]; end;
+
+  -- ---- F30: today's daily questions can't be read ahead --------------------
+  results := array_append(results, 'F30 a player can''t read today''s daily questions from the bank'::text);
+  select count(*) into n from public.puzzles where id = any(ids);
+  if n <> 0 then broken := broken || results[cardinality(results)]; end if;
+  reset role;
+  perform set_config('request.jwt.claims', json_build_object('role', 'anon')::text, true);
+  set local role anon;
+  results := array_append(results, 'F30 nor can someone signed out'::text);
+  select count(*) into n from public.puzzles where id = any(ids);
+  if n <> 0 then broken := broken || results[cardinality(results)]; end if;
+  reset role;
+  results := array_append(results, 'F30 the daily never uses a question bundled in the app'::text);
+  if exists (select 1 from public.puzzles where id = any(ids) and in_app) then broken := broken || results[cardinality(results)]; end if;
+
+  -- ---- RM2: a board win pays from the game the room is playing now ---------
+  -- A finished Square Off is left in the room (x won, unpaid) and the room has
+  -- moved on to Connect 4, which o has just won.
+  update public.rooms set mode = 'connect4' where id = r;
+  delete from public.ttt_games where room_id = r;
+  delete from public.c4_games where room_id = r;
+  insert into public.ttt_games(room_id, phase, winner, x_player, o_player, scored) values (r, 'over', 'x', a, b, false);
+  insert into public.c4_games (room_id, phase, winner, x_player, o_player, scored) values (r, 'over', 'o', a, b, false);
+  select score into sa from public.room_players where room_id = r and user_id = a;
+  select score into sb from public.room_players where room_id = r and user_id = b;
+  perform set_config('request.jwt.claims', json_build_object('sub', a, 'role', 'authenticated')::text, true);
+  set local role authenticated;
+  got := public.claim_board_win(r);
+  again := public.claim_board_win(r);
+  reset role;
+  results := array_append(results, 'RM2 the Connect 4 winner is paid, not the old Square Off winner'::text);
+  if (select score from public.room_players where room_id = r and user_id = b) <> sb + 1
+  or (select score from public.room_players where room_id = r and user_id = a) <> sa
+  then broken := broken || results[cardinality(results)]; end if;
+  results := array_append(results, 'F36 a win is paid once, however many phones claim it'::text);
+  if again <> 0 then broken := broken || results[cardinality(results)]; end if;
+
+  -- ---- V2 (F44): only the room's players get on its voice channel ----------
+  insert into realtime.messages(topic, extension, event, payload, private)
+    values ('voice:' || r, 'broadcast', 'sig', '{}'::jsonb, true);
+  perform set_config('realtime.topic', 'voice:' || r, true);
+  perform set_config('request.jwt.claims', json_build_object('sub', b, 'role', 'authenticated')::text, true);
+  set local role authenticated;
+  select count(*) into n from realtime.messages where topic = 'voice:' || r;
+  reset role;
+  perform set_config('request.jwt.claims', json_build_object('sub', c, 'role', 'authenticated')::text, true);
+  set local role authenticated;
+  select count(*) into n2 from realtime.messages where topic = 'voice:' || r;
+  reset role;
+  results := array_append(results, 'V2 a player in the room hears the call; a stranger doesn''t'::text);
+  if n < 1 or n2 <> 0 then broken := broken || results[cardinality(results)]; end if;
+
+  -- ---- DB1 (F48): friend codes are nobody's to read ------------------------
+  results := array_append(results, 'DB1 nobody reads friend codes; names stay readable'::text);
+  if has_column_privilege('anon', 'public.profiles', 'friend_code', 'select')
+  or has_column_privilege('authenticated', 'public.profiles', 'friend_code', 'select')
+  or not has_column_privilege('anon', 'public.profiles', 'username', 'select')
+  then broken := broken || results[cardinality(results)]; end if;
+
+  -- ---- N1 (F42): a phone pings one person ----------------------------------
+  perform set_config('request.jwt.claims', json_build_object('sub', a, 'role', 'authenticated')::text, true);
+  set local role authenticated;
+  perform public.save_push_subscription('https://push.test/rules-sql', 'k', 's');
+  reset role;
+  perform set_config('request.jwt.claims', json_build_object('sub', b, 'role', 'authenticated')::text, true);
+  set local role authenticated;
+  perform public.save_push_subscription('https://push.test/rules-sql', 'k', 's');
+  reset role;
+  results := array_append(results, 'N1 a phone that changes hands pings only its new owner'::text);
+  if (select array_agg(user_id) from public.push_subscriptions where endpoint = 'https://push.test/rules-sql') is distinct from array[b]
+  then broken := broken || results[cardinality(results)]; end if;
+  results := array_append(results, 'DB2 someone signed out can''t save a push address'::text);
+  if has_function_privilege('anon', 'public.save_push_subscription(text,text,text)', 'execute')
+  then broken := broken || results[cardinality(results)]; end if;
+
+  -- ---- verdict (always an error, so everything above rolls back) -----------
+  if cardinality(broken) = 0 then
+    raise exception 'RULES HOLD: % of %', cardinality(results), cardinality(results);
+  else
+    raise exception E'RULES BROKEN: % of %\n  %', cardinality(broken), cardinality(results),
+      array_to_string(broken, E'\n  ');
+  end if;
+end $rules$;

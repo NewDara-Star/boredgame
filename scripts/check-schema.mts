@@ -132,6 +132,23 @@ for (const fn of ["daily_next", "daily_answer", "submit_daily"]) {
   ok(!files.some((f) => /from\("profiles"\)\s*\.select\("\*/.test(readFileSync(f, "utf8"))), "nothing reads profiles with select(*)");
 }
 
+// The server rules bugs have broken before are tested in supabase/tests/rules.sql,
+// run against the database after a function changes (F54). This can't run it
+// (no database here); it holds that the file still covers each rule's function.
+{
+  let rules = "";
+  try { rules = readFileSync(join(root, "supabase/tests/rules.sql"), "utf8"); } catch { /* missing */ }
+  ok(rules.length > 0, "supabase/tests/rules.sql exists");
+  for (const fn of ["judge_answer", "record_round", "daily_next", "daily_answer", "submit_daily", "daily_round",
+                    "claim_board_win", "save_push_subscription"]) {
+    ok(rules.includes(`public.${fn}(`), `rules.sql tests ${fn}`);
+  }
+  for (const tag of ["Q12", "D1", "D2", "F30", "RM2", "F36", "V2", "DB1", "N1", "DB2"]) {
+    ok(rules.includes(`'${tag} `), `rules.sql keeps its ${tag} test`);
+  }
+  ok(/raise exception 'RULES HOLD/.test(rules), "rules.sql always ends in an error, so it rolls back");
+}
+
 // Every assertion above counts; exit only once they have all run.
 if (bad) { console.error(`\n${bad} of ${n} schema assertions failed`); process.exit(1); }
 console.log(`${n} schema assertions hold (${rpcs.size} rpcs, ${rels.size} relations)`);
