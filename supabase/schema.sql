@@ -432,6 +432,128 @@ revoke all on function public.record_best(text, int) from public, anon;
 grant execute on function public.record_best(text, int) to authenticated;
 
 -- ---------------------------------------------------------------------------
+-- Play from before you had an account comes with you (F17, talk item 3).
+--
+-- Signed out, the phone keeps each answer (question, what was given, time
+-- taken, the phone's date) and the days played. When an account is made on
+-- that phone, or a member says "yes, those are mine", the phone sends them
+-- here once. The server judges every answer itself, exactly as record_round
+-- does; nothing the phone says about right or wrong is used.
+--
+-- Trust: the same as record_round, which a signed-in player can already call
+-- with any answer. On top: live questions only, one answer per question per
+-- batch, answers from the last 30 days, at most 500. The batch id stops a
+-- retried upload being filed twice; it proves nothing about who anyone is.
+--
+-- The streak: phone dates can't be checked, so the phone adds at most 7 days,
+-- ending today or yesterday, and only on an account's first carry. It joins
+-- the account's own run if the two meet; otherwise the later run wins.
+-- (Applied live 2026-09-24 as migration carry_signed_out_play.)
+-- ---------------------------------------------------------------------------
+create table if not exists public.carried_batches (
+  batch      uuid primary key,
+  user_id    uuid not null references public.profiles(id) on delete cascade,
+  answers    int  not null default 0,
+  days       int  not null default 0,
+  created_at timestamptz not null default now()
+);
+create index if not exists carried_batches_user_id_idx on public.carried_batches(user_id);
+alter table public.carried_batches enable row level security;
+-- No policies: carry_over is the only reader and writer.
+
+create or replace function public.carry_over(
+  p_batch uuid, p_rows jsonb, p_days date[], p_best jsonb, p_local_date date default null)
+returns public.profiles language plpgsql security definer set search_path to 'public' as $$
+declare
+  uid uuid := auth.uid();
+  utc_today date := (now() at time zone 'utc')::date;
+  d date;                                   -- the phone's today, trusted a day either side of UTC
+  r jsonb; v_pid bigint; v_given text; v_ms int; v_day date;
+  v_answer text; v_accept text[]; v_choices text[];
+  filed bigint[] := '{}';
+  first_carry boolean;
+  re date; rs date; run int := 0;           -- the phone's run: rs..re
+  prev date; cur int;                       -- the account's run ends at prev, cur long
+  k text; v int;
+  rec public.profiles;
+begin
+  if uid is null then raise exception 'sign in first'; end if;
+  if p_batch is null then raise exception 'batch id missing'; end if;
+  if p_rows is not null and jsonb_typeof(p_rows) <> 'array' then raise exception 'rows must be a json array'; end if;
+  if coalesce(jsonb_array_length(p_rows), 0) > 500 then raise exception 'too many rows'; end if;
+  if coalesce(cardinality(p_days), 0) > 400 then raise exception 'too many days'; end if;
+
+  d := coalesce(p_local_date, utc_today);
+  if abs(d - utc_today) > 1 then d := utc_today; end if;
+
+  first_carry := not exists (select 1 from public.carried_batches where user_id = uid);
+  -- Filed already (a retry after a lost answer): change nothing, say how things stand.
+  insert into public.carried_batches(batch, user_id) values (p_batch, uid) on conflict (batch) do nothing;
+  if not found then
+    select * into rec from public.profiles where id = uid;
+    return rec;
+  end if;
+
+  -- ---- answers: judged here, one per question, last 30 days ----------------
+  for r in select value from jsonb_array_elements(coalesce(p_rows, '[]'::jsonb)) loop
+    v_pid := case when r->>'puzzle_id' ~ '^\d{1,18}$' then (r->>'puzzle_id')::bigint end;
+    v_day := case when r->>'day' ~ '^\d{4}-\d{2}-\d{2}$' then (r->>'day')::date end;
+    if v_pid is null or v_day is null or v_day > d or v_day < d - 30 or v_pid = any(filed) then continue; end if;
+    select answer, accept, choices into v_answer, v_accept, v_choices
+      from public.puzzles where id = v_pid and status = 'live';
+    if v_answer is null then continue; end if;
+    v_given := left(coalesce(r->>'given', ''), 200);
+    v_ms := case when r->>'ms' ~ '^\d{1,9}$' then least((r->>'ms')::int, 600000) end;
+    insert into public.attempts (user_id, puzzle_id, correct, ms_taken)
+      values (uid, v_pid, public.judge_answer(v_given, v_answer, v_accept, v_choices), v_ms);
+    filed := filed || v_pid;
+  end loop;
+
+  -- ---- the streak: at most 7 days, ending today or yesterday, first carry only
+  if first_carry then
+    select max(x) into re from unnest(p_days) x where x between d - 1 and d;
+    if re is not null then
+      run := 1;
+      while run < 7 and (re - run) = any(p_days) loop run := run + 1; end loop;
+      rs := re - run + 1;
+      select p.last_played, p.streak into prev, cur from public.profiles p where p.id = uid;
+      if prev is null or coalesce(cur, 0) = 0 or prev < rs - 1 then
+        -- nothing to join (or the account's run ended before the phone's began)
+        if prev is null or prev < re then
+          update public.profiles set streak = run, last_played = re,
+                 best_streak = greatest(best_streak, run) where id = uid;
+        end if;
+      elsif re >= prev - cur then
+        -- the runs meet or overlap: one run from the earlier start to the later end
+        update public.profiles set
+          streak = greatest(prev, re) - least(rs, prev - cur + 1) + 1,
+          last_played = greatest(prev, re),
+          best_streak = greatest(best_streak, greatest(prev, re) - least(rs, prev - cur + 1) + 1)
+         where id = uid;
+      end if;
+    end if;
+  end if;
+
+  -- ---- best rounds: record_best's rule, per game ----------------------------
+  if p_best is not null and jsonb_typeof(p_best) = 'object' then
+    for k, v in select key, case when value::text ~ '^\d{1,9}$' then value::text::int end
+                  from jsonb_each(p_best) limit 20 loop
+      if k !~ '^[a-z0-9_]{1,24}$' or v is null or v <= 0 then continue; end if;
+      update public.profiles p
+         set best_round = jsonb_set(p.best_round, array[k],
+               to_jsonb(greatest(coalesce((p.best_round->>k)::int, 0), least(v, 65000))))
+       where p.id = uid;
+    end loop;
+  end if;
+
+  update public.carried_batches set answers = cardinality(filed), days = run where batch = p_batch;
+  select * into rec from public.profiles where id = uid;
+  return rec;
+end $$;
+revoke all on function public.carry_over(uuid, jsonb, date[], jsonb, date) from public, anon;
+grant execute on function public.carry_over(uuid, jsonb, date[], jsonb, date) to authenticated;
+
+-- ---------------------------------------------------------------------------
 -- The daily round: ten questions, the same ten for everyone.
 --
 -- The round is STORED, not recomputed. Two people opening the app at the same

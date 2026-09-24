@@ -179,5 +179,33 @@ ok(filings >= 1, `found ${filings} record_round calls — the scan is broken`);
   ok(/recordRound\("trivia", \[\], null, userId\)/.test(rd("src/features/sort/useSortSolo.ts")), "a Ball Sort solve keeps the streak");
 }
 
+// ---- 9. play from before you had an account comes with you (F17) -------------
+// Signed out, the phone kept totals only, so an account made later started at
+// 0 while Home promised "make an account to keep your streak".
+{
+  const rd = (p: string) => { try { return readFileSync(join(root, p), "utf8"); } catch { return ""; } };
+  const prog = rd("src/features/play/progress.ts");
+  ok(/if \(!userId\) \{ keepSignedOut\(game, results, score, now\); return offline; \}/.test(prog),
+     "a round played signed out is kept answer by answer for the account made later");
+  const auth = rd("src/app/providers/AuthProvider.tsx");
+  for (const [fn, call] of [["signUp", "supabase.auth.signUp("], ["signInAsGuest", "supabase.auth.signInAnonymously("]]) {
+    const at = auth.indexOf(`async function ${fn}(`);
+    const body = auth.slice(at, auth.indexOf("\n  }\n", at));
+    const mark = body.indexOf("markMaking();"), make = body.indexOf(call);
+    ok(mark > 0 && make > mark, `${fn} marks the account as made on this phone before making it`);
+  }
+  const carry = rd("src/features/play/carry.ts");
+  ok(/await supabase\.rpc\("carry_over"/.test(carry) && /if \(error \|\| !data\)[^\n]*return null;/.test(carry),
+     "the carry is sent and the phone keeps its copy when it fails");
+  ok(/<CarryAcross \/>/.test(rd("src/app/layout/Shell.tsx")), "every screen can hand the play over");
+  const ca = rd("src/features/play/CarryAcross.tsx");
+  ok(/madeHere\(user\.created_at, c\)\) void carry\(user\.id, false\);\s*else setAsk/.test(ca),
+     "only an account made here takes it unasked; any other is asked first");
+  ok(/c\.declined\.includes\(user\.id\)/.test(ca), "'Not mine' isn't asked again");
+  const home = rd("src/features/home/HomePage.tsx");
+  ok(!/Make an account to keep your streak, play the daily/.test(home) && !/Playing as a guest/.test(home),
+     "Home no longer calls signed-out play 'guest' or promises what didn't carry");
+}
+
 if (bad) { console.error(`\n${bad} of ${n} delivery assertions failed`); process.exit(1); }
 console.log(`${n} delivery assertions hold (${voids} void-supabase sites, ${checked} edge functions)`);

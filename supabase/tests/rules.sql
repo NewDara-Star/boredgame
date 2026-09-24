@@ -4,7 +4,8 @@
 -- Run the whole file against the database (SQL Editor, or execute_sql) after
 -- changing any function it names: judge_answer, record_round, daily_next,
 -- daily_answer, submit_daily, daily_round, claim_board_win,
--- save_push_subscription, voice_topic_ok, or the profiles and puzzles grants.
+-- save_push_subscription, voice_topic_ok, carry_over, or the profiles and
+-- puzzles grants.
 --
 -- It ALWAYS ends in an error, on purpose: the error rolls every write back, so
 -- it can run against the live database. Read the message:
@@ -23,6 +24,7 @@ declare
   results text[] := '{}'; broken text[] := '{}';
   g31 uuid := gen_random_uuid(); g29 uuid := gen_random_uuid(); gwin uuid := gen_random_uuid(); rr bigint;
   mc2 bigint; mc2_answer text; mc2_choices text[];
+  cb uuid := gen_random_uuid();
 begin
   -- ---- borrowed rows -------------------------------------------------------
   select p1.user_id, p2.user_id, p1.room_id into a, b, r
@@ -204,6 +206,30 @@ begin
   then broken := broken || results[cardinality(results)]; end if;
   results := array_append(results, 'G30 the sweep runs every night'::text);
   if not exists (select 1 from cron.job where jobname = 'sweep-stale-guests' and active)
+  then broken := broken || results[cardinality(results)]; end if;
+
+  -- ---- C1 (F17): signed-out play carries, judged here, streak at most 7 ----
+  -- The phone says its near miss was right and sends it twice; it played the
+  -- last ten days.
+  delete from public.carried_batches where user_id = c;
+  update public.profiles set streak = 0, last_played = null where id = c;
+  select count(*) into n from public.attempts where user_id = c and puzzle_id = mc;
+  select count(*) into n2 from public.attempts where user_id = c and puzzle_id = mc and correct;
+  perform set_config('request.jwt.claims', json_build_object('sub', c, 'role', 'authenticated')::text, true);
+  set local role authenticated;
+  perform public.carry_over(cb, jsonb_build_array(jsonb_build_object('puzzle_id', mc, 'given', slip, 'correct', true, 'ms', 3000, 'day', today)),
+    array(select today - g from generate_series(0, 9) g), null, today);
+  perform public.carry_over(cb, jsonb_build_array(jsonb_build_object('puzzle_id', mc, 'given', slip, 'correct', true, 'ms', 3000, 'day', today)),
+    array(select today - g from generate_series(0, 9) g), null, today);
+  reset role;
+  results := array_append(results, 'C1 a carried answer is judged by the server and filed once, however often it''s sent'::text);
+  if (select count(*) from public.attempts where user_id = c and puzzle_id = mc) <> n + 1
+  or (select count(*) from public.attempts where user_id = c and puzzle_id = mc and correct) <> n2
+  then broken := broken || results[cardinality(results)]; end if;
+  results := array_append(results, 'C1 a phone adds at most 7 days of streak'::text);
+  if (select streak from public.profiles where id = c) <> 7 then broken := broken || results[cardinality(results)]; end if;
+  results := array_append(results, 'C1 someone signed out can''t carry anything'::text);
+  if has_function_privilege('anon', 'public.carry_over(uuid,jsonb,date[],jsonb,date)', 'execute')
   then broken := broken || results[cardinality(results)]; end if;
 
   -- ---- verdict (always an error, so everything above rolls back) -----------

@@ -10,6 +10,7 @@ import { IconHome, IconPlay, IconRooms, IconRanks, IconFlame } from "./Icons";
 import { Wordmark } from "@/shared/ui/Wordmark";
 import { ErrorBoundary } from "@/app/ErrorBoundary";
 import { PushOnboarding } from "@/features/push/PushOnboarding";
+import { CarryAcross } from "@/features/play/CarryAcross";
 import { Sky } from "@/shared/brand/Sky";
 
 // Sections, not games. One tab per game works at three and falls over at six,
@@ -107,6 +108,7 @@ export function Shell() {
       <main className="flex-1 max-w-3xl w-full mx-auto px-4 pt-4 pb-[calc(5rem+env(safe-area-inset-bottom))] sm:py-6">
         {/* Keyed on the path so navigating away from a broken screen clears it. */}
         <ErrorBoundary key={pathname}>
+          <CarryAcross />
           <Outlet />
         </ErrorBoundary>
       </main>

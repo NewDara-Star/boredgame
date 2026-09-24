@@ -13,6 +13,7 @@ import { stagger, riseIn, popIn } from "@/shared/ui/motion";
 import { AuthCard } from "./AuthCard";
 import { ClaimCard } from "./GuestCard";
 import { takeLinkError } from "@/shared/lib/linkError";
+import { readCarry } from "@/features/play/carry";
 
 /** A number worth looking at, with a word under it. That is the whole card. */
 function Stat({ value, label, accent = "" }:
@@ -45,6 +46,7 @@ function GuestView({ authError }: { authError: string | null }) {
   const p = useProgress();
   const { current } = rankFor(p.answered);
   const played = p.answered > 0;
+  const kept = readCarry().rows.length;   // what an account made now takes with it (F17)
 
   return (
     <motion.div variants={stagger(0.07)} initial="hidden" animate="show" className="space-y-4">
@@ -60,8 +62,8 @@ function GuestView({ authError }: { authError: string | null }) {
       )}
 
       <motion.div variants={riseIn}>
-        <AuthCard kept={played
-          ? `You've answered ${p.answered} question${p.answered === 1 ? "" : "s"} on this device. An account keeps them, and your rank and streak, everywhere else.`
+        <AuthCard kept={kept > 0
+          ? `${kept} answer${kept === 1 ? "" : "s"} from this phone come with you when you make an account, with up to 7 days of streak.`
           : undefined} />
       </motion.div>
 
@@ -71,10 +73,10 @@ function GuestView({ authError }: { authError: string | null }) {
         <RankBadge rank={current.key} size={38} />
         <div className="min-w-0 flex-1">
           <p className="text-[13px] font-bold">
-            {played ? `Playing as a guest — ${current.name}, ${p.answered} answered` : "Playing as a guest"}
+            {played ? `Playing signed out: ${current.name}, ${p.answered} answered` : "Playing signed out"}
           </p>
           <p className="text-[13px] font-bold text-soft mt-0.5">
-            Saved in this browser only. Clearing site data loses it.
+            Kept on this phone until you make an account. Clearing site data loses it.
           </p>
         </div>
       </motion.div>

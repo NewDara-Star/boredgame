@@ -4,6 +4,7 @@ import { useAuth } from "@/app/providers/AuthProvider";
 import { useCounts } from "@/features/play/counts";
 import { GAMES } from "@/features/play/registry";
 import { useProgress } from "@/features/play/useProgress";
+import { readCarry } from "@/features/play/carry";
 import { rankFor } from "@/features/play/rank";
 import { RankBadge } from "@/features/play/RankBadge";
 import { useDailyStatus } from "@/features/daily/useDaily";
@@ -37,6 +38,8 @@ function Head({ title, to, cta = "View all" }: { title: string; to?: string; cta
 export function HomePage() {
   const { user, profile, offline } = useAuth();
   const p = useProgress();
+  // What an account made now would take with it (F17), not the phone's lifetime tally.
+  const kept = user ? 0 : readCarry().rows.length;
   const counts = useCounts();
   const daily = useDailyStatus();
   const { current, next } = rankFor(p.answered);
@@ -161,10 +164,12 @@ export function HomePage() {
         <motion.div variants={popIn} className="mt-5">
           <Link to="/profile" className="cut tap block cut-ink text-ground p-4">
             <p className="font-display text-lg font-semibold">
-              {p.answered > 0 ? `${p.answered} answered on this device` : "Playing as a guest"}
+              {kept > 0 ? `${kept} answer${kept === 1 ? "" : "s"} on this phone` : "Playing signed out"}
             </p>
             <p className="text-[13px] font-semibold opacity-80 mt-0.5">
-              Make an account to keep your streak, play the daily and take a place on the board →
+              {kept > 0
+                ? "Make an account and they come with you, with up to 7 days of streak →"
+                : "Make an account to keep your answers and streak, play the daily and take a place on the board →"}
             </p>
           </Link>
         </motion.div>

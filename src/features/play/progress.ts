@@ -2,6 +2,7 @@ import { supabase } from "@/shared/lib/supabase";
 import type { GameKey, Profile } from "@/shared/types/db";
 import type { RoundResult } from "./types";
 import { advance, today } from "./streak";
+import { keepSignedOut } from "./carry";
 
 /**
  * Keyed per account, not per browser. A single shared key meant every account
@@ -82,7 +83,10 @@ export async function recordRound(
     streak: p.streak,
     profile: null,
   };
-  if (!supabase || !userId) return offline;
+  if (!supabase) return offline;
+  // Signed out: kept answer by answer so an account made later can take it
+  // (F17). The totals above are only the phone's view until then.
+  if (!userId) { keepSignedOut(game, results, score, now); return offline; }
 
   // Read before writing: the attempt rows bump the counters by trigger, so the
   // only moment the previous total exists is now.
@@ -131,4 +135,18 @@ export async function recordRound(
     streak: after.streak,
     profile: after,
   };
+}
+
+/**
+ * After a carry (F17): the signed-out tally is the account's now, so it leaves
+ * the phone's signed-out view, and the questions seen signed out join the
+ * account's seen list here, so the next round doesn't repeat them.
+ */
+export function handOver(userId: string) {
+  const anon = readLocal();
+  const mine = readLocal(userId);
+  const moved = new Set(anon.seen);
+  mine.seen = [...mine.seen.filter((id) => !moved.has(id)), ...anon.seen].slice(-500);
+  writeLocal(mine, userId);
+  try { localStorage.removeItem(keyFor(undefined)); } catch { /* private mode */ }
 }

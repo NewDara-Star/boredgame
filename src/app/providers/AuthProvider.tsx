@@ -17,6 +17,7 @@ export const isSynthetic = (email?: string | null) => !!email?.endsWith(`@${HOME
 import type { Profile } from "@/shared/types/db";
 import { sayError, NO_SERVER } from "@/shared/lib/sayError";
 import { nameProblem, nameIdeas, takenSentence } from "@/shared/lib/names";
+import { markMaking } from "@/features/play/carry";
 
 const SHORT_PASSWORD = "Use at least 6 characters for your password.";
 
@@ -171,6 +172,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     if (password.length < 6) return { error: SHORT_PASSWORD };
 
+    markMaking();   // the play on this phone goes to the account made here (F17)
     const { error } = await supabase.auth.signUp({
       email: asLogin(id), password,
       // The trigger reads this, so the name you chose is the name you get
@@ -193,6 +195,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // back to guest_ab12 and the player wonders who that is.
     const blocked = await nameBlocked(username);
     if (blocked) return { error: blocked };
+    markMaking();   // the play on this phone goes to the guest made here (F17)
     const { error } = await supabase.auth.signInAnonymously({
       options: { data: username ? { username } : undefined },
     });
