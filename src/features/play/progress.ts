@@ -100,7 +100,13 @@ export async function recordRound(
   const { data: after } = await supabase
     .rpc("touch_streak", { p_local_date: now }).single<Profile>();
 
-  if (!after) return offline;
+  // Signed in but the server didn't answer: this phone's copy for the account can
+  // be far behind the real one (a new phone starts at 0), so a line crossed here
+  // is not a line crossed at all. Report no change rather than celebrate "New
+  // rank: Apprentice" to someone who is really Accomplished.
+  if (!after) {
+    return { ...offline, answeredBefore: offline.answeredAfter, streakBefore: offline.streak };
+  }
   return {
     answeredBefore: before?.total_answered ?? after.total_answered,
     answeredAfter: after.total_answered,
