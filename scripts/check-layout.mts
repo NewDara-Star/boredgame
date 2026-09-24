@@ -113,4 +113,13 @@ for (const f of ["src/features/trivia/TriviaGame.tsx", "src/features/rooms/TurnP
   ok(/from "@\/features\/play\/lockIn"/.test(src) && /LOCK_MS|useLockIn/.test(src), `${f} locks a tapped option in before the verdict`);
 }
 
+
+// A score that changes mid-count carries on from the number on screen. It
+// used to restart from where the last count began, so 91 fell back to 13 (K3).
+{
+  const src = read("src/shared/ui/Counter.tsx");
+  ok(/const a = onScreen\.current;/.test(src) && /onScreen\.current = n;/.test(src),
+     "the score counter starts each count from the number on screen");
+}
+
 console.log(`${n} layout assertions hold`);
