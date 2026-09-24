@@ -1,6 +1,6 @@
 import { LOCK_MS, sleep } from "@/features/play/lockIn";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { scoreAnswer } from "@/features/play/scoring";
+import { keepGrid, readGrid } from "./grid";
 import type { PlayItem } from "@/features/play/types";
 import type { useDaily } from "./useDaily";
 
@@ -25,17 +25,6 @@ interface Last {
  * server's verdict. score/streak here are for the on-screen HUD only; the score
  * and time that land on the board are computed server-side in submit_daily().
  */
-/** Right and wrong in the order they were answered, kept for the day so the
-    share grid survives a reload. Only the order lives here; the score is the
-    server's. */
-const gridKey = (day: string) => `bg-daily-grid-${day}`;
-export function readGrid(day: string): boolean[] | null {
-  try { const v = JSON.parse(localStorage.getItem(gridKey(day)) ?? "null"); return Array.isArray(v) ? v : null; }
-  catch { return null; }
-}
-function keepGrid(day: string, grid: boolean[]) {
-  try { localStorage.setItem(gridKey(day), JSON.stringify(grid)); } catch { /* private mode */ }
-}
 
 export function useDailyPlay(d: DailyApi, enabled: boolean) {
   const [phase, setPhase] = useState<DailyPhase>("loading");
@@ -47,8 +36,9 @@ export function useDailyPlay(d: DailyApi, enabled: boolean) {
   const [last, setLast] = useState<Last | null>(null);
   const [pending, setPending] = useState<string | null>(null);
   const [grid, setGrid] = useState<boolean[]>([]);
-  const shownAt = useRef(Date.now()); // local stopwatch, DISPLAY ONLY (the +N)
   const finalised = useRef(false);
+  /** bumped by retry(), to load where the server says you are again */
+  const [attemptNo, setAttemptNo] = useState(0);
 
   const finish = useCallback(() => {
     setPhase("done");
@@ -65,34 +55,37 @@ export function useDailyPlay(d: DailyApi, enabled: boolean) {
       setTotal(n.total);
       if (n.total === 0) { setPhase("empty"); return; }
       if (n.done || !n.question) { finish(); return; }
-      setScore(0); setStreak(0); setLast(null); setPending(null);
+      // The server's running score and streak, so a reload mid-round carries on
+      // from where you were rather than from 0.
+      setScore(n.score); setStreak(n.streak); setLast(null); setPending(null);
       finalised.current = false;
       setIndex(n.answered);
       setCurrent(n.question);
-      shownAt.current = Date.now();
       setPhase("playing");
     })();
     return () => { cancelled = true; };
-  }, [enabled, d.day]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [enabled, d.day, attemptNo]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  /** After a failed load or answer: ask the server where you are and carry on.
+      An answer that did land is not asked again; one that didn't is served again. */
+  const retry = useCallback(() => { d.clearError(); setAttemptNo((n) => n + 1); }, [d]);
 
   const submit = useCallback(async (given: string) => {
     if (phase !== "playing" || !current || pending !== null) return;
     setPending(given);
-    const at = Date.now();
     // Sent at once (the server times you from its own clock), but the verdict
     // waits out the locked-in moment so your pick shows on its own first.
     const [v] = await Promise.all([d.answer(Number(current.id), given), sleep(LOCK_MS)]);
     if (!v) { setPending(null); return; } // error surfaced by useDaily
-    // The +N is a local estimate for feedback only; the score that ranks you is
-    // computed on the server from server-measured think-time.
-    const gained = v.correct ? scoreAnswer(at - shownAt.current, streak, 0) : 0;
-    setScore((s) => s + gained);
-    setStreak((s) => (v.correct ? s + 1 : 0));
-    setLast({ correct: v.correct, given, gained, near: false, answer: v.answer, explanation: v.explanation });
+    // The points are the server's, the ones that will be filed: it times you from
+    // when it served the question, so the phone's own estimate could differ.
+    setScore(v.score);
+    setStreak(v.streak);
+    setLast({ correct: v.correct, given, gained: v.gained, near: false, answer: v.answer, explanation: v.explanation });
     setGrid((g0) => { const g1 = [...(readGrid(d.day) ?? g0), v.correct]; keepGrid(d.day, g1); return g1; });
     setPending(null);
     setPhase("revealed");
-  }, [phase, current, pending, streak, d]);
+  }, [phase, current, pending, d]);
 
   const next = useCallback(async () => {
     const n = await d.next();
@@ -101,12 +94,11 @@ export function useDailyPlay(d: DailyApi, enabled: boolean) {
     setIndex(n.answered);
     setCurrent(n.question);
     setLast(null);
-    shownAt.current = Date.now();
     setPhase("playing");
   }, [d, finish]);
 
   return {
     current, index, total, phase, score, streak, last, pending, grid,
-    chosen: last?.given ?? pending, submit, next,
+    chosen: last?.given ?? pending, submit, next, retry,
   };
 }

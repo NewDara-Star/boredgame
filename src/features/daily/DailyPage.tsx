@@ -8,7 +8,8 @@ import { QuestionPanel } from "@/features/squareoff/QuestionPanel";
 import { Avatar } from "@/shared/ui/Avatar";
 import { stagger, riseIn, popIn } from "@/shared/ui/motion";
 import { useDaily, type DailyStanding } from "./useDaily";
-import { readGrid, useDailyPlay } from "./useDailyPlay";
+import { useDailyPlay } from "./useDailyPlay";
+import { readGrid } from "./grid";
 import { useEffect, useState } from "react";
 import { drawCard, shareResult, type MatchCard } from "@/shared/card/frame";
 import { ShareButtons } from "@/shared/card/ShareButtons";
@@ -17,7 +18,16 @@ import { roundHero } from "@/features/play/roundCard";
 
 const secs = (ms: number) => `${Math.round(ms / 1000)}s`;
 
-function Board({ rows, meId }: { rows: DailyStanding[]; meId?: string }) {
+function Board({ rows, meId, error, onRetry }:
+  { rows: DailyStanding[]; meId?: string; error?: boolean; onRetry?: () => void }) {
+  if (error) {
+    return (
+      <p className="text-sm text-soft font-bold text-center">
+        Couldn't load today's board.{" "}
+        {onRetry && <button onClick={onRetry} className="underline underline-offset-4 font-black">Try again</button>}
+      </p>
+    );
+  }
   if (rows.length === 0) {
     return <p className="text-sm text-soft font-bold text-center">Nobody has played today yet. You're first.</p>;
   }
@@ -57,17 +67,21 @@ function DailyShare({ day, correct, ms, score }: { day: string; correct: number;
   const [said, setSaid] = useState("");
   const grid = readGrid(day);
   const date = new Date(`${day}T12:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
-  const rows = grid ? [grid.slice(0, 5), grid.slice(5)].map((r) => r.map((ok) => (ok ? RIGHT : WRONG)).join("")).join("\n") : "";
-  const text = `BoredGame daily, ${date}\n${correct}/10 in ${secs(ms)}${rows ? `\n${rows}` : ""}\nCan you beat ${correct}?`;
+  // Squares only when all ten are known (the server's grid, kept at filing): half
+  // a grid from one phone of two looks like half a round.
+  const full = grid && grid.length === 10 ? grid : null;
+  const rows = full ? [full.slice(0, 5), full.slice(5)].map((r) => r.map((ok) => (ok ? RIGHT : WRONG)).join("")).join("\n") : "";
+  const dare = correct === 10 ? "Can you match it?" : `Can you beat ${correct}?`;   // the card's words
+  const text = `BoredGame daily, ${date}\n${correct}/10 in ${secs(ms)}${rows ? `\n${rows}` : ""}\n${dare}`;
   useEffect(() => {
     let cancelled = false;
-    const results = grid?.map((ok) => ({ correct: ok }))
+    const results = full?.map((ok) => ({ correct: ok }))
       ?? Array.from({ length: 10 }, (_, i) => ({ correct: i < correct }));
     void drawCard({
       title: "TODAY'S ROUND", code: null, path: "/daily", where: `Today's round · ${date}`,
       headline: `${correct}/10 on today's round`, hero: roundHero(results, score),
       caption: `Today's round · ${date} · ${secs(ms)}`,
-      dare: correct === 10 ? "Can you match it?" : `Can you beat ${correct}?`,
+      dare,
       flower: correct >= 7 ? "bloom" : correct >= 4 ? "awake" : "bored", text,
     }).then((m) => { if (!cancelled) setCard(m); }).catch(() => {});
     return () => { cancelled = true; };
@@ -117,24 +131,35 @@ export function DailyPage() {
   if (d.mine || r.phase === "done") {
     return (
       <motion.div variants={stagger(0.07)} initial="hidden" animate="show" className="space-y-4">
-        {d.error && (
-          <motion.p variants={riseIn} className="text-sm text-ember font-bold">{d.error}</motion.p>
-        )}
         <motion.div variants={riseIn}>
           <p className="text-[12px] font-black text-soft">Today's round</p>
           <h1 className="font-display text-[30px] leading-none font-semibold mt-1">
-            {d.mine ? `${d.mine.correct} out of 10` : "Round filed"}
+            {d.mine ? `${d.mine.correct} out of 10` : d.filing === "failed" ? "Not saved yet" : "Saving your round…"}
           </h1>
           <p className="text-sm text-soft font-semibold mt-1">
-            {d.mine ? `In ${secs(d.mine.ms)}. One go a day — back tomorrow.` : "Counting you in…"}
+            {d.mine ? `In ${secs(d.mine.ms)}. One go a day — back tomorrow.`
+              : d.filing === "failed" ? "Your answers are safe on the server. It just needs filing." : "One moment."}
           </p>
+          {/* Only a real failure shows, with the one thing that fixes it. Filing
+              again can't change a score: the server keeps the first one. */}
+          {!d.mine && d.filing === "failed" && (
+            <div className="mt-3 space-y-2">
+              {d.error && <p className="text-sm text-ember font-bold">{d.error}</p>}
+              <button onClick={() => void d.finalize()}
+                className="cut tap w-full py-3.5 font-display text-lg font-semibold cut-petal">
+                Try again
+              </button>
+            </div>
+          )}
         </motion.div>
         {d.mine && (
           <motion.div variants={riseIn}>
             <DailyShare day={d.day} correct={d.mine.correct} ms={d.mine.ms} score={d.mine.score} />
           </motion.div>
         )}
-        <motion.div variants={popIn}><Board rows={d.board} meId={user.id} /></motion.div>
+        <motion.div variants={popIn}>
+          <Board rows={d.board} meId={user.id} error={d.boardError} onRetry={() => void d.refresh()} />
+        </motion.div>
         <motion.p variants={riseIn} className="text-[12px] font-bold text-soft text-center">
           Same ten questions for everyone, so the scores actually mean something.
         </motion.p>
@@ -142,7 +167,16 @@ export function DailyPage() {
     );
   }
 
-  if (d.error) return <p className="text-sm text-ember font-bold">{d.error}</p>;
+  if (d.error) {
+    return (
+      <div className="card p-5 space-y-3">
+        <p className="text-sm text-ember font-bold">{d.error}</p>
+        <button onClick={r.retry} className="cut tap w-full py-3.5 font-display text-lg font-semibold cut-petal">
+          Try again
+        </button>
+      </div>
+    );
+  }
   if (r.phase === "loading") return <Dealing what="the round" />;
   if (r.phase === "empty") return <p className="text-sm text-soft font-bold">No round today.</p>;
 

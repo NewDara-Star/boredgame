@@ -7,6 +7,7 @@ import type { RebusSpec, GameKey, Difficulty, Profile } from "@/shared/types/db"
 import { today } from "@/features/play/streak";
 import { attempt } from "@/shared/lib/write";
 import { withTimeout } from "@/shared/lib/timeout";
+import { keepGrid } from "./grid";
 
 export interface DailyStanding {
   user_id: string;
@@ -22,6 +23,11 @@ export interface DailyVerdict {
   answer: string;
   explanation?: string;
   locked?: boolean;
+  /** the points this pick adds, and the running score and streak, as the server
+      will file them */
+  gained: number;
+  score: number;
+  streak: number;
 }
 
 /** One step of the round: the next question (answer-free) plus where we are. */
@@ -30,7 +36,13 @@ export interface DailyNext {
   answered: number;
   done: boolean;
   question: PlayItem | null;
+  /** where you are so far, from the server, so a reload resumes the score */
+  score: number;
+  streak: number;
 }
+
+/** Filing the round: in flight, refused (with a Try again), or done. */
+export type Filing = "idle" | "saving" | "failed" | "saved";
 
 /**
  * Map an answer-free question from daily_next() to a PlayItem. The answer is
@@ -66,22 +78,27 @@ function mapDailyRow(r: Record<string, unknown>): PlayItem {
  * the clock.
  */
 export function useDaily() {
-  const { user, applyProfile } = useAuth();
+  const { user, profile, applyProfile } = useAuth();
   const day = today();
   const [board, setBoard] = useState<DailyStanding[]>([]);
   const [mine, setMine] = useState<DailyStanding | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [boardError, setBoardError] = useState(false);
+  const [filing, setFiling] = useState<Filing>("idle");
 
   const readBoard = useCallback(async () => {
     if (!supabase) return;
-    const { data } = await supabase
+    const { data, error: boardFailed } = await supabase
       .from("daily_scores")
       .select("user_id, score, correct, ms, profiles(username)")
       .eq("day", day)
       .order("correct", { ascending: false })
       .order("ms", { ascending: true })
       .limit(50);
+    // A failed read is not an empty board: it used to say "You're first".
+    setBoardError(!!boardFailed);
+    if (boardFailed) return;
     const rows: DailyStanding[] = (data ?? []).map((r: Record<string, unknown>) => ({
       user_id: r.user_id as string,
       username: (r.profiles as { username?: string } | null)?.username ?? "someone",
@@ -127,13 +144,17 @@ export function useDaily() {
     if (!supabase) return null;
     const { data, error } = await supabase.rpc("daily_next", { p_day: day });
     if (error) {
-      setError("Couldn't load the next question. Check your connection and try again.");
+      setError(/closed/i.test(error.message)
+        ? "That round has closed. A new one is up: reload the page to play it."
+        : "Couldn't load the next question. Check your connection and try again.");
       return null;
     }
-    const n = data as { total: number; answered: number; done: boolean; question: Record<string, unknown> | null };
+    const n = data as { total: number; answered: number; done: boolean; question: Record<string, unknown> | null;
+                        score?: number; streak?: number };
     return {
       total: n.total, answered: n.answered, done: n.done,
       question: n.question ? mapDailyRow(n.question) : null,
+      score: n.score ?? 0, streak: n.streak ?? 0,
     };
   }, [day]);
 
@@ -155,19 +176,34 @@ export function useDaily() {
       think-times. One score per day; a second call is a no-op. */
   const finalize = useCallback(async () => {
     if (!supabase) return;
-    const msg = await attempt("Filing your score", supabase.rpc("submit_daily", { p_day: day }));
-    if (msg) setError(msg);
+    setFiling("saving"); setError(null);
+    let filed: { ok: boolean; correct: number; ms: number; score: number; grid?: boolean[] } | null = null;
+    const msg = await attempt("Filing your score", supabase.rpc("submit_daily", { p_day: day })
+      .then((r) => { filed = r.data as typeof filed; return r; }));
+    const f = filed as { ok: boolean; correct: number; ms: number; score: number; grid?: boolean[] } | null;
+    if (msg || !f?.ok) {
+      setError(msg ?? "That round closed before it was filed.");
+      setFiling("failed");
+      return;
+    }
+    // The result is yours as soon as the server has it, not when the board next
+    // loads: a board that failed to load left "Counting you in…" up for good.
+    setMine((m) => m ?? { user_id: user?.id ?? "", username: profile?.username ?? "you",
+                          score: f.score, correct: f.correct, ms: f.ms });
+    if (Array.isArray(f.grid)) keepGrid(day, f.grid);
+    setFiling("saved");
     // Today's round keeps your streak like any other round (and submit_daily has
     // just added its answers to your totals), so move the streak and take the
     // fresh profile it returns: Home and You then show the new numbers at once.
-    else {
-      const { data: p } = await supabase.rpc("touch_streak", { p_local_date: today() }).single<Profile>();
-      if (p) applyProfile(p);
-    }
+    const { data: p } = await supabase.rpc("touch_streak", { p_local_date: today() }).single<Profile>();
+    if (p) applyProfile(p);
     await readBoard();
-  }, [day, readBoard, applyProfile]);
+  }, [day, readBoard, applyProfile, user?.id, profile?.username]);
 
-  return { day, board, mine, error, loading, next, answer, finalize, refresh: readBoard };
+  const clearError = useCallback(() => setError(null), []);
+
+  return { day, board, mine, error, loading, next, answer, finalize, refresh: readBoard,
+           boardError, filing, clearError };
 }
 
 /**

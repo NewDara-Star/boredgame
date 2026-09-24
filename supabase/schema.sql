@@ -1681,13 +1681,54 @@ create table if not exists public.daily_picks (
 alter table public.daily_picks enable row level security;
 revoke all on public.daily_picks from anon, authenticated;
 
+-- A player's daily so far, worked out one way for everyone who needs it: the
+-- running score and streak daily_answer returns after each pick (the phone
+-- used to estimate its own +N and start again from 0 after a reload), where
+-- daily_next resumes, and what submit_daily files. Picks count in round order.
+create or replace function public.daily_tally(p_day date, p_uid uuid)
+returns table (score int, correct int, answered int, ms int, streak int, grid boolean[])
+language plpgsql stable security definer set search_path to 'public' as $$
+declare v_ids bigint[]; rec record; v_speed numeric; v_base int;
+        cap_ms constant int := 60000;   -- max a single question can contribute
+begin
+  score := 0; correct := 0; answered := 0; ms := 0; streak := 0; grid := '{}';
+  select dr.puzzle_ids into v_ids from public.daily_rounds dr where dr.day = p_day;
+  if v_ids is not null then
+    for rec in
+      select coalesce(dp.correct, false) as ok,
+             greatest(0, least(cap_ms,
+               (extract(epoch from (dp.answered_at - dp.served_at)) * 1000)::int)) as think
+      from public.daily_picks dp
+      where dp.day = p_day and dp.user_id = p_uid and dp.answered_at is not null
+      order by array_position(v_ids, dp.puzzle_id)
+    loop
+      answered := answered + 1;
+      ms := ms + rec.think;
+      grid := grid || rec.ok;
+      if rec.ok then
+        correct := correct + 1;
+        streak := streak + 1;
+        -- mirrors scoreAnswer(): base 500 + up to 500 for speed, +60/streak (cap 5)
+        v_speed := greatest(0, 1 - rec.think::numeric / 45000);
+        v_base := 500 + round(500 * v_speed)::int + least(streak, 5) * 60;
+        score := score + greatest(150, v_base);
+      else
+        streak := 0;
+      end if;
+    end loop;
+  end if;
+  return next;
+end $$;
+revoke all on function public.daily_tally(date, uuid) from public, anon, authenticated;
+
+
 -- Serve the next unanswered question (answer-free) and stamp when it was shown.
 -- The browser cannot see a question before this hands it over, so served_at is
 -- an honest "shown" time no client can fake or bring forward.
 create or replace function public.daily_next(p_day date)
 returns jsonb language plpgsql security definer set search_path to 'public' as $$
 declare uid uuid := auth.uid(); v_ids bigint[]; v_total int; v_answered int;
-        v_next bigint; v_q jsonb; i int;
+        v_next bigint; v_q jsonb; i int; t record;
 begin
   if uid is null then raise exception 'sign in first'; end if;
   -- The phone asks for its own date. A day either side of UTC is accepted, the
@@ -1724,8 +1765,11 @@ begin
     into v_q
   from public.puzzles p left join public.categories c on c.id = p.category_id
   where p.id = v_next;
+  -- Where you are, so a reload mid-round resumes the score and streak too.
+  select * into t from public.daily_tally(p_day, uid);
   return jsonb_build_object('total', v_total, 'answered', v_answered,
-                            'done', false, 'question', v_q);
+                            'done', false, 'question', v_q,
+                            'score', t.score, 'streak', t.streak);
 end $$;
 
 -- Judge one pick. First answer per puzzle is final; a repeat returns the stored
@@ -1735,7 +1779,7 @@ create or replace function public.daily_answer(p_day date, p_puzzle bigint, p_gi
 returns jsonb language plpgsql security definer set search_path to 'public' as $$
 declare uid uuid := auth.uid();
         v_ids bigint[]; v_answer text; v_accept text[]; v_choices text[]; v_expl text;
-        v_correct boolean; v_pick public.daily_picks;
+        v_correct boolean; v_pick public.daily_picks; t0 record; t1 record;
 begin
   if uid is null then raise exception 'sign in first'; end if;
   -- The phone asks for its own date. A day either side of UTC is accepted, the
@@ -1754,19 +1798,26 @@ begin
   select * into v_pick from public.daily_picks
     where day = p_day and user_id = uid and puzzle_id = p_puzzle;
   if v_pick.answered_at is not null then
+    select * into t1 from public.daily_tally(p_day, uid);
     return jsonb_build_object('correct', v_pick.correct, 'answer', v_answer,
-                              'explanation', v_expl, 'locked', true);
+                              'explanation', v_expl, 'locked', true,
+                              'gained', 0, 'score', t1.score, 'streak', t1.streak);
   end if;
   -- Only a question daily_next handed you: answering one it never served used
   -- to stamp it served there and then, so a script could answer in 0 seconds.
   if v_pick.puzzle_id is null then raise exception 'that question hasn''t been served yet'; end if;
   v_correct := public.judge_answer(p_given, v_answer, v_accept, v_choices);
+  select * into t0 from public.daily_tally(p_day, uid);
   update public.daily_picks
      set given = p_given, correct = v_correct, answered_at = now()
    where day = p_day and user_id = uid and puzzle_id = p_puzzle
      and answered_at is null;                            -- first answer wins
+  -- The points are the ones submit_daily will file: the phone shows these
+  -- instead of its own estimate.
+  select * into t1 from public.daily_tally(p_day, uid);
   return jsonb_build_object('correct', v_correct, 'answer', v_answer,
-                            'explanation', v_expl, 'locked', false);
+                            'explanation', v_expl, 'locked', false,
+                            'gained', t1.score - t0.score, 'score', t1.score, 'streak', t1.streak);
 end $$;
 
 -- Finalise: tally the recorded picks and sum the per-question think-times
@@ -1774,10 +1825,7 @@ end $$;
 -- dominate. One score per day per player; a second call is a no-op.
 create or replace function public.submit_daily(p_day date)
 returns jsonb language plpgsql security definer set search_path to 'public' as $$
-declare uid uuid := auth.uid(); v_ids bigint[];
-        v_correct int := 0; v_answered int := 0; v_ms int := 0;
-        v_score int := 0; v_streak int := 0; v_speed numeric; v_base int;
-        rec record; v_filed int := 0;
+declare uid uuid := auth.uid(); v_ids bigint[]; t record; v_filed int := 0;
         cap_ms constant int := 60000;   -- max a single question can contribute
 begin
   if uid is null then raise exception 'sign in first'; end if;
@@ -1790,29 +1838,9 @@ begin
   end if;
   select puzzle_ids into v_ids from public.daily_rounds where day = p_day;
   if v_ids is null then raise exception 'no round'; end if;
-  for rec in
-    select dp.correct,
-           greatest(0, least(cap_ms,
-             (extract(epoch from (dp.answered_at - dp.served_at)) * 1000)::int)) as think
-    from public.daily_picks dp
-    where dp.day = p_day and dp.user_id = uid and dp.answered_at is not null
-    order by array_position(v_ids, dp.puzzle_id)
-  loop
-    v_answered := v_answered + 1;
-    v_ms := v_ms + rec.think;
-    if rec.correct then
-      v_correct := v_correct + 1;
-      v_streak := v_streak + 1;
-      -- mirrors scoreAnswer(): base 500 + up to 500 for speed, +60/streak (cap 5)
-      v_speed := greatest(0, 1 - rec.think::numeric / 45000);
-      v_base := 500 + round(500 * v_speed)::int + least(v_streak, 5) * 60;
-      v_score := v_score + greatest(150, v_base);
-    else
-      v_streak := 0;
-    end if;
-  end loop;
+  select * into t from public.daily_tally(p_day, uid);
   insert into public.daily_scores(day, user_id, score, correct, answered, ms)
-    values (p_day, uid, v_score, v_correct, v_answered, v_ms)
+    values (p_day, uid, t.score, t.correct, t.answered, t.ms)
     on conflict (day, user_id) do nothing;
   -- Today's round counts like any other questions answered: its answers go into
   -- attempts, so the counters, rank and leaderboard move (they didn't: six rounds
@@ -1828,8 +1856,10 @@ begin
       from public.daily_picks dp
      where dp.day = p_day and dp.user_id = uid and dp.answered_at is not null;
   end if;
-  return jsonb_build_object('ok', true, 'correct', v_correct,
-                            'answered', v_answered, 'ms', v_ms, 'score', v_score);
+  -- The grid (right/wrong in round order) is the server's, so the text share has
+  -- all ten squares even when the round was played on two phones.
+  return jsonb_build_object('ok', true, 'correct', t.correct,
+                            'answered', t.answered, 'ms', t.ms, 'score', t.score, 'grid', to_jsonb(t.grid));
 end $$;
 
 revoke all on function public.daily_next(date)                from public, anon;
