@@ -1,7 +1,7 @@
 import { releasePush } from "@/features/push/release";
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import type { Session, User } from "@supabase/supabase-js";
-import { supabase, isConfigured } from "@/shared/lib/supabase";
+import { supabase, isConfigured, AUTH_STORAGE_KEY, SERVER } from "@/shared/lib/supabase";
 
 /**
  * Supabase Auth has no username login, so a name becomes an address on a domain
@@ -19,6 +19,17 @@ import { sayError, NO_SERVER } from "@/shared/lib/sayError";
 import { nameProblem, nameIdeas, takenSentence } from "@/shared/lib/names";
 
 const SHORT_PASSWORD = "Use at least 6 characters for your password.";
+
+/** What this phone kept for the person leaving that the next person mustn't
+    see: today's daily grid (the share card's squares) isn't kept per person. */
+function forgetThisPhone() {
+  try {
+    for (let i = localStorage.length - 1; i >= 0; i--) {
+      const k = localStorage.key(i);
+      if (k && k.startsWith("bg-daily-grid-")) localStorage.removeItem(k);
+    }
+  } catch { /* private mode */ }
+}
 
 /** Every profile column a player may read (the grant in schema.sql, F48). */
 const PROFILE_COLUMNS = "id, username, avatar, total_answered, total_correct, created_at, streak, best_streak, last_played, is_guest, best_round";
@@ -248,12 +259,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { error: null };
   }
 
+  /**
+   * Sign-out always works, signal or not (F5, M). supabase-js asks the server
+   * first and keeps the login if it can't reach it, so with no signal the
+   * profile was cleared but the session stayed: a signed-in account with no
+   * name. Now the phone forgets first: the stored login goes, and signOut then
+   * has nothing to ask the server about, so it finishes offline and tells every
+   * listener. The server hears about it in the background, with the token
+   * held back for that, and simply never does if there's no signal; the old
+   * refresh token then expires on its own.
+   */
   async function signOut() {
-    // While still signed in: the server only lets you remove your own.
-    await releasePush();
-    await supabase?.auth.signOut();
+    if (!supabase) return;
+    const { data } = await supabase.auth.getSession();       // read from the phone, no network
+    const token = data.session?.access_token ?? null;
+    supabase.auth.stopAutoRefresh();
+    await releasePush(token);                                 // bounded; the server part isn't waited for
+    try { localStorage.removeItem(AUTH_STORAGE_KEY); } catch { /* private mode */ }
+    forgetThisPhone();
+    await supabase.auth.signOut({ scope: "local" });          // no session left: no network, just SIGNED_OUT
+    if (token) {
+      void fetch(`${SERVER.url}/auth/v1/logout?scope=local`, {
+        method: "POST", keepalive: true,
+        headers: { apikey: SERVER.key, Authorization: `Bearer ${token}` },
+      }).catch(() => { /* offline: the refresh token expires on its own */ });
+    }
+    setUser(null);
     setProfile(null);
     setClaimedAs(null);
+    supabase.auth.startAutoRefresh();
   }
 
   return (

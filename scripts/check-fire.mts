@@ -137,5 +137,22 @@ ok(filings >= 1, `found ${filings} record_round calls — the scan is broken`);
   ok(/if \(run\.current !== me\) \{ local\.getTracks\(\)\.forEach\(\(tr\) => tr\.stop\(\)\); return; \}/.test(vp), "Cancel during the mic prompt turns the mic back off");
 }
 
+
+// ---- 6. sign-out doesn't wait for the server ---------------------------------
+// It asked the server first and waited: on a weak signal the phone sat signed
+// in with nothing happening (F5, M). The phone forgets first; the server is told
+// in the background with the token held back for that.
+{
+  const auth = readFileSync(join(root, "src/app/providers/AuthProvider.tsx"), "utf8");
+  const at = auth.indexOf("async function signOut(");
+  const body = auth.slice(at, auth.indexOf("\n  }\n", at));
+  const forget = body.indexOf("localStorage.removeItem(AUTH_STORAGE_KEY)"), local = body.indexOf('auth.signOut({ scope: "local" })');
+  ok(forget > 0 && local > forget, "sign-out forgets the stored login before asking supabase-js to sign out");
+  ok(/void fetch\(`\$\{SERVER\.url\}\/auth\/v1\/logout/.test(body) && /keepalive: true/.test(body), "the server is told in the background (keepalive), not waited for");
+  ok(/forgetThisPhone\(\)/.test(body) && /bg-daily-grid-/.test(auth), "the leaving person's daily grid doesn't stay for the next");
+  const rel = readFileSync(join(root, "src/features/push/release.ts"), "utf8");
+  ok(/void fetch\(/.test(rel) && /keepalive: true/.test(rel) && !/await supabase/.test(rel), "handing back push doesn't wait on the server either");
+}
+
 if (bad) { console.error(`\n${bad} of ${n} delivery assertions failed`); process.exit(1); }
 console.log(`${n} delivery assertions hold (${voids} void-supabase sites, ${checked} edge functions)`);

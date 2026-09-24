@@ -91,7 +91,7 @@ function GuestView({ authError }: { authError: string | null }) {
 
 /** The dashboard, for someone who actually has an account. */
 function MemberView() {
-  const { user, profile, signOut, setPassword: savePassword, setUsername } = useAuth();
+  const { user, profile, signOut, setPassword: savePassword, setUsername, isGuest } = useAuth();
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [pwDone, setPwDone] = useState(false);
@@ -237,7 +237,7 @@ function MemberView() {
             {busy ? "Saving…" : pwDone ? "Password saved" : "Save password"}
           </Button>
         </form>
-        <Button variant="ghost" className="w-full" onClick={() => void signOut()}>Sign out</Button>
+        <SignOut name={profile?.username ?? null} guest={isGuest} signOut={signOut} />
       </section>
     </motion.div>
   );
@@ -259,4 +259,34 @@ export function ProfilePage() {
     );
   }
   return user ? <MemberView /> : <GuestView authError={authError} />;
+}
+
+/**
+ * Sign out asks once, and says what happens (F5). A member's games are on the
+ * server, so the sheet says so and names the sign-in to come back with. A guest
+ * has no sign-in to come back with, so it says that plainly instead (F12 takes
+ * the button away from guests altogether).
+ */
+function SignOut({ name, guest, signOut }: { name: string | null; guest: boolean; signOut: () => Promise<void> }) {
+  const [asking, setAsking] = useState(false);
+  const [busy, setBusy] = useState(false);
+  if (!asking) {
+    return <Button variant="ghost" className="w-full" onClick={() => setAsking(true)}>Sign out</Button>;
+  }
+  return (
+    <div className="card p-4 space-y-3" role="alertdialog" aria-label="Sign out?">
+      <p className="text-sm font-semibold">
+        {guest
+          ? "You're playing as a guest. Signing out loses these games for good: keep this name first to save them."
+          : `Your games are saved. Sign back in as ${name ?? "your name"}.`}
+      </p>
+      <div className="flex gap-2">
+        <Button variant="ghost" className="flex-1" onClick={() => setAsking(false)} disabled={busy}>Stay</Button>
+        <Button className="flex-1" disabled={busy}
+          onClick={async () => { setBusy(true); await signOut(); }}>
+          {busy ? "Signing out…" : guest ? "Sign out anyway" : "Sign out"}
+        </Button>
+      </div>
+    </div>
+  );
 }
