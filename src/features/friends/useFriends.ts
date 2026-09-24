@@ -90,14 +90,18 @@ export function useFriends() {
     return res.name ?? "your friend";
   }, [loadFriends]);
 
-  const invite = useCallback(async (roomId: number, friendId: string) => {
-    if (!supabase) return;
-    await supabase.rpc("invite_friend", { p_room: roomId, p_friend: friendId });
+  /** true when the invite landed. It used to be ignored, so a failed invite
+      still took you into a room to wait for someone who was never asked. */
+  const invite = useCallback(async (roomId: number, friendId: string): Promise<boolean> => {
+    if (!supabase) return false;
+    const { error: e } = await supabase.rpc("invite_friend", { p_room: roomId, p_friend: friendId });
+    if (e) return false;
     // Fire-and-forget a push so an invite reaches them even with the app closed;
     // the in-app banner already covers the app-open case, and no-subscription is
     // a no-op server-side.
     fire(supabase.functions.invoke("notify-invite", { body: { room: roomId, to: friendId } }),
       "Pinging your friend");
+    return true;
   }, []);
 
   const respond = useCallback(async (inviteId: number, accept: boolean) => {

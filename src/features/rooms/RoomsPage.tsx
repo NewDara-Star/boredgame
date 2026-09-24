@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { AnswerMark } from "@/shared/brand/Pieces";
 import { LOCK_MS, sleep } from "@/features/play/lockIn";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "@/app/providers/AuthProvider";
 import { useRoom, useMyRooms, createRoom } from "./useRoom";
 import { PictoRenderer, PICTURE_ALT } from "@/features/picto/PictoRenderer";
@@ -38,6 +38,8 @@ export function RoomsPage() {
   /** the option you tapped in the race, lit while the server judges it */
   const [picked, setPicked] = useState<string | null>(null);
   const [startError, setStartError] = useState<string | null>(null);
+  /** set by "Play" on a friend when their invite didn't go through */
+  const inviteFailed = (useLocation().state as { inviteFailed?: string } | null)?.inviteFailed ?? null;
   const uname = profile?.username ?? user?.email?.split("@")[0] ?? "player";
 
   const {
@@ -252,6 +254,9 @@ export function RoomsPage() {
         </div>
       )}
 
+      {iAmIn && waiting && players.length < 2 && inviteFailed && (
+        <Note tone="warn">Couldn't invite {inviteFailed}. Send them the code below.</Note>
+      )}
       {iAmIn && waiting && players.length < room.capacity && <InviteCard code={room.code} waiting />}
 
       {iAmIn && waiting && (

@@ -81,14 +81,17 @@ export function FriendsPanel() {
   // waiting -- meet them there instead of opening a second room and crossing.
   const pendingFrom = (friendId: string) => invites.find((i) => i.from_id === friendId);
 
-  const play = async (friendId: string) => {
+  const play = async (friendId: string, friendName: string) => {
     if (!user || busy) return;
     setBusy(true);
     const waiting = pendingFrom(friendId);
     if (waiting) { await respond(waiting.id, true); nav(`/rooms/${waiting.room_code}`); return; }
     const r = await createRoom(user.id, uname);
-    if (r) { await invite(r.id, friendId); nav(`/rooms/${r.code}`); }
-    else setBusy(false);
+    if (!r) { setError("Couldn't open a room. Try again."); setBusy(false); return; }
+    // The room is yours either way; if the invite didn't land, the room says so
+    // and points at its code instead of leaving you waiting for nobody.
+    const invited = await invite(r.id, friendId);
+    nav(`/rooms/${r.code}`, invited ? undefined : { state: { inviteFailed: friendName } });
   };
 
   const join = async (i: Invite) => { await respond(i.id, true); nav(`/rooms/${i.room_code}`); };
@@ -106,7 +109,7 @@ export function FriendsPanel() {
             <div key={f.id} className="card bg-board p-2.5 flex items-center gap-3">
               <Avatar id={f.id} name={f.username} size={34} />
               <span className="min-w-0 flex-1 font-bold truncate">{f.username}</span>
-              <button onClick={() => void play(f.id)} disabled={busy}
+              <button onClick={() => void play(f.id, f.username)} disabled={busy}
                 className="cut tap cut-ink text-ground px-4 min-h-[44px] inline-flex items-center font-display font-semibold">
                 {pendingFrom(f.id) ? "Join" : "Play"}
               </button>
