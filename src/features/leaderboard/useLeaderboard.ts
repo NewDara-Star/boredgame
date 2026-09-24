@@ -23,6 +23,10 @@ export interface Board {
   /** Where the signed-in player sits, even when that is off the bottom of the page. */
   you: Standing | null;
   loading: boolean;
+  /** The board didn't load. An empty list must never stand in for this: it
+      used to say "Nobody has played yet" to someone with no signal. */
+  failed: boolean;
+  retry(): void;
 }
 
 /**
@@ -34,13 +38,15 @@ export function useLeaderboard(userId?: string, limit = 50): Board {
   const [rows, setRows] = useState<Standing[]>([]);
   const [you, setYou] = useState<Standing | null>(null);
   const [loading, setLoading] = useState(true);
+  const [failed, setFailed] = useState(false);
+  const [tick, setTick] = useState(0);
 
   useEffect(() => {
     if (!supabase) { setLoading(false); return; }
     let cancelled = false;
     (async () => {
       setLoading(true);
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("profiles")
         .select("id, username, total_answered, total_correct, streak, last_played")
         .gt("total_answered", 0)
@@ -53,6 +59,8 @@ export function useLeaderboard(userId?: string, limit = 50): Board {
         .order("id", { ascending: true })
         .limit(limit);
       if (cancelled) return;
+      if (error) { setFailed(true); setRows([]); setYou(null); setLoading(false); return; }
+      setFailed(false);
 
       const list: Standing[] = (data ?? []).map((r, i) => ({
         id: r.id,
@@ -93,7 +101,7 @@ export function useLeaderboard(userId?: string, limit = 50): Board {
       setLoading(false);
     })();
     return () => { cancelled = true; };
-  }, [userId, limit]);
+  }, [userId, limit, tick]);
 
-  return { rows, you, loading };
+  return { rows, you, loading, failed, retry: () => setTick((t) => t + 1) };
 }

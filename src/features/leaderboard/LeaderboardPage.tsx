@@ -89,7 +89,7 @@ function StickyBar({ children }: { children: React.ReactNode }) {
 
 export function LeaderboardPage() {
   const { user, offline } = useAuth();
-  const { rows, you, loading } = useLeaderboard(user?.id);
+  const { rows, you, loading, failed, retry } = useLeaderboard(user?.id);
 
   if (offline) {
     return (
@@ -120,6 +120,14 @@ export function LeaderboardPage() {
           {Array.from({ length: 5 }, (_, i) => (
             <div key={i} className="card h-[62px] animate-pulse opacity-40" />
           ))}
+        </div>
+      ) : failed ? (
+        <div className="card p-6 mt-6 text-center">
+          <p className="font-display text-xl font-semibold">Couldn't load the board</p>
+          <p className="text-sm text-soft font-semibold mt-1">Check your signal and try again.</p>
+          <button onClick={retry} className="cut tap inline-block mt-4 px-5 py-3 cut-petal font-display font-semibold">
+            Try again
+          </button>
         </div>
       ) : rows.length === 0 ? (
         <div className="card p-6 mt-6 text-center">
