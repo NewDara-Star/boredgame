@@ -5,6 +5,7 @@
  * Run: node --experimental-strip-types scripts/check-dealer.mts
  */
 import { deal, pickRound } from "../src/features/play/dealer.ts";
+import { readFileSync } from "node:fs";
 
 let failed = 0;
 const ok = (name: string, cond: boolean, detail = "") => {
@@ -79,6 +80,26 @@ console.log("\nedges");
   const small = pickRound(bank.slice(0, 4), (x) => x, ["q0"], 10, same);
   ok("a pool smaller than a round gives the whole pool", ids(small) === ids(bank.slice(0, 4)));
   ok("an empty pool gives an empty round", pickRound([], (x: string) => x, [], 10, same).length === 0);
+}
+
+console.log("stuck on a picture (talk item 5)");
+{
+  // The old code had no way on but a wrong answer; missing helpers fail here.
+  let skip: { sendToBack?: <T>(l: T[], i: number) => T[]; canSkip?: (id: string, i: number, n: number, s: ReadonlySet<string>) => boolean } = {};
+  try { skip = await import("../src/features/play/skip.ts"); } catch { /* not there */ }
+  const { sendToBack, canSkip } = skip;
+  ok("a picture can be sent to the back of the round", typeof sendToBack === "function" && typeof canSkip === "function");
+  if (sendToBack && canSkip) {
+    ok("it goes to the end; the next one takes its place", sendToBack(["a", "b", "c", "d"], 1).join("") === "acdb");
+    ok("the last one has nowhere to go", sendToBack(["a", "b"], 1).join("") === "ab" && !canSkip("b", 1, 2, new Set()));
+    ok("skipping is once per picture", canSkip("b", 1, 4, new Set()) && !canSkip("b", 3, 4, new Set(["b"])));
+    ok("nothing is lost or doubled", sendToBack(["a", "b", "c"], 0).slice().sort().join("") === "abc");
+  }
+  const rd = (f: string) => { try { return readFileSync(new URL(`../src/${f}`, import.meta.url), "utf8"); } catch { return ""; } };
+  const round = rd("features/play/useRound.ts"), picto = rd("features/picto/PictoGame.tsx");
+  ok("a returning picture keeps its time and its clues", /startedAt\.current = Date\.now\(\) - \(back\?\.ms \?\? 0\)/.test(round) && /setHintsUsed\(back\?\.hints \?\? 0\)/.test(round));
+  ok("Show me files a miss (nothing typed)", /giveUp: \(\) => submit\(""\)/.test(round));
+  ok("Picto offers Skip, then Show me", /r\.canSkip \? r\.skip : r\.giveUp/.test(picto) && /counts as a miss/.test(picto));
 }
 
 console.log(failed === 0 ? "\ndealing is sound" : `\n${failed} FAILED`);

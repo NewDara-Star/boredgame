@@ -21,7 +21,7 @@ export function PictoGame() {
 
   useEffect(() => {
     if (r.phase === "playing") { setGuess(""); inputRef.current?.focus(); }
-  }, [r.phase, r.index]);
+  }, [r.phase, r.index, r.current?.id]);   // a skip keeps the index, not the picture
 
   if (r.phase === "loading") return <>{filterBar}<Dealing what="the puzzles" /></>;
   if (r.phase === "empty") return (
@@ -104,6 +104,11 @@ export function PictoGame() {
             </button>
           </form>
           <HintBar item={item} used={r.hintsUsed} onUse={r.useHint} />
+          {/* Stuck (talk item 5): skip once, then Show me, which counts as a miss. */}
+          <button onClick={r.canSkip ? r.skip : r.giveUp}
+            className="mt-2 text-[13px] font-bold text-soft underline underline-offset-4 min-h-[44px]">
+            {r.canSkip ? "Skip for now: it comes back at the end" : "Show me the answer (counts as a miss)"}
+          </button>
         </>
       ) : (
         <Reveal correct={r.last!.correct} near={r.last!.near} answer={item.answer}

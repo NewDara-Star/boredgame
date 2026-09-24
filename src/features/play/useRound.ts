@@ -7,6 +7,7 @@ import { loadContent, shuffle } from "./content";
 import { pickRound } from "./dealer";
 import { readLocal, recordRound, type RoundOutcome } from "./progress";
 import { scoreParts, type ScoreParts } from "./scoring";
+import { sendToBack, canSkip } from "./skip";
 import type { PlayItem, RoundResult } from "./types";
 
 export type Phase = "loading" | "empty" | "playing" | "revealed" | "done";
@@ -33,6 +34,16 @@ export function useRound(
   /** Which round this is. Anything that finishes late (a load, a save) checks it
       and is dropped if a newer round has started since. */
   const roundNo = useRef(0);
+  /** Pictures sent to the back this round, with the time already spent on them
+      and the clues already bought, both kept for when they come back: skipping
+      is no way to preview a picture and then answer it fast, or clue-free. */
+  const skipped = useRef(new Map<string, { ms: number; hints: number }>());
+  /** A picture arriving on screen: its own clock and clues, or the ones it left with. */
+  const arrive = (item: PlayItem | undefined) => {
+    const back = item ? skipped.current.get(item.id) : undefined;
+    setHintsUsed(back?.hints ?? 0);
+    startedAt.current = Date.now() - (back?.ms ?? 0);
+  };
 
   const build = useCallback(async () => {
     const mine = ++roundNo.current;
@@ -43,7 +54,7 @@ export function useRound(
       setItems(fixed);
       setIndex(0); setScore(0); setStreak(0); setBestStreak(0);
       setResults([]); setLast(null); setHintsUsed(0); setOutcome(null);
-      startedAt.current = Date.now();
+      startedAt.current = Date.now(); skipped.current = new Map();
       setPhase(fixed.length ? "playing" : "empty");
       return;
     }
@@ -67,7 +78,7 @@ export function useRound(
     setItems(pickRound(all, (i) => i.id, readLocal(userId).seen, size, shuffle));
     setIndex(0); setScore(0); setStreak(0); setBestStreak(0);
     setResults([]); setLast(null); setHintsUsed(0); setOutcome(null);
-    startedAt.current = Date.now();
+    startedAt.current = Date.now(); skipped.current = new Map();
     setPhase("playing");
   }, [game, size, userId, categories.join("|"), fixed?.map((i) => i.id).join(",")]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -108,11 +119,18 @@ export function useRound(
       return;
     }
     setIndex((i) => i + 1);
-    setHintsUsed(0);
+    arrive(items[index + 1]);
     setLast(null);
-    startedAt.current = Date.now();
     setPhase("playing");
-  }, [index, items.length]);
+  }, [index, items]);
+
+  /** Stuck: to the back of the round, once. The next picture slides into its place. */
+  const skip = useCallback(() => {
+    if (phase !== "playing" || !current || !canSkip(current.id, index, items.length, new Set(skipped.current.keys()))) return;
+    skipped.current.set(current.id, { ms: Date.now() - startedAt.current, hints: hintsUsed });
+    setItems((list) => sendToBack(list, index));
+    arrive(items[index + 1]);
+  }, [phase, current, index, items, hintsUsed]);
 
   // Persist once, when the round actually ends.
   const saved = useRef(false);
@@ -136,5 +154,9 @@ export function useRound(
     categories: available,
     hintsUsed, useHint: () => setHintsUsed((h) => h + 1),
     submit, next, restart: build,
+    skip,
+    canSkip: !!current && canSkip(current.id, index, items.length, new Set(skipped.current.keys())),
+    /** "Show me": the answer, as a miss (nothing typed, so the server files it wrong). */
+    giveUp: () => submit(""),
   };
 }
