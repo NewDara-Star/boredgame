@@ -1,3 +1,4 @@
+import { serverNowIso, syncClock } from "@/shared/lib/serverClock";
 import { useCallback, useEffect, useState } from "react";
 import { fire } from "@/shared/lib/fire";
 import { supabase } from "@/shared/lib/supabase";
@@ -35,7 +36,7 @@ export function useRoom(code: string | undefined, userId: string | undefined) {
       list = ((peek as { user_id: string; username: string; ready: boolean }[]) ?? [])
         .map((x) => ({
           ...x, room_id: roomId, score: 0,
-          last_seen: new Date().toISOString(),
+          last_seen: serverNowIso(),
         })) as RoomPlayer[];
     }
     setPlayers(list);
@@ -96,6 +97,9 @@ export function useRoom(code: string | undefined, userId: string | undefined) {
   // (useRoomBank) instead of leaving the room with nothing to deal.
   const bank = useRoomBank(room?.game ?? null);
   const pool = bank.pool;
+
+  // Every room time is the server's; measure this phone's clock against it once.
+  useEffect(() => { void syncClock(); }, []);
 
   // A heartbeat on the row both players already subscribe to: the update itself
   // is what tells the other browser you are still here.

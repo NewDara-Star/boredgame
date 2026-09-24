@@ -650,9 +650,12 @@ declare uid uuid := auth.uid(); seats int; taken int; v_name text;
 begin
   if uid is null then raise exception 'sign in first'; end if;
 
-  -- The display name is client-supplied and went into room_players.username
-  -- unchecked; a blank or a pasted essay could land in the seat label. Clamp it.
-  v_name := nullif(btrim(coalesce(p_username, '')), '');
+  -- Your name is your profile's. It used to be whatever the phone sent, and a
+  -- phone whose profile hadn't loaded yet (an invite link opens and joins at
+  -- once) sent 'player', which then labelled that seat all match. The phone's
+  -- name is only the fallback, clamped, for an account with no profile row.
+  select nullif(btrim(p.username), '') into v_name from public.profiles p where p.id = uid;
+  if v_name is null then v_name := nullif(btrim(coalesce(p_username, '')), ''); end if;
   if v_name is null then v_name := 'player'; end if;
   if length(v_name) > 24 then v_name := left(v_name, 24); end if;
 
@@ -2051,6 +2054,43 @@ begin
 end $$;
 revoke all on function public.claim_board_win(bigint) from public, anon;
 grant execute on function public.claim_board_win(bigint) to authenticated;
+
+-- The time a room's move was written is the server's, not the writing phone's
+-- (F38, RM6). Each phone compared a question's start with its own clock, so a
+-- phone a few seconds off saw the other player's bar start part-empty, and the
+-- take-over rescue and the away notice fired early or late. The server stamps
+-- stamped_at on every write; the phones measure how far their clock is from
+-- this one (server_now) and correct for it. updated_at stays the phone's: it is
+-- also the catapult's shared seed, and rewriting it would redraw the writer's pot
+-- when the server's copy arrived.
+alter table public.ttt_games    add column if not exists stamped_at timestamptz;
+alter table public.c4_games     add column if not exists stamped_at timestamptz;
+alter table public.memory_games add column if not exists stamped_at timestamptz;
+
+create or replace function public.stamp_move_time()
+returns trigger language plpgsql set search_path to 'public' as $$
+begin
+  new.stamped_at := now();
+  return new;
+end $$;
+revoke all on function public.stamp_move_time() from public, anon, authenticated;
+drop trigger if exists stamp_ttt_games on public.ttt_games;
+create trigger stamp_ttt_games before insert or update on public.ttt_games
+  for each row execute function public.stamp_move_time();
+drop trigger if exists stamp_c4_games on public.c4_games;
+create trigger stamp_c4_games before insert or update on public.c4_games
+  for each row execute function public.stamp_move_time();
+drop trigger if exists stamp_memory_games on public.memory_games;
+create trigger stamp_memory_games before insert or update on public.memory_games
+  for each row execute function public.stamp_move_time();
+
+create or replace function public.server_now()
+returns timestamptz language sql stable set search_path to 'public' as $$
+  select now()
+$$;
+revoke all on function public.server_now() from public;
+grant execute on function public.server_now() to anon, authenticated;
+
 
 -- Claim the trivia round: judge the submitted answer against the round's puzzle
 -- server-side (exact for multiple choice, with the client's spelling slack for

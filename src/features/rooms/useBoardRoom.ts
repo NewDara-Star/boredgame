@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/shared/lib/supabase";
+import { serverNowIso, serverToLocal, syncClock } from "@/shared/lib/serverClock";
 import { shuffle } from "@/features/play/content";
 import { BANK_FAILED, useRoomBank } from "./useRoomBank";
 import { deal } from "@/features/play/dealer";
@@ -30,6 +31,8 @@ export interface BoardRow {
   x_player: string | null;
   o_player: string | null;
   updated_at: string;
+  /** the server's time of the last write (a trigger stamps it) */
+  stamped_at?: string | null;
 }
 
 /**
@@ -101,6 +104,8 @@ export function useBoardRoom<G extends BoardState, R extends BoardRow>(
   const [poolError, setPoolError] = useState<string | null>(null);
   const [writeError, setWriteError] = useState<string | null>(null);
 
+  useEffect(() => { void syncClock(); }, []);
+
   useEffect(() => {
     if (!supabase || !roomId) return;
     let channel: ReturnType<NonNullable<typeof supabase>["channel"]> | null = null;
@@ -162,7 +167,10 @@ export function useBoardRoom<G extends BoardState, R extends BoardRow>(
   const write = useCallback(async (next: G) => {
     if (!supabase || !roomId) return;
     const patch: Record<string, unknown> = {
-      ...engine.encode(next), updated_at: new Date().toISOString(),
+      // updated_at is this phone's (it is also the catapult's shared seed);
+      // stamped_at is the server's, set on arrival: this is only its stand-in
+      // until then, on the server's clock so the bar doesn't jump.
+      ...engine.encode(next), updated_at: new Date().toISOString(), stamped_at: serverNowIso(),
     };
     if (next.phase === "asking") {
       patch.puzzle_id = challenge === "trivia" ? nextPuzzleId() : null;
@@ -310,8 +318,12 @@ export function useBoardRoom<G extends BoardState, R extends BoardRow>(
     /** the questions didn't load; it keeps trying, and this says so */
     bankTrouble: bank.failed && pool.length === 0 ? BANK_FAILED : null,
     retryBank: bank.retryNow,
-    /** when the current question went up, so both clients run the same clock */
-    askedAt: row ? Date.parse(row.updated_at) : 0,
+    /** when the current question went up, on this phone's clock: the server's
+        stamp corrected by this phone's offset (a row from before the stamp
+        existed falls back to the writer's own time) */
+    askedAt: row ? (row.stamped_at ? serverToLocal(row.stamped_at) : Date.parse(row.updated_at)) : 0,
+    /** the same for both phones, for anything drawn from it (the catapult's pot) */
+    askedSeed: row ? Date.parse(row.updated_at) : 0,
     seats: { x: row?.x_player ?? null, o: row?.o_player ?? null },
   };
 }

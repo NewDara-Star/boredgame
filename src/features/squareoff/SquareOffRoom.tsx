@@ -143,7 +143,7 @@ export function SquareOffRoom({
           chosen={chosen} setChosen={setChosen}
           onAnswer={(correct: boolean) => t.submit(correct)}
           asking={asking} revealed={revealed} mine={!!mine}
-          fraction={Math.max(0, left / ask)} askedAt={t.askedAt}
+          fraction={Math.max(0, left / ask)} askedAt={t.askedSeed}
           waitingOn={names[other]}
           advanceOwner={g.phase === "revealed" && g.last ? g.last.by : null}
           stall={stall} myMark={t.myMark}

@@ -32,6 +32,8 @@ export function TurnPanel({
   /** whether the pending answer is yours to give */
   mine: boolean;
   fraction: number;
+  /** the question's shared seed (the writer's own updated_at), identical on
+      both phones: the catapult's pot is drawn from it. Not a clock. */
   askedAt: number;
   /** the other player's name, for "… is lining one up" */
   waitingOn: string;

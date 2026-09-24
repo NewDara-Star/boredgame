@@ -1,3 +1,4 @@
+import { serverToLocal } from "@/shared/lib/serverClock";
 import { useEffect, useRef, useState } from "react";
 import { SEAT_CSS } from "@/shared/brand/seats";
 import { PieceMark, type PieceKind } from "@/shared/brand/Pieces";
@@ -57,9 +58,10 @@ export function Seats({
 export function AwayNotice({ players, userId, now }: {
   players: RoomPlayer[]; userId: string; now: number;
 }) {
-  const gone = players.find((p) => p.user_id !== userId && now - Date.parse(p.last_seen) > AWAY_MS);
+  // last_seen is the server's time; read it on this phone's clock.
+  const gone = players.find((p) => p.user_id !== userId && now - serverToLocal(p.last_seen) > AWAY_MS);
   if (!gone) return null;
-  const mins = Math.floor((now - Date.parse(gone.last_seen)) / 60_000);
+  const mins = Math.floor((now - serverToLocal(gone.last_seen)) / 60_000);
   return (
     <div className="card bg-petal p-3.5 text-center">
       <p className="text-[13px] font-bold">
