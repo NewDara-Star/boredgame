@@ -7,7 +7,7 @@
  * AuthProvider, and the rule itself is the server's.
  */
 import { readFileSync } from "node:fs";
-import { nameProblem, nameIdeas, takenSentence, NAME_RULE } from "../src/shared/lib/names.ts";
+import { nameProblem, nameIdeas, takenSentence, NAME_RULE, errorField } from "../src/shared/lib/names.ts";
 
 let n = 0, bad = 0;
 const ok = (c: boolean, m: string) => { n++; if (!c) { console.error("FAIL " + m); bad++; } };
@@ -74,6 +74,18 @@ ok(!/isn't 3–20 letters|already using that name/.test(auth), "the old catch-al
   const guestSide = page.indexOf("{(isGuest || claimedAs) ? ("), memberSide = page.indexOf("<SignOut ");
   ok(guestSide > 0 && memberSide > guestSide && /<ClaimCard \/>/.test(page.slice(guestSide, memberSide)), "a guest's You screen offers saving, not Sign out");
   ok(/Start over as someone new/.test(page) && /for good\. There's no way back\./.test(page), "starting over is there, small, and says it's for good");
+}
+
+// Each error under the box it's about (F15, P7).
+ok(errorField("Use at least 6 characters for your password.") === "password", "a short password is a password error");
+ok(errorField("That name and password don't match an account.") === "form", "a failed sign-in is about the whole form");
+ok(errorField("Taken. Dara_12 is free.") === "name" && errorField("At least 3 letters or numbers.") === "name", "name problems stay under Name");
+ok(errorField("You seem to be offline. Check your connection and try again.") === "form", "the rest goes under the form");
+ok(/errorField\(error\) === "password"/.test(read("src/features/profile/AuthCard.tsx")), "the sign-in card puts password errors under Password");
+{
+  const page = read("src/features/profile/ProfilePage.tsx"), card = read("src/features/profile/GuestCard.tsx");
+  ok(/setDraft\(e\.target\.value\); setNameMsg\(null\)/.test(page), "typing a new name clears 'Saved' (P3)");
+  ok(/if \(!typed\.current && profile\?\.username\) setName\(profile\.username\)/.test(card), "the keep-this-name box fills in when the profile arrives (P6)");
 }
 
 // Our words, not the browser's tooltip: the name forms don't let it speak.

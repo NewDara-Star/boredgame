@@ -206,7 +206,7 @@ function MemberView() {
               if (isSynthetic(user?.email)) setNameNote(`You'll sign in as ${draft.trim()} from now on.`);
             }
           }}>
-          <Input value={draft} onChange={(e) => setDraft(e.target.value)}
+          <Input value={draft} onChange={(e) => { setDraft(e.target.value); setNameMsg(null); setNameNote(null); setNameErr(null); }}
             maxLength={20} placeholder="yourname" autoComplete="off" />
           <Button type="submit" variant="ghost"
             disabled={nameBusy || !draft.trim() || draft === profile?.username}>

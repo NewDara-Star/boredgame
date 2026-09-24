@@ -35,3 +35,17 @@ export function nameIdeas(raw: string, random: () => number = Math.random): stri
 /** The sentence for a taken name, with a free one when there is one. */
 export const takenSentence = (free: string | null) =>
   free ? `Taken. ${free} is free.` : "Taken. Try adding a number.";
+
+/**
+ * Which box an account-form error belongs under (F15, P7). Every error used to
+ * land under Name, so a short or wrong password read as a problem with the
+ * name. A sentence about the password goes under Password, one about the name
+ * under Name, and the rest ("That name and password don't match", "You seem to
+ * be offline") under the whole form.
+ */
+export function errorField(message: string): "name" | "password" | "form" {
+  if (/name and (your )?password/i.test(message)) return "form";
+  if (/password/i.test(message)) return "password";
+  if (/^(Taken|At least 3|Letters, numbers|No spaces|Pick a name|20 characters|That name|Someone)/.test(message)) return "name";
+  return "form";
+}

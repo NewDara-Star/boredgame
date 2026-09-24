@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/app/providers/AuthProvider";
 import { Button } from "@/shared/ui/Button";
 import { Field, Input } from "@/shared/ui/Field";
+import { errorField } from "@/shared/lib/names";
 
 /**
  * One field, and you are in the room.
@@ -60,6 +61,10 @@ export function GuestCard({ note }: { note?: string }) {
 export function ClaimCard() {
   const { profile, claimAccount, checkName, claimedAs, clearClaimed } = useAuth();
   const [name, setName] = useState(profile?.username ?? "");
+  // The name copied in once, at first sight: if the profile hadn't arrived
+  // yet, the box stayed empty (P6). Fill it when it arrives, unless typed in.
+  const typed = useRef(false);
+  useEffect(() => { if (!typed.current && profile?.username) setName(profile.username); }, [profile?.username]);
   const [password, setPassword] = useState("");
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -101,12 +106,12 @@ export function ClaimCard() {
         if (error) setError(error);
       }}>
       <p className="font-display text-lg font-semibold">Keep this name</p>
-      <Field label="Name" error={error ?? (live.state === "bad" ? live.text : null)}
+      <Field label="Name" error={(error && errorField(error) !== "password" ? error : null) ?? (live.state === "bad" ? live.text : null)}
         hint={error ? undefined : live.state === "ok" ? live.text : live.state === "checking" ? "Checking…" : undefined}>
         <Input value={name} autoCapitalize="none" maxLength={20}
-          onChange={(e) => { setName(e.target.value); setError(null); }} />
+          onChange={(e) => { typed.current = true; setName(e.target.value); setError(null); }} />
       </Field>
-      <Field label="Password" hint="At least 6 characters">
+      <Field label="Password" hint="At least 6 characters" error={error && errorField(error) === "password" ? error : null}>
         <Input type="password" required minLength={6} value={password} placeholder="••••••••"
           autoComplete="new-password" onChange={(e) => setPassword(e.target.value)} />
       </Field>

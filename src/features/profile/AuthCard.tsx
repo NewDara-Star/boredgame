@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useAuth } from "@/app/providers/AuthProvider";
 import { Button } from "@/shared/ui/Button";
 import { Field, Input } from "@/shared/ui/Field";
+import { errorField } from "@/shared/lib/names";
 
 /**
  * Signing up is the default, not signing in. Someone who already has an account
@@ -50,16 +51,20 @@ export function AuthCard({ kept }: { kept?: string }) {
             address still works for the accounts made before names. */}
         <Field label={mode === "signup" ? "Pick a name" : "Name"}
           hint={mode === "signup" ? "3–20 letters, numbers or underscores. This is what people see." : undefined}
-          error={error}>
+          error={error && errorField(error) === "name" ? error : null}>
           <Input required value={id} placeholder="yourname" autoCapitalize="none"
             autoComplete="username" maxLength={40}
             onChange={(e) => setId(e.target.value)} />
         </Field>
-        <Field label="Password" hint={mode === "signup" ? "At least 6 characters" : undefined}>
+        <Field label="Password" hint={mode === "signup" ? "At least 6 characters" : undefined}
+          error={error && errorField(error) === "password" ? error : null}>
           <Input type="password" required minLength={6} value={password} placeholder="••••••••"
             autoComplete={mode === "signin" ? "current-password" : "new-password"}
             onChange={(e) => setPassword(e.target.value)} />
         </Field>
+        {error && errorField(error) === "form" && (
+          <p role="alert" className="text-[13px] font-bold text-ink bg-ember rounded-lg px-2 py-1">{error}</p>
+        )}
         <Button type="submit" disabled={busy} className="w-full">
           {busy ? "Working…" : mode === "signup" ? "Create account" : "Sign in"}
         </Button>
