@@ -108,6 +108,32 @@ ok(!isCorrect("six feet", "six feet underground", ["six feet under"]),
   }
 }
 
+// --- the server judges the same way (supabase/schema.sql, judge_answer) -------
+// Two copies of one rule: the phone's (slack() above) and the server's, which is
+// what actually counts. They drifted once without anyone seeing: the server used
+// the typo allowance on multiple choice, so tapping 'Definately' counted as right
+// while the screen said Missed. Read the server's rule out of the schema and
+// hold both parts of it.
+{
+  const schema = readFileSync(new URL("../supabase/schema.sql", import.meta.url), "utf8");
+  const at = schema.indexOf("create or replace function public.judge_answer(");
+  ok(at >= 0, "schema.sql defines judge_answer");
+  const body = schema.slice(at, schema.indexOf("$$;", at));
+  const m = body.match(/length\(\w+(?:\.\w+)?\) < (\d+) then (\d+) when length\(\w+(?:\.\w+)?\) < (\d+) then (\d+) else (\d+)/);
+  ok(!!m, "judge_answer's typo allowance can be read");
+  const [lo, a, hi, b, c] = m!.slice(1).map(Number);
+  const server = (len: number) => (len < lo ? a : len < hi ? b : c);
+  for (let len = 1; len <= 40; len++)
+    ok(server(len) === slack("x".repeat(len)), `server and phone allow the same slips for a ${len}-letter answer`);
+  ok(/cardinality\(coalesce\(p_choices[^)]*\)\) > 0 then p_given = p_answer/.test(body),
+     "a question with options is judged on the exact option, before any allowance");
+  for (const fn of ["record_round", "claim_round", "daily_answer"]) {
+    const i = schema.indexOf(`create or replace function public.${fn}(`);
+    const f = schema.slice(i, schema.indexOf("end $$;", i));
+    ok(/public\.judge_answer\(/.test(f) && !/levenshtein/.test(f), `${fn} judges through judge_answer and nothing else`);
+  }
+}
+
 // --- what gets logged -------------------------------------------------------
 ok(nearMiss("head over heals", "head over heelz"), "a close wrong answer is worth logging");
 ok(!nearMiss("head over heels", "head over heels"), "a right one is not");

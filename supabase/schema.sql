@@ -239,7 +239,7 @@ returns void language plpgsql security definer set search_path to 'public' as $$
 declare
   uid uuid := auth.uid();
   r jsonb; v_pid bigint; v_given text; v_ms int;
-  v_answer text; v_accept text[]; g text; v_correct boolean;
+  v_answer text; v_accept text[]; v_choices text[]; v_correct boolean;
 begin
   if uid is null then raise exception 'sign in first'; end if;
   if p_rows is null or jsonb_typeof(p_rows) <> 'array' then
@@ -255,19 +255,11 @@ begin
 
     -- Only live puzzles; the answer is read here, never sent by the client. An
     -- unknown id is skipped, not failed, so one bad row can't sink the round.
-    select answer, accept into v_answer, v_accept
+    select answer, accept, choices into v_answer, v_accept, v_choices
       from public.puzzles where id = v_pid and status = 'live';
     if v_answer is null then continue; end if;
 
-    g := public.normalise_answer(v_given);
-    v_correct := g <> '' and exists (
-      select 1 from unnest(array[v_answer] || coalesce(v_accept, '{}'::text[])) w
-      cross join lateral (select public.normalise_answer(w) as nw) x
-      where x.nw <> '' and (
-        g = x.nw or extensions.levenshtein(g, x.nw) <=
-          (case when length(x.nw) < 8 then 0 when length(x.nw) < 14 then 1 else 2 end)
-      )
-    );
+    v_correct := public.judge_answer(v_given, v_answer, v_accept, v_choices);
 
     insert into public.attempts (user_id, puzzle_id, correct, ms_taken)
       values (uid, v_pid, v_correct, v_ms);
@@ -1738,7 +1730,7 @@ end $$;
 create or replace function public.daily_answer(p_day date, p_puzzle bigint, p_given text)
 returns jsonb language plpgsql security definer set search_path to 'public' as $$
 declare uid uuid := auth.uid();
-        v_ids bigint[]; v_answer text; v_ansnorm text; v_expl text;
+        v_ids bigint[]; v_answer text; v_accept text[]; v_choices text[]; v_expl text;
         v_correct boolean; v_pick public.daily_picks;
 begin
   if uid is null then raise exception 'sign in first'; end if;
@@ -1750,7 +1742,7 @@ begin
   if v_ids is null or not (p_puzzle = any(v_ids)) then
     raise exception 'not in today''s round';
   end if;
-  select answer, answer_normalised, explanation into v_answer, v_ansnorm, v_expl
+  select answer, accept, choices, explanation into v_answer, v_accept, v_choices, v_expl
     from public.puzzles where id = p_puzzle;
   select * into v_pick from public.daily_picks
     where day = p_day and user_id = uid and puzzle_id = p_puzzle;
@@ -1761,8 +1753,7 @@ begin
   insert into public.daily_picks(day, user_id, puzzle_id, served_at)
     values (p_day, uid, p_puzzle, now())
     on conflict (day, user_id, puzzle_id) do nothing;
-  v_correct := p_given is not null
-               and public.normalise_answer(p_given) = v_ansnorm;
+  v_correct := public.judge_answer(p_given, v_answer, v_accept, v_choices);
   update public.daily_picks
      set given = p_given, correct = v_correct, answered_at = now()
    where day = p_day and user_id = uid and puzzle_id = p_puzzle
@@ -1856,8 +1847,31 @@ grant execute on function public.submit_daily(date)              to authenticate
 -- ============================================================================
 
 -- levenshtein(), so the server judges a typed answer with the same slack the
--- client does (picto rooms). Trivia rooms are exact multiple choice.
+-- client does (Picto). Multiple choice is exact: see judge_answer below.
 create extension if not exists fuzzystrmatch with schema extensions;
+
+-- The one rule for "is this answer right", used by record_round, claim_round and
+-- daily_answer. A question with options is judged on the exact option: the
+-- player tapped a button, so there is nothing to forgive, and the typo slack
+-- would pass 'Definately' for 'Definitely' and '+1' for '-1'. Only a typed
+-- answer (Picto) gets the slack, and its numbers must match slack() in
+-- src/shared/lib/normalise.ts (scripts/check-answers.mts holds them together).
+-- Only the judging functions call it (they run as the owner), so nobody else can.
+create or replace function public.judge_answer(p_given text, p_answer text, p_accept text[], p_choices text[])
+returns boolean language sql stable set search_path to 'public' as $$
+  select case
+    when p_given is null or p_answer is null then false
+    when cardinality(coalesce(p_choices, '{}'::text[])) > 0 then p_given = p_answer
+    else public.normalise_answer(p_given) <> '' and exists (
+      select 1 from unnest(array[p_answer] || coalesce(p_accept, '{}'::text[])) w
+      cross join lateral (select public.normalise_answer(w) as nw) x
+      where x.nw <> '' and (
+        public.normalise_answer(p_given) = x.nw
+        or extensions.levenshtein(public.normalise_answer(p_given), x.nw) <=
+          (case when length(x.nw) < 8 then 0 when length(x.nw) < 14 then 1 else 2 end)))
+  end
+$$;
+revoke all on function public.judge_answer(text, text, text[], text[]) from public, anon, authenticated;
 
 alter table public.ttt_games    add column if not exists scored boolean not null default false;
 alter table public.c4_games     add column if not exists scored boolean not null default false;
@@ -1906,7 +1920,7 @@ grant execute on function public.claim_board_win(bigint) to authenticated;
 create or replace function public.claim_round(p_room bigint, p_given text)
 returns jsonb language plpgsql security definer set search_path to 'public' as $$
 declare uid uuid := auth.uid(); v_round public.room_rounds;
-        v_answer text; v_accept text[]; g text; v_correct boolean; v_upd int;
+        v_answer text; v_accept text[]; v_choices text[]; v_correct boolean; v_upd int;
 begin
   if uid is null then raise exception 'sign in first'; end if;
   if not public.is_room_member(p_room) then raise exception 'not a member of room %', p_room; end if;
@@ -1914,16 +1928,8 @@ begin
     where room_id = p_room and winner_id is null
     order by round_no desc limit 1;
   if v_round.id is null then return jsonb_build_object('won', false, 'reason', 'no open round'); end if;
-  select answer, accept into v_answer, v_accept from public.puzzles where id = v_round.puzzle_id;
-  g := public.normalise_answer(p_given);
-  v_correct := g <> '' and exists (
-    select 1 from unnest(array[v_answer] || coalesce(v_accept, '{}'::text[])) w
-    cross join lateral (select public.normalise_answer(w) as nw) x
-    where x.nw <> '' and (
-      g = x.nw or extensions.levenshtein(g, x.nw) <=
-        (case when length(x.nw) < 8 then 0 when length(x.nw) < 14 then 1 else 2 end)
-    )
-  );
+  select answer, accept, choices into v_answer, v_accept, v_choices from public.puzzles where id = v_round.puzzle_id;
+  v_correct := public.judge_answer(p_given, v_answer, v_accept, v_choices);
   if not v_correct then return jsonb_build_object('won', false); end if;
   update public.room_rounds set winner_id = uid, ended_at = now()
     where id = v_round.id and winner_id is null;
