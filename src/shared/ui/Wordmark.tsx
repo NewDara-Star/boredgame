@@ -16,6 +16,6 @@ export function Wordmark({ height = 30, look = "ink", className = "" }:
 }
 
 /** A small sunflower head, where the old four-point star used to sit. */
-export function Starburst({ size = 40, className = "" }: { size?: number; fill?: string; className?: string }) {
+export function Starburst({ size = 40, className = "" }: { size?: number; className?: string }) {
   return <Art name="sfh-awake" className={className} style={{ width: size }} />;
 }

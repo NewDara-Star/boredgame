@@ -115,7 +115,5 @@ export const GAMES: GameDef[] = [
   },
 ];
 
-export const gameBySlug = (slug: string) => GAMES.find((g) => g.slug === slug) ?? null;
-
 /** The ones that can be played against another person, for the room lobby. */
 export const ROOM_GAMES = GAMES.filter((g): g is GameDef & { room: NonNullable<GameDef["room"]> } => !!g.room);

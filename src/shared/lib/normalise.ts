@@ -76,9 +76,6 @@ export function nearMiss(guess: string, answer: string, accept?: string[] | null
 }
 
 export function levenshtein(a: string, b: string): number {
-  // Cheap reject: an edit distance can never be smaller than the length gap,
-  // and most comparisons here are against an answer of a very different size.
-  if (Math.abs(a.length - b.length) > Math.max(a.length, b.length)) return Infinity;
   const prev = new Array(b.length + 1).fill(0).map((_, i) => i);
   const cur = new Array(b.length + 1).fill(0);
   for (let i = 1; i <= a.length; i++) {

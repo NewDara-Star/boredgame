@@ -1,4 +1,4 @@
-import { COLS, ROWS, SIZE, winnerOf, type Cell, type Game, type Mark } from "./rules";
+import { COLS, ROWS, winnerOf, type Cell, type Game, type Mark } from "./rules";
 
 /** The database row. `line` is derived from the board, so it is not stored. */
 export interface C4Row {
@@ -36,7 +36,6 @@ export function decode(row: C4Row): Game {
 
 export const encodeBoard = (board: Cell[]) => board.map((c) => c ?? "-").join("");
 
-export const EMPTY_BOARD = "-".repeat(SIZE);
 
 /** Only the fields a move can change — never the whole row, never the players. */
 export function encode(g: Game): Omit<C4Row, "room_id" | "puzzle_id" | "x_player" | "o_player" | "updated_at"> {

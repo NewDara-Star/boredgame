@@ -33,10 +33,6 @@ export const onColour = (h: Hue) => (h === "grape" ? BOARD : INK);
 /** Game families set a game's tile and card world. New games pick one. */
 export const FAMILIES = { quiz: "sky", board: "leaf", puzzle: "grape", skill: "ember", party: "gum" } as const;
 export type Family = keyof typeof FAMILIES;
-export const familyRamp = (f: Family): Ramp => RAMPS[FAMILIES[f]];
-
-/** Button roles (from Clash Royale's one-colour-one-job rule). */
-export const ROLES = { main: "petal", join: "leaf", second: "sky", leave: "ember" } as const;
 
 /** The sky clock. The phone's own hour picks the sky; neighbours blend over 30 minutes. */
 export type SkyName = "morning" | "midday" | "golden" | "night";
@@ -61,7 +57,3 @@ export const FONT = {
   mono: '"Atkinson Hyperlegible Mono", ui-monospace, Menlo, monospace',
 } as const;
 
-/** Soft shadow for UI surfaces (cards, sheets). The world has no outlines. */
-export const LIFT = "0 10px 24px rgba(14,74,176,.16), 0 2px 0 rgba(14,74,176,.10)";
-/** The outline that subjects (flower, pieces, badges, icons) carry. */
-export const OUTLINE = INK;

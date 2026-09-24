@@ -79,7 +79,7 @@ export function HomePage() {
           <Link to="/daily"
             className={`cut tap block p-5 relative overflow-hidden
               ${daily.played === null ? "cut-petal text-ink" : "bg-board"}`}>
-            <Starburst size={82} fill={daily.played === null ? "rgba(255,255,255,.22)" : "var(--color-petal)"}
+            <Starburst size={82}
               className="absolute -right-3 -top-3 rotate-12" />
             <p className="relative text-[12px] font-black opacity-75">
               Daily challenge

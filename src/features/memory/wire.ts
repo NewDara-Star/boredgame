@@ -1,4 +1,4 @@
-import { SIZE, newGame, type Cell, type Game, type Mark } from "./rules";
+import { newGame, type Cell, type Game, type Mark } from "./rules";
 
 /** The stored row. `line` is derived, so it is not stored. */
 export interface MemoryRow {
@@ -37,7 +37,6 @@ export function decode(row: MemoryRow): Game {
 
 export const encodeBoard = (board: Cell[]) => board.map((c) => c ?? "-").join("");
 export const encodeDeck = (deck: number[]) => deck.join("");
-export const EMPTY_BOARD = "-".repeat(SIZE);
 
 /**
  * The deck is included even though a move never changes it: dealing happens

@@ -53,12 +53,6 @@ export interface Puzzle {
   created_at: string;
 }
 
-export interface Category {
-  id: number;
-  name: string;
-  slug: string;
-  game: GameKey | null;
-}
 
 export interface Profile {
   id: string;
@@ -78,14 +72,6 @@ export interface Profile {
   created_at: string;
 }
 
-export interface Attempt {
-  id: number;
-  user_id: string;
-  puzzle_id: number;
-  correct: boolean;
-  ms_taken: number | null;
-  created_at: string;
-}
 
 export type RoomStatus = "waiting" | "playing" | "finished" | "abandoned";
 

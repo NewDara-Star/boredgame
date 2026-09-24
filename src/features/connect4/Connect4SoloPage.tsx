@@ -6,19 +6,19 @@ import { c4Hero } from "./card";
 
 const board = gridBoard(Board);
 const glyphs = { x: "disc", o: "disc" } as const;
-const art = (_title: string) => ({ hero: (g: { board: NonNullable<Parameters<typeof c4Hero>[0]>; line: number[] | null }) => c4Hero(g.board, g.line) });
+const art = () => ({ hero: (g: { board: NonNullable<Parameters<typeof c4Hero>[0]>; line: number[] | null }) => c4Hero(g.board, g.line) });
 
 /** Plain Connect 4 against the bot: tap a column, the disc falls. */
 export function Connect4SoloPage() {
   return <BoardSoloPage engine={C4} title="Connect 4" board={board} glyphs={glyphs} plain
-    ratio={BOARD_RATIO.connect4} art={art("Connect 4")} />;
+    ratio={BOARD_RATIO.connect4} art={art()} />;
 }
 
 /** The trivia version: name a column, then answer for it. A miss costs the
     turn and nothing else — the bot does not get a shot at your column. */
 export function Connect4TriviaSoloPage() {
   return <BoardSoloPage engine={C4} title="Connect 4 Trivia" board={board} glyphs={glyphs}
-    ratio={BOARD_RATIO.connect4} art={art("Connect 4 Trivia")} />;
+    ratio={BOARD_RATIO.connect4} art={art()} />;
 }
 
 /** The same board, with the question replaced by a shot. Built for a player who
@@ -26,5 +26,5 @@ export function Connect4TriviaSoloPage() {
 export function Connect4CatapultSoloPage() {
   return <BoardSoloPage engine={C4} title="Connect 4 Catapult" board={board}
     glyphs={glyphs} challenge="catapult"
-    ratio={BOARD_RATIO.connect4} art={art("Connect 4 Catapult")} />;
+    ratio={BOARD_RATIO.connect4} art={art()} />;
 }

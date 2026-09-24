@@ -64,7 +64,6 @@ export function Board({
             className={`${pickable ? "tap" : ""} aspect-square grid place-items-center rounded-[14px]
               ${won ? "bg-leaf-hi" : contested ? "bg-petal-hi" : open ? "bg-mist" : "bg-board"}
               ${pickable ? "cursor-pointer hover:bg-sky-hi/40" : "cursor-default"}`}
-            style={{ opacity: 1 }}
             animate={won ? { scale: [1, 1.1, 1] } : contested ? { scale: [1, 1.04, 1] } : { scale: 1 }}
             transition={won ? { ...SPRING, delay: (line?.indexOf(i) ?? 0) * 0.09 }
               : contested ? { duration: 1.1, repeat: Infinity, ease: "easeInOut" } : SPRING}>

@@ -175,7 +175,6 @@ export function targetFor(seed: number, level: Level = "medium"): Target {
 }
 
 export const isPole = (t: Target) => t.y > 0;
-export const pointsFor = (t: Target) => (isPole(t) ? 3 : 1);
 
 export interface Flight {
   /** every position the ball occupies, wind-up first */

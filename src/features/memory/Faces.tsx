@@ -2,12 +2,11 @@ import { Art } from "@/shared/brand/Art";
 import { RAMPS } from "@/shared/brand/tokens";
 
 /**
- * The eight faces, drawn in the brand's chunky style instead of emoji (which look
- * different on every phone). Index order is the deck's: a stored deck of indices
- * still deals the same pairs.
+ * The eight faces (sunflower, flame, house, star, heart, raindrop, leaf, moon),
+ * drawn in the brand's chunky style instead of emoji (which look different on
+ * every phone). Index order is the deck's: a stored deck of indices still deals
+ * the same pairs.
  */
-export const FACE_NAMES = ["sunflower", "flame", "house", "star", "heart", "raindrop", "leaf", "moon"];
-
 const OUT = "var(--color-ink-day)";
 const drawn: Record<number, (id: string) => JSX.Element> = {
   3: () => <path d="M24 6 L29.6 18 L42.6 19.3 L32.8 28 L35.6 41 L24 34.4 L12.4 41 L15.2 28 L5.4 19.3 L18.4 18 Z" fill={RAMPS.petal.base} stroke={OUT} strokeWidth="3.4" strokeLinejoin="round" />,

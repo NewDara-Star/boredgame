@@ -2,7 +2,6 @@ import type { Transition, Variants } from "framer-motion";
 
 /** One spring, used everywhere, so the whole app moves with the same weight. */
 export const SPRING: Transition = { type: "spring", stiffness: 420, damping: 26, mass: 0.7 };
-export const SOFT: Transition = { type: "spring", stiffness: 260, damping: 24 };
 
 /** Parent that deals its children out one at a time. */
 export const stagger = (each = 0.06, delay = 0): Variants => ({

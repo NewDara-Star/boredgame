@@ -58,6 +58,3 @@ function copy(text: string): Promise<"copied" | "cancelled"> {
   return navigator.clipboard?.writeText(text).then(() => "copied" as const, () => "cancelled" as const)
     ?? Promise.resolve("cancelled" as const);
 }
-
-/** The old entry point, kept so a bare file still saves. */
-export function saveCard(file: File) { void shareResult({ file, text: "" }); }

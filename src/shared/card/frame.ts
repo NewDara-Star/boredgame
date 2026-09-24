@@ -124,7 +124,6 @@ export function fitSize(c: Ctx, text: string, max: number, start: number, weight
   do { c.font = `${weight} ${size}px ${family}`; size -= 2; } while (c.measureText(text).width > max && size > 20);
   return size + 2;
 }
-export const HEADLINE_CHARS = 22;
 export const ellipsize = (text: string, n: number) =>
   text.length <= n ? text : `${text.slice(0, n - 1).trimEnd()}…`;
 
@@ -344,4 +343,4 @@ export async function toCard(canvas: HTMLCanvasElement, title: string, code: str
   };
 }
 
-export { shareResult, saveCard } from "./share";
+export { shareResult } from "./share";

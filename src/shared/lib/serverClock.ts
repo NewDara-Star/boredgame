@@ -16,8 +16,6 @@ let syncedAt = 0;
 let inflight: Promise<void> | null = null;
 export const RESYNC_MS = 10 * 60_000;
 
-export const clockOffset = () => offset;
-
 /** Sync at most every ten minutes; calls made meanwhile share one sync. */
 export function syncClock(samples = 3): Promise<void> {
   if (!supabase || Date.now() - syncedAt < RESYNC_MS) return Promise.resolve();
