@@ -11,9 +11,6 @@ import { ResultScreen } from "@/features/play/ResultScreen";
 import { useSoloBoard } from "@/features/play/useSoloBoard";
 import { TurnPanel } from "@/features/rooms/TurnPanel";
 
-/** A sentinel that is never any question's answer, so "wrong" can be expressed
-    through the same one-string channel a tapped option uses. */
-const NOT_THE_ANSWER = "\u0000";
 import type { BoardEngine, BoardRow, BoardState, Mark } from "@/features/rooms/useBoardRoom";
 
 /**
@@ -172,9 +169,13 @@ export function BoardSoloPage<G extends BoardState & { target: number | null; li
             challenge={challenge === "catapult" ? "catapult" : "trivia"}
             item={s.item} options={s.options}
             chosen={s.chosen} setChosen={() => {}}
-            onAnswer={(correct) => (challenge === "catapult"
+            // The option you tapped, as tapped: it is what the reveal marks as
+            // yours and what the server judges. (It used to be a null character
+            // for any wrong pick, which Postgres refuses, so a game with a miss
+            // filed nothing.)
+            onAnswer={(correct, given) => (challenge === "catapult"
               ? s.fire(correct)
-              : s.submit(correct ? s.item?.answer ?? null : NOT_THE_ANSWER))}
+              : s.submit(given ?? null))}
             asking={g.phase === "asking"} revealed={revealed} mine={s.iAnswer}
             fraction={s.fraction} askedAt={0} target={s.target}
             waitingOn="The bot"

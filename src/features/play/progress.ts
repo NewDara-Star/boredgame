@@ -95,7 +95,17 @@ export async function recordRound(
   // its OWN verdict -- the client no longer declares its own `correct`. Filing a
   // correct row for a question you never answered was how the lifetime counters,
   // and so the leaderboard, could be inflated. See record_round.
-  if (rows.length) await supabase.rpc("record_round", { p_rows: rows });
+  // One retry: a round is only filed here, so a dropped request loses it. (The
+  // server refusing it outright, as it did for the null-character answers,
+  // fails both times and shows in the console instead of vanishing.)
+  if (rows.length) {
+    let { error } = await supabase.rpc("record_round", { p_rows: rows });
+    if (error) {
+      await new Promise((r) => setTimeout(r, 1500));
+      ({ error } = await supabase.rpc("record_round", { p_rows: rows }));
+    }
+    if (error) console.error("record_round failed", error.message);
+  }
   // Before touch_streak, so the profile it returns already carries the new best.
   if (score > 0) await supabase.rpc("record_best", { p_game: game, p_score: score });
 

@@ -83,5 +83,26 @@ for (const slug of readdirSync(fns)) {
 }
 ok(checked >= 1, `found ${checked} edge functions — the scan is broken`);
 
+// ---- 3. nothing the server refuses on sight ------------------------------
+// A wrong pick in a solo board game was sent as "\u0000", and Postgres refuses a
+// null character in json, so the whole round was rejected -- and nobody read the
+// error. Both halves are checked: no null characters in the source, and the
+// one call that files a round looks at what came back.
+let nuls = 0, filings = 0;
+for (const file of walk(join(root, "src"))) {
+  const src = decomment(readFileSync(file, "utf8"));
+  for (const m of src.matchAll(/\\u0000|\\x00|\\0(?![0-9])|\u0000/g)) {
+    nuls++;
+    ok(false, `${file.replace(root, "")}:${src.slice(0, m.index).split("\n").length} — a null character; Postgres refuses it in json and text`);
+  }
+  for (const m of src.matchAll(/rpc\(\s*"record_round"/g)) {
+    filings++;
+    const before = src.slice(Math.max(0, m.index! - 80), m.index);
+    ok(/\{[^}]*\berror\b[^}]*\}\s*=\s*await\s+supabase!?\s*\.\s*$/.test(before),
+      `${file.replace(root, "")}:${src.slice(0, m.index).split("\n").length} — record_round's error is not read, so a refused round disappears`);
+  }
+}
+ok(filings >= 1, `found ${filings} record_round calls — the scan is broken`);
+
 if (bad) { console.error(`\n${bad} of ${n} delivery assertions failed`); process.exit(1); }
 console.log(`${n} delivery assertions hold (${voids} void-supabase sites, ${checked} edge functions)`);

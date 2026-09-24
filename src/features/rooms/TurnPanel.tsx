@@ -24,7 +24,8 @@ export function TurnPanel({
   options: string[];
   chosen: string | null;
   setChosen: (o: string | null) => void;
-  onAnswer: (correct: boolean) => void;
+  /** the verdict, and the option tapped (none for a catapult shot) */
+  onAnswer: (correct: boolean, given?: string) => void;
   asking: boolean;
   revealed: boolean;
   /** whether the pending answer is yours to give */
@@ -96,7 +97,7 @@ export function TurnPanel({
         // shuffle again here, or the two players see different orders.
         item={item} options={options} chosen={chosen}
         revealed={revealed} locked={!mine || revealed}
-        onAnswer={(opt) => { setChosen(opt); onAnswer(opt === item.answer); }} />
+        onAnswer={(opt) => { setChosen(opt); onAnswer(opt === item.answer, opt); }} />
       {moveOn}
     </div>
   );
