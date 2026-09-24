@@ -7,6 +7,7 @@ import { Field, Input } from "@/shared/ui/Field";
 import { Button } from "@/shared/ui/Button";
 import { Card } from "@/shared/ui/Card";
 import { validate, isValid, type DraftPuzzle } from "./validation";
+import { forgetContent } from "@/features/play/content";
 
 const CATEGORIES = ["Idioms", "Food", "Places", "Everyday", "Music", "Sport", "Science", "Maths", "Design", "Film & TV", "Tech", "World"];
 
@@ -62,7 +63,7 @@ export function AdminPage() {
     });
     setSaving(false);
     setMsg(error ? error.message : "Published.");
-    if (!error) setD(EMPTY);
+    if (!error) { forgetContent(d.game); setD(EMPTY); }
   }
 
   if (allowed === false) return <Navigate to="/" replace />;

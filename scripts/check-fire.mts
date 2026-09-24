@@ -115,6 +115,10 @@ ok(filings >= 1, `found ${filings} record_round calls — the scan is broken`);
   ok(i >= 0, "content.ts loads the bank through loadLive");
   ok(/\.range\(/.test(body) && /\.order\(/.test(body), "the bank is fetched in ordered pages (.order + .range), not in one request");
   ok(/count:\s*"exact"/.test(body) && /for\s*\(/.test(body), "the first page carries the total and the rest are fetched from it");
+  ok(!/select\(\s*"\*/.test(body), "the bank asks for the columns it uses, not select(*)");
+  // ...and once per visit, not once per round (about 0.8 MB each time).
+  const lc = src.slice(src.indexOf("export async function loadContent("));
+  ok(/cache\.get\(game\)/.test(lc) && /CACHE_MS/.test(lc), "loadContent keeps the bank for the visit");
 }
 
 if (bad) { console.error(`\n${bad} of ${n} delivery assertions failed`); process.exit(1); }

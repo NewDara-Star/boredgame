@@ -37,7 +37,9 @@ function fromSeedTrivia(): PlayItem[] {
 }
 
 /** Rows come back with the joined category, which the bare Puzzle type doesn't carry. */
-type PuzzleRow = Puzzle & { categories?: { name: string } | null };
+type PuzzleRow = Pick<Puzzle, "id" | "game" | "render" | "spec" | "image_url" | "prompt" | "choices"
+  | "answer" | "accept" | "alt_hint" | "char_hint" | "explanation" | "difficulty">
+  & { categories?: { name: string } | null };
 
 function fromRow(row: PuzzleRow): PlayItem {
   return {
@@ -76,17 +78,21 @@ function fromRow(row: PuzzleRow): PlayItem {
  */
 export const PAGE = 1000;
 
+/** Only what fromRow reads: about a quarter less than select("*"). */
+const COLUMNS = "id, game, render, spec, image_url, prompt, choices, answer, accept, alt_hint, char_hint, explanation, difficulty, categories(name)";
+
 async function loadLive(game: GameKey): Promise<PuzzleRow[]> {
   const page = (from: number, count = false) => supabase!
     .from("puzzles")
-    .select("*, categories(name)", count ? { count: "exact" } : undefined)
+    .select(COLUMNS, count ? { count: "exact" } : undefined)
     .eq("game", game)
     .eq("status", "live")
     .order("id")
     .range(from, from + PAGE - 1);
   const first = await page(0, true);
   if (first.error) throw first.error;
-  const rows = (first.data ?? []) as PuzzleRow[];
+  // The untyped client guesses the category join is a list; it is one row.
+  const rows = (first.data ?? []) as unknown as PuzzleRow[];
   const total = first.count ?? rows.length;
   const rest = [];
   for (let from = PAGE; from < total; from += PAGE) rest.push(page(from));
@@ -94,7 +100,7 @@ async function loadLive(game: GameKey): Promise<PuzzleRow[]> {
     // A later page failing keeps what arrived rather than dropping to the
     // bundled set: 1,000 real questions beat the handful in the app.
     if (r.error) { console.error("puzzles page failed", r.error.message); continue; }
-    rows.push(...((r.data ?? []) as PuzzleRow[]));
+    rows.push(...((r.data ?? []) as unknown as PuzzleRow[]));
   }
   return rows;
 }
@@ -105,17 +111,40 @@ async function loadLive(game: GameKey): Promise<PuzzleRow[]> {
  */
 export const CONTENT_TIMEOUT_MS = 6000;
 
+/**
+ * The bank is downloaded once and kept for the visit (about 0.8 MB for trivia),
+ * instead of at the start of every round, board game and room. Callers share
+ * one request in flight. It is fetched again after CACHE_MS, so an open tab
+ * still picks up new questions, and a failed or timed-out load is never kept:
+ * the next round tries the database again.
+ */
+export const CACHE_MS = 30 * 60_000;
+const cache = new Map<GameKey, { at: number; items: Promise<PlayItem[] | null> }>();
+
+/** Drop a game's kept bank, e.g. after publishing a puzzle. */
+export function forgetContent(game?: GameKey) {
+  if (game) cache.delete(game); else cache.clear();
+}
+
 export async function loadContent(game: GameKey): Promise<PlayItem[]> {
   const bundled = () => (game === "picto" ? fromSeedPicto() : fromSeedTrivia());
   if (!supabase) return bundled();
 
-  // Bounded, because an error is not the only way this goes wrong. A request
-  // that simply never comes back — bad signal, captive-portal wifi — used to
-  // leave every game sitting on "Dealing questions…" for as long as the tab was
-  // open, with a perfectly good bundled set sitting unused in the same file.
-  const rows = await withTimeout(loadLive(game), CONTENT_TIMEOUT_MS, () => [] as PuzzleRow[]);
-
-  return rows.length > 0 ? rows.map(fromRow) : bundled();
+  let hit = cache.get(game);
+  if (!hit || Date.now() - hit.at > CACHE_MS) {
+    // Bounded, because an error is not the only way this goes wrong. A request
+    // that simply never comes back — bad signal, captive-portal wifi — used to
+    // leave every game sitting on "Dealing questions…" for as long as the tab
+    // was open, with a perfectly good bundled set sitting unused in the file.
+    const items = withTimeout(loadLive(game), CONTENT_TIMEOUT_MS, () => [] as PuzzleRow[])
+      .then((rows) => (rows.length > 0 ? rows.map(fromRow) : null));
+    hit = { at: Date.now(), items };
+    cache.set(game, hit);
+    void items.then((v) => { if (!v && cache.get(game)?.items === items) cache.delete(game); });
+  }
+  const items = await hit.items;
+  // A copy of the list, so no caller can reorder or trim everyone else's.
+  return items ? [...items] : bundled();
 }
 
 /**
