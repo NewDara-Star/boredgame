@@ -4,6 +4,7 @@ import { AnswerMark, Tick } from "@/shared/brand/Pieces";
 import { Dealing } from "@/shared/ui/Note";
 import { AnimatePresence, motion } from "framer-motion";
 import { useRound } from "@/features/play/useRound";
+import { useLockIn } from "@/features/play/lockIn";
 import { CategoryBar } from "@/features/play/CategoryBar";
 import { readFilter, writeFilter } from "@/features/play/filters";
 import { shuffle } from "@/features/play/content";
@@ -14,6 +15,7 @@ import { SPRING, stagger, riseIn } from "@/shared/ui/motion";
 export function TriviaGame() {
   const [cats, setCats] = useState<string[]>(() => readFilter("trivia"));
   const r = useRound("trivia", 10, cats);
+  const lock = useLockIn(r.index);
   const chooseCats = (next: string[]) => { setCats(next); writeFilter("trivia", next); };
   const filterBar = (
     <CategoryBar categories={r.categories} selected={cats} onChange={chooseCats} />
@@ -98,13 +100,14 @@ export function TriviaGame() {
               const isAnswer = opt === item.answer;
               const isMine = revealed && r.last?.given === opt;
               const bg = isBurned && !revealed ? "bg-board opacity-25 line-through"
-                : !revealed ? "bg-board"
+                : !revealed ? (lock.picked === opt ? "bg-petal" : "bg-board")
                 : isAnswer ? "bg-leaf text-ink"
                 : isMine ? "bg-ember text-ink" : "bg-board opacity-45";
               return (
                 <motion.button key={opt} variants={riseIn}
-                  disabled={revealed || isBurned} onClick={() => r.submit(opt)}
-                  whileTap={revealed ? undefined : { scale: 0.97 }}
+                  disabled={revealed || isBurned || lock.picked !== null}
+                  onClick={() => lock.pick(opt, (o, at) => r.submit(o, at))}
+                  whileTap={revealed || lock.picked !== null ? undefined : { scale: 0.97 }}
                   className={`card ${revealed ? "" : "tap"} flex items-center gap-3 text-left px-4 py-3.5 ${bg}`}>
                   <span aria-hidden={!(revealed && (isAnswer || isMine))} className="text-base shrink-0"
                     >
@@ -122,8 +125,8 @@ export function TriviaGame() {
 
       {r.phase === "playing" ? (
         r.hintsUsed === 0 && (
-          <button onClick={r.useHint}
-            className="cut tap mt-4 text-xs font-black px-4 min-h-[44px] inline-flex items-center rounded-xl cut-petal">
+          <button onClick={r.useHint} disabled={lock.picked !== null}
+            className="cut tap mt-4 disabled:opacity-50 text-xs font-black px-4 min-h-[44px] inline-flex items-center rounded-xl cut-petal">
             50 / 50 — burn two wrong answers · −100
           </button>
         )

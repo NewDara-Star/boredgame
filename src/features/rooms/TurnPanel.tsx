@@ -1,4 +1,5 @@
 import { QuestionPanel, Timer } from "@/features/squareoff/QuestionPanel";
+import { LOCK_MS, useLockIn } from "@/features/play/lockIn";
 import { Catapult } from "@/features/challenge/Catapult";
 import { targetFor } from "@/features/challenge/rules";
 import type { PlayItem } from "@/features/play/types";
@@ -49,6 +50,8 @@ export function TurnPanel({
   /** Square Off says "Let them try it" when a miss hands the square over. */
   nextLabel: string;
 }) {
+  // Keyed on the question and the phase, so every new ask starts unlocked.
+  const lock = useLockIn(`${item?.id}|${asking}`);
   /* The pause is skippable. A shorter fixed timer is not the same thing as
      being able to move on when you have finished reading. Once a reveal is
      stuck, whoever stallWriter names gets the same button rather than sitting
@@ -95,9 +98,14 @@ export function TurnPanel({
       <QuestionPanel
         // Already permuted by loadContent, seeded on the puzzle id — do NOT
         // shuffle again here, or the two players see different orders.
-        item={item} options={options} chosen={chosen}
-        revealed={revealed} locked={!mine || revealed}
-        onAnswer={(opt) => { setChosen(opt); onAnswer(opt === item.answer, opt); }} />
+        item={item} options={options} chosen={lock.picked ?? chosen}
+        revealed={revealed} locked={!mine || revealed || lock.picked !== null}
+        // Locked in first, then answered. With the clock nearly out the pause is
+        // skipped, so a last-second tap still lands before time does.
+        onAnswer={(opt) => {
+          setChosen(opt);
+          lock.pick(opt, (o) => onAnswer(o === item.answer, o), fraction < 0.1 ? 0 : LOCK_MS);
+        }} />
       {moveOn}
     </div>
   );

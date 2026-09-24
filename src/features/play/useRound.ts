@@ -70,9 +70,11 @@ export function useRound(
 
   const current = items[index];
 
-  const submit = useCallback((given: string) => {
+  /** `tappedAt`: when the option was tapped, so the locked-in pause before the
+      verdict doesn't count against your speed. */
+  const submit = useCallback((given: string, tappedAt = Date.now()) => {
     if (phase !== "playing" || !current) return;
-    const ms = Date.now() - startedAt.current;
+    const ms = Math.max(0, tappedAt - startedAt.current);
     const ok = current.choices
       ? given === current.answer
       : isCorrect(given, current.answer, current.accept);

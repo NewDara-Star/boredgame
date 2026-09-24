@@ -1,3 +1,4 @@
+import { LOCK_MS, sleep } from "@/features/play/lockIn";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { scoreAnswer } from "@/features/play/scoring";
 import type { PlayItem } from "@/features/play/types";
@@ -77,11 +78,14 @@ export function useDailyPlay(d: DailyApi, enabled: boolean) {
   const submit = useCallback(async (given: string) => {
     if (phase !== "playing" || !current || pending !== null) return;
     setPending(given);
-    const v = await d.answer(Number(current.id), given);
+    const at = Date.now();
+    // Sent at once (the server times you from its own clock), but the verdict
+    // waits out the locked-in moment so your pick shows on its own first.
+    const [v] = await Promise.all([d.answer(Number(current.id), given), sleep(LOCK_MS)]);
     if (!v) { setPending(null); return; } // error surfaced by useDaily
     // The +N is a local estimate for feedback only; the score that ranks you is
     // computed on the server from server-measured think-time.
-    const gained = v.correct ? scoreAnswer(Date.now() - shownAt.current, streak, 0) : 0;
+    const gained = v.correct ? scoreAnswer(at - shownAt.current, streak, 0) : 0;
     setScore((s) => s + gained);
     setStreak((s) => (v.correct ? s + 1 : 0));
     setLast({ correct: v.correct, given, gained, near: false, answer: v.answer, explanation: v.explanation });

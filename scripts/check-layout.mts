@@ -103,4 +103,14 @@ for (const p of PLAY_SCREENS) {
     "PlayBoard treats a zero height as unbounded rather than as no room, so it cannot deadlock again");
 }
 
+// --- a tapped option is locked in before the verdict (Daramola, 24 Sep) ------
+// Every screen that shows multiple-choice options goes through lockIn.ts, so
+// your pick lights on its own before right or wrong shows. A new screen that
+// renders options without it would reveal instantly again.
+for (const f of ["src/features/trivia/TriviaGame.tsx", "src/features/rooms/TurnPanel.tsx",
+                 "src/features/daily/useDailyPlay.ts", "src/features/rooms/RoomsPage.tsx"]) {
+  const src = read(f);
+  ok(/from "@\/features\/play\/lockIn"/.test(src) && /LOCK_MS|useLockIn/.test(src), `${f} locks a tapped option in before the verdict`);
+}
+
 console.log(`${n} layout assertions hold`);

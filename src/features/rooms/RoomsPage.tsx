@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { AnswerMark } from "@/shared/brand/Pieces";
+import { LOCK_MS, sleep } from "@/features/play/lockIn";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "@/app/providers/AuthProvider";
 import { useRoom, useMyRooms, createRoom } from "./useRoom";
@@ -33,6 +34,8 @@ export function RoomsPage() {
   const { user, profile, offline, isGuest } = useAuth();
   const [joinCode, setJoinCode] = useState("");
   const [guess, setGuess] = useState("");
+  /** the option you tapped in the race, lit while the server judges it */
+  const [picked, setPicked] = useState<string | null>(null);
   const [startError, setStartError] = useState<string | null>(null);
   const uname = profile?.username ?? user?.email?.split("@")[0] ?? "player";
 
@@ -335,9 +338,14 @@ export function RoomsPage() {
           {!won && currentPuzzle.choices ? (
             <div className="grid gap-2.5">
               {currentPuzzle.choices.map((opt, i) => (
-                <button key={opt}
-                  onClick={() => void claimRound(opt)}
-                  className="card tap flex items-center gap-3 text-left px-4 py-4 bg-board">
+                <button key={opt} disabled={picked !== null}
+                  // A race: the claim goes at once, and the pick stays lit at
+                  // least the locked-in moment before anything else shows.
+                  onClick={() => {
+                    setPicked(opt);
+                    void Promise.all([claimRound(opt), sleep(LOCK_MS)]).then(() => setPicked(null));
+                  }}
+                  className={`card ${picked === null ? "tap" : ""} flex items-center gap-3 text-left px-4 py-4 ${picked === opt ? "bg-petal" : "bg-board"}`}>
                   <AnswerMark index={i} />
                   <span className="text-[15px] font-bold">{opt}</span>
                 </button>
