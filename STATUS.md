@@ -2,6 +2,17 @@
 
 Last updated: 2026-09-04 (three more games, and the whole bank is live)
 
+## Brand migration (sunflower identity, v4) — the ledger
+
+`npm run check:brand` is the ledger. It counts every trace of the old look (BANS) and every piece of the
+new identity that must exist (REQUIRES), and ratchets against `scripts/brand-baseline.json`: a count may
+only go down, and `npm run build` fails if one goes up. Done means `node scripts/check-brand.mjs --strict`
+exits 0. `--list` prints every hit as file:line. Spec: project docs boredgame/BRAND.md and boredgame/SHARING.md.
+
+| Date | Old-look hits | Requirements met | Commit |
+|---|---|---|---|
+| 2026-09-24 | 1115 | 0/19 | fence added |
+
 ## Verified working
 
 Each claim below was checked by running it, not by reading the code.

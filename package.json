@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "node scripts/check-brand.mjs && tsc -b && vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "check:squareoff": "node --experimental-strip-types scripts/check-squareoff.mts",
@@ -15,7 +15,9 @@
     "check:layout": "node --experimental-strip-types scripts/check-layout.mts",
     "check:lobby": "node --experimental-strip-types scripts/check-lobby.mts",
     "check:schema": "node --experimental-strip-types scripts/check-schema.mts",
-    "check:fire": "node --experimental-strip-types scripts/check-fire.mts"
+    "check:fire": "node --experimental-strip-types scripts/check-fire.mts",
+    "check:brand": "node scripts/check-brand.mjs",
+    "check:brand:list": "node scripts/check-brand.mjs --list"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.0",
