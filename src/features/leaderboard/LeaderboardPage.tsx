@@ -88,8 +88,11 @@ function StickyBar({ children }: { children: React.ReactNode }) {
 }
 
 export function LeaderboardPage() {
-  const { user, offline } = useAuth();
-  const { rows, you, loading, failed, retry } = useLeaderboard(user?.id);
+  const { user, offline, isGuest } = useAuth();
+  // Guests are left off the board (useLeaderboard filters is_guest), so they
+  // have no place on it. Asking for theirs used to produce one anyway, counted
+  // against members only: a "14 You" row for someone the board never shows.
+  const { rows, you, loading, failed, retry } = useLeaderboard(isGuest ? undefined : user?.id);
 
   if (offline) {
     return (
@@ -158,6 +161,13 @@ export function LeaderboardPage() {
           before it reaches you, which reads as "you are not on here". */}
       {!loading && you && !youOnPage && (
         <StickyBar><Row p={you} meId={user?.id} /></StickyBar>
+      )}
+      {!loading && isGuest && rows.length > 0 && (
+        <StickyBar>
+          <Link to="/profile" className="cut tap block cut-petal px-4 py-3 text-center font-display font-semibold">
+            Guests aren't on the board. Save your progress to join it →
+          </Link>
+        </StickyBar>
       )}
       {!loading && !user && rows.length > 0 && (
         <StickyBar>
