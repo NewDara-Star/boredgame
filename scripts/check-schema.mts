@@ -76,4 +76,15 @@ ok(declaredFns.size >= 15, `only found ${declaredFns.size} functions in schema.s
 ok(declaredRels.size >= 12, `only found ${declaredRels.size} tables in schema.sql — the scan is broken`);
 
 if (bad) { console.error(`\n${bad} of ${n} schema assertions failed`); process.exit(1); }
+// The daily is played on the phone's own date. Every daily function must take
+// a day either side of UTC (touch_streak's rule): UTC-and-yesterday only shut the
+// daily for an hour after midnight in Dublin and Lagos.
+for (const fn of ["daily_next", "daily_answer", "submit_daily"]) {
+  const at = schema.indexOf(`create or replace function public.${fn}(`);
+  const body = schema.slice(at, schema.indexOf("end $$;", at));
+  ok(at >= 0 && /abs\(p_day - \(now\(\) at time zone 'utc'\)::date\) > 1/.test(body)
+     && !/p_day <> \(\(now\(\) at time zone 'utc'\)::date - 1\)/.test(body),
+     `${fn} accepts a day either side of UTC`);
+}
+
 console.log(`${n} schema assertions hold (${rpcs.size} rpcs, ${rels.size} relations)`);

@@ -1690,8 +1690,11 @@ declare uid uuid := auth.uid(); v_ids bigint[]; v_total int; v_answered int;
         v_next bigint; v_q jsonb; i int;
 begin
   if uid is null then raise exception 'sign in first'; end if;
-  if p_day <> (now() at time zone 'utc')::date
-     and p_day <> ((now() at time zone 'utc')::date - 1) then
+  -- The phone asks for its own date. A day either side of UTC is accepted, the
+  -- rule touch_streak uses: accepting only UTC and the day before shut the
+  -- daily for the first hour after midnight in UTC+1 (Dublin in summer, Lagos
+  -- all year) and for half of every day in New Zealand.
+  if abs(p_day - (now() at time zone 'utc')::date) > 1 then
     raise exception 'that round is closed';
   end if;
   v_ids := public.daily_round(p_day);
@@ -1735,8 +1738,11 @@ declare uid uuid := auth.uid();
         v_correct boolean; v_pick public.daily_picks;
 begin
   if uid is null then raise exception 'sign in first'; end if;
-  if p_day <> (now() at time zone 'utc')::date
-     and p_day <> ((now() at time zone 'utc')::date - 1) then
+  -- The phone asks for its own date. A day either side of UTC is accepted, the
+  -- rule touch_streak uses: accepting only UTC and the day before shut the
+  -- daily for the first hour after midnight in UTC+1 (Dublin in summer, Lagos
+  -- all year) and for half of every day in New Zealand.
+  if abs(p_day - (now() at time zone 'utc')::date) > 1 then
     raise exception 'that round is closed';
   end if;
   select puzzle_ids into v_ids from public.daily_rounds where day = p_day;
@@ -1775,8 +1781,11 @@ declare uid uuid := auth.uid(); v_ids bigint[];
         cap_ms constant int := 60000;   -- max a single question can contribute
 begin
   if uid is null then raise exception 'sign in first'; end if;
-  if p_day <> (now() at time zone 'utc')::date
-     and p_day <> ((now() at time zone 'utc')::date - 1) then
+  -- The phone asks for its own date. A day either side of UTC is accepted, the
+  -- rule touch_streak uses: accepting only UTC and the day before shut the
+  -- daily for the first hour after midnight in UTC+1 (Dublin in summer, Lagos
+  -- all year) and for half of every day in New Zealand.
+  if abs(p_day - (now() at time zone 'utc')::date) > 1 then
     return jsonb_build_object('ok', false);
   end if;
   select puzzle_ids into v_ids from public.daily_rounds where day = p_day;
