@@ -191,8 +191,8 @@ create table if not exists puzzles (
 create index if not exists puzzles_live_idx on puzzles (status, game, difficulty);
 
 alter table puzzles enable row level security;
-drop policy if exists "live puzzles are public" on puzzles;
-create policy "live puzzles are public" on puzzles for select using (status = 'live' or is_admin());
+-- "live puzzles are public" hides an open daily's questions; it is defined with
+-- open_daily_ids() after the daily round, further down (F30).
 drop policy if exists "admins write puzzles" on puzzles;
 create policy "admins write puzzles" on puzzles for all using (is_admin()) with check (is_admin());
 
@@ -451,8 +451,7 @@ create table if not exists public.daily_rounds (
   created_at  timestamptz not null default now()
 );
 alter table public.daily_rounds enable row level security;
-drop policy if exists "daily round readable" on public.daily_rounds;
-create policy "daily round readable" on public.daily_rounds for select using (true);
+-- No read policy: the rounds are private, read only by the daily functions (F30).
 
 -- One score per player per day, first filing wins: `on conflict do nothing`
 -- and the boolean says whether yours was the one that landed, so a second
@@ -474,26 +473,28 @@ create policy "daily scores readable" on public.daily_scores for select using (t
 
 create or replace function public.daily_round(p_day date)
 returns bigint[] language plpgsql security definer set search_path to 'public' as $$
-declare ids bigint[];
+declare ids bigint[]; v_recent bigint[];
 begin
   select puzzle_ids into ids from public.daily_rounds where day = p_day;
   if ids is not null then return ids; end if;
 
-  -- A fixed spread so the shape of the day is the same every day, ordered
-  -- deterministically off the date so two people creating it agree.
-  select array_agg(id order by md5(p_day::text || id::text)) into ids
+  select coalesce(array_agg(x), '{}') into v_recent
+    from public.daily_rounds dr, unnest(dr.puzzle_ids) x
+   where dr.day >= p_day - 60;
+
+  select array_agg(id order by random()) into ids
   from (
     (select id from public.puzzles
-      where game='trivia' and status='live' and difficulty='easy'
-      order by md5(p_day::text || id::text) limit 4)
+      where game='trivia' and status='live' and difficulty='easy' and not in_app
+      order by (id = any(v_recent)), random() limit 4)
     union all
     (select id from public.puzzles
-      where game='trivia' and status='live' and difficulty='medium'
-      order by md5(p_day::text || id::text) limit 4)
+      where game='trivia' and status='live' and difficulty='medium' and not in_app
+      order by (id = any(v_recent)), random() limit 4)
     union all
     (select id from public.puzzles
-      where game='trivia' and status='live' and difficulty='hard'
-      order by md5(p_day::text || id::text) limit 2)
+      where game='trivia' and status='live' and difficulty='hard' and not in_app
+      order by (id = any(v_recent)), random() limit 2)
   ) picked;
 
   if ids is null or array_length(ids, 1) = 0 then return null; end if;
@@ -1715,7 +1716,7 @@ begin
     values (p_day, uid, v_next, now())
     on conflict (day, user_id, puzzle_id) do nothing;   -- first serve wins
   select (to_jsonb(p) - 'answer' - 'answer_normalised' - 'accept' - 'explanation'
-            - 'created_by' - 'status' - 'category_id')
+            - 'created_by' - 'status' - 'category_id' - 'in_app')
          || jsonb_build_object('category', coalesce(c.name, ''))
     into v_q
   from public.puzzles p left join public.categories c on c.id = p.category_id
@@ -1750,9 +1751,9 @@ begin
     return jsonb_build_object('correct', v_pick.correct, 'answer', v_answer,
                               'explanation', v_expl, 'locked', true);
   end if;
-  insert into public.daily_picks(day, user_id, puzzle_id, served_at)
-    values (p_day, uid, p_puzzle, now())
-    on conflict (day, user_id, puzzle_id) do nothing;
+  -- Only a question daily_next handed you: answering one it never served used
+  -- to stamp it served there and then, so a script could answer in 0 seconds.
+  if v_pick.puzzle_id is null then raise exception 'that question hasn''t been served yet'; end if;
   v_correct := public.judge_answer(p_given, v_answer, v_accept, v_choices);
   update public.daily_picks
      set given = p_given, correct = v_correct, answered_at = now()
@@ -1827,6 +1828,94 @@ revoke all on function public.daily_answer(date, bigint, text) from public, anon
 revoke all on function public.submit_daily(date)              from public, anon;
 grant execute on function public.daily_next(date)                to authenticated;
 grant execute on function public.daily_answer(date, bigint, text) to authenticated;
+
+-- The daily can't be read ahead or scripted (F30, D2).
+--
+-- 1. A question that also ships inside the app (src/shared/data/trivia.ts) has
+--    its answer in the JavaScript every visitor downloads, so it is never a
+--    daily question. seed.mjs sets the flag for anything it adds.
+alter table public.puzzles add column if not exists in_app boolean not null default false;
+comment on column public.puzzles.in_app is
+  'Also bundled in the app, so its answer is public: never dealt as a daily question.';
+update public.puzzles set in_app = true
+ where game = 'trivia' and prompt = any(array[
+    'Most abundant element in Earth''s crust by mass?',
+    'What does a catalyst do to a reaction?',
+    'Which gas makes up about 78% of dry air?',
+    'Speed of light in a vacuum is about…',
+    'Double a car''s speed. Its kinetic energy multiplies by…',
+    'Which organelle produces most of a cell''s ATP?',
+    'In DNA, adenine pairs with…',
+    'Antibiotics are ineffective against…',
+    'CRISPR-Cas9 is primarily a tool for…',
+    'π to two decimal places?',
+    '2¹⁰ = ?',
+    'Next in the sequence: 1, 1, 2, 3, 5, 8, …',
+    'A shirt costs €80 after a 20% discount. What was the original price?',
+    'Probability of rolling a sum of 7 with two dice?',
+    'Standard deviation measures…',
+    'The Nike logo is called the…',
+    'The FedEx wordmark hides which shape between the E and the x?',
+    'Which colour model is used for print?',
+    '"Kerning" adjusts…',
+    'Helvetica was designed in which country?',
+    'The Bauhaus school was founded in…',
+    'Jakob''s Law in UX says…',
+    '"Leading" controls…',
+    'What does xG measure in football?',
+    'Which club has won the most European Cups / Champions Leagues?',
+    'Who won the 2022 World Cup?',
+    '"Gegenpressing" means…',
+    'Nigeria''s national football team is nicknamed the…',
+    'In football analytics, PPDA measures…',
+    'Which nation has won the most AFCON titles?',
+    'Who directed "Inception"?',
+    'Standard cinema frame rate?',
+    'Which country''s film industry is nicknamed Nollywood?',
+    'Which film won Best Picture in 2020, the first not in English?',
+    'In Avatar: The Last Airbender, Aang comes from which nation?',
+    'A MacGuffin is…',
+    'The 180-degree rule in filmmaking says…',
+    'At its core, a large language model predicts…',
+    'HTTP status 404 means…',
+    'Which data structure gives O(1) average-case lookup?',
+    '"Overfitting" means a model…',
+    'A race condition is…',
+    'Binary 1010 in decimal?',
+    'Capital of Ireland?',
+    'Which currency does Nigeria use?',
+    'Longest river in Africa?',
+    'Which city replaced Lagos as Nigeria''s capital?',
+    'Ogun is the Yoruba orisha of…',
+    'Fela Kuti pioneered which genre?',
+    'The Book of Kells is housed at…',
+    'Yoruba belongs to which language family?'
+  ]);
+
+-- 2. (daily_round, above, draws at random and skips in_app and recent questions.)
+
+-- 3. The rounds themselves are private: only the daily functions read them.
+drop policy if exists "daily round readable" on public.daily_rounds;
+revoke all on public.daily_rounds from anon, authenticated;
+
+-- 4. While a daily is open (its day and the day after), its ten questions are
+--    out of the public list, so their answers can't be read from it. They sit
+--    out of solo Trivia and rooms for those two days (Daramola, 24 Sep).
+--    open_daily_ids() gives ids only, never answers; the list policy needs it.
+create or replace function public.open_daily_ids()
+returns bigint[] language sql stable security definer set search_path to 'public' as $$
+  select coalesce(array_agg(x), '{}')
+    from public.daily_rounds dr, unnest(dr.puzzle_ids) x
+   where dr.day >= (now() at time zone 'utc')::date - 1
+$$;
+revoke all on function public.open_daily_ids() from public;
+grant execute on function public.open_daily_ids() to anon, authenticated;
+
+drop policy if exists "live puzzles are public" on puzzles;
+create policy "live puzzles are public" on puzzles for select
+  using ((status = 'live' and not (id = any ((select public.open_daily_ids())::bigint[]))) or is_admin());
+
+-- 5. (daily_next and daily_answer, above: only a served question is judged.)
 grant execute on function public.submit_daily(date)              to authenticated;
 
 -- The old client-trusted submit_daily(date,int,int,int,int) was dropped

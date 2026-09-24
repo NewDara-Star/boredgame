@@ -34,6 +34,8 @@ const rows = [
     game: "trivia", render: "text", prompt: q.prompt, choices: q.choices,
     answer: q.choices[0], alt_hint: q.alt_hint, char_hint: q.char_hint,
     difficulty: q.difficulty, category_id: catId(q.category), status: "live",
+    // Its answer ships in the app, so it must never be a daily question (F30).
+    in_app: true,
   })),
 ];
 
@@ -56,7 +58,8 @@ for (const r of rows) {
   if (!id) continue;
   const { error } = await db.from("puzzles")
     .update({ spec: r.spec, accept: r.accept, alt_hint: r.alt_hint, char_hint: r.char_hint,
-              choices: r.choices ?? null, difficulty: r.difficulty })
+              choices: r.choices ?? null, difficulty: r.difficulty,
+              ...(r.game === "trivia" ? { in_app: true } : {}) })
     .eq("id", id);
   if (error) { console.error(`Update ${id} failed: ${error.message}`); process.exit(1); }
   edited++;
