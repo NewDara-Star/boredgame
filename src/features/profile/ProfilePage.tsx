@@ -98,6 +98,7 @@ function MemberView() {
   const [error, setError] = useState<string | null>(null);
   const [draft, setDraft] = useState(profile?.username ?? "");
   const [nameBusy, setNameBusy] = useState(false);
+  const [nameNote, setNameNote] = useState<string | null>(null);
   const [nameMsg, setNameMsg] = useState<string | null>(null);
   const [nameErr, setNameErr] = useState<string | null>(null);
   useEffect(() => { setDraft(profile?.username ?? ""); }, [profile?.username]);
@@ -203,10 +204,14 @@ function MemberView() {
         <form className="flex gap-2 mt-3" noValidate
           onSubmit={async (e) => {
             e.preventDefault();
-            setNameErr(null); setNameMsg(null); setNameBusy(true);
+            setNameErr(null); setNameMsg(null); setNameNote(null); setNameBusy(true);
             const { error } = await setUsername(draft);
             setNameBusy(false);
-            if (error) setNameErr(error); else setNameMsg("Saved");
+            if (error) setNameErr(error);
+            else {
+              setNameMsg("Saved");
+              if (isSynthetic(user?.email)) setNameNote(`You'll sign in as ${draft.trim()} from now on.`);
+            }
           }}>
           <Input value={draft} onChange={(e) => setDraft(e.target.value)}
             maxLength={20} placeholder="yourname" autoComplete="off" />
@@ -216,6 +221,7 @@ function MemberView() {
           </Button>
         </form>
         {nameErr && <p className="text-[12px] font-bold text-ember mt-2">{nameErr}</p>}
+        {nameNote && !nameErr && <p className="text-[12px] font-bold mt-2" role="status">{nameNote}</p>}
       </motion.section>
 
       <section className="border-t-2 border-mist pt-6 space-y-4">

@@ -269,15 +269,47 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { error: error ? sayError(error, "Couldn't save your password. Try again.") : null };
   }
 
+  /**
+   * A new name, and for an account that signs in with its name, a new sign-in
+   * to match (F10). Renaming used to change only the name, so Dara renamed to
+   * Dee still had to sign in as dara, and dara stayed taken for everyone else.
+   *
+   * The name first, as in claimAccount: set_username is the race-safe step.
+   * Then the sign-in. If that fails, the name goes back, so what you're called
+   * and what you sign in with never differ.
+   */
   async function setUsername(name: string) {
     if (!supabase) return { error: NO_SERVER };
     const blocked = await nameBlocked(name, profile?.username);
     if (blocked) return { error: blocked };
-    const { data, error } = await supabase.rpc("set_username", { p_name: name.trim() });
+    const want = name.trim();
+    const before = profile?.username ?? null;
+    const { data, error } = await supabase.rpc("set_username", { p_name: want });
     if (error) return { error: sayError(error, "Couldn't save your name. Try again.") };
     // Both already checked above; these are the race where it changed between.
     if (data === "taken") return { error: takenSentence(null) };
     if (data === "invalid") return { error: nameProblem(name) ?? "Letters, numbers and _ only." };
+
+    // Only an account whose sign-in IS its name follows it: not a guest (no
+    // sign-in yet) and not an old email account.
+    const login = user?.email ?? null;
+    if (user && !user.is_anonymous && isSynthetic(login) && login !== asLogin(want)) {
+      const { error: moved } = await supabase.auth.updateUser({ email: asLogin(want), data: { username: want } });
+      if (moved) {
+        const back = before
+          ? await supabase.rpc("set_username", { p_name: before })
+          : { error: null };
+        await refreshProfile();
+        if (back.error) {
+          return { error: `Your name changed, but your sign-in didn't: sign in as ${before} until you try again.` };
+        }
+        return {
+          error: /already registered|already been/i.test(moved.message)
+            ? "That name is kept for an older account's sign-in. Pick another."
+            : sayError(moved, "Couldn't change your name. Try again."),
+        };
+      }
+    }
     await refreshProfile();
     return { error: null };
   }

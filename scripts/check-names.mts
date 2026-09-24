@@ -55,6 +55,18 @@ ok(!/isn't 3–20 letters|already using that name/.test(auth), "the old catch-al
   ok(/useNameCheck\(/.test(card) && /Next time, sign in as/.test(card), "the claim form checks the name as you type and says what to sign in as");
 }
 
+// Renaming moves the sign-in with the name (F10): the name first, then the
+// login; a login that won't move gives the name back, so they never differ.
+{
+  const at = auth.indexOf("async function setUsername(");
+  const body = auth.slice(at, auth.indexOf("\n  }\n", at));
+  const name = body.indexOf('rpc("set_username", { p_name: want })'), login = body.indexOf("supabase.auth.updateUser({ email: asLogin(want)");
+  ok(name > 0 && login > name, "setUsername saves the name, then moves the sign-in to match");
+  ok(/!user\.is_anonymous && isSynthetic\(login\)/.test(body), "only an account that signs in with its name has its sign-in moved");
+  ok(/rpc\("set_username", \{ p_name: before \}\)/.test(body), "a sign-in that won't move gives the old name back");
+  ok(/You'll sign in as \$\{draft\.trim\(\)\} from now on\./.test(read("src/features/profile/ProfilePage.tsx")), "the rename says what you sign in as now");
+}
+
 // Our words, not the browser's tooltip: the name forms don't let it speak.
 for (const f of ["src/features/profile/AuthCard.tsx", "src/features/profile/GuestCard.tsx", "src/features/profile/ProfilePage.tsx"]) {
   const src = read(f);
