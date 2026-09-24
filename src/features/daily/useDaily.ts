@@ -3,7 +3,7 @@ import { supabase } from "@/shared/lib/supabase";
 import { useAuth } from "@/app/providers/AuthProvider";
 import { shuffleSeeded } from "@/shared/lib/shuffle";
 import type { PlayItem } from "@/features/play/types";
-import type { RebusSpec, GameKey, Difficulty } from "@/shared/types/db";
+import type { RebusSpec, GameKey, Difficulty, Profile } from "@/shared/types/db";
 import { today } from "@/features/play/streak";
 import { attempt } from "@/shared/lib/write";
 import { withTimeout } from "@/shared/lib/timeout";
@@ -66,7 +66,7 @@ function mapDailyRow(r: Record<string, unknown>): PlayItem {
  * the clock.
  */
 export function useDaily() {
-  const { user } = useAuth();
+  const { user, applyProfile } = useAuth();
   const day = today();
   const [board, setBoard] = useState<DailyStanding[]>([]);
   const [mine, setMine] = useState<DailyStanding | null>(null);
@@ -157,8 +157,15 @@ export function useDaily() {
     if (!supabase) return;
     const msg = await attempt("Filing your score", supabase.rpc("submit_daily", { p_day: day }));
     if (msg) setError(msg);
+    // Today's round keeps your streak like any other round (and submit_daily has
+    // just added its answers to your totals), so move the streak and take the
+    // fresh profile it returns: Home and You then show the new numbers at once.
+    else {
+      const { data: p } = await supabase.rpc("touch_streak", { p_local_date: today() }).single<Profile>();
+      if (p) applyProfile(p);
+    }
     await readBoard();
-  }, [day, readBoard]);
+  }, [day, readBoard, applyProfile]);
 
   return { day, board, mine, error, loading, next, answer, finalize, refresh: readBoard };
 }

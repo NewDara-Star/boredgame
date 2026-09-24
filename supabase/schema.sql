@@ -1779,7 +1779,7 @@ returns jsonb language plpgsql security definer set search_path to 'public' as $
 declare uid uuid := auth.uid(); v_ids bigint[];
         v_correct int := 0; v_answered int := 0; v_ms int := 0;
         v_score int := 0; v_streak int := 0; v_speed numeric; v_base int;
-        rec record;
+        rec record; v_filed int := 0;
         cap_ms constant int := 60000;   -- max a single question can contribute
 begin
   if uid is null then raise exception 'sign in first'; end if;
@@ -1813,6 +1813,20 @@ begin
   insert into public.daily_scores(day, user_id, score, correct, answered, ms)
     values (p_day, uid, v_score, v_correct, v_answered, v_ms)
     on conflict (day, user_id) do nothing;
+  -- Today's round counts like any other questions answered: its answers go into
+  -- attempts, so the counters, rank and leaderboard move (they didn't: six rounds
+  -- had been played and none counted). Only on the FIRST filing, so calling this
+  -- twice can't count the same answers twice. The verdicts are the ones
+  -- daily_answer already judged; nothing here takes the client's word.
+  get diagnostics v_filed = row_count;
+  if v_filed = 1 then
+    insert into public.attempts (user_id, puzzle_id, correct, ms_taken)
+    select uid, dp.puzzle_id, coalesce(dp.correct, false),
+           greatest(0, least(cap_ms,
+             (extract(epoch from (dp.answered_at - dp.served_at)) * 1000)::int))
+      from public.daily_picks dp
+     where dp.day = p_day and dp.user_id = uid and dp.answered_at is not null;
+  end if;
   return jsonb_build_object('ok', true, 'correct', v_correct,
                             'answered', v_answered, 'ms', v_ms, 'score', v_score);
 end $$;
