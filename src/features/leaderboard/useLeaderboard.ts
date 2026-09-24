@@ -1,5 +1,12 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/shared/lib/supabase";
+import { isAlive } from "@/features/play/streak";
+
+/** A profile keeps its last streak until its owner plays again, so a run that
+    ended a week ago would still read "3-day streak" here. Your own screens hide
+    a dead one with isAlive; the board has to say the same thing. */
+const liveStreak = (r: { streak: number; last_played: string | null }) =>
+  isAlive(r.last_played) ? r.streak : 0;
 
 export interface Standing {
   id: string;
@@ -35,7 +42,7 @@ export function useLeaderboard(userId?: string, limit = 50): Board {
       setLoading(true);
       const { data } = await supabase
         .from("profiles")
-        .select("id, username, total_answered, total_correct, streak")
+        .select("id, username, total_answered, total_correct, streak, last_played")
         .gt("total_answered", 0)
         // Guests have a name but not an account. Ranking them would put a row
         // on the board that nobody can ever sign back in to.
@@ -52,7 +59,7 @@ export function useLeaderboard(userId?: string, limit = 50): Board {
         username: r.username,
         answered: r.total_answered,
         correct: r.total_correct,
-        streak: r.streak,
+        streak: liveStreak(r),
         position: i + 1,
       }));
       setRows(list);
@@ -65,7 +72,7 @@ export function useLeaderboard(userId?: string, limit = 50): Board {
       // whole table down to count them.
       const { data: me } = await supabase
         .from("profiles")
-        .select("id, username, total_answered, total_correct, streak")
+        .select("id, username, total_answered, total_correct, streak, last_played")
         .eq("id", userId).single();
       // A signed-in user with no profile row is a real state — the trigger can
       // fail, or the row can be deleted — and it used to produce a Standing of
@@ -81,7 +88,7 @@ export function useLeaderboard(userId?: string, limit = 50): Board {
       if (cancelled) return;
       setYou({
         id: me.id, username: me.username, answered: me.total_answered,
-        correct: me.total_correct, streak: me.streak, position: (count ?? 0) + 1,
+        correct: me.total_correct, streak: liveStreak(me), position: (count ?? 0) + 1,
       });
       setLoading(false);
     })();
