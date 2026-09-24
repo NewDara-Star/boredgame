@@ -28,8 +28,21 @@ function skyNow(d = new Date()) {
 export function Sky() {
   const [sky, setSky] = useState(skyNow);
   useEffect(() => {
-    const id = setInterval(() => setSky(skyNow()), 60_000);
-    return () => clearInterval(id);
+    const now = () => setSky(skyNow());
+    const id = setInterval(now, 60_000);
+    // A phone asleep in a pocket runs no timers. Coming back to the app is when
+    // the sky is most likely wrong (a morning sky at night), so look at the
+    // clock then, not at the next minute's tick (F7, N).
+    const back = () => { if (document.visibilityState === "visible") now(); };
+    document.addEventListener("visibilitychange", back);
+    window.addEventListener("pageshow", now);
+    window.addEventListener("focus", now);
+    return () => {
+      clearInterval(id);
+      document.removeEventListener("visibilitychange", back);
+      window.removeEventListener("pageshow", now);
+      window.removeEventListener("focus", now);
+    };
   }, []);
   useEffect(() => { document.documentElement.dataset.sky = sky.name; }, [sky.name]);
   const [a, b, c] = sky.stops;

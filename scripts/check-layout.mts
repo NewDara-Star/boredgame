@@ -122,4 +122,12 @@ for (const f of ["src/features/trivia/TriviaGame.tsx", "src/features/rooms/TurnP
      "the score counter starts each count from the number on screen");
 }
 
+
+// The sky looks at the clock when you come back to the app, not at the next
+// minute's tick: a phone asleep in a pocket runs no timers (F7, N).
+{
+  const src = read("src/shared/brand/Sky.tsx");
+  ok(/addEventListener\("visibilitychange"/.test(src) && /addEventListener\("pageshow"/.test(src), "the sky updates when the app comes back into view");
+}
+
 console.log(`${n} layout assertions hold`);
