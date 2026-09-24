@@ -30,6 +30,21 @@ export function slack(normalisedAnswer: string): number {
   return n < 8 ? 0 : n < 14 ? 1 : 2;
 }
 
+/**
+ * The puzzles in `bank` a new answer would be confused with: any spelling of
+ * one within the typo allowance of any spelling of the other, so a slip on one
+ * would count as the other (or it is the same answer twice). The bank's own
+ * safety property, asked of one newcomer; the puzzle editor runs it against the
+ * live bank before publishing (F47, A4).
+ */
+export function clashesWith<T extends { answer: string; accept?: string[] | null }>(
+  answer: string, accept: string[] | null | undefined, bank: T[],
+): T[] {
+  const mine = spellings(answer, accept);
+  return bank.filter((q) => spellings(q.answer, q.accept).some((b) =>
+    mine.some((a) => levenshtein(a, b) <= Math.max(slack(a), slack(b)))));
+}
+
 /** Every spelling a puzzle will take: its answer, plus anything hand-listed. */
 export const spellings = (answer: string, accept?: string[] | null) =>
   [answer, ...(accept ?? [])].map(normalise).filter(Boolean);

@@ -4,7 +4,7 @@
  * function, so it has to be checked against real answers rather than reasoned
  * about — and re-checked whenever a puzzle is added.
  */
-import { normalise, isCorrect, closeness, nearMiss, slack, levenshtein }
+import { normalise, isCorrect, closeness, nearMiss, slack, levenshtein, clashesWith }
   from "../src/shared/lib/normalise.ts";
 import { PICTO_SEED } from "../src/shared/data/picto.ts";
 import { readFileSync } from "node:fs";
@@ -158,5 +158,27 @@ ok(!nearMiss("banana", "water under the bridge"), "nor is something nowhere near
 ok(!nearMiss("aa", "water under the bridge"), "nor is a stray keypress");
 ok(closeness("water under the bridge", "water under the bridge") === 1, "identical is 1");
 ok(closeness("", "water") === 0, "empty is 0");
+
+
+// --- a new puzzle is checked against the bank before it goes live (F47, A4) ---
+{
+  const bank = PICTO_SEED.map((p) => ({ answer: p.answer, accept: p.accept ?? null }));
+  const long = bank.find((p) => normalise(p.answer).length >= 14)!;
+  const slip = long.answer.slice(0, -1) + (long.answer.endsWith("x") ? "y" : "x");
+  ok(clashesWith(slip, null, bank).some((q) => q.answer === long.answer), `"${slip}" is refused: one slip from "${long.answer}"`);
+  ok(clashesWith(long.answer.toUpperCase() + "!", null, bank).length >= 1, "the same answer again is refused");
+  ok(clashesWith("a completely new phrase", null, bank).length === 0, "a new phrase is let through");
+  ok(clashesWith("cot", null, [{ answer: "cat" }]).length === 0, "short answers get no allowance, so cat and cot can both exist");
+  const withAlt = bank.find((p) => (p.accept ?? []).length > 0);
+  if (withAlt) ok(clashesWith(withAlt.accept![0], null, bank).includes(withAlt), "an accepted spelling counts as taken too");
+}
+// ...and the editor actually asks, and files the category it offers (A1, A3).
+{
+  const admin = readFileSync(new URL("../src/features/admin/AdminPage.tsx", import.meta.url), "utf8");
+  ok(/clashesWith\(d\.answer, null, bank\)/.test(admin) && /if \(hit\.length\)/.test(admin), "the editor refuses a Picto answer that clashes with the live bank");
+  ok(/if \(!bank\) \{/.test(admin), "and refuses to publish when it can't read the bank");
+  ok(/category_id: Number\(d\.category\)/.test(admin), "the editor saves the category's id");
+  ok(/from\("categories"\)/.test(admin) && !/const CATEGORIES = \[/.test(admin), "the editor's categories come from the database, not a list in the code");
+}
 
 console.log(`${n} answer-matching assertions hold`);

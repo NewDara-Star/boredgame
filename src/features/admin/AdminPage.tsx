@@ -8,8 +8,25 @@ import { Button } from "@/shared/ui/Button";
 import { Card } from "@/shared/ui/Card";
 import { validate, isValid, type DraftPuzzle } from "./validation";
 import { forgetContent } from "@/features/play/content";
+import { clashesWith } from "@/shared/lib/normalise";
 
-const CATEGORIES = ["Idioms", "Food", "Places", "Everyday", "Music", "Sport", "Science", "Maths", "Design", "Film & TV", "Tech", "World"];
+/** A category as the database has it. The editor used to carry its own list of
+    12 names, missing English and General, and saved none of them (A1, A3). */
+interface Category { id: number; name: string }
+
+/** Every Picto answer already in the bank, whatever its status, in pages (the
+    server stops at 1,000 rows without saying so). */
+async function pictoBank(): Promise<{ id: number; answer: string; accept: string[] | null }[] | null> {
+  const PAGE = 1000;
+  const out: { id: number; answer: string; accept: string[] | null }[] = [];
+  for (let from = 0; ; from += PAGE) {
+    const { data, error } = await supabase!.from("puzzles").select("id, answer, accept")
+      .eq("game", "picto").order("id").range(from, from + PAGE - 1);
+    if (error || !data) return null;
+    out.push(...(data as { id: number; answer: string; accept: string[] | null }[]));
+    if (data.length < PAGE) return out;
+  }
+}
 
 const EMPTY: DraftPuzzle = {
   game: "picto", render: "text",
@@ -23,7 +40,18 @@ export function AdminPage() {
   const [d, setD] = useState<DraftPuzzle>(EMPTY);
   const [touched, setTouched] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [msg, setMsg] = useState<string | null>(null);
+  const [msg, setMsg] = useState<{ text: string; bad: boolean } | null>(null);
+  const [cats, setCats] = useState<Category[] | null>(null);
+  const [catsFailed, setCatsFailed] = useState(false);
+  const loadCats = () => {
+    if (!supabase) return;
+    setCatsFailed(false);
+    void supabase.from("categories").select("id, name").order("id").then(({ data, error }) => {
+      if (error || !data) setCatsFailed(true);
+      else setCats(data as Category[]);
+    });
+  };
+  useEffect(loadCats, []);
   // Admin is checked server-side (the puzzles RLS is is_admin()), but the page
   // itself was shown to anyone who typed /admin — a non-admin got the whole
   // editor and a raw "row-level security" error on Publish. Ask the database
@@ -45,8 +73,26 @@ export function AdminPage() {
   async function save() {
     setTouched(true);
     if (!ok) return;
-    if (!supabase || !user) { setMsg("Sign in with Supabase configured to publish."); return; }
+    if (!supabase || !user) { setMsg({ text: "Sign in with Supabase configured to publish.", bad: true }); return; }
     setSaving(true);
+    setMsg(null);
+    // A Picto answer within the typo allowance of one already in the bank would
+    // let a slip on one count as the other. Check the live bank, not just the
+    // bundled set the seed checks (A4). If the bank can't be read, don't guess.
+    if (d.game === "picto") {
+      const bank = await pictoBank();
+      if (!bank) {
+        setSaving(false);
+        setMsg({ text: "Couldn't check the answer against the puzzles already live. Try again.", bad: true });
+        return;
+      }
+      const hit = clashesWith(d.answer, null, bank);
+      if (hit.length) {
+        setSaving(false);
+        setMsg({ text: `"${d.answer.trim()}" is too close to "${hit[0].answer}", already a puzzle: a typo of one would count as the other. Change the answer.`, bad: true });
+        return;
+      }
+    }
     const { error } = await supabase.from("puzzles").insert({
       game: d.game,
       render: d.render,
@@ -58,12 +104,13 @@ export function AdminPage() {
       alt_hint: d.altHint,
       char_hint: d.charHint,
       difficulty: d.difficulty,
+      category_id: Number(d.category),
       status: "live",
       created_by: user.id,
     });
     setSaving(false);
-    setMsg(error ? error.message : "Published.");
-    if (!error) { forgetContent(d.game); setD(EMPTY); }
+    setMsg(error ? { text: `Couldn't publish: ${error.message}`, bad: true } : { text: "Published.", bad: false });
+    if (!error) { forgetContent(d.game); setD(EMPTY); setTouched(false); }
   }
 
   if (allowed === false) return <Navigate to="/" replace />;
@@ -169,9 +216,12 @@ export function AdminPage() {
         <Field label="Category" error={touched ? errors.category : null}>
           <select value={d.category} onChange={(e) => set("category", e.target.value)}
             className="w-full bg-board shadow-lift-sm rounded-2xl px-3 py-2.5 text-ink">
-            <option value="">Select…</option>
-            {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+            <option value="">{cats ? "Select…" : catsFailed ? "Couldn't load" : "Loading…"}</option>
+            {cats?.map((c) => <option key={c.id} value={String(c.id)}>{c.name}</option>)}
           </select>
+          {catsFailed && (
+            <button onClick={loadCats} className="mt-1 text-[12px] font-bold text-ember underline">Try again</button>
+          )}
         </Field>
       </div>
 
@@ -180,7 +230,7 @@ export function AdminPage() {
           {Object.keys(errors).length} field{Object.keys(errors).length > 1 ? "s" : ""} need attention before this can be published.
         </p>
       )}
-      {msg && <p className="text-xs text-leaf">{msg}</p>}
+      {msg && <p role="status" className={`text-xs ${msg.bad ? "text-ember" : "text-leaf"}`}>{msg.text}</p>}
 
       <Button onClick={() => void save()} disabled={saving} className="w-full">
         {saving ? "Publishing…" : "Publish puzzle"}
