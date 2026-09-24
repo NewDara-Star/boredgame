@@ -134,6 +134,23 @@ ok(!isCorrect("six feet", "six feet underground", ["six feet under"]),
   }
 }
 
+// --- a picture never describes itself with the clue ---------------------------
+// An image puzzle's alt text was its paid clue: read aloud, and shown on screen
+// when the picture failed to load.
+{
+  const { readdirSync, statSync } = await import("node:fs");
+  const walk = (d: string, out: string[] = []): string[] => {
+    for (const e of readdirSync(d)) { const p = d + "/" + e; statSync(p).isDirectory() ? walk(p, out) : /\.tsx$/.test(p) && out.push(p); }
+    return out;
+  };
+  const src = new URL("../src", import.meta.url).pathname;
+  for (const f of walk(src)) {
+    const t = readFileSync(f, "utf8");
+    for (const m of t.matchAll(/alt=\{([^}]*)\}/g))
+      ok(!/altHint|charHint|alt_hint|char_hint|\.answer\b/.test(m[1]), `${f.slice(src.length)}: alt text must not be a clue or the answer (${m[1]})`);
+  }
+}
+
 // --- what gets logged -------------------------------------------------------
 ok(nearMiss("head over heals", "head over heelz"), "a close wrong answer is worth logging");
 ok(!nearMiss("head over heels", "head over heels"), "a right one is not");

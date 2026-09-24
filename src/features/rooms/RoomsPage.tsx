@@ -4,7 +4,7 @@ import { LOCK_MS, sleep } from "@/features/play/lockIn";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "@/app/providers/AuthProvider";
 import { useRoom, useMyRooms, createRoom } from "./useRoom";
-import { PictoRenderer } from "@/features/picto/PictoRenderer";
+import { PictoRenderer, PICTURE_ALT } from "@/features/picto/PictoRenderer";
 import { Button } from "@/shared/ui/Button";
 import { Card } from "@/shared/ui/Card";
 import { Field, Input } from "@/shared/ui/Field";
@@ -332,6 +332,9 @@ export function RoomsPage() {
           <Card className="aspect-square max-h-[44vh] mx-auto w-full grid place-items-center p-6 text-ink">
             {currentPuzzle.spec
               ? <PictoRenderer spec={currentPuzzle.spec} />
+              // An image puzzle drew nothing here before (latent: none are live).
+              : currentPuzzle.render === "image" && currentPuzzle.imageUrl
+              ? <img src={currentPuzzle.imageUrl} alt={PICTURE_ALT} className="max-h-full object-contain rounded-xl" />
               : <p className="text-xl font-semibold text-center">{currentPuzzle.prompt}</p>}
           </Card>
 

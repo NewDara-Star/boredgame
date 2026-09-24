@@ -6,7 +6,7 @@ import { useRound } from "@/features/play/useRound";
 import { CategoryBar } from "@/features/play/CategoryBar";
 import { readFilter, writeFilter } from "@/features/play/filters";
 import { Hud, HintBar, Reveal, Summary, Burst } from "@/features/play/RoundChrome";
-import { PictoRenderer } from "./PictoRenderer";
+import { PictoRenderer, PICTURE_ALT } from "./PictoRenderer";
 import { SPRING, shake } from "@/shared/ui/motion";
 
 export function PictoGame() {
@@ -79,7 +79,7 @@ export function PictoGame() {
             className="card aspect-square max-h-[46vh] mx-auto w-full grid place-items-center p-7 text-ember"
           >
             {item.render === "image" && item.imageUrl
-              ? <img src={item.imageUrl} alt={item.altHint} className="max-h-full object-contain rounded-xl" />
+              ? <img src={item.imageUrl} alt={PICTURE_ALT} className="max-h-full object-contain rounded-xl" />
               : item.spec && <PictoRenderer spec={item.spec} animate seed={item.id} />}
           </motion.div>
         </AnimatePresence>

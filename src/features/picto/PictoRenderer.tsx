@@ -81,3 +81,9 @@ export function PictoRenderer({
     </svg>
   );
 }
+
+
+/** An image puzzle's picture is described neutrally. Its alt text used to be the
+    clue, the same one that costs 100 points: a screen reader read it out, and a
+    picture that failed to load showed it on screen. */
+export const PICTURE_ALT = "A picture puzzle. What phrase is this?";
