@@ -96,6 +96,8 @@ export async function recordRound(
   // correct row for a question you never answered was how the lifetime counters,
   // and so the leaderboard, could be inflated. See record_round.
   if (rows.length) await supabase.rpc("record_round", { p_rows: rows });
+  // Before touch_streak, so the profile it returns already carries the new best.
+  if (score > 0) await supabase.rpc("record_best", { p_game: game, p_score: score });
 
   const { data: after } = await supabase
     .rpc("touch_streak", { p_local_date: now }).single<Profile>();

@@ -416,6 +416,29 @@ end; $$;
 revoke all on function public.touch_streak(date) from public, anon;
 grant execute on function public.touch_streak(date) to authenticated;
 
+-- Best round lived only in the phone's storage, so a new phone showed none.
+-- It belongs to the account. Scores are worked out on the phone (speed-based),
+-- so this is a personal best only, never ranked, and clamped to what a round
+-- can score. (Applied live 2026-09-24 as migration best_round_per_account.)
+alter table public.profiles add column if not exists best_round jsonb not null default '{}'::jsonb;
+
+create or replace function public.record_best(p_game text, p_score int)
+returns public.profiles language plpgsql security definer set search_path to 'public' as $$
+declare uid uuid := auth.uid(); rec public.profiles;
+begin
+  if uid is null then raise exception 'sign in first'; end if;
+  if p_game is null or p_game !~ '^[a-z0-9_]{1,24}$' then raise exception 'bad game'; end if;
+  p_score := greatest(0, least(coalesce(p_score, 0), 65000));
+  update public.profiles p
+     set best_round = jsonb_set(p.best_round, array[p_game],
+           to_jsonb(greatest(coalesce((p.best_round->>p_game)::int, 0), p_score)))
+   where p.id = uid
+   returning p.* into rec;
+  return rec;
+end $$;
+revoke all on function public.record_best(text, int) from public, anon;
+grant execute on function public.record_best(text, int) to authenticated;
+
 -- ---------------------------------------------------------------------------
 -- The daily round: ten questions, the same ten for everyone.
 --

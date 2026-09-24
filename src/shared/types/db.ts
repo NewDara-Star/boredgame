@@ -71,6 +71,8 @@ export interface Profile {
   best_streak: number;
   /** YYYY-MM-DD, in whatever calendar the player's device was on */
   last_played: string | null;
+  /** Best round score per game ({ trivia: 4200 }), kept on the account by record_best(). */
+  best_round: Record<string, number>;
   /** Signed in anonymously — playing, but not on the leaderboard yet. */
   is_guest: boolean;
   /** shareable code behind /add/<code>; generated on first friends-screen visit */
