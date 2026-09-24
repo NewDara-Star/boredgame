@@ -35,3 +35,6 @@ scripts/_*.mts
 # vite writes these next to a config when it transpiles it
 *.timestamp-*.mjs
 app.tgz
+
+# tsc -b writes its build cache here on every build; a tracked copy is always "changed"
+tsconfig.tsbuildinfo
