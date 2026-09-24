@@ -7,9 +7,6 @@ export interface TttRow {
   turn: Mark;
   phase: Game["phase"];
   target: number | null;
-  /** Dead: the steal is gone. The column stays `not null default false` so a
-      client mid-deploy can still insert, and nothing reads it. */
-  steal?: boolean;
   last: Game["last"];
   winner: Mark | "draw" | null;
   puzzle_id: number | null;

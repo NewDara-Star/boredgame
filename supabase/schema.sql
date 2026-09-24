@@ -532,10 +532,6 @@ create table if not exists public.ttt_games (
   phase     text not null default 'picking'
               check (phase in ('picking','asking','revealed','over')),
   target    smallint check (target between 0 and 8),
-  -- Dead since the steal was removed: a miss costs the turn and nothing else.
-  -- Kept, rather than dropped, so a client still running the old build can
-  -- insert. Nothing reads it. Drop it once nothing old is deployed.
-  steal     boolean not null default false,
   last      jsonb,
   winner    text check (winner in ('x','o','draw')),
   puzzle_id bigint references public.puzzles(id),
@@ -2418,3 +2414,71 @@ create policy "voice: room members talk" on realtime.messages
 revoke select on public.profiles from anon, authenticated;
 grant select (id, username, avatar, total_answered, total_correct, created_at, streak, best_streak,
               last_played, is_guest, best_round) on public.profiles to anon, authenticated;
+
+-- ============================================================================
+-- Tidy-up for growth (F49: DB2, DB3, DB4). Migration tidy_up_for_growth.
+-- ============================================================================
+-- 1. Signed-out callers only reach what a signed-out screen uses: find_room,
+--    room_peek, username_available, log_near_miss, and the policy helpers a
+--    signed-out read of puzzles or rooms evaluates (is_admin, open_daily_ids,
+--    is_room_member; each answers false or public ids without a sign-in).
+--    Push and Ball Sort's clock need a sign-in; the two trigger functions
+--    are never called directly by anyone.
+revoke execute on function public.delete_push_subscription(text) from public, anon;
+revoke execute on function public.save_push_subscription(text, text, text) from public, anon;
+revoke execute on function public.sort_solo_start(date, text) from public, anon;
+grant execute on function public.delete_push_subscription(text) to authenticated;
+grant execute on function public.save_push_subscription(text, text, text) to authenticated;
+grant execute on function public.sort_solo_start(date, text) to authenticated;
+revoke execute on function public.rls_auto_enable() from public, anon, authenticated;
+revoke execute on function public.sync_guest_flag() from public, anon, authenticated;
+
+-- 2. Dead weight. The steal left Square Off long ago and nothing reads or
+--    writes the column; attempts are filed only by record_round (definer) and
+--    players lost the insert grant, so the insert rule guards nothing.
+alter table public.ttt_games drop column if exists steal;
+drop policy if exists "own attempts insert" on public.attempts;
+
+-- 3. Every foreign key gets an index, so deleting a player or a puzzle, and
+--    looking rows up by player, doesn't scan whole tables as they grow.
+create index if not exists puzzles_category_id_idx     on public.puzzles(category_id);
+create index if not exists puzzles_created_by_idx      on public.puzzles(created_by);
+create index if not exists attempts_puzzle_id_idx      on public.attempts(puzzle_id);
+create index if not exists rooms_host_id_idx           on public.rooms(host_id);
+create index if not exists room_players_user_id_idx    on public.room_players(user_id);
+create index if not exists room_rounds_puzzle_id_idx   on public.room_rounds(puzzle_id);
+create index if not exists room_rounds_winner_id_idx   on public.room_rounds(winner_id);
+create index if not exists daily_picks_user_id_idx     on public.daily_picks(user_id);
+create index if not exists daily_picks_puzzle_id_idx   on public.daily_picks(puzzle_id);
+create index if not exists ttt_games_puzzle_id_idx     on public.ttt_games(puzzle_id);
+create index if not exists ttt_games_x_player_idx      on public.ttt_games(x_player);
+create index if not exists ttt_games_o_player_idx      on public.ttt_games(o_player);
+create index if not exists daily_scores_user_id_idx    on public.daily_scores(user_id);
+create index if not exists c4_games_puzzle_id_idx      on public.c4_games(puzzle_id);
+create index if not exists c4_games_x_player_idx       on public.c4_games(x_player);
+create index if not exists c4_games_o_player_idx       on public.c4_games(o_player);
+create index if not exists friendships_friend_id_idx   on public.friendships(friend_id);
+create index if not exists memory_games_puzzle_id_idx  on public.memory_games(puzzle_id);
+create index if not exists memory_games_x_player_idx   on public.memory_games(x_player);
+create index if not exists memory_games_o_player_idx   on public.memory_games(o_player);
+create index if not exists sort_races_x_player_idx     on public.sort_races(x_player);
+create index if not exists sort_races_o_player_idx     on public.sort_races(o_player);
+create index if not exists sort_solo_user_id_idx       on public.sort_solo(user_id);
+create index if not exists game_invites_room_id_idx    on public.game_invites(room_id);
+create index if not exists game_invites_from_user_idx  on public.game_invites(from_user);
+
+-- 4. auth.uid() once per query, not once per row: (select auth.uid()).
+alter policy "own profile insert" on public.profiles with check ((select auth.uid()) = id);
+alter policy "own profile update" on public.profiles using ((select auth.uid()) = id);
+alter policy "own attempts readable" on public.attempts using ((select auth.uid()) = user_id);
+alter policy "create own room" on public.rooms with check (host_id = (select auth.uid()));
+alter policy "host updates room" on public.rooms using (host_id = (select auth.uid()));
+alter policy "rooms readable by the people in them" on public.rooms
+  using (host_id = (select auth.uid()) or public.is_room_member(id));
+alter policy "update own score" on public.room_players using (user_id = (select auth.uid()));
+alter policy "players readable by the people in the room" on public.room_players
+  using (user_id = (select auth.uid()) or public.is_room_member(room_id));
+alter policy "see your own friendships" on public.friendships using (user_id = (select auth.uid()));
+alter policy "see invites you sent or got" on public.game_invites
+  using (from_user = (select auth.uid()) or to_user = (select auth.uid()));
+alter policy "see your own push subs" on public.push_subscriptions using (user_id = (select auth.uid()));
