@@ -62,12 +62,16 @@ export function useSortSolo(level: Level, userId: string | undefined, practice =
   useEffect(() => { reset(); }, [reset]);
 
   /** Everyone's best on this board, and where you stand — even off the page. */
+  const [boardFailed, setBoardFailed] = useState(false);
   const loadBoard = useCallback(async () => {
-    if (!supabase || practice) { setBoard([]); setMine(null); return; }
-    const { data } = await supabase.from("sort_daily_best")
+    if (!supabase || practice) { setBoard([]); setMine(null); setBoardFailed(false); return; }
+    const { data, error: boardError } = await supabase.from("sort_daily_best")
       .select("user_id, username, ms, moves, log")
       .eq("day", day).eq("level", level)
       .order("ms", { ascending: true }).order("moves", { ascending: true }).limit(20);
+    // A failed read is not an empty ladder: it said "Be the first on the board".
+    setBoardFailed(!!boardError);
+    if (boardError) return;
     const rows: Standing[] = (data ?? []).map((r, i) => ({ ...r, position: i + 1 }));
     setBoard(rows);
     if (!userId) { setMine(null); return; }
@@ -148,7 +152,7 @@ export function useSortSolo(level: Level, userId: string | undefined, practice =
 
   return {
     day, puzzle, me, selected, refused, startedAt, solvedMs, result, error, finishing,
-    board, mine, practice,
+    board, mine, practice, boardFailed, refreshBoard: loadBoard,
     progress: solvedCount(me.tubes, me.cap),
     pick, takeBack, again: reset, shuffle,
   };

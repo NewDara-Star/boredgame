@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { useEffect, useState, type ReactNode } from "react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/app/providers/AuthProvider";
@@ -197,6 +198,7 @@ export function SortSoloPage() {
         </motion.div>
       ) : (
         <Ladder rows={r.board} mine={r.mine} meId={user?.id} level={level}
+          failed={r.boardFailed} onRetry={() => void r.refreshBoard()}
           film={(s) => ({
             tubes: r.puzzle.tubes, cap: r.puzzle.cap, log: decodeLog(s.log ?? ""), ms: s.ms, moves: s.moves,
             par: r.puzzle.par, name: s.username, level, where: "TODAY'S TUBES", rank: s.position,
@@ -208,8 +210,9 @@ export function SortSoloPage() {
 
 /** Today's board for this level: the top twenty, and you if you are below
     them. A row with a replay opens on a tap, and the film plays. */
-function Ladder({ rows, mine, meId, level, film }:
-  { rows: Standing[]; mine: Standing | null; meId?: string; level: Level; film: (s: Standing) => Replay }) {
+function Ladder({ rows, mine, meId, level, film, failed, onRetry }:
+  { rows: Standing[]; mine: Standing | null; meId?: string; level: Level; film: (s: Standing) => Replay;
+    failed?: boolean; onRetry?: () => void }) {
   const offPage = mine && !rows.some((r) => r.user_id === meId);
   const [open, setOpen] = useState<string | null>(null);
   const row = (s: Standing) => (
@@ -221,9 +224,20 @@ function Ladder({ rows, mine, meId, level, film }:
   return (
     <motion.div variants={riseIn} className="card bg-board p-3">
       <p className="text-[12px] font-black text-soft mb-2">
-        Today · {level} · {rows.length === 0 ? "no times yet" : `${rows.length}${rows.length === 20 ? "+" : ""} sorted it`}
+        Today · {level}{!meId || failed ? "" : ` · ${rows.length === 0 ? "no times yet" : `${rows.length}${rows.length === 20 ? "+" : ""} sorted it`}`}
       </p>
-      {rows.length === 0 ? (
+      {/* Today's times are for members only, so a signed-out ladder is empty
+          whether or not anyone has played: say why, not "you're first". */}
+      {!meId ? (
+        <p className="text-sm font-bold text-soft">
+          <Link to="/profile" className="underline underline-offset-4">Sign in</Link> to see today's times.
+        </p>
+      ) : failed ? (
+        <p className="text-sm font-bold text-soft">
+          Couldn't load today's times.{" "}
+          {onRetry && <button onClick={onRetry} className="underline underline-offset-4 font-black">Try again</button>}
+        </p>
+      ) : rows.length === 0 ? (
         <p className="text-sm font-bold text-soft">Be the first on the board.</p>
       ) : (
         <ol className="grid gap-1.5">
