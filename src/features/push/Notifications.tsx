@@ -9,12 +9,12 @@ export function NotificationsCard() {
 
   if (state === "subscribed") {
     return (
-      <div className="piece bg-surface p-3 flex items-center gap-3">
+      <div className="card bg-board p-3 flex items-center gap-3">
         <span className="min-w-0 flex-1 text-[13px] font-bold">
           Notifications on — you'll get pinged when a friend invites you.
         </span>
         <button onClick={() => void disable()} disabled={busy}
-          className="text-[12px] font-black uppercase tracking-wider text-ink/50 px-2 py-2 shrink-0">
+          className="text-[12px] font-black text-ink/50 px-2 py-2 shrink-0">
           Turn off
         </button>
       </div>
@@ -23,7 +23,7 @@ export function NotificationsCard() {
 
   if (needsInstall) {
     return (
-      <div className="piece bg-pop p-3 space-y-1">
+      <div className="card bg-petal p-3 space-y-1">
         <p className="text-[13px] font-bold">Want a ping when a friend invites you?</p>
         <p className="text-[12px] text-ink/70 font-semibold">
           On iPhone, add BoredGame to your home screen first: tap Share, then
@@ -45,11 +45,11 @@ export function NotificationsCard() {
   if (state === "default" || state === "granted") {
     return (
       <button onClick={() => void enable()} disabled={busy}
-        className="piece press w-full bg-acid px-4 py-3 text-left flex items-center justify-between">
+        className="cut tap w-full cut-leaf-hi px-4 py-3 text-left flex items-center justify-between">
         <span className="min-w-0 font-bold text-[13px]">
           {busy ? "Turning on…" : "Get pinged when a friend invites you"}
         </span>
-        <span className="text-[12px] font-black uppercase tracking-wider shrink-0 ml-2">Turn on</span>
+        <span className="text-[12px] font-black shrink-0 ml-2">Turn on</span>
       </button>
     );
   }

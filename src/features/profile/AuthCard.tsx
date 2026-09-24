@@ -19,7 +19,7 @@ export function AuthCard({ kept }: { kept?: string }) {
 
   if (sent) {
     return (
-      <div className="piece bg-good text-surface p-5">
+      <div className="card bg-leaf text-ink p-5">
         <p className="font-display text-lg font-semibold">Check your email</p>
         <p className="text-sm font-semibold mt-1">There's a sign-in link waiting for you.</p>
       </div>
@@ -27,7 +27,7 @@ export function AuthCard({ kept }: { kept?: string }) {
   }
 
   return (
-    <div className="piece p-5">
+    <div className="card p-5">
       <h2 className="font-display text-[22px] leading-tight font-semibold">
         {mode === "signup" ? "Create an account" : "Welcome back"}
       </h2>
@@ -65,13 +65,13 @@ export function AuthCard({ kept }: { kept?: string }) {
         </Button>
       </form>
 
-      <div className="flex items-center gap-2 mt-4 pt-4 border-t-2 border-sand">
+      <div className="flex items-center gap-2 mt-4 pt-4 border-t-2 border-mist">
         <p className="text-xs font-bold text-soft">
           {mode === "signup" ? "Already have one?" : "New here?"}
         </p>
         <button type="button"
           onClick={() => { setMode(mode === "signup" ? "signin" : "signup"); setError(null); }}
-          className="text-xs font-black uppercase tracking-wider underline underline-offset-4">
+          className="text-xs font-black underline underline-offset-4">
           {mode === "signup" ? "Sign in" : "Create an account"}
         </button>
       </div>

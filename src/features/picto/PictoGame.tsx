@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { RAMPS } from "@/shared/brand/tokens";
 import { Dealing } from "@/shared/ui/Note";
 import { AnimatePresence, motion } from "framer-motion";
 import { useRound } from "@/features/play/useRound";
@@ -39,15 +40,15 @@ export function PictoGame() {
             <motion.div key={i}
               initial={{ opacity: 0, x: -14 }} animate={{ opacity: 1, x: 0 }}
               transition={{ ...SPRING, delay: 0.3 + i * 0.05 }}
-              className="piece p-3 flex items-center gap-3">
+              className="card p-3 flex items-center gap-3">
               <div className={`w-14 h-14 shrink-0 rounded-xl border-2 border-ink p-1
-                ${res.correct ? "bg-good text-surface" : "bg-sand text-ink"}`}>
+                ${res.correct ? "bg-leaf text-ink" : "bg-mist text-ink"}`}>
                 {res.item.spec && <PictoRenderer spec={res.item.spec} />}
               </div>
               <div className="min-w-0">
                 <p className="font-display font-semibold truncate">{res.item.answer}</p>
                 {!res.correct && (
-                  <p className="text-xs text-bad font-bold truncate">you said: {res.given || "—"}</p>
+                  <p className="text-xs text-ember font-bold truncate">you said: {res.given || "—"}</p>
                 )}
               </div>
             </motion.div>
@@ -64,7 +65,7 @@ export function PictoGame() {
 
   return (
     <div>
-      <Hud index={r.index} total={r.items.length} score={r.score} streak={r.streak} accent="#FF5A1F" />
+      <Hud index={r.index} total={r.items.length} score={r.score} streak={r.streak} accent={RAMPS.sky.base} />
 
       <div className="relative mt-4">
         <Burst show={r.phase === "revealed" && !!r.last?.correct} />
@@ -75,7 +76,7 @@ export function PictoGame() {
             animate={wrong ? { opacity: 1, scale: 1, rotate: 0, ...shake } : { opacity: 1, scale: 1, rotate: 0 }}
             exit={{ opacity: 0, scale: 0.94, y: -12 }}
             transition={SPRING}
-            className="piece aspect-square max-h-[46vh] mx-auto w-full grid place-items-center p-7 text-picto"
+            className="card aspect-square max-h-[46vh] mx-auto w-full grid place-items-center p-7 text-ember"
           >
             {item.render === "image" && item.imageUrl
               ? <img src={item.imageUrl} alt={item.altHint} className="max-h-full object-contain rounded-xl" />
@@ -84,7 +85,7 @@ export function PictoGame() {
         </AnimatePresence>
       </div>
 
-      <p className="mt-3 text-[12px] font-black uppercase tracking-widest text-soft text-center">
+      <p className="mt-3 text-[12px] font-black text-soft text-center">
         {item.difficulty}{item.category ? ` · ${item.category}` : ""}
       </p>
 
@@ -94,11 +95,11 @@ export function PictoGame() {
             className="mt-4 flex gap-2.5">
             <input ref={inputRef} value={guess} onChange={(e) => setGuess(e.target.value)}
               aria-label="Your guess" placeholder="What phrase is this?" autoComplete="off" autoCapitalize="none"
-              className="flex-1 bg-surface border-[2.5px] border-ink rounded-2xl px-4 py-3.5
+              className="flex-1 bg-board border-[2.5px] border-ink rounded-2xl px-4 py-3.5
                 font-bold text-ink placeholder:text-soft/60 outline-none
                 focus:shadow-[0_5px_0_var(--color-ink)] transition-shadow" />
             <button type="submit" disabled={!guess.trim()}
-              className="piece press bg-picto text-surface font-display text-lg font-semibold px-6">
+              className="cut tap cut-ember text-ink font-display text-lg font-semibold px-6">
               Go
             </button>
           </form>

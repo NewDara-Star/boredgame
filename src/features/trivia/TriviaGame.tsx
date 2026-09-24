@@ -1,4 +1,6 @@
 import { useMemo, useState } from "react";
+import { RAMPS } from "@/shared/brand/tokens";
+import { AnswerMark, Tick } from "@/shared/brand/Pieces";
 import { Dealing } from "@/shared/ui/Note";
 import { AnimatePresence, motion } from "framer-motion";
 import { useRound } from "@/features/play/useRound";
@@ -8,8 +10,6 @@ import { shuffle } from "@/features/play/content";
 import { Hud, Reveal, Summary, Burst } from "@/features/play/RoundChrome";
 import { SPRING, stagger, riseIn } from "@/shared/ui/motion";
 
-const SHAPES = ["▲", "◆", "●", "■"];
-const HUES = ["#FF5A1F", "#2B4BFF", "#FFD028", "#10A04E"];
 
 export function TriviaGame() {
   const [cats, setCats] = useState<string[]>(() => readFilter("trivia"));
@@ -53,13 +53,13 @@ export function TriviaGame() {
             <motion.div key={i}
               initial={{ opacity: 0, x: -14 }} animate={{ opacity: 1, x: 0 }}
               transition={{ ...SPRING, delay: 0.3 + i * 0.04 }}
-              className={`piece p-3 ${res.correct ? "bg-surface" : "bg-sand"}`}>
+              className={`card p-3 ${res.correct ? "bg-board" : "bg-mist"}`}>
               <p className="text-sm font-bold">{res.item.prompt}</p>
               <p className="text-xs mt-1 font-bold">
                 {res.correct
-                  ? <span className="text-good">✓ {res.item.answer}</span>
-                  : <><span className="text-bad line-through">{res.given}</span>
-                      <span className="text-good"> → {res.item.answer}</span></>}
+                  ? <span className="text-leaf-deep inline-flex items-center gap-1"><Tick size={14} />{res.item.answer}</span>
+                  : <><span className="text-ember line-through">{res.given}</span>
+                      <span className="text-leaf"> → {res.item.answer}</span></>}
               </p>
             </motion.div>
           ))}
@@ -75,7 +75,7 @@ export function TriviaGame() {
 
   return (
     <div>
-      <Hud index={r.index} total={r.items.length} score={r.score} streak={r.streak} accent="#2B4BFF" />
+      <Hud index={r.index} total={r.items.length} score={r.score} streak={r.streak} accent={RAMPS.sky.base} />
 
       <AnimatePresence mode="wait">
         <motion.div key={item.id}
@@ -83,8 +83,8 @@ export function TriviaGame() {
           exit={{ opacity: 0, y: -16 }} transition={SPRING} className="relative">
           <Burst show={revealed && !!r.last?.correct} />
 
-          <span className="inline-block mt-4 text-[12px] font-black uppercase tracking-widest
-            bg-trivia text-surface rounded-full px-2.5 py-1">
+          <span className="inline-block mt-4 text-[12px] font-black
+            bg-sky text-board rounded-full px-2.5 py-1">
             {item.category} · {item.difficulty}
           </span>
           <h2 className="mt-2.5 font-display text-[26px] leading-tight font-semibold text-balance">
@@ -97,18 +97,18 @@ export function TriviaGame() {
               const isBurned = burned.has(opt);
               const isAnswer = opt === item.answer;
               const isMine = revealed && r.last?.given === opt;
-              const bg = isBurned && !revealed ? "bg-surface opacity-25 line-through"
-                : !revealed ? "bg-surface"
-                : isAnswer ? "bg-good text-surface"
-                : isMine ? "bg-bad text-surface" : "bg-surface opacity-45";
+              const bg = isBurned && !revealed ? "bg-board opacity-25 line-through"
+                : !revealed ? "bg-board"
+                : isAnswer ? "bg-leaf text-ink"
+                : isMine ? "bg-ember text-ink" : "bg-board opacity-45";
               return (
                 <motion.button key={opt} variants={riseIn}
                   disabled={revealed || isBurned} onClick={() => r.submit(opt)}
                   whileTap={revealed ? undefined : { scale: 0.97 }}
-                  className={`piece ${revealed ? "" : "press"} flex items-center gap-3 text-left px-4 py-3.5 ${bg}`}>
+                  className={`card ${revealed ? "" : "tap"} flex items-center gap-3 text-left px-4 py-3.5 ${bg}`}>
                   <span aria-hidden={!(revealed && (isAnswer || isMine))} className="text-base shrink-0"
-                    style={{ color: revealed && (isAnswer || isMine) ? "currentColor" : HUES[i % 4] }}>
-                    {revealed && isAnswer ? "✓" : revealed && isMine ? "✗" : SHAPES[i % 4]}
+                    >
+                  <AnswerMark index={i} state={revealed && isAnswer ? "right" : revealed && isMine ? "wrong" : "idle"} />
                   </span>
                   {revealed && isAnswer && <span className="sr-only">Correct answer: </span>}
                   {revealed && isMine && !isAnswer && <span className="sr-only">Your incorrect answer: </span>}
@@ -123,7 +123,7 @@ export function TriviaGame() {
       {r.phase === "playing" ? (
         r.hintsUsed === 0 && (
           <button onClick={r.useHint}
-            className="piece press mt-4 text-xs font-black uppercase tracking-wider px-4 min-h-[44px] inline-flex items-center rounded-xl bg-pop">
+            className="cut tap mt-4 text-xs font-black px-4 min-h-[44px] inline-flex items-center rounded-xl cut-petal">
             50 / 50 — burn two wrong answers · −100
           </button>
         )

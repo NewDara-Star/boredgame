@@ -1,10 +1,11 @@
 import { motion, useReducedMotion } from "framer-motion";
 import type { RebusSpec } from "@/shared/types/db";
+import { FONT } from "@/shared/brand/tokens";
 
 const FONTS: Record<string, string> = {
-  sans: "Nunito, system-ui, sans-serif",
-  serif: "Fredoka, system-ui, sans-serif",
-  mono: "ui-monospace, SFMono-Regular, Menlo, monospace",
+  sans: FONT.text,
+  serif: FONT.display,
+  mono: FONT.mono,
 };
 
 /**

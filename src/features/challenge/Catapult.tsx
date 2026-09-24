@@ -131,7 +131,7 @@ export function Catapult({
   return (
     <div className="space-y-2">
       <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`}
-        className={`w-full rounded-2xl border-[3px] border-ink bg-surface touch-none select-none
+        className={`w-full rounded-2xl border-[3px] border-ink bg-board touch-none select-none
           ${canAim ? "cursor-grab" : ""}`}
         onPointerDown={(e) => {
           if (!canAim) return;
@@ -154,7 +154,7 @@ export function Catapult({
         onPointerCancel={() => setDrag(null)}>
 
         {/* the draw half, so it reads as somewhere to put your thumb */}
-        <rect x="0" y={GROUND} width={W} height={H - GROUND} fill="var(--color-paper)" />
+        <rect x="0" y={GROUND} width={W} height={H - GROUND} fill="var(--color-ground)" />
 
         {/* The ground. A pot sunk in the floor is a HOLE — the line stops at
             its rim, because a ball that lands on the opening goes in. */}
@@ -172,19 +172,19 @@ export function Catapult({
             {dots.map((p, i) => (
               <circle key={i} cx={sx(p.x)} cy={sy(p.y) - BALL}
                 r={2 - (i / dots.length) * 1.05}
-                fill="var(--color-picto)"
+                fill="var(--color-ember)"
                 opacity={0.85 - (i / dots.length) * 0.78} />
             ))}
             <line x1={drag!.from.x} y1={drag!.from.y} x2={drag!.to.x} y2={drag!.to.y}
-              stroke="var(--color-hot)" strokeWidth="0.8" strokeDasharray="2 2" opacity="0.85" />
+              stroke="var(--color-petal)" strokeWidth="0.8" strokeDasharray="2 2" opacity="0.85" />
             <circle cx={drag!.from.x} cy={drag!.from.y} r="1.4" fill="var(--color-ink)" />
             {/* the power reading, at the finger's anchor rather than in a corner */}
             <circle cx={drag!.from.x} cy={drag!.from.y} r="5"
-              fill="none" stroke="var(--color-acid)" strokeWidth="1.6"
+              fill="none" stroke="var(--color-leaf-hi)" strokeWidth="1.6"
               strokeDasharray={`${pullFraction(drag!) * 31.4} 31.4`}
               transform={`rotate(-90 ${drag!.from.x} ${drag!.from.y})`} />
             <circle cx={drag!.to.x} cy={drag!.to.y} r="3.4"
-              fill="var(--color-hot)" stroke="var(--color-ink)" strokeWidth="1" />
+              fill="var(--color-petal)" stroke="var(--color-ink)" strokeWidth="1" />
           </>
         )}
 
@@ -211,10 +211,10 @@ export function Catapult({
         )}
         <path d={`M ${potX - hw} ${potY} L ${potX - hw * 0.8} ${potY + depth}
                   L ${potX + hw * 0.8} ${potY + depth} L ${potX + hw} ${potY} Z`}
-          fill={sunk ? "var(--color-trivia)" : "var(--color-hot)"}
+          fill={sunk ? "var(--color-sky)" : "var(--color-petal)"}
           stroke="var(--color-ink)" strokeWidth="1.4" strokeLinejoin="round" />
         <line x1={potX - hw} y1={potY} x2={potX + hw} y2={potY}
-          stroke="var(--color-acid)" strokeWidth="1.2" strokeLinecap="round" />
+          stroke="var(--color-leaf-hi)" strokeWidth="1.2" strokeLinecap="round" />
         {/* the lips, which are the whole story: clip the near one and it tips
             in, clip the far one and it rims out */}
         <circle cx={potX - hw} cy={potY} r="1.5" fill="var(--color-ink)" />
@@ -227,9 +227,9 @@ export function Catapult({
     return (
       <g>
         <circle cx={sx(p.x)} cy={sy(p.y) - BALL} r={BALL}
-          fill="var(--color-pop)" stroke="var(--color-ink)" strokeWidth="1.4" />
+          fill="var(--color-petal)" stroke="var(--color-ink)" strokeWidth="1.4" />
         <circle cx={sx(p.x) - BALL * 0.3} cy={sy(p.y) - BALL * 1.32} r={BALL * 0.28}
-          fill="var(--color-surface)" opacity="0.85" />
+          fill="var(--color-board)" opacity="0.85" />
       </g>
     );
   }

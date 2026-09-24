@@ -83,7 +83,7 @@ export function Connect4Room({
           names={names}
           scores={{ x: scoreOf("x"), o: scoreOf("o") }}
           active={g.phase === "over" ? null : g.turn}
-          glyph={() => "●"}
+          glyph={() => "disc"}
           dimmed={g.phase === "over"} />
       </PlayRow>
 

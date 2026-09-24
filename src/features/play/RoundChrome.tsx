@@ -1,4 +1,5 @@
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { MIST, RAMPS } from "@/shared/brand/tokens";
 import { useEffect, useState, type ReactNode } from "react";
 import { drawCard, saveCard, type MatchCard } from "@/shared/card/frame";
 import { roundHero } from "./roundCard";
@@ -17,7 +18,7 @@ export function Hud({ index, total, score, streak, accent }:
           <motion.span key={i}
             className="h-2.5 flex-1 rounded-full border-2 border-ink"
             initial={false}
-            animate={{ backgroundColor: i <= index ? accent : "#EFE3CB" }}
+            animate={{ backgroundColor: i <= index ? accent : MIST }}
             transition={{ duration: 0.25 }} />
         ))}
       </div>
@@ -25,7 +26,7 @@ export function Hud({ index, total, score, streak, accent }:
         {streak >= 2 && (
           <motion.span key="streak" variants={popIn} initial="hidden" animate="show"
             exit={{ opacity: 0, scale: 0.6 }}
-            className="text-[13px] font-black uppercase bg-pop border-2 border-ink rounded-full px-2 py-0.5">
+            className="text-[13px] font-black bg-petal border-2 border-ink rounded-full px-2 py-0.5">
             {streak}×
           </motion.span>
         )}
@@ -47,7 +48,7 @@ export function HintBar({ item, used, onUse }:
             initial={{ opacity: 0, height: 0, y: -6 }}
             animate={{ opacity: 1, height: "auto", y: 0 }}
             className="text-sm text-soft font-semibold mb-1.5 overflow-hidden">
-            <span className="text-[12px] font-black uppercase tracking-widest bg-sand
+            <span className="text-[12px] font-black bg-mist
               border-2 border-ink rounded-full px-2 py-0.5 mr-2">
               {i === 0 ? "Clue" : "Letters"}
             </span>
@@ -57,7 +58,7 @@ export function HintBar({ item, used, onUse }:
       </AnimatePresence>
       {used < hints.length && (
         <button onClick={onUse}
-          className="piece press text-xs font-black uppercase tracking-wider px-4 min-h-[44px] inline-flex items-center rounded-xl bg-sand">
+          className="card tap text-xs font-black px-4 min-h-[44px] inline-flex items-center rounded-xl bg-mist">
           {used === 0 ? "Need a clue?  −100" : "One more  −100"}
         </button>
       )}
@@ -69,7 +70,7 @@ export function HintBar({ item, used, onUse }:
 export function Burst({ show }: { show: boolean }) {
   const still = useReducedMotion();
   if (still) return null;
-  const bits = ["#FF5A1F", "#2B4BFF", "#FFD028", "#10A04E", "#FF5A1F", "#FFD028", "#2B4BFF", "#10A04E"];
+  const bits = [RAMPS.ember.base, RAMPS.sky.base, RAMPS.petal.base, RAMPS.leaf.base, RAMPS.grape.base, RAMPS.petal.base, RAMPS.sky.base, RAMPS.gum.base];
   return (
     <AnimatePresence>
       {show && (
@@ -103,24 +104,24 @@ export function Reveal({ correct, near, answer, gained, onNext, isLast, explanat
     <motion.div
       initial={{ opacity: 0, y: 26 }} animate={{ opacity: 1, y: 0 }} transition={SPRING}
       className="mt-5">
-      <div className={`piece p-4 ${correct ? "bg-good" : near ? "bg-pop" : "bg-bad"}`}>
-        <p className={`font-display text-lg font-semibold ${near && !correct ? "text-ink" : "text-surface"}`}>
+      <div className={`card p-4 ${correct ? "bg-leaf" : near ? "bg-petal" : "bg-ember"}`}>
+        <p className={`font-display text-lg font-semibold ${near && !correct ? "text-ink" : "text-board"}`}>
           {correct ? `Correct  +${gained}` : near ? "So close" : "Missed"}
         </p>
         {!correct && (
-          <p className={`text-[15px] font-bold mt-0.5 ${near ? "text-ink" : "text-surface"}`}>
+          <p className={`text-[15px] font-bold mt-0.5 ${near ? "text-ink" : "text-board"}`}>
             {answer}
           </p>
         )}
       </div>
       {explanation && (
-        <div className="piece p-4 mt-2.5">
-          <p className="text-[12px] font-black uppercase tracking-widest text-soft">Why</p>
+        <div className="card p-4 mt-2.5">
+          <p className="text-[12px] font-black text-soft">Why</p>
           <p className="text-[15px] font-semibold mt-1 leading-snug">{explanation}</p>
         </div>
       )}
       <button onClick={onNext} autoFocus
-        className="piece press w-full mt-3 py-4 font-display text-lg font-semibold bg-ink text-paper">
+        className="cut tap w-full mt-3 py-4 font-display text-lg font-semibold cut-ink text-ground">
         {isLast ? "See the round" : "Next"}
       </button>
     </motion.div>
@@ -149,7 +150,7 @@ function RoundCard({ title, results, score, outcome }:
       <img src={card.url} alt={`${title}: ${right} of ${results.length}, ${score} points`}
         className="w-full rounded-2xl border-[3px] border-ink" />
       <button onClick={() => saveCard(card.file)}
-        className="piece press w-full py-3.5 font-display text-lg font-semibold bg-pop">
+        className="cut tap w-full py-3.5 font-display text-lg font-semibold cut-petal">
         Save the image
       </button>
     </motion.div>
@@ -165,25 +166,25 @@ export function Summary({ score, results, outcome, onAgain, children, title }:
   return (
     <motion.div variants={stagger(0.08)} initial="hidden" animate="show" className="text-center">
       <motion.p variants={riseIn}
-        className="text-[12px] font-black uppercase tracking-widest text-soft">Round complete</motion.p>
+        className="text-[12px] font-black text-soft">Round complete</motion.p>
       <motion.div variants={popIn} className="relative py-2">
         <Burst show />
-        <Counter value={score} className="font-display text-7xl font-semibold text-picto block" />
+        <Counter value={score} className="font-display text-7xl font-semibold text-ember block" />
       </motion.div>
       <motion.p variants={riseIn} className="text-sm font-bold text-soft">
         {right} of {results.length} correct
       </motion.p>
       {!!outcome?.streak && (
         <motion.p variants={popIn}
-          className="inline-block mt-3 text-[13px] font-black uppercase tracking-widest
-            bg-pop border-[2.5px] border-ink rounded-full px-3 py-1">
+          className="inline-block mt-3 text-[13px] font-black
+            bg-petal border-[2.5px] border-ink rounded-full px-3 py-1">
           Day {outcome.streak} streak
         </motion.p>
       )}
       {title && <RoundCard title={title} results={results} score={score} outcome={outcome} />}
       <motion.div variants={riseIn} className="mt-6 text-left">{children}</motion.div>
       <motion.button variants={riseIn} onClick={onAgain}
-        className="piece press w-full mt-5 py-4 font-display text-lg font-semibold bg-picto text-surface">
+        className="cut tap w-full mt-5 py-4 font-display text-lg font-semibold cut-ember text-ink">
         Play again
       </motion.button>
       <UnlockGate outcome={outcome ?? null} />

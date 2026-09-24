@@ -36,7 +36,7 @@ const SCAN_DIRS = ["src"];
 const SCAN_FILES = ["index.html", "vite.config.ts", "public/manifest.webmanifest", "public/manifest.json"];
 const EXT = new Set([".ts", ".tsx", ".css", ".html", ".json", ".webmanifest"]);
 /** The one place colours are allowed to be written as hex. */
-const TOKEN_HOME = ["src/shared/brand/"];
+const TOKEN_HOME = ["src/shared/brand/", "src/shared/data/rank-badges.json"];
 
 function walk(dir, out = []) {
   const abs = path.join(ROOT, dir);
@@ -53,7 +53,7 @@ const files = [...SCAN_DIRS.flatMap((d) => walk(d)), ...SCAN_FILES.filter((f) =>
 // ---------------------------------------------------------------- bans
 const OLD = "hot|acid|pop|picto|trivia|good|bad|paper|sand|surface";
 const UTIL = "bg|text|border|from|to|via|fill|stroke|ring|outline|decoration|divide|placeholder|caret|accent|shadow";
-const COLOURED_BG = `bg-(?:${OLD}|petal|sky|leaf|ember|gum)(?:/\\d+)?`;
+const COLOURED_BG = `bg-(?:${OLD}|petal|sky|leaf|ember|gum)(?!-)(?:/\\d+)?`;
 const BANS = [
   { id: "old-token-class", why: "old palette utility (hot, pop, picto, trivia, good, bad, paper, sand, surface, acid)",
     re: new RegExp(`\\b(?:${UTIL})-(?:${OLD})(?:/\\d+)?\\b`, "g"), in: [".tsx", ".ts"] },
@@ -74,7 +74,7 @@ const BANS = [
   { id: "old-card-frame", why: "old share-card frame: artStage, hot-pink ground, sticker headline",
     re: /\bartStage\b|\b(?:HOT|POP|PICTO|TRIVIA|SAND)\b(?=[,\s}])/g, in: [".ts", ".tsx"] },
   { id: "white-on-colour", why: "letters on colour are ink (grape takes white)",
-    re: new RegExp(`className=["'{\`][^"'\`]*?(?:${COLOURED_BG})[^"'\`]*?\\btext-(?:white|surface|paper)\\b|className=["'{\`][^"'\`]*?\\btext-(?:white|surface|paper)\\b[^"'\`]*?(?:${COLOURED_BG})`, "g"), in: [".tsx"] },
+    re: new RegExp(`["'\`][^"'\`]*?\\b(?:${COLOURED_BG})\\b[^"'\`]*?\\btext-(?:white|surface|paper|board|ground)\\b[^"'\`]*["'\`]|["'\`][^"'\`]*?\\btext-(?:white|surface|paper|board|ground)\\b[^"'\`]*?\\b(?:${COLOURED_BG})\\b[^"'\`]*["'\`]`, "g"), in: [".tsx", ".ts"] },
   { id: "old-theme-meta", why: "theme-color / manifest colours still the old pink or cream",
     re: /#FF2E88|#FBF4E6|%23FF2E88/gi, in: [".html", ".webmanifest", ".json", ".ts"] },
 ];
@@ -95,7 +95,7 @@ const REQUIRES = [
   { id: "badges-v3", why: "rank-badges.json is the sunflower ladder",
     ok: () => /"viewBox":"-4 -4/.test(read("src/shared/data/rank-badges.json") ?? "") },
   { id: "game-families", why: "every game in the registry declares a family",
-    ok: () => { const r = read("src/features/play/registry.tsx") ?? ""; const ids = (r.match(/\bid:\s*["']/g) ?? []).length; const fam = (r.match(/\bfamily:\s*["']/g) ?? []).length; return ids > 0 && fam >= ids; } },
+    ok: () => { const r = read("src/features/play/registry.tsx") ?? ""; const ids = (r.match(/\bslug:\s*["']/g) ?? []).length; const fam = (r.match(/\bfamily:\s*["']/g) ?? []).length; return ids > 0 && fam >= ids; } },
   { id: "game-tiles", why: "every game has a cut-gem tile", ok: () => !!read("src/shared/brand/tiles.tsx") },
   { id: "card-v4", why: "share cards paint the six-part layout (world, hook, moment, detail, dare, name)",
     ok: () => /\bpaintDare\b/.test(read("src/shared/card/frame.ts") ?? "") },

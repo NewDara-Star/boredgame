@@ -40,7 +40,7 @@ export function TicTacToeRoom({
           names={names}
           scores={{ x: scoreOf("x"), o: scoreOf("o") }}
           active={g.phase === "over" ? null : g.turn}
-          glyph={(m) => (m === "x" ? "✕" : "◯")}
+          glyph={(m) => (m === "x" ? "cross" : "ring")}
           dimmed={g.phase === "over"} />
       </PlayRow>
 

@@ -5,7 +5,7 @@ import { C4 } from "./useC4Room";
 import { connect4Art } from "./card";
 
 const board = gridBoard(Board);
-const glyphs = { x: "●", o: "●" } as const;
+const glyphs = { x: "disc", o: "disc" } as const;
 const art = (title: string) => ({ hero: () => connect4Art(title.toUpperCase()) });
 
 /** Plain Connect 4 against the bot: tap a column, the disc falls. */

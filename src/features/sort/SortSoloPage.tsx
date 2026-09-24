@@ -77,7 +77,7 @@ export function SortSoloPage() {
           <h1 className="font-display text-[26px] leading-none font-semibold whitespace-nowrap">
             {practice ? "Practice" : "Today's tubes"}
           </h1>
-          <p className="text-[12px] font-black uppercase tracking-widest text-soft mt-1">
+          <p className="text-[12px] font-black text-soft mt-1">
             {practice ? "A random board, off the record" : "Everyone gets this board today"}
           </p>
         </div>
@@ -85,8 +85,8 @@ export function SortSoloPage() {
           {LEVELS.map((l) => (
             <button key={l} onClick={() => setLevel(l)} aria-pressed={level === l}
               disabled={running}
-              className={`text-[12px] font-black uppercase tracking-wider px-2.5 py-1.5 rounded-full border-2 border-ink
-                disabled:opacity-40 ${level === l ? "bg-ink text-paper" : "bg-surface text-ink"}`}>
+              className={`text-[12px] font-black px-2.5 py-1.5 rounded-full border-2 border-ink
+                disabled:opacity-40 ${level === l ? "bg-ink text-ground" : "bg-board text-ink"}`}>
               {l}
             </button>
           ))}
@@ -110,7 +110,7 @@ export function SortSoloPage() {
               picture twice on a phone that had to be scrolled past it. */}
           <PlayBoard ratio={TUBES_RATIO} min={120}>
             {(width) => (
-              <div className="piece bg-surface p-3 pt-1" style={{ width }}>
+              <div className="card bg-board p-3 pt-1" style={{ width }}>
                 <Board tubes={r.me.tubes} cap={r.me.cap} selected={r.selected} refused={r.refused}
                   width={width - 26} onPick={r.pick} disabled={r.finishing} />
               </div>
@@ -129,14 +129,14 @@ export function SortSoloPage() {
 
       {r.error && (
         <PlayRow>
-          <p className="piece bg-pop p-3 text-[13px] font-bold text-center">{r.error}</p>
+          <p className="card bg-petal p-3 text-[13px] font-bold text-center">{r.error}</p>
         </PlayRow>
       )}
 
       {r.result ? (
         <motion.div variants={popIn} className="space-y-3 shrink-0">
           {/* one line, not a panel: the film above it already says the time big */}
-          <div className="piece px-4 py-3 bg-good text-surface flex items-baseline justify-between gap-3">
+          <div className="card px-4 py-3 bg-leaf text-ink flex items-baseline justify-between gap-3">
             <p className="font-display text-2xl font-semibold tabular-nums">{clock(r.result.ms)}</p>
             <p className="text-[13px] font-bold opacity-90 text-right">
               {r.result.moves} moves, {overPar <= 0 ? "par" : `par ${r.puzzle.par}`}
@@ -146,19 +146,19 @@ export function SortSoloPage() {
           {film && (
             <ReplayPlayer replay={film}>
               <button onClick={r.again}
-                className="piece press py-4 font-display text-lg font-semibold bg-surface">
+                className="card tap py-4 font-display text-lg font-semibold bg-board">
                 Go again
               </button>
             </ReplayPlayer>
           )}
           <div className="flex justify-center gap-5">
             <button onClick={() => (practice ? r.shuffle() : setLevel(LEVELS[(LEVELS.indexOf(level) + 1) % 3]))}
-              className="text-[13px] font-black uppercase tracking-wider text-soft underline underline-offset-4">
+              className="text-[13px] font-black text-soft underline underline-offset-4">
               {practice ? "New board" : "Next level"}
             </button>
             {card && (
               <button onClick={() => saveCard(card.file)}
-                className="text-[13px] font-black uppercase tracking-wider text-soft underline underline-offset-4">
+                className="text-[13px] font-black text-soft underline underline-offset-4">
                 Still image
               </button>
             )}
@@ -167,17 +167,17 @@ export function SortSoloPage() {
       ) : (
         <PlayRow className="grid grid-cols-2 gap-2.5">
           <button onClick={r.takeBack} disabled={r.me.history.length === 0 || r.finishing}
-            className="piece press py-3 font-display font-semibold bg-surface disabled:opacity-50">
+            className="card tap py-3 font-display font-semibold bg-board disabled:opacity-50">
             Take it back
           </button>
           {practice ? (
             <button onClick={r.shuffle} disabled={running}
-              className="piece press py-3 font-display font-semibold bg-surface disabled:opacity-50">
+              className="card tap py-3 font-display font-semibold bg-board disabled:opacity-50">
               New board
             </button>
           ) : (
             <button onClick={() => setPractice(true)} disabled={running}
-              className="piece press py-3 font-display font-semibold bg-surface disabled:opacity-50">
+              className="card tap py-3 font-display font-semibold bg-board disabled:opacity-50">
               Practice instead
             </button>
           )}
@@ -188,7 +188,7 @@ export function SortSoloPage() {
       {practice ? (
         <motion.div variants={riseIn} className="text-center">
           <button onClick={() => setPractice(false)} disabled={running}
-            className="text-[13px] font-black uppercase tracking-wider text-soft underline underline-offset-4 disabled:opacity-40">
+            className="text-[13px] font-black text-soft underline underline-offset-4 disabled:opacity-40">
             Back to today's tubes
           </button>
         </motion.div>
@@ -216,8 +216,8 @@ function Ladder({ rows, mine, meId, level, film }:
     </Row>
   );
   return (
-    <motion.div variants={riseIn} className="piece bg-surface p-3">
-      <p className="text-[12px] font-black uppercase tracking-widest text-soft mb-2">
+    <motion.div variants={riseIn} className="card bg-board p-3">
+      <p className="text-[12px] font-black text-soft mb-2">
         Today · {level} · {rows.length === 0 ? "no times yet" : `${rows.length}${rows.length === 20 ? "+" : ""} sorted it`}
       </p>
       {rows.length === 0 ? (
@@ -236,13 +236,13 @@ function Ladder({ rows, mine, meId, level, film }:
 function Row({ s, me, open, onOpen, children }:
   { s: Standing; me: boolean; open: boolean; onOpen?: () => void; children?: ReactNode }) {
   return (
-    <li className={`rounded-xl ${me ? "bg-pop" : ""}`}>
+    <li className={`rounded-xl ${me ? "bg-petal" : ""}`}>
       <button onClick={onOpen} disabled={!onOpen} aria-expanded={open}
         className="flex w-full items-center gap-2.5 px-2 py-1.5 text-left disabled:cursor-default">
         <span className="w-6 text-[13px] font-black tabular-nums text-soft">{s.position}</span>
         <Avatar id={s.user_id} name={s.username} size={26} />
         <span className="flex-1 truncate text-sm font-bold">{s.username}</span>
-        {onOpen && <span className="text-[12px] font-black uppercase tracking-wider text-soft">{open ? "close" : "watch"}</span>}
+        {onOpen && <span className="text-[12px] font-black text-soft">{open ? "close" : "watch"}</span>}
         <span className="text-[12px] font-bold text-soft tabular-nums">{s.moves} mv</span>
         <span className="font-display text-base font-semibold tabular-nums">{clock(s.ms)}</span>
       </button>
@@ -253,8 +253,8 @@ function Row({ s, me, open, onOpen, children }:
 
 function Stat({ label, value, sub }: { label: string; value: string; sub: string }) {
   return (
-    <div className="piece bg-surface px-2 py-2.5">
-      <p className="text-[12px] font-black uppercase tracking-widest text-soft">{label}</p>
+    <div className="card bg-board px-2 py-2.5">
+      <p className="text-[12px] font-black text-soft">{label}</p>
       <p className="font-display text-2xl font-semibold leading-none mt-1 tabular-nums">{value}</p>
       <p className="text-[12px] font-bold text-soft mt-1 truncate">{sub}</p>
     </div>

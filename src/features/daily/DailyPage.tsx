@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { RAMPS } from "@/shared/brand/tokens";
 import { Dealing } from "@/shared/ui/Note";
 import { motion } from "framer-motion";
 import { useAuth } from "@/app/providers/AuthProvider";
@@ -20,14 +21,14 @@ function Board({ rows, meId }: { rows: DailyStanding[]; meId?: string }) {
       {rows.map((r, i) => {
         const me = r.user_id === meId;
         return (
-          <div key={r.user_id} className={`piece flex items-center gap-3 px-3 py-2.5 ${me ? "bg-pop" : ""}`}>
+          <div key={r.user_id} className={`card flex items-center gap-3 px-3 py-2.5 ${me ? "bg-petal" : ""}`}>
             <span className="w-6 text-center font-display text-lg font-semibold tabular-nums text-soft">
               {i + 1}
             </span>
             <Avatar id={r.user_id} name={r.username} size={32} />
             <span className="flex-1 font-bold text-[15px] truncate">
               {r.username}
-              {me && <span className="text-soft font-black text-[12px] uppercase tracking-widest ml-1.5">you</span>}
+              {me && <span className="text-soft font-black text-[12px] ml-1.5">you</span>}
             </span>
             <span className="text-right">
               <b className="block font-display text-lg font-semibold tabular-nums leading-none">
@@ -54,12 +55,12 @@ export function DailyPage() {
   }
   if (!user) {
     return (
-      <div className="piece p-6 text-center">
+      <div className="card p-6 text-center">
         <h1 className="font-display text-2xl font-semibold">Today's round</h1>
         <p className="text-sm text-soft font-semibold mt-2">
           Ten questions, the same ten for everyone, once a day. Sign in to play it and take a place on the board.
         </p>
-        <Link to="/profile" className="piece press block mt-5 py-3.5 font-display text-lg font-semibold bg-pop">
+        <Link to="/profile" className="cut tap block mt-5 py-3.5 font-display text-lg font-semibold cut-petal">
           Sign in
         </Link>
       </div>
@@ -74,10 +75,10 @@ export function DailyPage() {
     return (
       <motion.div variants={stagger(0.07)} initial="hidden" animate="show" className="space-y-4">
         {d.error && (
-          <motion.p variants={riseIn} className="text-sm text-bad font-bold">{d.error}</motion.p>
+          <motion.p variants={riseIn} className="text-sm text-ember font-bold">{d.error}</motion.p>
         )}
         <motion.div variants={riseIn}>
-          <p className="text-[12px] font-black uppercase tracking-widest text-soft">Today's round</p>
+          <p className="text-[12px] font-black text-soft">Today's round</p>
           <h1 className="font-display text-[30px] leading-none font-semibold mt-1">
             {d.mine ? `${d.mine.correct} out of 10` : "Round filed"}
           </h1>
@@ -93,7 +94,7 @@ export function DailyPage() {
     );
   }
 
-  if (d.error) return <p className="text-sm text-bad font-bold">{d.error}</p>;
+  if (d.error) return <p className="text-sm text-ember font-bold">{d.error}</p>;
   if (r.phase === "loading") return <Dealing what="the round" />;
   if (r.phase === "empty") return <p className="text-sm text-soft font-bold">No round today.</p>;
 
@@ -103,10 +104,10 @@ export function DailyPage() {
 
   return (
     <div>
-      <p className="text-[12px] font-black uppercase tracking-widest text-soft mb-2">
+      <p className="text-[12px] font-black text-soft mb-2">
         Today's round · one go
       </p>
-      <Hud index={r.index} total={r.total} score={r.score} streak={r.streak} accent="#FF2E88" />
+      <Hud index={r.index} total={r.total} score={r.score} streak={r.streak} accent={RAMPS.petal.base} />
       <div className="mt-5">
         <QuestionPanel
           item={item} options={item.choices ?? []} chosen={r.chosen ?? null}

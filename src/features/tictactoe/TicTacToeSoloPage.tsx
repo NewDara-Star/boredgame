@@ -11,5 +11,5 @@ const art = { hero: () => TIC_TAC_TOE_ART };
     Off with the questions switched off — see useBoardRoom. */
 export function TicTacToeSoloPage() {
   return <BoardSoloPage engine={TTT} title="Tic Tac Toe" board={gridBoard(Board)}
-    glyphs={{ x: "✕", o: "◯" }} plain art={art} />;
+    glyphs={{ x: "cross", o: "ring" }} plain art={art} />;
 }

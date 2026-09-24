@@ -59,7 +59,7 @@ export function MemoryRoom({
           scores={{ x: scoreOf(g, "x"), o: scoreOf(g, "o") }}
           active={g.turn}
           dimmed={g.phase === "over"}
-          glyph={(m: Mark) => (m === "x" ? "◆" : "●")} />
+          glyph={(m: Mark) => (m === "x" ? "tile" : "disc")} />
       </PlayRow>
 
       <PlayBoard min={78}>

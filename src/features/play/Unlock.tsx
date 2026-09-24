@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { RAMPS } from "@/shared/brand/tokens";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { SPRING } from "@/shared/ui/motion";
@@ -33,7 +34,7 @@ export function unlockFrom(o: RoundOutcome | null): Unlock | null {
   return null;
 }
 
-const BITS = ["#FF5A1F", "#2B4BFF", "#FFD028", "#10A04E"];
+const BITS = [RAMPS.ember.base, RAMPS.sky.base, RAMPS.petal.base, RAMPS.leaf.base, RAMPS.grape.base, RAMPS.gum.base];
 
 /** Paper confetti: flat squares on an ink outline, same as every other piece. */
 function Confetti() {
@@ -73,14 +74,14 @@ export function UnlockOverlay({ unlock, onClose }: { unlock: Unlock; onClose: ()
       onClick={onClose} role="dialog" aria-modal="true">
       <motion.div
         onClick={(e) => e.stopPropagation()}
-        className="piece relative overflow-hidden w-full max-w-[320px] p-7 text-center"
+        className="card relative overflow-hidden w-full max-w-[320px] p-7 text-center"
         initial={{ scale: 0.7, y: 30, rotate: -3, opacity: 0 }}
         animate={{ scale: 1, y: 0, rotate: 0, opacity: 1 }}
         exit={{ scale: 0.85, y: 20, opacity: 0 }}
         transition={{ ...SPRING, stiffness: 300, damping: 20 }}>
         <Confetti />
 
-        <p className="relative z-10 text-[12px] font-black uppercase tracking-widest text-soft">
+        <p className="relative z-10 text-[12px] font-black text-soft">
           {isRank ? "New rank" : "Streak milestone"}
         </p>
 
@@ -89,7 +90,7 @@ export function UnlockOverlay({ unlock, onClose }: { unlock: Unlock; onClose: ()
             <RankBadge rank={unlock.rank.key} size={96} animate />
           ) : (
             <motion.div
-              className="piece bg-pop w-[96px] h-[96px] grid place-items-center"
+              className="card bg-petal w-[96px] h-[96px] grid place-items-center"
               style={{ borderRadius: 999 }}
               initial={{ scale: 0.3, rotate: -25 }} animate={{ scale: 1, rotate: 0 }}
               transition={{ type: "spring", stiffness: 260, damping: 14 }}>
@@ -117,7 +118,7 @@ export function UnlockOverlay({ unlock, onClose }: { unlock: Unlock; onClose: ()
           initial={{ y: 14, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
           transition={{ ...SPRING, delay: 0.3 }}>
           <button onClick={onClose}
-            className="piece press w-full py-3.5 font-display text-lg font-semibold bg-pop">
+            className="cut tap w-full py-3.5 font-display text-lg font-semibold cut-petal">
             Nice
           </button>
           <Link to="/profile" onClick={onClose}

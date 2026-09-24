@@ -24,8 +24,7 @@ export function CategoryBar({
   return (
     <div className="mb-3">
       <button onClick={() => setOpen((o) => !o)}
-        className="piece press flex items-center gap-2 px-3 py-1.5 text-[13px] font-black
-          uppercase tracking-wider rounded-xl">
+        className="card tap flex items-center gap-2 px-3 py-1.5 text-[13px] font-black rounded-xl">
         <span>{selected.length === 0 ? "All categories" : `${selected.length} selected`}</span>
         <span className="text-soft tabular-nums">{inPlay}</span>
         <motion.span animate={{ rotate: open ? 180 : 0 }} transition={SPRING} className="leading-none">▾</motion.span>
@@ -42,15 +41,14 @@ export function CategoryBar({
                 return (
                   <button key={c.name} onClick={() => toggle(c.name)}
                     className={`border-2 border-ink rounded-full px-2.5 py-1 text-[13px] font-bold
-                      ${on ? "bg-ink text-paper" : "bg-surface text-ink"}`}>
+                      ${on ? "bg-ink text-ground" : "bg-board text-ink"}`}>
                     {c.name} <span className="opacity-60 tabular-nums">{c.count}</span>
                   </button>
                 );
               })}
               {selected.length > 0 && (
                 <button onClick={() => onChange([])}
-                  className="border-2 border-ink rounded-full px-2.5 py-1 text-[13px] font-black
-                    uppercase tracking-wider bg-pop">
+                  className="border-2 border-ink rounded-full px-2.5 py-1 text-[13px] font-black bg-petal">
                   Clear
                 </button>
               )}

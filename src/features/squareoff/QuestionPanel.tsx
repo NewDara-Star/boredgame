@@ -1,16 +1,15 @@
 import { motion } from "framer-motion";
+import { AnswerMark } from "@/shared/brand/Pieces";
 import { stagger, riseIn } from "@/shared/ui/motion";
 import type { PlayItem } from "@/features/play/types";
 
-const SHAPES = ["▲", "◆", "●", "■"];
-const HUES = ["#FF5A1F", "#2B4BFF", "#FFD028", "#10A04E"];
 
 export function Timer({ fraction }: { fraction: number }) {
   return (
-    <div className="h-3 bg-sand rounded-full overflow-hidden border-2 border-ink">
+    <div className="h-3 bg-mist rounded-full overflow-hidden border-2 border-ink">
       <motion.div
         className="h-full"
-        style={{ background: fraction < 0.3 ? "var(--color-bad)" : "var(--color-pop)" }}
+        style={{ background: fraction < 0.3 ? "var(--color-ember)" : "var(--color-petal)" }}
         animate={{ width: `${Math.max(0, fraction) * 100}%` }}
         transition={{ duration: 0.2, ease: "linear" }} />
     </div>
@@ -35,14 +34,14 @@ export function QuestionPanel({
   /** the correct answer, for modes that don't ship it on the item. The daily
       serves questions answer-free (item.answer is ""), so the reveal takes the
       correct answer from the server verdict instead -- without it, the right
-      option never turns green and a correct pick shows the red ✗. */
+      option never turns green and a correct pick shows the red cross. */
   answer?: string;
 }) {
   const correctAnswer = answer ?? item.answer;
   return (
     <div>
-      <span className="inline-block text-[12px] font-black uppercase tracking-widest
-        bg-trivia text-surface rounded-full px-2.5 py-1">
+      <span className="inline-block text-[12px] font-black
+        bg-sky text-board rounded-full px-2.5 py-1">
         {item.category} · {item.difficulty}
       </span>
       <h2 className="mt-2.5 font-display text-[22px] leading-tight font-semibold text-balance">
@@ -54,18 +53,18 @@ export function QuestionPanel({
           const isAnswer = opt === correctAnswer;
           const isMine = chosen === opt;
           const bg = !revealed
-            ? (isMine ? "bg-pop" : "bg-surface")
-            : isAnswer ? "bg-good text-surface"
-            : isMine ? "bg-bad text-surface"
-            : "bg-surface opacity-40";
+            ? (isMine ? "bg-petal" : "bg-board")
+            : isAnswer ? "bg-leaf text-ink"
+            : isMine ? "bg-ember text-ink"
+            : "bg-board opacity-40";
           return (
             <motion.button key={opt} variants={riseIn}
               disabled={locked}
               onClick={() => onAnswer(opt)}
-              className={`piece ${locked ? "" : "press"} flex items-center gap-3 text-left px-4 py-3 ${bg}`}>
+              className={`card ${locked ? "" : "tap"} flex items-center gap-3 text-left px-4 py-3 ${bg}`}>
               <span aria-hidden={!(revealed && (isAnswer || isMine))} className="text-base shrink-0"
-                style={{ color: revealed && (isAnswer || isMine) ? "currentColor" : HUES[i % 4] }}>
-                {revealed && isAnswer ? "✓" : revealed && isMine ? "✗" : SHAPES[i % 4]}
+                >
+                  <AnswerMark index={i} state={revealed && isAnswer ? "right" : revealed && isMine ? "wrong" : "idle"} />
               </span>
               {revealed && isAnswer && <span className="sr-only">Correct answer: </span>}
               {revealed && isMine && !isAnswer && <span className="sr-only">Your incorrect answer: </span>}
@@ -77,7 +76,7 @@ export function QuestionPanel({
 
       {revealed && item.explanation && (
         <motion.p initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-          className="piece p-3.5 mt-2.5 text-[14px] font-semibold leading-snug">
+          className="card p-3.5 mt-2.5 text-[14px] font-semibold leading-snug">
           {item.explanation}
         </motion.p>
       )}

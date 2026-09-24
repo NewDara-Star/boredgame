@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { RAMPS } from "@/shared/brand/tokens";
 import { motion } from "framer-motion";
 import type { Tube } from "./rules";
 
@@ -20,16 +21,16 @@ import type { Tube } from "./rules";
 /** ball colours, by index. The app's own tokens where they exist, so a red ball
     is the same red as a wrong answer and a blue one the same as trivia. */
 export const BALL: [string, string, string][] = [
-  ["#FF8A96", "#E5233B", "#8E0D1E"],   // red
-  ["#8FA4FF", "#2B4BFF", "#15258F"],   // blue
-  ["#7FE0A6", "#10A04E", "#075A2A"],   // green
-  ["#FFE98A", "#FFD028", "#B88A00"],   // yellow
-  ["#C4A2FF", "#7B3FE4", "#41208A"],   // purple
-  ["#FFB08C", "#FF5A1F", "#9E2E05"],   // orange
+  [RAMPS.ember.hi, RAMPS.ember.base, RAMPS.ember.deep],
+  [RAMPS.sky.hi, RAMPS.sky.base, RAMPS.sky.deep],
+  [RAMPS.leaf.hi, RAMPS.leaf.base, RAMPS.leaf.deep],
+  [RAMPS.petal.hi, RAMPS.petal.base, RAMPS.petal.deep],
+  [RAMPS.grape.hi, RAMPS.grape.base, RAMPS.grape.deep],
+  [RAMPS.gum.hi, RAMPS.gum.base, RAMPS.gum.deep],
 ];
 
 /** ball colours as words, for the screen reader -- same order as BALL. */
-const COLOUR = ["red", "blue", "green", "yellow", "purple", "orange"];
+const COLOUR = ["red", "blue", "green", "yellow", "purple", "pink"];
 
 const TW = 40, GAP = 9, R = 14.5, SLOT = 31.5;
 const LIFT = 44;                               // headroom for the lifted ball
@@ -151,7 +152,7 @@ export function Board({
               fill={`url(#glass-${size})`} pointerEvents="none" />
             {/* the rim */}
             <ellipse cx={x + TW / 2} cy={g.top} rx={TW / 2} ry="3.2"
-              fill="var(--color-paper)" stroke="var(--color-ink)" strokeWidth="2" />
+              fill="var(--color-ground)" stroke="var(--color-ink)" strokeWidth="2" />
 
             {/* balls, bottom first */}
             {t.map((c, k) => {
@@ -182,7 +183,7 @@ export function Board({
 
             {full && size === "full" && (
               <text x={x + TW / 2} y={g.top + g.tubeH + 9} textAnchor="middle"
-                fontSize="9" fontWeight="800" fill="var(--color-good)" letterSpacing=".08em">
+                fontSize="9" fontWeight="800" fill="var(--color-leaf)" letterSpacing=".08em">
                 DONE
               </text>
             )}

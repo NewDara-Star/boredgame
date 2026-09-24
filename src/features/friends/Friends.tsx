@@ -20,21 +20,21 @@ function InviteCards({ invites, onJoin, onDismiss }: {
   return (
     <div className="space-y-2">
       {invites.map((i) => (
-        <div key={i.id} className="piece bg-pop p-3 flex items-center gap-3">
+        <div key={i.id} className="card bg-petal p-3 flex items-center gap-3">
           <div className="min-w-0 flex-1">
             <p className="text-[15px] font-bold truncate">
               {i.from_name} wants to play
             </p>
-            <p className="text-[12px] font-black uppercase tracking-wider text-ink/60">
+            <p className="text-[12px] font-black text-ink/60">
               Room {i.room_code}
             </p>
           </div>
           <button onClick={() => onDismiss(i)}
-            className="text-[12px] font-black uppercase tracking-wider text-ink/50 px-2 py-2">
+            className="text-[12px] font-black text-ink/50 px-2 py-2">
             Dismiss
           </button>
           <button onClick={() => onJoin(i)}
-            className="piece press bg-ink text-paper px-4 min-h-[44px] inline-flex items-center font-display font-semibold">
+            className="cut tap cut-ink text-ground px-4 min-h-[44px] inline-flex items-center font-display font-semibold">
             Join
           </button>
         </div>
@@ -101,13 +101,13 @@ export function FriendsPanel() {
 
       {friends.length > 0 && (
         <div className="space-y-2">
-          <p className="text-[12px] font-black uppercase tracking-widest text-soft">Your people</p>
+          <p className="text-[12px] font-black text-soft">Your people</p>
           {friends.map((f) => (
-            <div key={f.id} className="piece bg-surface p-2.5 flex items-center gap-3">
+            <div key={f.id} className="card bg-board p-2.5 flex items-center gap-3">
               <Avatar id={f.id} name={f.username} size={34} />
               <span className="min-w-0 flex-1 font-bold truncate">{f.username}</span>
               <button onClick={() => void play(f.id)} disabled={busy}
-                className="piece press bg-ink text-paper px-4 min-h-[44px] inline-flex items-center font-display font-semibold">
+                className="cut tap cut-ink text-ground px-4 min-h-[44px] inline-flex items-center font-display font-semibold">
                 {pendingFrom(f.id) ? "Join" : "Play"}
               </button>
             </div>
@@ -116,12 +116,12 @@ export function FriendsPanel() {
       )}
 
       <div className="space-y-2">
-        <p className="text-[12px] font-black uppercase tracking-widest text-soft">Add a friend</p>
+        <p className="text-[12px] font-black text-soft">Add a friend</p>
         {link && (
           <button onClick={() => void copy()}
-            className="piece press w-full bg-acid px-4 py-3 text-left flex items-center justify-between">
+            className="cut tap w-full cut-leaf-hi px-4 py-3 text-left flex items-center justify-between">
             <span className="min-w-0 truncate font-bold text-[13px]">{link.replace(/^https?:\/\//, "")}</span>
-            <span className="text-[12px] font-black uppercase tracking-wider shrink-0 ml-2">
+            <span className="text-[12px] font-black shrink-0 ml-2">
               {copied ? "Copied" : "Copy link"}
             </span>
           </button>

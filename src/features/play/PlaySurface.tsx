@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { PieceMark, type PieceKind } from "@/shared/brand/Pieces";
 import { motion } from "framer-motion";
 import { SPRING } from "@/shared/ui/motion";
 import type { Mark } from "@/features/rooms/useBoardRoom";
@@ -84,12 +85,12 @@ export function PlayRow({ children, className = "" }: { children: ReactNode; cla
  */
 export function PlayHead({ title, seats }: {
   title: string;
-  seats: { mark: Mark; name: string; glyph: string; score: number; active: boolean }[];
+  seats: { mark: Mark; name: string; glyph: PieceKind; score: number; active: boolean }[];
 }) {
   return (
     <PlayRow className="flex items-center gap-2">
       <h1 className="font-display text-[15px] leading-none font-semibold truncate
-        text-soft uppercase tracking-wider">
+        text-soft">
         {title}
       </h1>
       <div className="flex-1" />
@@ -97,12 +98,9 @@ export function PlayHead({ title, seats }: {
         <motion.div key={s.mark}
           animate={{ scale: s.active ? 1 : 0.94, opacity: s.active ? 1 : 0.55 }}
           transition={SPRING}
-          className={`piece flex items-center gap-1.5 px-2.5 py-1.5 ${s.active ? "bg-pop" : "bg-surface"}`}>
-          <span className="font-display text-base font-semibold leading-none"
-            style={{ color: s.mark === "x" ? "var(--color-picto)" : "var(--color-trivia)" }}>
-            {s.glyph}
-          </span>
-          <span className="text-[12px] font-black uppercase tracking-wide truncate max-w-[72px]">{s.name}</span>
+          className={`card flex items-center gap-1.5 px-2.5 py-1.5 ${s.active ? "bg-petal" : "bg-board"}`}>
+          <PieceMark kind={s.glyph} colour={s.mark === "x" ? "var(--color-ember)" : "var(--color-sky)"} size={18} />
+          <span className="text-[12px] font-black truncate max-w-[72px]">{s.name}</span>
           <span className="font-display text-base font-semibold tabular-nums leading-none">{s.score}</span>
         </motion.div>
       ))}

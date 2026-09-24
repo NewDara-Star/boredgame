@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { SPRING } from "@/shared/ui/motion";
 import { COLS, ROWS, landingRow, type Cell, type Mark } from "./rules";
 
-const COLOUR: Record<Mark, string> = { x: "var(--color-picto)", o: "var(--color-trivia)" };
+const COLOUR: Record<Mark, string> = { x: "var(--color-ember)", o: "var(--color-sky)" };
 
 /**
  * The whole column is the tap target, not the individual cell. On a phone the
@@ -35,8 +35,8 @@ export function Board({
             onClick={() => pickable && onPick(c)}
             aria-label={open ? `Column ${c + 1}, open` : `Column ${c + 1}, full`}
             className={`flex flex-col rounded-[10px] p-[2px]
-              ${pickable ? "press cursor-pointer" : "cursor-default"}
-              ${contested ? "bg-pop" : pickable ? "bg-sand/70" : "bg-transparent"}`}
+              ${pickable ? "cut tap cursor-pointer" : "cursor-default"}
+              ${contested ? "cut-petal" : pickable ? "bg-mist/70" : "bg-transparent"}`}
             style={{ gap: width ? Math.max(2, width * 0.014) : compact ? 3 : 5 }}>
             {Array.from({ length: ROWS }, (_, r) => {
               const i = r * COLS + c;
@@ -45,7 +45,7 @@ export function Board({
               return (
                 <span key={r}
                   className={`aspect-square rounded-full grid place-items-center
-                    border-[3px] border-ink ${won ? "bg-good" : "bg-surface"}`}>
+                    border-[3px] border-ink ${won ? "bg-leaf" : "bg-board"}`}>
                   {cell && (
                     // Dropped, not faded in: the disc arrives from above so you
                     // can see which column it fell down.

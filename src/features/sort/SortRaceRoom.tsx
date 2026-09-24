@@ -92,7 +92,7 @@ export function SortRaceRoom({
                   o: r.seat === "o" ? r.myProgress : r.theirProgress }}
         active={r.seat ?? "x"}
         dimmed={!!r.won}
-        glyph={(m) => (m === "x" ? "◆" : "●")} />
+        glyph={(m) => (m === "x" ? "tile" : "disc")} />
 
       <div className="grid grid-cols-3 gap-2 text-center">
         <Stat label="Moves" value={String(r.me.moves)} sub={`par ${r.row.par}`} />
@@ -107,7 +107,7 @@ export function SortRaceRoom({
         return (
           <PlayBoard ratio={TUBES_RATIO} min={0}>
             {(width) => (
-              <div className="piece bg-surface p-3 pt-1" style={{ width }}>
+              <div className="card bg-board p-3 pt-1" style={{ width }}>
                 <Board tubes={me.tubes} cap={me.cap} selected={r.selected} refused={r.refused}
                   width={width - 26} onPick={r.pick} disabled={!playing} />
               </div>
@@ -134,15 +134,15 @@ export function SortRaceRoom({
       {playing && (
         <div className="flex items-center gap-3">
           {r.theirTubes && (
-            <div className="piece bg-sand p-2 shrink-0" style={{ width: 150 }}>
-              <p className="text-[12px] font-black uppercase tracking-widest text-soft text-center mb-1">
+            <div className="card bg-mist p-2 shrink-0" style={{ width: 150 }}>
+              <p className="text-[12px] font-black text-soft text-center mb-1">
                 {them} · {r.theirMoves}
               </p>
               <Board tubes={r.theirTubes} cap={r.row.cap} size="mini" />
             </div>
           )}
           <button onClick={r.takeBack} disabled={r.me.history.length === 0}
-            className="piece press flex-1 py-3 font-display font-semibold bg-surface">
+            className="card tap flex-1 py-3 font-display font-semibold bg-board">
             Take it back
           </button>
         </div>
@@ -150,8 +150,8 @@ export function SortRaceRoom({
 
       {playing && (
         <button onClick={() => void r.concede()}
-          className="block mx-auto text-[13px] font-black uppercase tracking-wider
-            text-bad underline underline-offset-4 pt-1">
+          className="block mx-auto text-[13px] font-black
+            text-ember underline underline-offset-4 pt-1">
           Give up this race
         </button>
       )}
@@ -186,8 +186,8 @@ export function SortRaceRoom({
 
 function Stat({ label, value, sub }: { label: string; value: string; sub: string }) {
   return (
-    <div className="piece bg-surface px-2 py-2.5">
-      <p className="text-[12px] font-black uppercase tracking-widest text-soft">{label}</p>
+    <div className="card bg-board px-2 py-2.5">
+      <p className="text-[12px] font-black text-soft">{label}</p>
       <p className="font-display text-2xl font-semibold leading-none mt-1 tabular-nums">{value}</p>
       <p className="text-[12px] font-bold text-soft mt-1">{sub}</p>
     </div>

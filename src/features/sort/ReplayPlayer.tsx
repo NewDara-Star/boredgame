@@ -73,21 +73,21 @@ export function ReplayPlayer({ replay, autoplay = true, children }:
   };
 
   const filmButton = busy ? (
-    <div className="piece bg-surface px-3 py-2.5 grid content-center">
-      <p className="text-[12px] font-black uppercase tracking-widest text-soft">Making it…</p>
-      <div className="mt-1.5 h-2.5 rounded-full border-2 border-ink bg-sand overflow-hidden">
-        <div className="h-full bg-pop transition-[width]" style={{ width: `${(100 * busy.done) / busy.total}%` }} />
+    <div className="card bg-board px-3 py-2.5 grid content-center">
+      <p className="text-[12px] font-black text-soft">Making it…</p>
+      <div className="mt-1.5 h-2.5 rounded-full border-2 border-ink bg-mist overflow-hidden">
+        <div className="h-full bg-petal transition-[width]" style={{ width: `${(100 * busy.done) / busy.total}%` }} />
       </div>
     </div>
   ) : gif ? (
     <button onClick={() => saveCard(gif.file)}
-      className="piece press py-4 font-display text-lg font-semibold bg-pop leading-tight">
+      className="cut tap py-4 font-display text-lg font-semibold cut-petal leading-tight">
       Save the film
       <span className="block text-[12px] font-bold opacity-70">{(gif.bytes / 1_000_000).toFixed(1)} MB GIF</span>
     </button>
   ) : (
     <button onClick={() => void save()}
-      className="piece press py-4 font-display text-lg font-semibold bg-pop">
+      className="cut tap py-4 font-display text-lg font-semibold cut-petal">
       Make the film
     </button>
   );
@@ -95,7 +95,7 @@ export function ReplayPlayer({ replay, autoplay = true, children }:
   return (
     <div className="space-y-2.5">
       <button onClick={play} disabled={playing} aria-label="Play the replay"
-        className="block w-full rounded-2xl border-[3px] border-ink overflow-hidden bg-hot">
+        className="block w-full rounded-2xl border-[3px] border-ink overflow-hidden bg-petal">
         <canvas ref={canvas} width={SIZE} height={SIZE} className="block w-full h-auto" />
       </button>
       <div className={`grid gap-2.5 ${children ? "grid-cols-2" : ""}`}>

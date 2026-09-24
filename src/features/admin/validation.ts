@@ -45,7 +45,7 @@ export function validate(d: DraftPuzzle): Errors {
   if (d.game === "picto") {
     if (d.render === "image" && !d.imageUrl.trim()) e.imageUrl = "Upload or paste an image URL.";
     if (d.render === "text" && d.items.filter((i) => i.text.trim()).length === 0)
-      e.items = "Add at least one piece of text to the canvas.";
+      e.items = "Add at least one card of text to the canvas.";
   } else {
     if (d.prompt.trim().length < 10) e.prompt = "Write the question out in full.";
     const filled = d.choices.filter((c) => c.trim());

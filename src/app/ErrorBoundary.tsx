@@ -21,7 +21,7 @@ export class ErrorBoundary extends Component<
   render() {
     if (!this.state.error) return this.props.children;
     return (
-      <div className="piece p-6">
+      <div className="card p-6">
         <h1 className="font-display text-2xl font-semibold">This screen fell over</h1>
         <p className="text-sm text-soft font-semibold mt-2">
           Something on this page hit a value it did not expect. The rest of the app is fine —
@@ -32,7 +32,7 @@ export class ErrorBoundary extends Component<
         </p>
         <button
           onClick={() => { this.setState({ error: null }); this.props.onReset?.(); }}
-          className="piece press w-full mt-5 py-3.5 font-display text-lg font-semibold bg-pop">
+          className="cut tap w-full mt-5 py-3.5 font-display text-lg font-semibold cut-petal">
           Try again
         </button>
       </div>

@@ -32,11 +32,11 @@ export function Board({ game, canFlip, width, onFlip }: {
             animate={{ scale: pair ? 1.06 : 1 }}
             transition={SPRING}
             aria-label={shown ? `${FACES[face]}${owner ? ", claimed" : ""}` : `Tile ${i + 1}, face down`}
-            className={`piece press aspect-square grid place-items-center leading-none
+            className={`cut tap aspect-square grid place-items-center leading-none
               ${width ? "" : "text-[30px]"}
               disabled:opacity-100
-              ${owner === "x" ? "bg-picto/25" : owner === "o" ? "bg-trivia/25"
-                : shown ? "bg-pop" : "bg-surface"}`}>
+              ${owner === "x" ? "bg-ember/25" : owner === "o" ? "bg-sky/25"
+                : shown ? "cut-petal" : "bg-board"}`}>
             <motion.span
               // The flip itself, rather than the face simply appearing: turning
               // a tile over is the entire verb of this game.

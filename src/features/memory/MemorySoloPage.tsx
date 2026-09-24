@@ -20,7 +20,7 @@ export function MemorySoloPage() {
       engine={MEMORY}
       title="Memory Match"
       challenge="none"
-      glyphs={{ x: "◆", o: "●" }}
+      glyphs={{ x: "tile", o: "disc" }}
       art={{ hero: () => memoryArt("MEMORY MATCH") }}
       // Pairs, not games won: it is the number you are playing for.
       score={(g) => ({ x: scoreOf(g, "x"), o: scoreOf(g, "o") })}

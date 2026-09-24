@@ -12,6 +12,7 @@ exits 0. `--list` prints every hit as file:line. Spec: project docs boredgame/BR
 | Date | Old-look hits | Requirements met | Commit |
 |---|---|---|---|
 | 2026-09-24 | 1115 | 0/19 | fence added |
+| 2026-09-24 | 82 | 8/19 | tokens, type, primitives, sky clock, mascot, tiles, badges, icons, pieces |
 
 ## Verified working
 

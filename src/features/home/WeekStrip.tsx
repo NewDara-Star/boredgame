@@ -43,15 +43,15 @@ export function WeekStrip({ streak, lastPlayed }: { streak: number; lastPlayed: 
           initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
           transition={{ ...SPRING, delay: i * 0.035 }}
           className={`flex-1 rounded-2xl border-[2.5px] border-ink py-2 text-center
-            ${d.played ? "bg-pop" : d.isToday ? "bg-surface" : "bg-sand/60"}`}>
-          <span className="block text-[12px] font-black uppercase tracking-wide text-soft">
+            ${d.played ? "bg-petal" : d.isToday ? "bg-board" : "bg-mist/60"}`}>
+          <span className="block text-[12px] font-black text-soft">
             {d.label}
           </span>
           <span className="block font-display text-[17px] font-semibold tabular-nums leading-tight">
             {d.date}
           </span>
           <span className={`block h-1.5 w-1.5 rounded-full mx-auto mt-1
-            ${d.played ? "bg-ink" : d.isToday ? "bg-hot" : "bg-transparent"}`} />
+            ${d.played ? "bg-ink" : d.isToday ? "bg-petal" : "bg-transparent"}`} />
         </motion.div>
       ))}
     </div>

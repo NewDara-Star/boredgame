@@ -71,12 +71,12 @@ export function AdminPage() {
   return (
     <div className="space-y-5">
       <h1 className="text-2xl font-bold">Add a puzzle</h1>
-      {offline && <p className="text-xs text-picto">No database connected — you can design and preview here, but not publish.</p>}
+      {offline && <p className="text-xs text-ember">No database connected — you can design and preview here, but not publish.</p>}
 
       <div className="flex gap-2">
         {(["picto", "trivia"] as const).map((g) => (
           <button key={g} onClick={() => set("game", g)}
-            className={`px-4 py-2 rounded-xl text-sm font-semibold border ${d.game === g ? "bg-sand border-ink" : "border-ink text-soft"}`}>
+            className={`px-4 py-2 rounded-xl text-sm font-semibold border ${d.game === g ? "bg-mist border-ink" : "border-ink text-soft"}`}>
             {g === "picto" ? "Picto Phrase" : "Star Trivia"}
           </button>
         ))}
@@ -87,7 +87,7 @@ export function AdminPage() {
           <div className="flex gap-2">
             {(["text", "image"] as const).map((rd) => (
               <button key={rd} onClick={() => set("render", rd)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold border ${d.render === rd ? "bg-sand border-ink" : "border-ink text-soft"}`}>
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold border ${d.render === rd ? "bg-mist border-ink" : "border-ink text-soft"}`}>
                 {rd === "text" ? "Drawn from text" : "Uploaded image"}
               </button>
             ))}
@@ -98,7 +98,7 @@ export function AdminPage() {
               <Card className="aspect-square max-h-72 mx-auto w-full grid place-items-center p-6 text-ink">
                 <PictoRenderer spec={{ items: d.items.filter((i) => i.text.trim()) }} />
               </Card>
-              <p className="text-[12px] uppercase tracking-widest text-soft">Canvas is 100 × 100</p>
+              <p className="text-[12px] text-soft">Canvas is 100 × 100</p>
               {d.items.map((it, i) => (
                 <div key={i} className="grid grid-cols-[1fr_56px_56px_56px_56px_auto] gap-1.5 items-center">
                   <Input value={it.text} placeholder="text"
@@ -108,13 +108,13 @@ export function AdminPage() {
                       onChange={(e) => set("items", d.items.map((x, j) => j === i ? { ...x, [f]: Number(e.target.value) } : x))} />
                   ))}
                   <button onClick={() => set("items", d.items.filter((_, j) => j !== i))}
-                    className="text-bad px-2" aria-label="Remove">×</button>
+                    className="text-ember px-2" aria-label="Remove">×</button>
                 </div>
               ))}
               <Button variant="ghost" onClick={() => set("items", [...d.items, { text: "", x: 50, y: 50, size: 15 }])}>
                 + Add text
               </Button>
-              {touched && errors.items && <p className="text-xs text-bad">{errors.items}</p>}
+              {touched && errors.items && <p className="text-xs text-ember">{errors.items}</p>}
             </>
           ) : (
             <Field label="Image URL" error={touched ? errors.imageUrl : null}>
@@ -134,7 +134,7 @@ export function AdminPage() {
               {d.choices.map((c, i) => (
                 <div key={i} className="flex items-center gap-2">
                   <input type="radio" name="answer" checked={!!c && d.answer === c}
-                    onChange={() => set("answer", c)} className="accent-[var(--color-picto)]" />
+                    onChange={() => set("answer", c)} className="accent-[var(--color-ember)]" />
                   <Input value={c} placeholder={`Option ${i + 1}`}
                     onChange={(e) => set("choices", d.choices.map((x, j) => j === i ? e.target.value : x))} />
                 </div>
@@ -149,7 +149,7 @@ export function AdminPage() {
           <Input value={d.answer} onChange={(e) => set("answer", e.target.value)} placeholder="The phrase" />
         </Field>
       )}
-      {d.game === "trivia" && touched && errors.answer && <p className="text-xs text-bad">{errors.answer}</p>}
+      {d.game === "trivia" && touched && errors.answer && <p className="text-xs text-ember">{errors.answer}</p>}
 
       <Field label="Description hint" error={touched ? errors.altHint : null}>
         <Input value={d.altHint} onChange={(e) => set("altHint", e.target.value)} placeholder="What the player should notice" />
@@ -161,13 +161,13 @@ export function AdminPage() {
       <div className="grid grid-cols-2 gap-3">
         <Field label="Difficulty">
           <select value={d.difficulty} onChange={(e) => set("difficulty", e.target.value as DraftPuzzle["difficulty"])}
-            className="w-full bg-surface border-[2.5px] border-ink rounded-2xl px-3 py-2.5 text-ink">
+            className="w-full bg-board border-[2.5px] border-ink rounded-2xl px-3 py-2.5 text-ink">
             <option value="easy">Easy</option><option value="medium">Medium</option><option value="hard">Hard</option>
           </select>
         </Field>
         <Field label="Category" error={touched ? errors.category : null}>
           <select value={d.category} onChange={(e) => set("category", e.target.value)}
-            className="w-full bg-surface border-[2.5px] border-ink rounded-2xl px-3 py-2.5 text-ink">
+            className="w-full bg-board border-[2.5px] border-ink rounded-2xl px-3 py-2.5 text-ink">
             <option value="">Select…</option>
             {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
           </select>
@@ -175,11 +175,11 @@ export function AdminPage() {
       </div>
 
       {touched && !ok && (
-        <p className="text-xs text-bad">
+        <p className="text-xs text-ember">
           {Object.keys(errors).length} field{Object.keys(errors).length > 1 ? "s" : ""} need attention before this can be published.
         </p>
       )}
-      {msg && <p className="text-xs text-good">{msg}</p>}
+      {msg && <p className="text-xs text-leaf">{msg}</p>}
 
       <Button onClick={() => void save()} disabled={saving} className="w-full">
         {saving ? "Publishing…" : "Publish puzzle"}

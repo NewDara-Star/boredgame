@@ -34,7 +34,7 @@ export function AddFriendPage() {
   if (added) {
     return (
       <div className="space-y-4 text-center">
-        <p className="text-[12px] font-black uppercase tracking-widest text-soft">Friend added</p>
+        <p className="text-[12px] font-black text-soft">Friend added</p>
         <h1 className="font-display text-[30px] leading-none font-semibold">{added} is on your list</h1>
         <p className="text-sm text-soft font-semibold">
           Head to Head-to-head and tap Play beside them any time.
@@ -48,7 +48,7 @@ export function AddFriendPage() {
     return (
       <div className="space-y-4">
         <div>
-          <p className="text-[12px] font-black uppercase tracking-widest text-soft">You've been invited</p>
+          <p className="text-[12px] font-black text-soft">You've been invited</p>
           <h1 className="font-display text-[30px] leading-none font-semibold mt-1">Add a friend</h1>
           <p className="text-sm text-soft font-semibold mt-2">
             Pick a name and they're on your list — you can play each other with one tap, no codes.
@@ -69,7 +69,7 @@ export function AddFriendPage() {
 
   return (
     <div className="space-y-4 text-center">
-      <p className="text-[12px] font-black uppercase tracking-widest text-soft">Friend request</p>
+      <p className="text-[12px] font-black text-soft">Friend request</p>
       <h1 className="font-display text-[30px] leading-none font-semibold">Add this friend?</h1>
       <p className="text-sm text-soft font-semibold">
         You'll be able to invite each other to a game with one tap.
@@ -79,7 +79,7 @@ export function AddFriendPage() {
       </Button>
       <Note>{error}</Note>
       <button onClick={() => nav("/")}
-        className="block mx-auto text-[13px] font-black uppercase tracking-wider text-soft underline underline-offset-4">
+        className="block mx-auto text-[13px] font-black text-soft underline underline-offset-4">
         Not now
       </button>
     </div>

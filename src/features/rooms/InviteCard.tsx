@@ -28,8 +28,8 @@ export function InviteCard({ code, waiting }: { code: string; waiting: boolean }
 
   return (
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={SPRING}
-      className="piece p-5 bg-hot text-surface">
-      <p className="text-[12px] font-black uppercase tracking-widest opacity-80">
+      className="card p-5 bg-petal text-ink">
+      <p className="text-[12px] font-black opacity-80">
         {waiting ? "Waiting for a second player" : "Invite someone else"}
       </p>
 
@@ -38,13 +38,13 @@ export function InviteCard({ code, waiting }: { code: string; waiting: boolean }
           try { await navigator.clipboard.writeText(code); flash("Code copied"); }
           catch { flash("Select it to copy"); }
         }}
-        className="piece press w-full mt-3 py-3 bg-surface text-ink
+        className="card tap w-full mt-3 py-3 bg-board text-ink
           font-display text-[30px] font-semibold tracking-[0.28em] leading-none">
         {code}
       </button>
 
       <button onClick={() => void share()}
-        className="piece press w-full mt-2.5 py-3.5 bg-pop text-ink font-display text-lg font-semibold">
+        className="cut tap w-full mt-2.5 py-3.5 cut-petal text-ink font-display text-lg font-semibold">
         {said ?? "Send the invite link"}
       </button>
 

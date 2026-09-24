@@ -50,7 +50,7 @@ export function PushOnboarding() {
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
       <button aria-label="Close" onClick={close}
         className="absolute inset-0 bg-ink/40" />
-      <div className="relative w-full sm:max-w-md piece bg-paper p-5 m-0 sm:m-4
+      <div className="relative w-full sm:max-w-md card bg-ground p-5 m-0 sm:m-4
         rounded-t-3xl sm:rounded-3xl space-y-3">
         <p className="font-display text-[22px] font-semibold leading-tight">
           Never miss a game
@@ -69,18 +69,18 @@ export function PushOnboarding() {
               <li>Open BoredGame from the new icon, then come back here to turn it on.</li>
             </ol>
             <button onClick={close}
-              className="piece press w-full bg-ink text-paper px-4 py-3 font-display font-semibold mt-1">
+              className="cut tap w-full cut-ink text-ground px-4 py-3 font-display font-semibold mt-1">
               Got it
             </button>
           </div>
         ) : (
           <div className="space-y-2">
             <button onClick={() => void enable()} disabled={busy}
-              className="piece press w-full bg-hot text-paper px-4 py-3 font-display font-semibold">
+              className="cut tap w-full cut-petal text-ink px-4 py-3 font-display font-semibold">
               {busy ? "Turning on…" : "Turn on notifications"}
             </button>
             <button onClick={close}
-              className="w-full py-2 text-[13px] font-black uppercase tracking-wider text-ink/50">
+              className="w-full py-2 text-[13px] font-black text-ink/50">
               Not now
             </button>
           </div>

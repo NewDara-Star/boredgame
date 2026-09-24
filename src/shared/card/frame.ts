@@ -44,7 +44,7 @@ export function rounded(c: Ctx, x: number, y: number, w: number, h: number, r: n
   c.closePath();
 }
 
-/** Outline plus a hard offset shadow — the same primitive as `.piece` in CSS. */
+/** Outline plus a hard offset shadow — the same primitive as `.card` in CSS. */
 export function piece(c: Ctx, x: number, y: number, w: number, h: number,
                       r: number, fill: string, drop = 14, line = 8) {
   c.fillStyle = INK;
@@ -85,7 +85,7 @@ export function star(c: Ctx, cx: number, cy: number, r: number, fill: string) {
   c.closePath(); c.fill(); c.restore();
 }
 
-/** A colour at some opacity over white — the `bg-picto/25` tints, in canvas. */
+/** A colour at some opacity over white — the `bg-ember/25` tints, in canvas. */
 export function tint(hex: string, alpha: number) {
   const n = parseInt(hex.slice(1), 16);
   const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;

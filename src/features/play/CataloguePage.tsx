@@ -31,7 +31,7 @@ export function CataloguePage() {
       {GAMES.length > SEARCH_AT && (
         <motion.input variants={riseIn} value={q} onChange={(e) => setQ(e.target.value)}
           placeholder="Search games" type="search"
-          className="w-full mt-4 bg-surface border-[2.5px] border-ink rounded-2xl px-4 py-3
+          className="w-full mt-4 bg-board border-[2.5px] border-ink rounded-2xl px-4 py-3
             font-bold text-ink placeholder:text-soft/60 outline-none
             focus:shadow-[0_5px_0_var(--color-ink)] transition-shadow" />
       )}
@@ -44,12 +44,11 @@ export function CataloguePage() {
           const live = g.bank ? counts[g.bank] ?? 0 : null;
           const playable = live === null || live > 0;
           const card = (
-            <div className={`piece ${playable ? "press" : ""} p-4 h-full flex items-center gap-4
+            <div className={`card ${playable ? "tap" : ""} p-4 h-full flex items-center gap-4
               ${playable ? "" : "opacity-55"}`}>
               <g.Art size={62} />
               <div className="min-w-0">
-                <span className={`inline-block whitespace-nowrap text-[12px] font-black uppercase
-                  tracking-wide rounded-full px-2 py-0.5 ${g.chip}`}>{g.badge}</span>
+                <span className={`inline-block whitespace-nowrap text-[12px] font-black rounded-full px-2 py-0.5 ${g.chip}`}>{g.badge}</span>
                 <h2 className="font-display text-xl font-semibold mt-1">{g.name}</h2>
                 <p className="text-[13px] text-soft font-semibold leading-snug">{g.tagline}</p>
                 <p className="text-[13px] font-bold text-soft/70 mt-1 tabular-nums">

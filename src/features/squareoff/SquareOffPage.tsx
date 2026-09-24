@@ -14,5 +14,5 @@ const art = { hero: () => SQUARE_OFF_ART };
  */
 export function SquareOffPage() {
   return <BoardSoloPage engine={TTT} title="Square Off" board={gridBoard(Board)}
-    glyphs={{ x: "✕", o: "◯" }} art={art} />;
+    glyphs={{ x: "cross", o: "ring" }} art={art} />;
 }

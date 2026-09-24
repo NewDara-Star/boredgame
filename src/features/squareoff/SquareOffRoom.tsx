@@ -90,7 +90,7 @@ export function SquareOffRoom({
           scores={{ x: scoreOf("x"), o: scoreOf("o") }}
           active={g.phase === "asking" ? g.answerer : g.turn}
           dimmed={g.phase === "over"}
-          glyph={(m: Mark) => (m === "x" ? "✕" : "◯")} />
+          glyph={(m: Mark) => (m === "x" ? "cross" : "ring")} />
       </PlayRow>
 
       <PlayBoard min={78}>

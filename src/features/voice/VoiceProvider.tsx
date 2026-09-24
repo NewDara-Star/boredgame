@@ -183,21 +183,21 @@ export function VoiceProvider({ children }: { children: React.ReactNode }) {
       {showBar && (
         <div className="fixed inset-x-0 z-40 flex justify-center px-3
           bottom-[calc(62px+env(safe-area-inset-bottom)+8px)] sm:bottom-4">
-          <div className="piece bg-ink text-paper w-full max-w-md p-2 flex items-center gap-2">
+          <div className="card bg-ink text-ground w-full max-w-md p-2 flex items-center gap-2">
             <button onClick={() => nav(`/rooms/${target!.code}`)}
               className="min-w-0 flex-1 text-left px-2 py-1">
-              <span className="block text-[11px] font-black uppercase tracking-wider text-paper/50">
+              <span className="block text-[11px] font-black text-ground/50">
                 {state === "live" ? "On call — tap to return" : "Connecting…"}
               </span>
               <span className="block text-[14px] font-bold truncate">{target!.peerName}</span>
             </button>
             <button onClick={toggleMute}
-              className={`piece press px-3 min-h-[38px] inline-flex items-center font-display font-semibold text-[13px] ${
-                muted ? "bg-bad text-surface" : "bg-acid text-ink"}`}>
+              className={`cut tap px-3 min-h-[38px] inline-flex items-center font-display font-semibold text-[13px] ${
+                muted ? "cut-ember text-ink" : "bg-leaf-hi text-ink"}`}>
               {muted ? "Unmute" : "Mute"}
             </button>
             <button onClick={hangup}
-              className="piece press px-3 min-h-[38px] inline-flex items-center bg-hot text-paper font-display font-semibold text-[13px]">
+              className="cut tap px-3 min-h-[38px] inline-flex items-center cut-petal text-ink font-display font-semibold text-[13px]">
               Leave
             </button>
           </div>

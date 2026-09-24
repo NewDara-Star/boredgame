@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { AnswerMark } from "@/shared/brand/Pieces";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "@/app/providers/AuthProvider";
 import { useRoom, useMyRooms, createRoom } from "./useRoom";
@@ -111,7 +112,7 @@ export function RoomsPage() {
       return (
         <div className="space-y-4">
           <div>
-            <p className="text-[12px] font-black uppercase tracking-widest text-soft">
+            <p className="text-[12px] font-black text-soft">
               You've been invited
             </p>
             <h1 className="font-display text-[30px] leading-none font-semibold mt-1">
@@ -132,7 +133,7 @@ export function RoomsPage() {
           </div>
           <GuestCard note="Type a name and you're in the room. No password." />
           <details className="group">
-            <summary className="text-[13px] font-black uppercase tracking-wider text-soft
+            <summary className="text-[13px] font-black text-soft
               underline underline-offset-4 cursor-pointer list-none text-center">
               I have an account
             </summary>
@@ -149,7 +150,7 @@ export function RoomsPage() {
         </p>
         <GuestCard />
         <details>
-          <summary className="text-[13px] font-black uppercase tracking-wider text-soft
+          <summary className="text-[13px] font-black text-soft
             underline underline-offset-4 cursor-pointer list-none text-center">
             I have an account
           </summary>
@@ -171,12 +172,12 @@ export function RoomsPage() {
 
         {myRooms.length > 0 && (
           <div className="space-y-2">
-            <p className="text-[12px] font-black uppercase tracking-widest text-soft">Rooms you're in</p>
+            <p className="text-[12px] font-black text-soft">Rooms you're in</p>
             {myRooms.map((r) => (
               <button key={r.id} onClick={() => nav(`/rooms/${r.code}`)}
-                className="piece press w-full flex items-center justify-between px-4 py-3.5 bg-surface text-left">
+                className="card tap w-full flex items-center justify-between px-4 py-3.5 bg-board text-left">
                 <span className="font-display text-lg font-semibold tracking-[0.2em]">{r.code}</span>
-                <span className="text-[12px] font-black uppercase tracking-wider text-soft">
+                <span className="text-[12px] font-black text-soft">
                   {r.status === "playing" ? "in progress" : "waiting"} · rejoin →
                 </span>
               </button>
@@ -220,7 +221,7 @@ export function RoomsPage() {
           {waiting ? "Your room" : (ROOM_GAMES.find((g) => g.room.mode === room.mode
             && (g.bank === null || g.bank === room.game))?.name ?? "Race")}
         </p>
-        <p className="text-xs text-soft uppercase tracking-widest font-bold">{room.status}</p>
+        <p className="text-xs text-soft font-bold">{room.status}</p>
       </div>
 
       <Note>{error ?? startError}</Note>
@@ -287,7 +288,7 @@ export function RoomsPage() {
 
       {iAmIn && (
         <button onClick={async () => { await leave(); nav("/rooms"); }}
-          className="block mx-auto text-[13px] font-black uppercase tracking-wider
+          className="block mx-auto text-[13px] font-black
             text-soft underline underline-offset-4 pt-2">
           Leave this room
         </button>
@@ -297,8 +298,8 @@ export function RoomsPage() {
         const ranked = [...players].sort((a, b) => b.score - a.score);
         const drawn = ranked.length > 1 && ranked[0].score === ranked[1].score;
         return (
-          <div className={`piece p-6 text-center ${drawn ? "bg-sand" : "bg-good text-surface"}`}>
-            <p className="text-[12px] font-black uppercase tracking-widest opacity-70">Match over</p>
+          <div className={`card p-6 text-center ${drawn ? "bg-mist" : "bg-leaf text-ink"}`}>
+            <p className="text-[12px] font-black opacity-70">Match over</p>
             <p className="font-display text-3xl font-semibold mt-1">
               {drawn ? "All square" : `${ranked[0]?.username ?? "Nobody"} takes it`}
             </p>
@@ -306,7 +307,7 @@ export function RoomsPage() {
               {ranked.map((p) => p.score).join(" — ")}
             </p>
             <button onClick={async () => { await leave(); nav("/rooms"); }}
-              className="piece press w-full mt-5 py-3.5 font-display text-lg font-semibold bg-surface text-ink">
+              className="card tap w-full mt-5 py-3.5 font-display text-lg font-semibold bg-board text-ink">
               New room
             </button>
           </div>
@@ -317,12 +318,12 @@ export function RoomsPage() {
         <>
           <div className="flex gap-2 flex-wrap">
             {players.map((p) => (
-              <span key={p.user_id} className="piece text-sm px-3 py-1.5">
-                {p.username} <b className="text-picto tabular-nums ml-1">{p.score}</b>
+              <span key={p.user_id} className="card text-sm px-3 py-1.5">
+                {p.username} <b className="text-ember tabular-nums ml-1">{p.score}</b>
               </span>
             ))}
           </div>
-          <p className="text-[12px] uppercase tracking-widest text-soft font-black">
+          <p className="text-[12px] text-soft font-black">
             Round {round.round_no} of {room.best_of}
           </p>
           <Card className="aspect-square max-h-[44vh] mx-auto w-full grid place-items-center p-6 text-ink">
@@ -336,17 +337,15 @@ export function RoomsPage() {
               {currentPuzzle.choices.map((opt, i) => (
                 <button key={opt}
                   onClick={() => void claimRound(opt)}
-                  className="piece press flex items-center gap-3 text-left px-4 py-4 bg-surface">
-                  <span aria-hidden style={{ color: ["#FF5A1F","#2B4BFF","#FFD028","#10A04E"][i % 4] }}>
-                    {["▲","◆","●","■"][i % 4]}
-                  </span>
+                  className="card tap flex items-center gap-3 text-left px-4 py-4 bg-board">
+                  <AnswerMark index={i} />
                   <span className="text-[15px] font-bold">{opt}</span>
                 </button>
               ))}
             </div>
           ) : won ? (
             <div className="text-center">
-              <p className={`text-sm font-bold ${won === user.id ? "text-good" : "text-bad"}`}>
+              <p className={`text-sm font-bold ${won === user.id ? "text-leaf" : "text-ember"}`}>
                 {won === user.id ? "You took it" : `${players.find((p) => p.user_id === won)?.username ?? "They"} took it`}
               </p>
               <p className="text-lg font-semibold mt-1">{currentPuzzle.answer}</p>

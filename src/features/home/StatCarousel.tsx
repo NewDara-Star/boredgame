@@ -37,8 +37,8 @@ export function StatCarousel({ stats }: { stats: Stat[] }) {
       <Carousel>
         {stats.map((s) => (
           <motion.div key={s.label} variants={riseIn}
-            className={`piece snap-start shrink-0 w-[148px] p-4 flex flex-col ${s.bg} ${s.fg ?? ""}`}>
-            <span className="block text-[12px] font-black uppercase tracking-widest opacity-70">
+            className={`card snap-start shrink-0 w-[148px] p-4 flex flex-col ${s.bg} ${s.fg ?? ""}`}>
+            <span className="block text-[12px] font-black opacity-70">
               {s.label}
             </span>
 

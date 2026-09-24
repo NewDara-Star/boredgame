@@ -12,13 +12,13 @@ export default defineConfig({
       // A new deploy's service worker takes over on the next load -- no "update
       // available" prompt, no stale app served from cache after a push.
       registerType: "autoUpdate",
-      includeAssets: ["apple-touch-icon.png"],
+      includeAssets: ["apple-touch-icon.png", "favicon.svg"],
       manifest: {
         name: "BoredGame",
         short_name: "BoredGame",
         description: "Quick head-to-head word and board games -- trivia, picto, ball sort and more.",
-        theme_color: "#FF2E88",
-        background_color: "#FBF4E6",
+        theme_color: "#1F9BFF", // brand-ok: manifest needs literals; sky base
+        background_color: "#EAF5FF", // brand-ok: ground
         display: "standalone",
         start_url: "/",
         scope: "/",

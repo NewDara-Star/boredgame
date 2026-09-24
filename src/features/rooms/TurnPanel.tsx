@@ -56,12 +56,12 @@ export function TurnPanel({
   const moveOn = advanceOwner !== null && (
     advanceOwner === myMark ? (
       <button onClick={onAdvanceNow}
-        className="piece press w-full py-3.5 font-display text-lg font-semibold bg-ink text-paper">
+        className="cut tap w-full py-3.5 font-display text-lg font-semibold cut-ink text-ground">
         {nextLabel}
       </button>
     ) : stall?.action === "advance" && stall.mark === myMark ? (
       <button onClick={onForceAdvance}
-        className="piece press w-full py-3.5 font-display text-lg font-semibold bg-ink text-paper">
+        className="cut tap w-full py-3.5 font-display text-lg font-semibold cut-ink text-ground">
         Move it on
       </button>
     ) : null

@@ -19,7 +19,7 @@ export function GuestCard({ note }: { note?: string }) {
   const [error, setError] = useState<string | null>(null);
 
   return (
-    <div className="piece bg-pop p-5">
+    <div className="card bg-petal p-5">
       <h2 className="font-display text-[22px] leading-tight font-semibold">Just play</h2>
       <p className="text-sm font-semibold mt-1 opacity-80">
         {note ?? "Type a name and you're in. No password, nothing to remember."}
@@ -63,7 +63,7 @@ export function ClaimCard() {
   if (!open) {
     return (
       <button onClick={() => setOpen(true)}
-        className="piece press w-full bg-sand px-4 py-3 text-left">
+        className="card tap w-full bg-mist px-4 py-3 text-left">
         <span className="block font-display text-base font-semibold">Keep this name</span>
         <span className="block text-[12px] font-bold text-soft mt-0.5">
           Add a password and your games, streak and rank stick around.
@@ -73,7 +73,7 @@ export function ClaimCard() {
   }
 
   return (
-    <form className="piece p-5 space-y-3"
+    <form className="card p-5 space-y-3"
       onSubmit={async (e) => {
         e.preventDefault();
         setError(null); setBusy(true);

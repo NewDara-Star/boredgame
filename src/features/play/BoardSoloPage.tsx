@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import type { PieceKind } from "@/shared/brand/Pieces";
 import { Dealing } from "@/shared/ui/Note";
 import { motion } from "framer-motion";
 import { popIn } from "@/shared/ui/motion";
@@ -54,7 +55,7 @@ export function BoardSoloPage<G extends BoardState & { target: number | null; li
   board: DrawBoard<G>;
   /** the board's width over its height, so it can be fitted to the space left */
   ratio?: number;
-  glyphs: Record<Mark, string>;
+  glyphs: Record<Mark, PieceKind>;
   /** the result card's picture: the game draws its final board on it */
   art?: { hero: (g: G) => Hero; glyph?: Glyph; caption?: (g: G) => string | undefined };
   plain?: boolean;
@@ -99,7 +100,7 @@ export function BoardSoloPage<G extends BoardState & { target: number | null; li
         card={card}
         alt={`${title} session: you ${s.wins.x}, the bot ${s.wins.o}`}>
         <button onClick={s.newSession}
-          className="piece press py-3.5 font-display text-lg font-semibold bg-surface">
+          className="card tap py-3.5 font-display text-lg font-semibold bg-board">
           New session
         </button>
       </ResultScreen>
@@ -138,9 +139,9 @@ export function BoardSoloPage<G extends BoardState & { target: number | null; li
 
       {over ? (
         <PlayRow>
-        <motion.div variants={popIn} initial="hidden" animate="show" className={`piece p-4 text-center
-          ${g.winner === "x" ? "bg-good text-surface"
-            : g.winner === "o" ? "bg-bad text-surface" : "bg-sand"}`}>
+        <motion.div variants={popIn} initial="hidden" animate="show" className={`card p-4 text-center
+          ${g.winner === "x" ? "bg-leaf text-ink"
+            : g.winner === "o" ? "bg-ember text-ink" : "bg-mist"}`}>
           <p className="font-display text-2xl font-semibold">
             {g.winner === "x" ? "You win" : g.winner === "o" ? "The bot wins" : "Draw"}
             {s.results.length > 0 && (
@@ -151,11 +152,11 @@ export function BoardSoloPage<G extends BoardState & { target: number | null; li
           </p>
           <div className="grid grid-cols-2 gap-2.5 mt-3">
             <button onClick={s.restart}
-              className="piece press py-3 font-display text-lg font-semibold bg-surface text-ink">
+              className="card tap py-3 font-display text-lg font-semibold bg-board text-ink">
               Play again
             </button>
             <button onClick={s.endSession}
-              className="piece press py-3 font-display text-lg font-semibold bg-surface text-ink">
+              className="card tap py-3 font-display text-lg font-semibold bg-board text-ink">
               End session
             </button>
           </div>

@@ -12,5 +12,5 @@ const art = { hero: () => CATAPULT_SQUARES_ART };
     they have to spend their own turn on it. */
 export function SquareOffCatapultPage() {
   return <BoardSoloPage engine={TTT} title="Catapult Squares" board={gridBoard(Board)}
-    glyphs={{ x: "✕", o: "◯" }} challenge="catapult" art={art} />;
+    glyphs={{ x: "cross", o: "ring" }} challenge="catapult" art={art} />;
 }

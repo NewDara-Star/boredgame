@@ -16,9 +16,9 @@ import { AuthCard } from "./AuthCard";
 function Stat({ value, label, accent = "" }:
   { value: string | number; label: string; accent?: string }) {
   return (
-    <motion.div variants={popIn} className={`piece p-3.5 ${accent}`}>
+    <motion.div variants={popIn} className={`card p-3.5 ${accent}`}>
       <b className="block font-display text-[28px] leading-none font-semibold tabular-nums">{value}</b>
-      <span className="block text-[12px] font-black uppercase tracking-widest text-soft mt-1.5">
+      <span className="block text-[12px] font-black text-soft mt-1.5">
         {label}
       </span>
     </motion.div>
@@ -56,7 +56,7 @@ function GuestView({ authError }: { authError: string | null }) {
   return (
     <motion.div variants={stagger(0.07)} initial="hidden" animate="show" className="space-y-4">
       <motion.div variants={riseIn}>
-        <p className="text-[12px] font-black uppercase tracking-widest text-soft">Account</p>
+        <p className="text-[12px] font-black text-soft">Account</p>
         <h1 className="font-display text-[32px] leading-none font-semibold mt-1">
           {played ? "Keep your progress" : "Save your progress"}
         </h1>
@@ -74,7 +74,7 @@ function GuestView({ authError }: { authError: string | null }) {
 
       {/* Shown as a small aside, not as a dashboard — it is what you stand to keep,
           not a profile you already have. */}
-      <motion.div variants={riseIn} className="piece p-4 flex items-center gap-3">
+      <motion.div variants={riseIn} className="card p-4 flex items-center gap-3">
         <RankBadge rank={current.key} size={38} />
         <div className="min-w-0 flex-1">
           <p className="text-[13px] font-bold">
@@ -124,29 +124,29 @@ function MemberView() {
         <RankBadge rank={current.key} size={54} animate className="shrink-0" />
       </motion.section>
 
-      <motion.div variants={riseIn} className="piece p-4">
+      <motion.div variants={riseIn} className="card p-4">
         <div className="flex items-baseline justify-between gap-3">
           <span className="font-display text-xl font-semibold">{current.name}</span>
           <span className="text-xs font-bold text-soft tabular-nums">
             {next ? `${next.min - p.answered} to ${next.name}` : "Top rank"}
           </span>
         </div>
-        <div className="h-3.5 bg-sand rounded-full mt-2.5 overflow-hidden border-2 border-ink">
-          <motion.div className="h-full bg-pop"
+        <div className="h-3.5 bg-mist rounded-full mt-2.5 overflow-hidden border-2 border-ink">
+          <motion.div className="h-full bg-petal"
             initial={{ width: 0 }} animate={{ width: `${Math.round(progress * 100)}%` }}
             transition={{ type: "spring", stiffness: 90, damping: 18, delay: 0.3 }} />
         </div>
       </motion.div>
 
       <motion.section variants={stagger(0.05)} className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-        <Stat value={p.streak} label="Day streak" accent={p.streak > 0 ? "bg-pop" : ""} />
+        <Stat value={p.streak} label="Day streak" accent={p.streak > 0 ? "bg-petal" : ""} />
         <Stat value={p.answered} label="Answered" />
         <Stat value={p.answered ? Math.round((p.correct / p.answered) * 100) + "%" : "—"} label="Accuracy" />
         <Stat value={best || "—"} label="Best round" />
       </motion.section>
 
       <section>
-        <p className="text-[12px] font-black uppercase tracking-widest text-soft mb-2.5">
+        <p className="text-[12px] font-black text-soft mb-2.5">
           Streaks · best run {p.bestStreak} {p.bestStreak === 1 ? "day" : "days"}
         </p>
         <motion.div variants={stagger(0.04)} className="grid grid-cols-6 gap-2">
@@ -154,12 +154,12 @@ function MemberView() {
             const earned = p.bestStreak >= m.days;
             return (
               <motion.div key={m.days} variants={popIn} title={m.name}
-                className={`piece grid place-items-center aspect-square
-                  ${earned ? "bg-pop" : "bg-sand opacity-45"}`}>
+                className={`card grid place-items-center aspect-square
+                  ${earned ? "bg-petal" : "bg-mist opacity-45"}`}>
                 <span className="font-display text-lg font-semibold tabular-nums leading-none">{m.days}</span>
                 {/* No tracking: at 12px in a 53px square the trailing letter-space put
                     "DAY" exactly on the boundary. Size is what has to be legible. */}
-                <span className="text-[12px] font-black uppercase text-soft">day</span>
+                <span className="text-[12px] font-black text-soft">day</span>
               </motion.div>
             );
           })}
@@ -167,7 +167,7 @@ function MemberView() {
       </section>
 
       <section>
-        <p className="text-[12px] font-black uppercase tracking-widest text-soft mb-2.5">
+        <p className="text-[12px] font-black text-soft mb-2.5">
           Ranks · {RANKS.filter((r) => p.answered >= r.min).length} of {RANKS.length}
         </p>
         <motion.div variants={stagger(0.035)} className="grid grid-cols-3 sm:grid-cols-5 gap-2.5">
@@ -175,13 +175,13 @@ function MemberView() {
             const locked = p.answered < rk.min;
             return (
               <motion.div key={rk.key} variants={popIn}
-                className={`piece px-2 py-3 text-center ${locked ? "bg-sand" : ""}`}>
+                className={`card px-2 py-3 text-center ${locked ? "bg-mist" : ""}`}>
                 <div className="h-10 grid place-items-center">
                   <RankBadge rank={rk.key} size={36} locked={locked} />
                 </div>
                 {/* No tracking and a hard break: "Accomplished" next to "Advanced"
                     collided at phone width with letter-spacing applied. */}
-                <p className={`text-[12px] font-black uppercase mt-1.5 leading-[1.15] break-words
+                <p className={`text-[12px] font-black mt-1.5 leading-[1.15] break-words
                   ${locked ? "text-soft/60" : "text-ink"}`}>{rk.name}</p>
                 <p className="text-[12px] font-bold text-soft/60 tabular-nums leading-tight mt-0.5">
                   {locked ? `${rk.min - p.answered} to go` : "unlocked"}
@@ -193,8 +193,8 @@ function MemberView() {
       </section>
 
       <motion.section variants={riseIn}
-        className={`piece p-4 ${generated ? "bg-pop" : ""}`}>
-        <p className="text-[12px] font-black uppercase tracking-widest text-soft">Your name</p>
+        className={`card p-4 ${generated ? "bg-petal" : ""}`}>
+        <p className="text-[12px] font-black text-soft">Your name</p>
         <p className="text-[13px] font-semibold mt-1">
           {generated
             ? "This one was made up for you at signup. Pick something before anyone sees you on the leaderboard."
@@ -215,10 +215,10 @@ function MemberView() {
             {nameBusy ? "…" : nameMsg ?? "Save"}
           </Button>
         </form>
-        {nameErr && <p className="text-[12px] font-bold text-bad mt-2">{nameErr}</p>}
+        {nameErr && <p className="text-[12px] font-bold text-ember mt-2">{nameErr}</p>}
       </motion.section>
 
-      <section className="border-t-2 border-sand pt-6 space-y-4">
+      <section className="border-t-2 border-mist pt-6 space-y-4">
         <form className="space-y-3"
           onSubmit={async (e) => {
             e.preventDefault();
@@ -249,7 +249,7 @@ export function ProfilePage() {
 
   if (offline) {
     return (
-      <div className="piece p-6">
+      <div className="card p-6">
         <h1 className="font-display text-2xl font-semibold">No account needed yet</h1>
         <p className="text-sm text-soft font-semibold mt-2">
           There is no backend configured, so progress is saved in this browser only.

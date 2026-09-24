@@ -10,9 +10,9 @@ import { useLeaderboard, type Standing } from "./useLeaderboard";
 /** 2nd, 1st, 3rd — the order they stand in, not the order they finished. */
 const PODIUM_ORDER = [1, 0, 2];
 const PLINTH = [
-  { h: 96, bg: "bg-pop" },      // 1st
-  { h: 68, bg: "bg-sand" },     // 2nd
-  { h: 52, bg: "bg-surface" },  // 3rd
+  { h: 96, bg: "bg-petal" },      // 1st
+  { h: 68, bg: "bg-mist" },     // 2nd
+  { h: 52, bg: "bg-board" },  // 3rd
 ];
 
 function Podium({ top, meId }: { top: Standing[]; meId?: string }) {
@@ -33,14 +33,14 @@ function Podium({ top, meId }: { top: Standing[]; meId?: string }) {
               <Avatar id={p.id} name={p.username} size={first ? 60 : 48} />
             </motion.div>
             <p className={`mt-2 font-display font-semibold truncate px-1
-              ${first ? "text-[15px]" : "text-[13px]"} ${p.id === meId ? "text-picto" : ""}`}>
+              ${first ? "text-[15px]" : "text-[13px]"} ${p.id === meId ? "text-ember" : ""}`}>
               {p.username}
             </p>
             <p className="text-[13px] font-bold text-soft tabular-nums">{p.answered}</p>
             {/* The plinths are what make it a podium rather than three avatars in
                 a row, so they carry the numeral and the height difference. */}
             <motion.div
-              className={`piece ${PLINTH[i].bg} mt-2 grid place-items-center rounded-b-none`}
+              className={`card ${PLINTH[i].bg} mt-2 grid place-items-center rounded-b-none`}
               style={{ boxShadow: "none" }}
               initial={{ height: 0 }} animate={{ height: PLINTH[i].h }}
               transition={{ ...SPRING, delay: 0.16 + slot * 0.09 }}>
@@ -57,14 +57,14 @@ function Row({ p, meId }: { p: Standing; meId?: string }) {
   const me = p.id === meId;
   const rank = rankFor(p.answered).current;
   return (
-    <div className={`piece press flex items-center gap-3 px-3 py-2.5 ${me ? "bg-pop" : ""}`}>
+    <div className={`cut tap flex items-center gap-3 px-3 py-2.5 ${me ? "cut-petal" : ""}`}>
       <span className="w-7 shrink-0 text-center font-display text-lg font-semibold tabular-nums text-soft">
         {p.position}
       </span>
       <Avatar id={p.id} name={p.username} size={36} />
       <span className="min-w-0 flex-1">
         <span className="block font-bold text-[15px] truncate">
-          {p.username}{me && <span className="text-soft font-black text-[12px] uppercase tracking-widest ml-1.5">you</span>}
+          {p.username}{me && <span className="text-soft font-black text-[12px] ml-1.5">you</span>}
         </span>
         <span className="block text-[13px] font-bold text-soft tabular-nums">
           {p.answered} answered
@@ -81,7 +81,7 @@ function Row({ p, meId }: { p: Standing; meId?: string }) {
 function StickyBar({ children }: { children: React.ReactNode }) {
   return (
     <div className="fixed inset-x-0 bottom-[62px] sm:bottom-0 z-20 px-4 pt-10 pb-3.5 pointer-events-none"
-      style={{ background: "linear-gradient(to top, var(--color-paper) 62%, transparent)" }}>
+      style={{ background: "linear-gradient(to top, var(--color-ground) 62%, transparent)" }}>
       <div className="max-w-3xl mx-auto pointer-events-auto">{children}</div>
     </div>
   );
@@ -93,7 +93,7 @@ export function LeaderboardPage() {
 
   if (offline) {
     return (
-      <div className="piece p-6">
+      <div className="card p-6">
         <h1 className="font-display text-2xl font-semibold">Leaderboard</h1>
         <p className="text-sm text-soft font-semibold mt-2">
           There is no backend configured, so there is nobody to rank. Add Supabase keys and it fills in.
@@ -118,16 +118,16 @@ export function LeaderboardPage() {
       {loading ? (
         <div className="mt-6 space-y-2">
           {Array.from({ length: 5 }, (_, i) => (
-            <div key={i} className="piece h-[62px] animate-pulse opacity-40" />
+            <div key={i} className="card h-[62px] animate-pulse opacity-40" />
           ))}
         </div>
       ) : rows.length === 0 ? (
-        <div className="piece p-6 mt-6 text-center">
+        <div className="card p-6 mt-6 text-center">
           <p className="font-display text-xl font-semibold">Nobody has played yet.</p>
           <p className="text-sm text-soft font-semibold mt-1">
             Answer one question and the top spot is yours.
           </p>
-          <Link to="/trivia" className="piece press inline-block mt-4 px-5 py-3 bg-pop font-display font-semibold">
+          <Link to="/trivia" className="cut tap inline-block mt-4 px-5 py-3 cut-petal font-display font-semibold">
             Start a round
           </Link>
         </div>
@@ -153,7 +153,7 @@ export function LeaderboardPage() {
       )}
       {!loading && !user && rows.length > 0 && (
         <StickyBar>
-          <Link to="/profile" className="piece press block bg-pop px-4 py-3 text-center font-display font-semibold">
+          <Link to="/profile" className="cut tap block cut-petal px-4 py-3 text-center font-display font-semibold">
             Sign in to take a place on this list →
           </Link>
         </StickyBar>

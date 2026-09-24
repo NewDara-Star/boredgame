@@ -4,9 +4,9 @@ import { riseIn } from "@/shared/ui/motion";
 type Tone = "bad" | "warn" | "good";
 
 const TONE: Record<Tone, string> = {
-  bad: "bg-bad text-surface",
-  warn: "bg-pop",
-  good: "bg-good text-surface",
+  bad: "bg-ember text-ink",
+  warn: "bg-petal",
+  good: "bg-leaf text-ink",
 };
 
 /**
@@ -34,7 +34,7 @@ export function Note({ children, tone = "bad", title, animate = false }: {
       <p className={`text-[13px] font-bold ${title ? "mt-1" : ""}`}>{children}</p>
     </>
   );
-  const cls = `piece p-3.5 text-center ${TONE[tone]}`;
+  const cls = `card p-3.5 text-center ${TONE[tone]}`;
   return animate
     ? <motion.div variants={riseIn} className={cls}>{body}</motion.div>
     : <div className={cls}>{body}</div>;

@@ -1,11 +1,15 @@
 import type { ButtonHTMLAttributes } from "react";
 
-type Variant = "primary" | "secondary" | "ghost";
+/** One colour, one job (BRAND.md): gold is the main action, green joins and confirms,
+    sky is the second choice, ember leaves. Ghost is the quiet white one. */
+type Variant = "primary" | "join" | "secondary" | "leave" | "ghost";
 
 const styles: Record<Variant, string> = {
-  primary: "bg-picto text-surface",
-  secondary: "bg-trivia text-surface",
-  ghost: "bg-surface text-ink",
+  primary: "cut-petal",
+  join: "cut-leaf",
+  secondary: "cut-sky",
+  leave: "cut-ember",
+  ghost: "cut-board",
 };
 
 export function Button({
@@ -14,7 +18,7 @@ export function Button({
   return (
     <button
       {...rest}
-      className={`piece press font-display text-[15px] font-semibold px-5 py-3.5 rounded-2xl
+      className={`cut tap font-display text-[16px] px-5 py-3.5
         disabled:cursor-not-allowed ${styles[variant]} ${className}`}
     />
   );

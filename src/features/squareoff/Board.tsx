@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { SPRING } from "@/shared/ui/motion";
 import type { Cell, Mark } from "./rules";
 
-const COLOUR: Record<Mark, string> = { x: "var(--color-picto)", o: "var(--color-trivia)" };
+const COLOUR: Record<Mark, string> = { x: "var(--color-ember)", o: "var(--color-sky)" };
 
 /** Drawn, not typed. A letter X and the letter O sit at different optical weights. */
 function Glyph({ mark }: { mark: Mark }) {
@@ -53,9 +53,9 @@ export function Board({
             disabled={!pickable}
             onClick={() => pickable && onPick(i)}
             aria-label={cell ? `Square ${i + 1}, taken` : `Square ${i + 1}, open`}
-            className={`piece ${pickable ? "press" : ""} aspect-square grid place-items-center
+            className={`cut ${pickable ? "tap" : ""} aspect-square grid place-items-center
               ${compact ? "rounded-[14px]" : ""}
-              ${won ? "bg-good" : contested ? "bg-pop" : "bg-surface"}
+              ${won ? "cut-leaf" : contested ? "bg-petal" : "bg-board"}
               ${pickable ? "cursor-pointer" : "cursor-default"}`}
             style={{ opacity: 1 }}
             animate={won ? { scale: [1, 1.1, 1] } : contested ? { scale: [1, 1.04, 1] } : { scale: 1 }}
