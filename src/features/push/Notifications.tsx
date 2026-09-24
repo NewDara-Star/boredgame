@@ -4,7 +4,7 @@ import { usePush } from "./usePush";
     can lead somewhere: signed in, and either able to subscribe now or (on iOS)
     one home-screen install away from it. */
 export function NotificationsCard() {
-  const { state, busy, enable, disable, needsInstall, signedIn } = usePush();
+  const { state, busy, enable, disable, needsInstall, signedIn, error } = usePush();
   if (!signedIn) return null;
 
   if (state === "subscribed") {
@@ -44,6 +44,8 @@ export function NotificationsCard() {
 
   if (state === "default" || state === "granted") {
     return (
+      <div className="space-y-1.5">
+      {error && <p className="text-[12px] text-ember font-bold px-1">{error}</p>}
       <button onClick={() => void enable()} disabled={busy}
         className="cut tap w-full cut-leaf-hi px-4 py-3 text-left flex items-center justify-between">
         <span className="min-w-0 font-bold text-[13px]">
@@ -51,6 +53,7 @@ export function NotificationsCard() {
         </span>
         <span className="text-[12px] font-black shrink-0 ml-2">Turn on</span>
       </button>
+      </div>
     );
   }
 

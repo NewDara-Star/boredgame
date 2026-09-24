@@ -41,6 +41,7 @@ export function usePush() {
   // false until the first getSubscription() settles, so UI can wait instead of
   // flashing an "enable" prompt at someone who is already subscribed.
   const [ready, setReady] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const sync = useCallback(async () => {
     if (!supported) { setState("unsupported"); setReady(true); return; }
@@ -48,10 +49,19 @@ export function usePush() {
     try {
       const reg = await navigator.serviceWorker.ready;
       const sub = await reg.pushManager.getSubscription();
-      setState(sub ? "subscribed" : Notification.permission === "granted" ? "granted" : "default");
+      // "On" means the server pings YOU on this phone, not just that the phone
+      // holds a subscription: it used to show "on" to whoever signed in next
+      // while the pings went to the person who turned them on.
+      let mine = false;
+      if (sub && supabase && user) {
+        const { data } = await supabase.from("push_subscriptions")
+          .select("endpoint").eq("endpoint", sub.endpoint).maybeSingle();
+        mine = !!data;
+      }
+      setState(mine ? "subscribed" : Notification.permission === "granted" ? "granted" : "default");
     } catch { setState("default"); }
     finally { setReady(true); }
-  }, [supported]);
+  }, [supported, user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => { void sync(); }, [sync]);
 
@@ -71,11 +81,16 @@ export function usePush() {
         });
       }
       const j = sub.toJSON();
-      await supabase.rpc("save_push_subscription", {
+      // Saving it under you also takes it from anyone else on this phone.
+      const { error: saveError } = await supabase.rpc("save_push_subscription", {
         p_endpoint: sub.endpoint,
         p_p256dh: j.keys?.p256dh ?? "",
         p_auth: j.keys?.auth ?? "",
       });
+      // Only "on" if the server has it: a failed save used to show "on" and
+      // no ping ever came (N2).
+      if (saveError) { setError("Couldn't turn notifications on. Try again."); setState("granted"); return; }
+      setError(null);
       setState("subscribed");
     } catch { await sync(); }
     finally { setBusy(false); }
@@ -101,5 +116,5 @@ export function usePush() {
   // bare "not supported".
   const needsInstall = !supported && isIOS() && !isStandalone();
 
-  return { supported, state, busy, ready, enable, disable, needsInstall, signedIn: !!user };
+  return { supported, state, busy, ready, enable, disable, needsInstall, signedIn: !!user, error };
 }

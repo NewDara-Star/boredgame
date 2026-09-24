@@ -1,3 +1,4 @@
+import { releasePush } from "@/features/push/release";
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase, isConfigured } from "@/shared/lib/supabase";
@@ -200,6 +201,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   async function signOut() {
+    // While still signed in: the server only lets you remove your own.
+    await releasePush();
     await supabase?.auth.signOut();
     setProfile(null);
   }

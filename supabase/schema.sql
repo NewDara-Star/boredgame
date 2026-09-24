@@ -2344,11 +2344,15 @@ create policy "see your own push subs" on public.push_subscriptions
   for select using (user_id = auth.uid());
 grant select on public.push_subscriptions to authenticated;
 
+-- A phone's push address belongs to one person: whoever turned notifications on
+-- there last (F42, N1). Saving it used to add a row beside the old owner's, so
+-- the phone kept getting the first person's pings too.
 create or replace function public.save_push_subscription(p_endpoint text, p_p256dh text, p_auth text)
  returns void language plpgsql security definer set search_path to 'public' as $function$
 declare uid uuid := auth.uid();
 begin
   if uid is null then raise exception 'sign in first'; end if;
+  delete from public.push_subscriptions where endpoint = p_endpoint and user_id <> uid;
   insert into public.push_subscriptions(user_id, endpoint, p256dh, auth)
     values (uid, p_endpoint, p_p256dh, p_auth)
     on conflict (user_id, endpoint)
