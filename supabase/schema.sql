@@ -2009,31 +2009,42 @@ alter table public.memory_games add column if not exists scored boolean not null
 -- `scored` is reset to false when a board is dealt/rematched (client writes it).
 -- No seat is passed in, so a caller cannot name who to pay, and a repeat call
 -- (both browsers watching, or a stall rescue) adds nothing.
+--
+-- The table is the one the room is playing now (rooms.mode). It used to take
+-- whichever game table had a row, Square Off's first, and 'Play something
+-- else' leaves the old row behind: after a Square Off game, a Connect 4 win
+-- found the old, already-scored Square Off row and paid nothing (RM2). Either
+-- phone may call it, so a win isn't lost when the winner's call drops (RM3).
 create or replace function public.claim_board_win(p_room bigint)
 returns int language plpgsql security definer set search_path to 'public' as $$
-declare v_tbl text; v_winner text; v_x uuid; v_o uuid; v_scored boolean; v_seat uuid; new_score int;
+declare v_mode text; v_winner text; v_x uuid; v_o uuid; v_scored boolean; v_seat uuid; new_score int;
 begin
   if auth.uid() is null then raise exception 'sign in first'; end if;
   if not public.is_room_member(p_room) then raise exception 'not a member of room %', p_room; end if;
-  select 'ttt', winner, x_player, o_player, scored into v_tbl, v_winner, v_x, v_o, v_scored
-    from public.ttt_games where room_id = p_room;
-  if v_tbl is null then
-    select 'c4', winner, x_player, o_player, scored into v_tbl, v_winner, v_x, v_o, v_scored
+  select mode into v_mode from public.rooms where id = p_room;
+  if v_mode in ('squareoff', 'tictactoe') then
+    select winner, x_player, o_player, scored into v_winner, v_x, v_o, v_scored
+      from public.ttt_games where room_id = p_room;
+  elsif v_mode in ('connect4', 'connect4trivia') then
+    select winner, x_player, o_player, scored into v_winner, v_x, v_o, v_scored
       from public.c4_games where room_id = p_room;
-  end if;
-  if v_tbl is null then
-    select 'memory', winner, x_player, o_player, scored into v_tbl, v_winner, v_x, v_o, v_scored
+  elsif v_mode = 'memory' then
+    select winner, x_player, o_player, scored into v_winner, v_x, v_o, v_scored
       from public.memory_games where room_id = p_room;
+  else
+    return 0;   -- a race or Ball Sort room has no board to pay out
   end if;
-  if v_tbl is null or v_winner is null or v_winner = 'draw' or v_scored then
+  if v_winner is null or v_winner = 'draw' or v_scored then
     return 0;
   end if;
   v_seat := case v_winner when 'x' then v_x when 'o' then v_o end;
   if v_seat is null then return 0; end if;
-  if    v_tbl = 'ttt' then update public.ttt_games    set scored = true where room_id = p_room;
-  elsif v_tbl = 'c4'  then update public.c4_games     set scored = true where room_id = p_room;
-  else                     update public.memory_games set scored = true where room_id = p_room;
+  if    v_mode in ('squareoff', 'tictactoe')     then update public.ttt_games    set scored = true where room_id = p_room and not scored;
+  elsif v_mode in ('connect4', 'connect4trivia') then update public.c4_games     set scored = true where room_id = p_room and not scored;
+  else                                                update public.memory_games set scored = true where room_id = p_room and not scored;
   end if;
+  -- Both phones may call at once: only the call that flipped `scored` pays.
+  if not found then return 0; end if;
   update public.room_players set score = score + 1
    where room_id = p_room and user_id = v_seat returning score into new_score;
   return coalesce(new_score, 0);

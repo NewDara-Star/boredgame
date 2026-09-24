@@ -87,4 +87,14 @@ for (const fn of ["daily_next", "daily_answer", "submit_daily"]) {
      `${fn} accepts a day either side of UTC`);
 }
 
+// A room's board point is paid from the game the room is playing now. Searching
+// the game tables in turn found a stale Square Off row after 'Play something
+// else' and paid nothing for the Connect 4 win (RM2).
+{
+  const at = schema.indexOf("create or replace function public.claim_board_win(");
+  const body = schema.slice(at, schema.indexOf("end $$;", at));
+  ok(/select mode into v_mode from public\.rooms/.test(body) && !/if v_tbl is null then/.test(body),
+     "claim_board_win pays from the room's current game (rooms.mode), not the first table with a row");
+}
+
 console.log(`${n} schema assertions hold (${rpcs.size} rpcs, ${rels.size} relations)`);

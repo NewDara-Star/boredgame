@@ -186,10 +186,9 @@ export function useBoardRoom<G extends BoardState, R extends BoardRow>(
     return msg;
   }, [roomId, nextPuzzleId, remember, engine, challenge]);
 
-  /** The client that wrote the winning move books the win, so the tally moves
-      exactly once however many browsers are watching. Incremented in the
-      database rather than read-modify-written from this client's copy of the
-      players list, which can lag realtime across a rematch. */
+  /** Book the win. Incremented in the database rather than read-modify-written
+      from this client's copy of the players list, which can lag realtime
+      across a rematch. */
   const bookWin = useCallback(async (next: G) => {
     if (next.phase !== "over" || !next.winner || next.winner === "draw") return;
     if (!supabase || !roomId) return;
@@ -208,6 +207,18 @@ export function useBoardRoom<G extends BoardState, R extends BoardRow>(
     const msg = await write(next);
     if (!msg) await bookWin(next);
   }, [write, bookWin]);
+
+  // And every seated phone books a finished game as it sees it arrive, not only
+  // the one that made the winning move: if that phone's call dropped (signal,
+  // the app closed on the win), the win was never counted. The server pays once,
+  // from the game's own row, whoever calls and however often (RM3); a call that
+  // lands before the winning board does finds no winner and pays nothing.
+  const bookedFor = useRef<unknown>(null);
+  useEffect(() => {
+    if (!game || !myMark || game.phase !== "over" || bookedFor.current === row) return;
+    bookedFor.current = row;
+    void bookWin(game);
+  }, [game, myMark, row, bookWin]);
 
   const choose = useCallback((cell: number) => {
     // No phase check here on purpose. Memory's second tap lands during
