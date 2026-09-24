@@ -2278,6 +2278,54 @@ revoke all on function public.my_invites() from public, anon;
 grant execute on function public.my_invites() to authenticated;
 
 -- ============================================================================
+-- Nightly tidy-up (pg_cron, switched on in the dashboard 24 Sep)
+-- ============================================================================
+create extension if not exists pg_cron;
+
+-- close_stale_rooms expires "come play" invites a week old (F39).
+alter table public.game_invites drop constraint if exists game_invites_status_check;
+alter table public.game_invites add constraint game_invites_status_check
+  check (status in ('pending', 'accepted', 'declined', 'expired'));
+
+-- Rooms nobody has touched for a week close by themselves, and invites a week
+-- old expire (F39, RM8, N3). Waiting rooms from early September sat in
+-- everyone's "Rooms you're in" for good, and invites to them kept showing
+-- (my_invites and the rooms list only show waiting and playing rooms, so an
+-- abandoned room drops out of both).
+-- "Touched" is the latest of: the room made, a player joining or checking in,
+-- a move in any of its games, a race round starting. Run nightly by pg_cron
+-- (Daramola switched it on, 24 Sep); 7 days is a default that can change.
+create or replace function public.close_stale_rooms(p_days int default 7)
+returns int language plpgsql security definer set search_path to 'public' as $$
+declare v_closed int;
+begin
+  with act as (
+    select r.id,
+      greatest(r.created_at,
+        (select max(greatest(rp.last_seen, rp.joined_at)) from public.room_players rp where rp.room_id = r.id),
+        (select max(coalesce(g.stamped_at, g.updated_at)) from public.ttt_games g where g.room_id = r.id),
+        (select max(coalesce(g.stamped_at, g.updated_at)) from public.c4_games g where g.room_id = r.id),
+        (select max(coalesce(g.stamped_at, g.updated_at)) from public.memory_games g where g.room_id = r.id),
+        (select max(s.updated_at) from public.sort_races s where s.room_id = r.id),
+        (select max(rr.started_at) from public.room_rounds rr where rr.room_id = r.id)) as last_active
+    from public.rooms r
+    where r.status in ('waiting', 'playing')
+  )
+  update public.rooms r set status = 'abandoned'
+    from act
+   where act.id = r.id and act.last_active < now() - make_interval(days => p_days);
+  get diagnostics v_closed = row_count;
+  -- A "come play" invite a week old is stale even if its room is still in use.
+  update public.game_invites set status = 'expired'
+   where status = 'pending' and created_at < now() - make_interval(days => p_days);
+  return v_closed;
+end $$;
+revoke all on function public.close_stale_rooms(int) from public, anon, authenticated;
+
+-- Nightly at 03:15 UTC. cron.schedule replaces a job of the same name.
+select cron.schedule('close-stale-rooms', '15 3 * * *', $$select public.close_stale_rooms(7)$$);
+
+-- ============================================================================
 -- Web Push: a browser's push endpoint, plus the server-only VAPID key the edge
 -- sender signs with. Writes via definer RPCs; the sender reads subscriptions
 -- with the service role. Push is deferred behind an installed PWA on iOS.
