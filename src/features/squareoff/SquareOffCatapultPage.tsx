@@ -2,9 +2,9 @@ import { BoardSoloPage } from "@/features/play/BoardSoloPage";
 import { Board } from "./Board";
 import { gridBoard } from "./gridBoard";
 import { TTT } from "./useTttRoom";
-import { CATAPULT_SQUARES_ART } from "./card";
+import { gridHero } from "./card";
 
-const art = { hero: () => CATAPULT_SQUARES_ART };
+const art = { hero: (g: { board: NonNullable<Parameters<typeof gridHero>[0]>; line: number[] | null }) => gridHero(g.board, g.line) };
 
 
 /** Square Off with a catapult instead of a question: land the shot, claim the

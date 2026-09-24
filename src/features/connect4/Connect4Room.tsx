@@ -10,7 +10,7 @@ import {
 import { Board } from "./Board";
 import { BOARD_RATIO } from "@/features/play/BoardSoloPage";
 import { PlayBoard, PlayRow, PlaySurface } from "@/features/play/PlaySurface";
-import { connect4Art } from "./card";
+import { c4Hero } from "./card";
 import { describe, stallWriter, type Mark } from "./rules";
 import { useC4Room } from "./useC4Room";
 
@@ -45,7 +45,7 @@ export function Connect4Room({
   // up, because that bar has to look continuous.
   const { now, names, scoreOf, sides, card, done } =
     useMatchChrome(code, title, status, players, t.seats, asking,
-      { hero: () => connect4Art(title) });
+      { hero: () => c4Hero(t.game?.board, t.game?.line), me: t.myMark });
 
   useEffect(() => { setChosen(null); }, [t.item?.id, g?.target]);
 

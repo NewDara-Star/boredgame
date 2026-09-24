@@ -5,6 +5,7 @@ import { Avatar } from "@/shared/ui/Avatar";
 import { SPRING, stagger, riseIn } from "@/shared/ui/motion";
 import { rankFor } from "@/features/play/rank";
 import { RankBadge } from "@/features/play/RankBadge";
+import { SunRoad } from "./SunRoad";
 import { useLeaderboard, type Standing } from "./useLeaderboard";
 
 /** 2nd, 1st, 3rd — the order they stand in, not the order they finished. */
@@ -117,6 +118,8 @@ export function LeaderboardPage() {
       <motion.p variants={riseIn} className="text-soft text-sm font-semibold mt-2">
         Ranked by questions answered — turning up beats being clever.
       </motion.p>
+
+      {!loading && you && <motion.div variants={riseIn}><SunRoad answered={you.answered} /></motion.div>}
 
       {loading ? (
         <div className="mt-6 space-y-2">

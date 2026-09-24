@@ -5,7 +5,8 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { popIn } from "@/shared/ui/motion";
 import type { RoomPlayer, RoomStatus } from "@/shared/types/db";
-import { drawCard, ellipsize, HEADLINE_CHARS, type Glyph, type Hero, type MatchCard } from "@/shared/card/frame";
+import { drawCard, type Glyph, type Hero, type MatchCard } from "@/shared/card/frame";
+import { gamePath, matchVoice } from "@/shared/card/voice";
 import { ResultScreen } from "@/features/play/ResultScreen";
 
 export type Mark = "x" | "o";
@@ -169,7 +170,11 @@ export interface Side { mark: Mark; name: string; score: number }
  */
 /** What the game puts on its result card: its board as it stood, and how a
     seat is drawn. Read when the card is drawn, so it sees the final board. */
-export interface CardArt { hero: () => Hero; glyph?: Glyph; caption?: () => string | undefined }
+export interface CardArt {
+  hero: () => Hero; glyph?: Glyph; caption?: () => string | undefined;
+  /** whose phone this is, so the card can say "I beat Tobi" rather than "Ada beat Tobi" */
+  me?: Mark | null;
+}
 
 export function useMatchChrome(
   code: string, title: string, status: RoomStatus,
@@ -202,16 +207,16 @@ export function useMatchChrome(
   // that says Host 0 / Guest 0 above a real scoreline, and then never redraws.
   const done = status === "finished";
   const seated = !!seats.x && !!seats.o && players.length >= 2;
-  const sig = `${code}|${title}|${sides[0].name}:${sides[0].score}|${sides[1].name}:${sides[1].score}`;
+  const sig = `${code}|${title}|${sides[0].name}:${sides[0].score}|${sides[1].name}:${sides[1].score}|${art?.me ?? "-"}`;
   useEffect(() => {
     if (!done || !seated || card?.sig === sig) return;
     let cancelled = false;
     const [a, b] = sides;
-    const winner = a.score === b.score ? null : a.score > b.score ? a : b;
     const art = artRef.current;
+    const v = matchVoice(title, a, b, art?.me ?? null);
     void drawCard({
-      title, code,
-      headline: winner ? `${ellipsize(winner.name, HEADLINE_CHARS)} wins` : "All square",
+      title, code, path: gamePath(title),
+      headline: v.headline, dare: v.dare, flower: v.flower, text: v.text,
       hero: art?.hero() ?? (() => {}),
       glyph: art?.glyph, caption: art?.caption?.(),
       sides: [a, b],

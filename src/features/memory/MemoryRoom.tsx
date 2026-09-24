@@ -6,7 +6,7 @@ import {
 } from "@/features/rooms/matchUi";
 import { Board } from "./Board";
 import { PlayBoard, PlayRow, PlaySurface } from "@/features/play/PlaySurface";
-import { memoryArt } from "./card";
+import { memoryHero } from "./card";
 import { describe, scoreOf, stallWriter, type Mark } from "./rules";
 import { useMemoryRoom } from "./useMemoryRoom";
 import { AWAY_MS } from "@/features/play/clock";
@@ -27,7 +27,7 @@ export function MemoryRoom({
   const g = t.game;
   const { now, names, sides, card, done } =
     useMatchChrome(code, "MEMORY MATCH", status, players, t.seats, g?.phase === "asking",
-      { hero: () => memoryArt("MEMORY MATCH") });
+      { hero: () => memoryHero(t.game?.board), me: t.myMark });
 
   /**
    * This room used to have no rescue at all, on the reasoning that every phase

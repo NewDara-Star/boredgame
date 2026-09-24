@@ -24,6 +24,18 @@ interface Last {
  * server's verdict. score/streak here are for the on-screen HUD only; the score
  * and time that land on the board are computed server-side in submit_daily().
  */
+/** Right and wrong in the order they were answered, kept for the day so the
+    share grid survives a reload. Only the order lives here; the score is the
+    server's. */
+const gridKey = (day: string) => `bg-daily-grid-${day}`;
+export function readGrid(day: string): boolean[] | null {
+  try { const v = JSON.parse(localStorage.getItem(gridKey(day)) ?? "null"); return Array.isArray(v) ? v : null; }
+  catch { return null; }
+}
+function keepGrid(day: string, grid: boolean[]) {
+  try { localStorage.setItem(gridKey(day), JSON.stringify(grid)); } catch { /* private mode */ }
+}
+
 export function useDailyPlay(d: DailyApi, enabled: boolean) {
   const [phase, setPhase] = useState<DailyPhase>("loading");
   const [current, setCurrent] = useState<PlayItem | undefined>(undefined);
@@ -33,6 +45,7 @@ export function useDailyPlay(d: DailyApi, enabled: boolean) {
   const [streak, setStreak] = useState(0);
   const [last, setLast] = useState<Last | null>(null);
   const [pending, setPending] = useState<string | null>(null);
+  const [grid, setGrid] = useState<boolean[]>([]);
   const shownAt = useRef(Date.now()); // local stopwatch, DISPLAY ONLY (the +N)
   const finalised = useRef(false);
 
@@ -72,6 +85,7 @@ export function useDailyPlay(d: DailyApi, enabled: boolean) {
     setScore((s) => s + gained);
     setStreak((s) => (v.correct ? s + 1 : 0));
     setLast({ correct: v.correct, given, gained, near: false, answer: v.answer, explanation: v.explanation });
+    setGrid((g0) => { const g1 = [...(readGrid(d.day) ?? g0), v.correct]; keepGrid(d.day, g1); return g1; });
     setPending(null);
     setPhase("revealed");
   }, [phase, current, pending, streak, d]);
@@ -88,7 +102,7 @@ export function useDailyPlay(d: DailyApi, enabled: boolean) {
   }, [d, finish]);
 
   return {
-    current, index, total, phase, score, streak, last, pending,
+    current, index, total, phase, score, streak, last, pending, grid,
     chosen: last?.given ?? pending, submit, next,
   };
 }

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { fontsReady, saveCard, SIZE, toCard } from "@/shared/card/frame";
+import { fontsReady, shareResult, SIZE, toCard } from "@/shared/card/frame";
+import { linkTo } from "@/shared/card/voice";
 import { encodeGif } from "@/shared/card/gif";
 import { durationOf, paintFrame, type Replay } from "./replay";
 
@@ -45,8 +46,10 @@ export function ReplayPlayer({ replay, autoplay = true, children }:
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [replay]);
 
+  const send = (file: File) => void shareResult({ file, url: linkTo("/ballsort"),
+    text: `My Ball Sort solve: ${replay.moves} moves, par ${replay.par}. Beat it:` });
   const save = async () => {
-    if (gif) { saveCard(gif.file); return; }
+    if (gif) { send(gif.file); return; }
     await fontsReady();
     const big = document.createElement("canvas"); big.width = SIZE; big.height = SIZE;
     const small = document.createElement("canvas"); small.width = GIF_SIZE; small.height = GIF_SIZE;
@@ -80,9 +83,9 @@ export function ReplayPlayer({ replay, autoplay = true, children }:
       </div>
     </div>
   ) : gif ? (
-    <button onClick={() => saveCard(gif.file)}
+    <button onClick={() => send(gif.file)}
       className="cut tap py-4 font-display text-lg font-semibold cut-petal leading-tight">
-      Save the film
+      Share the film
       <span className="block text-[12px] font-bold opacity-70">{(gif.bytes / 1_000_000).toFixed(1)} MB GIF</span>
     </button>
   ) : (

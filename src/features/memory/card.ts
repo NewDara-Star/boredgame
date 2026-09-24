@@ -1,19 +1,17 @@
-import { artStage, INK, rounded, TRIVIA, type Hero } from "@/shared/card/frame";
+/** The share card's picture for Memory Match: the sixteen tiles as they finished,
+    each one in the colour of the player who claimed it. */
+import { cutPlate, type Hero } from "@/shared/card/frame";
+import { RAMPS } from "@/shared/brand/tokens";
+import { SEAT_RAMP } from "@/shared/brand/seats";
+import { COLS, type Cell } from "./rules";
 
-
-/** The session card's picture: four tiles, one turned, as on the catalogue. */
-export const memoryArt = (name: string): Hero => (c, box) =>
-  artStage(c, box, name, -3, (c, _w, h) => {
-    const tile = h * 0.42, gap = tile * 0.16, s = tile * 2 + gap;
-    const faces = ["⭐", "", "", "⭐"];
-    for (let i = 0; i < 4; i++) {
-      const x = -s / 2 + (i % 2) * (tile + gap), y = -s / 2 + Math.floor(i / 2) * (tile + gap);
-      c.fillStyle = INK; rounded(c, x, y + 10, tile, tile, 22); c.fill();
-      c.fillStyle = i === 1 ? TRIVIA : "#FFFFFF"; rounded(c, x, y, tile, tile, 22); c.fill();
-      c.lineWidth = 8; c.strokeStyle = INK; rounded(c, x, y, tile, tile, 22); c.stroke();
-      if (faces[i]) {
-        c.font = `${tile * 0.5}px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif`;
-        c.fillText(faces[i], x + tile / 2, y + tile / 2 + tile * 0.04);
-      }
-    }
-  });
+export const memoryHero = (board: Cell[] | null | undefined): Hero => (c, box) => {
+  const n = board?.length || 16, rows = Math.ceil(n / COLS);
+  const gap = 14, t = Math.min((box.w - gap * (COLS - 1)) / COLS, (box.h - gap * (rows - 1)) / rows);
+  const x0 = box.x + (box.w - (t * COLS + gap * (COLS - 1))) / 2, y0 = box.y + (box.h - (t * rows + gap * (rows - 1))) / 2;
+  for (let i = 0; i < n; i++) {
+    const owner = board?.[i] ?? null;
+    cutPlate(c, x0 + (i % COLS) * (t + gap), y0 + Math.floor(i / COLS) * (t + gap), t, t, t * 0.16, t * 0.1,
+      owner ? SEAT_RAMP[owner] : RAMPS.grape, false);
+  }
+};

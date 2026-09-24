@@ -2,9 +2,9 @@ import { BoardSoloPage } from "@/features/play/BoardSoloPage";
 import { Board } from "./Board";
 import { gridBoard } from "./gridBoard";
 import { TTT } from "./useTttRoom";
-import { SQUARE_OFF_ART } from "./card";
+import { gridHero } from "./card";
 
-const art = { hero: () => SQUARE_OFF_ART };
+const art = { hero: (g: { board: NonNullable<Parameters<typeof gridHero>[0]>; line: number[] | null }) => gridHero(g.board, g.line) };
 
 
 /**

@@ -7,6 +7,9 @@ import { RankBadge } from "./RankBadge";
 import { rankFor, RANKS, type Rank } from "./rank";
 import { milestoneAt } from "./streak";
 import type { RoundOutcome } from "./progress";
+import type { MatchCard } from "@/shared/card/frame";
+import { rankStory, streakStory } from "@/shared/card/moments";
+import { ShareButtons } from "@/shared/card/ShareButtons";
 
 export type Unlock =
   | { kind: "rank"; rank: Rank }
@@ -67,6 +70,15 @@ export function UnlockOverlay({ unlock, onClose }: { unlock: Unlock; onClose: ()
   }, [onClose]);
 
   const isRank = unlock.kind === "rank";
+  // Drawn as the overlay opens, so the share tap has a file ready (share.ts).
+  const [card, setCard] = useState<MatchCard | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    void (unlock.kind === "rank" ? rankStory(unlock.rank) : streakStory(unlock.days, unlock.name))
+      .then((m) => { if (!cancelled) setCard(m); })
+      .catch(() => { /* no canvas: the overlay still says it */ });
+    return () => { cancelled = true; };
+  }, [unlock]);
   return (
     <motion.div
       className="fixed inset-0 z-50 grid place-items-center p-5 bg-ink/60"
@@ -117,8 +129,9 @@ export function UnlockOverlay({ unlock, onClose }: { unlock: Unlock; onClose: ()
         <motion.div className="relative z-10 mt-6 space-y-2"
           initial={{ y: 14, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
           transition={{ ...SPRING, delay: 0.3 }}>
+          <ShareButtons card={card} story={false} />
           <button onClick={onClose}
-            className="cut tap w-full py-3.5 font-display text-lg font-semibold cut-petal">
+            className="cut tap w-full py-3 font-display text-lg cut-board">
             Nice
           </button>
           <Link to="/profile" onClick={onClose}

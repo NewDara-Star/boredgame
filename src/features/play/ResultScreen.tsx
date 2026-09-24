@@ -1,7 +1,8 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { motion } from "framer-motion";
 import { popIn } from "@/shared/ui/motion";
-import { saveCard, type MatchCard } from "@/shared/card/frame";
+import type { MatchCard } from "@/shared/card/frame";
+import { ShareButtons } from "@/shared/card/ShareButtons";
 
 /**
  * The end of a session, on one screen.
@@ -20,7 +21,7 @@ export function ResultScreen({ headline, score, tone, card, alt, children }: {
   tone: "win" | "loss" | "draw";
   card: MatchCard | null;
   alt: string;
-  /** what to do next: one or two buttons, side by side with Save */
+  /** what to do next, under Share and Story */
   children?: ReactNode;
 }) {
   const bg = tone === "draw" ? "bg-mist" : tone === "win" ? "bg-leaf text-ink" : "bg-ember text-ink";
@@ -54,12 +55,9 @@ export function ResultScreen({ headline, score, tone, card, alt, children }: {
         )}
       </div>
 
-      <div className="shrink-0 grid grid-cols-2 gap-2.5">
-        <button onClick={() => card && saveCard(card.file)} disabled={!card}
-          className="cut tap py-3.5 font-display text-lg font-semibold cut-petal disabled:opacity-50">
-          Save the image
-        </button>
-        {children}
+      <div className="shrink-0 grid gap-2.5">
+        <ShareButtons card={card} />
+        {children && <div className="grid grid-cols-1 gap-2.5">{children}</div>}
       </div>
     </motion.div>
   );

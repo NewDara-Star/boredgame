@@ -1,7 +1,9 @@
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { MIST, RAMPS } from "@/shared/brand/tokens";
 import { useEffect, useState, type ReactNode } from "react";
-import { drawCard, saveCard, type MatchCard } from "@/shared/card/frame";
+import { drawCard, type MatchCard } from "@/shared/card/frame";
+import { ShareButtons } from "@/shared/card/ShareButtons";
+import { gameName, gamePath } from "@/shared/card/voice";
 import { roundHero } from "./roundCard";
 import { Counter } from "@/shared/ui/Counter";
 import { SPRING, stagger, riseIn, popIn } from "@/shared/ui/motion";
@@ -134,9 +136,13 @@ function RoundCard({ title, results, score, outcome }:
   const right = results.filter((r) => r.correct).length;
   useEffect(() => {
     let cancelled = false;
+    const n = results.length, game = gameName(title);
     void drawCard({
-      title, code: null,
-      headline: `${right} of ${results.length}`,
+      title, code: null, path: gamePath(title),
+      headline: `${right}/${n} on ${game}`,
+      dare: right === n ? "Can you match it?" : `Can you beat ${right}?`,
+      flower: right >= n * 0.7 ? "bloom" : right >= n * 0.4 ? "awake" : "bored",
+      text: `I got ${right}/${n} on ${game}. ${right === n ? "Can you match it?" : "Can you beat it?"}`,
       hero: roundHero(results, score),
       caption: outcome?.streak ? `Day ${outcome.streak} streak` : `${right} right, ${results.length - right} missed`,
     }).then((made) => { if (!cancelled) setCard(made); })
@@ -148,10 +154,7 @@ function RoundCard({ title, results, score, outcome }:
     <motion.div variants={riseIn} className="mt-6 space-y-2.5">
       <img src={card.url} alt={`${title}: ${right} of ${results.length}, ${score} points`}
         className="w-full rounded-2xl shadow-lift-sm" />
-      <button onClick={() => saveCard(card.file)}
-        className="cut tap w-full py-3.5 font-display text-lg font-semibold cut-petal">
-        Save the image
-      </button>
+      <ShareButtons card={card} />
     </motion.div>
   );
 }

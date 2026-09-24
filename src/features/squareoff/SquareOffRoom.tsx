@@ -4,7 +4,7 @@ import { Note, Dealing } from "@/shared/ui/Note";
 import { TurnPanel } from "@/features/rooms/TurnPanel";
 import { Board } from "./Board";
 import { PlayBoard, PlayRow, PlaySurface } from "@/features/play/PlaySurface";
-import { SQUARE_OFF_ART } from "./card";
+import { gridHero } from "./card";
 import { describe, stallWriter, type Mark } from "./rules";
 import { useTttRoom } from "./useTttRoom";
 import { askMs, AWAY_MS } from "@/features/play/clock";
@@ -42,7 +42,7 @@ export function SquareOffRoom({
   // because that bar has to look continuous.
   const { now, names, scoreOf, sides, card, done } =
     useMatchChrome(code, "SQUARE OFF", status, players, t.seats, asking,
-      { hero: () => SQUARE_OFF_ART });
+      { hero: () => gridHero(t.game?.board, t.game?.line), me: t.myMark });
 
   useEffect(() => { setChosen(null); }, [t.item?.id, g?.target]);
 

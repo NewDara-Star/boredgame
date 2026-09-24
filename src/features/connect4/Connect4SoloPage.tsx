@@ -2,11 +2,11 @@ import { BoardSoloPage, BOARD_RATIO } from "@/features/play/BoardSoloPage";
 import { gridBoard } from "@/features/squareoff/gridBoard";
 import { Board } from "./Board";
 import { C4 } from "./useC4Room";
-import { connect4Art } from "./card";
+import { c4Hero } from "./card";
 
 const board = gridBoard(Board);
 const glyphs = { x: "disc", o: "disc" } as const;
-const art = (title: string) => ({ hero: () => connect4Art(title.toUpperCase()) });
+const art = (_title: string) => ({ hero: (g: { board: NonNullable<Parameters<typeof c4Hero>[0]>; line: number[] | null }) => c4Hero(g.board, g.line) });
 
 /** Plain Connect 4 against the bot: tap a column, the disc falls. */
 export function Connect4SoloPage() {

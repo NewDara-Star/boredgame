@@ -1,22 +1,22 @@
-/** The session card's picture: the frame and a few discs, as on the catalogue. */
-import { artStage, INK, PICTO, rounded, TRIVIA, type Hero } from "@/shared/card/frame";
+/** The share card's picture for Connect 4: the frame as it finished, the winning
+    four lit, discs outlined in the seat colours. */
+import { ball, rounded, type Hero } from "@/shared/card/frame";
+import { RAMPS } from "@/shared/brand/tokens";
+import { SEAT_RAMP } from "@/shared/brand/seats";
+import { COLS, ROWS, type Cell } from "./rules";
 
-
-
-export const connect4Art = (name: string): Hero => (c, box) =>
-  artStage(c, box, name, 3, (c, _w, h) => {
-    const cols = 5, rows = 3, hole = h * 0.25, gap = hole * 0.28;
-    const w = cols * hole + (cols + 1) * gap, hh = rows * hole + (rows + 1) * gap;
-    c.fillStyle = INK; rounded(c, -w / 2, -hh / 2 + 12, w, hh, 28); c.fill();
-    c.fillStyle = TRIVIA; rounded(c, -w / 2, -hh / 2, w, hh, 28); c.fill();
-    c.lineWidth = 8; c.strokeStyle = INK; rounded(c, -w / 2, -hh / 2, w, hh, 28); c.stroke();
-    const filled: Record<string, string> = { "1,2": PICTO, "2,2": TRIVIA_DISC, "2,1": PICTO, "3,2": PICTO, "3,1": TRIVIA_DISC, "3,0": PICTO };
-    for (let col = 0; col < cols; col++) for (let r = 0; r < rows; r++) {
-      const cx = -w / 2 + gap + hole / 2 + col * (hole + gap), cy = -hh / 2 + gap + hole / 2 + r * (hole + gap);
-      c.beginPath(); c.arc(cx, cy, hole / 2, 0, Math.PI * 2);
-      c.fillStyle = filled[`${col},${r}`] ?? "#FFFFFF"; c.fill();
-      c.lineWidth = 6; c.strokeStyle = INK; c.stroke();
-    }
-  });
-/** the guest's disc on a blue frame needs to read as a disc, not a hole */
-const TRIVIA_DISC = "#8FA4FF";
+export const c4Hero = (board: Cell[] | null | undefined, line: number[] | null = null): Hero => (c, box) => {
+  const cell = Math.min(box.w / (COLS + 0.4), box.h / (ROWS + 0.4));
+  const w = cell * (COLS + 0.4), h = cell * (ROWS + 0.4);
+  const x0 = box.x + (box.w - w) / 2, y0 = box.y + (box.h - h) / 2;
+  c.save();
+  rounded(c, x0, y0, w, h, cell * 0.45); c.fillStyle = RAMPS.sky.deep; c.fill();
+  for (let r = 0; r < ROWS; r++) for (let k = 0; k < COLS; k++) {
+    const i = r * COLS + k, cx = x0 + cell * 0.2 + cell * k + cell / 2, cy = y0 + cell * 0.2 + cell * r + cell / 2;
+    const v = board?.[i];
+    if (line?.includes(i)) { c.beginPath(); c.arc(cx, cy, cell * 0.47, 0, Math.PI * 2); c.fillStyle = RAMPS.leaf.hi; c.fill(); }
+    if (!v) { c.beginPath(); c.arc(cx, cy, cell * 0.36, 0, Math.PI * 2); c.fillStyle = "rgba(35,26,61,.45)"; c.fill(); }
+    else ball(c, cx, cy, cell * 0.36, SEAT_RAMP[v]);
+  }
+  c.restore();
+};

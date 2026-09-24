@@ -72,7 +72,7 @@ const BANS = [
   { id: "emoji-in-ui", why: "emoji standing in for drawn icons (the streak flame, stars...)",
     re: /[\u{1F300}-\u{1FAFF}\u{2600}-\u{26FF}]/gu, in: [".tsx", ".ts"] },
   { id: "old-card-frame", why: "old share-card frame: artStage, hot-pink ground, sticker headline",
-    re: /\bartStage\b|\b(?:HOT|POP|PICTO|TRIVIA|SAND)\b(?=[,\s}])/g, in: [".ts", ".tsx"] },
+    re: /\bartStage\b|\b(?:HOT|POP|PICTO|TRIVIA|SAND)\b(?=\s*[,}])/g, in: [".ts", ".tsx"] },
   { id: "ui-outline", why: "an ink outline on UI (cards, chips, bars, inputs); the world has no outlines, only subjects do",
     re: /\bborder(?:-[trblxy])?-ink\b|\bborder(?:-[trblxy])?-\[\d+px\][^"'`]*?\bborder-ink\b|\bring-ink\b|\boutline-ink\b/g, in: [".tsx", ".ts"] },
   { id: "white-on-colour", why: "letters on colour are ink (grape takes white)",
@@ -106,8 +106,13 @@ const REQUIRES = [
     ["share-match", "src/features/rooms/matchUi.tsx"], ["share-solo", "src/features/play/BoardSoloPage.tsx"],
     ["share-round", "src/features/play/RoundChrome.tsx"], ["share-sort", "src/features/sort/SortSoloPage.tsx"],
     ["share-daily", "src/features/daily/DailyPage.tsx"], ["share-rankup", "src/features/play/Unlock.tsx"],
-    ["share-ranks", "src/features/leaderboard/LeaderboardPage.tsx"], ["share-invite", "src/features/rooms/InviteCard.tsx"],
-  ].map(([id, f]) => ({ id, why: `${f} shares through the new share API (shareResult)`, ok: () => /\bshareResult\b/.test(read(f) ?? "") })),
+    ["share-ranks", "src/features/leaderboard/SunRoad.tsx"], ["share-invite", "src/features/rooms/InviteCard.tsx"],
+  ].map(([id, f]) => ({ id, why: `${f} shares through the new share API (shareResult, or ShareButtons / ResultScreen which call it)`,
+    ok: () => /\bshareResult\b|<ShareButtons\b|<ResultScreen\b/.test(read(f) ?? "") })),
+  { id: "share-buttons", why: "ShareButtons calls shareResult and ResultScreen uses ShareButtons, so the share points above really share",
+    ok: () => /\bshareResult\(/.test(read("src/shared/card/ShareButtons.tsx") ?? "")
+      && /<ShareButtons\b/.test(read("src/features/play/ResultScreen.tsx") ?? "")
+      && !/\bsaveCard\(/.test(read("src/features/play/ResultScreen.tsx") ?? "") },
   { id: "link-previews", why: "a Vercel function serves og:image for /r/:code, /d/:date, /f/:user", ok: () => !!(read("api/og.ts") || read("api/og.tsx")) },
 ];
 

@@ -6,7 +6,7 @@ import type { Replay } from "./replay";
 import { clock, decodeLog, type Level } from "./rules";
 import { Avatar } from "@/shared/ui/Avatar";
 import { stagger, riseIn, popIn } from "@/shared/ui/motion";
-import { drawCard, saveCard, type MatchCard } from "@/shared/card/frame";
+import { drawCard, shareResult, type MatchCard } from "@/shared/card/frame";
 import { Board, TUBES_RATIO } from "./Board";
 import { PlayBoard, PlayRow, PlaySurface } from "@/features/play/PlaySurface";
 import { sortHero } from "./card";
@@ -49,8 +49,11 @@ export function SortSoloPage() {
     let cancelled = false;
     const overPar = r.result.moves - r.puzzle.par;
     void drawCard({
-      title: "BALL SORT", code: null,
-      headline: clock(r.result.ms),
+      title: "BALL SORT", code: null, path: "/ballsort",
+      headline: `Sorted in ${clock(r.result.ms)}`,
+      dare: `Par is ${r.puzzle.par}. Beat it?`,
+      flower: overPar <= 0 ? "bloom" : "awake",
+      text: `I sorted today's tubes in ${clock(r.result.ms)}, ${r.result.moves} moves (par ${r.puzzle.par}). Beat it:`,
       hero: sortHero(r.me.tubes, r.me.cap),
       caption: `${rank ? `#${rank} today · ` : practice ? "practice · " : ""}${r.result.moves} moves${overPar <= 0 ? ", par" : `, par ${r.puzzle.par}`} · ${level}`,
     }).then((made) => { if (!cancelled) setCard(made); })
@@ -157,7 +160,7 @@ export function SortSoloPage() {
               {practice ? "New board" : "Next level"}
             </button>
             {card && (
-              <button onClick={() => saveCard(card.file)}
+              <button onClick={() => void shareResult({ file: card.file, text: card.text ?? "", url: card.link })}
                 className="text-[13px] font-black text-soft underline underline-offset-4">
                 Still image
               </button>

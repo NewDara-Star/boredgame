@@ -8,7 +8,12 @@ import { QuestionPanel } from "@/features/squareoff/QuestionPanel";
 import { Avatar } from "@/shared/ui/Avatar";
 import { stagger, riseIn, popIn } from "@/shared/ui/motion";
 import { useDaily, type DailyStanding } from "./useDaily";
-import { useDailyPlay } from "./useDailyPlay";
+import { readGrid, useDailyPlay } from "./useDailyPlay";
+import { useEffect, useState } from "react";
+import { drawCard, shareResult, type MatchCard } from "@/shared/card/frame";
+import { ShareButtons } from "@/shared/card/ShareButtons";
+import { linkTo } from "@/shared/card/voice";
+import { roundHero } from "@/features/play/roundCard";
 
 const secs = (ms: number) => `${Math.round(ms / 1000)}s`;
 
@@ -39,6 +44,44 @@ function Board({ rows, meId }: { rows: DailyStanding[]; meId?: string }) {
           </div>
         );
       })}
+    </div>
+  );
+}
+
+const RIGHT = "\u{1F7E9}", WRONG = "\u{1F7E5}"; // green and red squares, for the text grid only
+
+/** The day, spoiler-free: the text grid (Wordle's trick) and the card. The grid
+    only appears when this phone saw the order of the answers. */
+function DailyShare({ day, correct, ms, score }: { day: string; correct: number; ms: number; score: number }) {
+  const [card, setCard] = useState<MatchCard | null>(null);
+  const [said, setSaid] = useState("");
+  const grid = readGrid(day);
+  const date = new Date(`${day}T12:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+  const rows = grid ? [grid.slice(0, 5), grid.slice(5)].map((r) => r.map((ok) => (ok ? RIGHT : WRONG)).join("")).join("\n") : "";
+  const text = `BoredGame daily, ${date}\n${correct}/10 in ${secs(ms)}${rows ? `\n${rows}` : ""}\nCan you beat ${correct}?`;
+  useEffect(() => {
+    let cancelled = false;
+    const results = grid?.map((ok) => ({ correct: ok }))
+      ?? Array.from({ length: 10 }, (_, i) => ({ correct: i < correct }));
+    void drawCard({
+      title: "TODAY'S ROUND", code: null, path: "/daily", where: `Today's round · ${date}`,
+      headline: `${correct}/10 on today's round`, hero: roundHero(results, score),
+      caption: `Today's round · ${date} · ${secs(ms)}`,
+      dare: correct === 10 ? "Can you match it?" : `Can you beat ${correct}?`,
+      flower: correct >= 7 ? "bloom" : correct >= 4 ? "awake" : "bored", text,
+    }).then((m) => { if (!cancelled) setCard(m); }).catch(() => {});
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [day, correct, ms, score]);
+  return (
+    <div className="space-y-2.5">
+      {card && <img src={card.url} alt={`Today's round: ${correct} of 10`} className="w-full rounded-2xl shadow-lift-sm" />}
+      <ShareButtons card={card} />
+      <button onClick={() => void shareResult({ text, url: linkTo("/daily") })
+          .then((r) => { if (r === "copied") { setSaid("Copied"); setTimeout(() => setSaid(""), 2200); } })}
+        className="block mx-auto text-[13px] font-black text-soft underline underline-offset-4">
+        {said || "Share as text"}
+      </button>
     </div>
   );
 }
@@ -86,6 +129,11 @@ export function DailyPage() {
             {d.mine ? `In ${secs(d.mine.ms)}. One go a day — back tomorrow.` : "Counting you in…"}
           </p>
         </motion.div>
+        {d.mine && (
+          <motion.div variants={riseIn}>
+            <DailyShare day={d.day} correct={d.mine.correct} ms={d.mine.ms} score={d.mine.score} />
+          </motion.div>
+        )}
         <motion.div variants={popIn}><Board rows={d.board} meId={user.id} /></motion.div>
         <motion.p variants={riseIn} className="text-[12px] font-bold text-soft text-center">
           Same ten questions for everyone, so the scores actually mean something.

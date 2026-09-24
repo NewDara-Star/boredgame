@@ -2,9 +2,9 @@ import { BoardSoloPage } from "@/features/play/BoardSoloPage";
 import { Board } from "@/features/squareoff/Board";
 import { gridBoard } from "@/features/squareoff/gridBoard";
 import { TTT } from "@/features/squareoff/useTttRoom";
-import { TIC_TAC_TOE_ART } from "@/features/squareoff/card";
+import { gridHero } from "@/features/squareoff/card";
 
-const art = { hero: () => TIC_TAC_TOE_ART };
+const art = { hero: (g: { board: NonNullable<Parameters<typeof gridHero>[0]>; line: number[] | null }) => gridHero(g.board, g.line) };
 
 
 /** Plain Tic Tac Toe against the bot. Same board and same reducer as Square

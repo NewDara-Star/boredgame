@@ -6,7 +6,7 @@ import {
 } from "@/features/rooms/matchUi";
 import { Board, TUBES_RATIO } from "./Board";
 import { PlayBoard, PlayRow, PlaySurface } from "@/features/play/PlaySurface";
-import { ballGlyph, sortArt } from "./card";
+import { ballGlyph, sortHero } from "./card";
 import { ReplayPlayer } from "./ReplayPlayer";
 import { decodeLog, type Replay } from "./rules";
 import { useSortRoom } from "./useSortRoom";
@@ -42,7 +42,7 @@ export function SortRaceRoom({
     code, "BALL SORT", status, players,
     { x: r.row?.x_player ?? null, o: r.row?.o_player ?? null },
     !r.won,
-    { hero: () => sortArt("BALL SORT"), glyph: ballGlyph,
+    { hero: () => (r.me ? sortHero(r.me.tubes, r.me.cap) : () => {}), glyph: ballGlyph, me: r.seat ?? null,
       caption: () => r.me && r.row ? `Last race: ${r.me.moves} moves, par ${r.row.par}` : undefined });
 
   // The winner's solve, as a film, once the referee has kept one.

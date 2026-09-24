@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { SPRING } from "@/shared/ui/motion";
+import { shareResult } from "@/shared/card/frame";
 
 /**
  * The whole two-player feature depends on a second person arriving, and the room
@@ -13,17 +14,12 @@ export function InviteCard({ code, waiting }: { code: string; waiting: boolean }
 
   const flash = (msg: string) => { setSaid(msg); setTimeout(() => setSaid(null), 2200); };
 
-  async function share() {
-    // Native share sheet where there is one — on a phone that is the difference
-    // between "send this to your brother" being one tap or six.
-    if (navigator.share) {
-      try {
-        await navigator.share({ title: "BoredGame", text: `Join my room — code ${code}`, url });
-        return;
-      } catch { /* dismissed, fall through to copy */ }
-    }
-    try { await navigator.clipboard.writeText(url); flash("Link copied"); }
-    catch { flash("Copy the code above"); }
+  // One tap to the share sheet where there is one — on a phone that is the
+  // difference between "send this to your brother" being one tap or six. The
+  // link's preview card is drawn by api/og.
+  function share() {
+    void shareResult({ text: `Come play me on BoredGame. Room code ${code}:`, url })
+      .then((r) => { if (r === "copied") flash("Link copied"); });
   }
 
   return (
@@ -43,7 +39,7 @@ export function InviteCard({ code, waiting }: { code: string; waiting: boolean }
         {code}
       </button>
 
-      <button onClick={() => void share()}
+      <button onClick={share}
         className="cut tap w-full mt-2.5 py-3.5 cut-petal text-ink font-display text-lg font-semibold">
         {said ?? "Send the invite link"}
       </button>

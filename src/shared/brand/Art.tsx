@@ -8,6 +8,8 @@ import { useId, type CSSProperties } from "react";
 const ART = import.meta.glob("./art/*.svg", { query: "?raw", import: "default", eager: true }) as Record<string, string>;
 
 export const hasArt = (name: string) => `./art/${name}.svg` in ART;
+/** The untouched SVG, for drawing onto a canvas (share cards). */
+export const artRaw = (name: string) => ART[`./art/${name}.svg`] ?? "";
 
 /** Ids are made unique per instance: two tiles with the same gradient id on one page
     would otherwise both read the first one, and a hidden first one paints nothing. */

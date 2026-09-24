@@ -6,6 +6,7 @@ import { popIn } from "@/shared/ui/motion";
 import { PlayBoard, PlayHead, PlayRow, PlaySurface } from "@/features/play/PlaySurface";
 import { UnlockGate } from "@/features/play/Unlock";
 import { drawCard, type Glyph, type Hero, type MatchCard } from "@/shared/card/frame";
+import { botVoice, gamePath } from "@/shared/card/voice";
 import { ResultScreen } from "@/features/play/ResultScreen";
 import { useSoloBoard } from "@/features/play/useSoloBoard";
 import { TurnPanel } from "@/features/rooms/TurnPanel";
@@ -76,10 +77,10 @@ export function BoardSoloPage<G extends BoardState & { target: number | null; li
   useEffect(() => {
     if (!s.ended) { setCard(null); return; }
     let cancelled = false;
-    const winner = s.wins.x === s.wins.o ? null : s.wins.x > s.wins.o ? sides[0] : sides[1];
+    const v = botVoice(title, s.wins.x, s.wins.o);
     void drawCard({
-      title: title.toUpperCase(), code: null,
-      headline: winner ? `${winner.name} win${winner.mark === "x" ? "" : "s"}` : "All square",
+      title: title.toUpperCase(), code: null, path: gamePath(title),
+      headline: v.headline, dare: v.dare, flower: v.flower, text: v.text,
       hero: art?.hero(g) ?? (() => {}),
       glyph: art?.glyph, caption: art?.caption?.(g),
       sides: [sides[0], sides[1]],
