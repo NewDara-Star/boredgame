@@ -82,8 +82,10 @@ export function VoiceProvider({ children }: { children: React.ReactNode }) {
         const local = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
         localRef.current = local;
 
+        // Private: the database only lets the room's seated players on this
+        // channel (policy "voice: room members listen/talk", F44).
         const chan = supabase!.channel(`voice:${t.roomId}`, {
-          config: { presence: { key: user.id }, broadcast: { self: false } },
+          config: { private: true, presence: { key: user.id }, broadcast: { self: false } },
         });
         chanRef.current = chan;
         const send = (s: SigBody) =>
@@ -124,7 +126,8 @@ export function VoiceProvider({ children }: { children: React.ReactNode }) {
 
         chan.on("broadcast", { event: "sig" }, async ({ payload }) => {
           const msg = payload as Sig;
-          if (msg.from === user.id) return;
+          // Only the opponent we're calling, never anyone else in the room.
+          if (msg.from !== t.peerId) return;
           if (msg.kind === "desc") {
             if (msg.desc.type === "offer") {
               await pc.setRemoteDescription(msg.desc); remoteSet.current = true; await flushIce();
@@ -143,7 +146,7 @@ export function VoiceProvider({ children }: { children: React.ReactNode }) {
         chan.on("presence", { event: "sync" }, () => {
           const st = chan.presenceState<{ user_id?: string }>();
           let peerPresent = false;
-          for (const k in st) for (const m of st[k]) if (m.user_id && m.user_id !== user.id) peerPresent = true;
+          for (const k in st) for (const m of st[k]) if (m.user_id === t.peerId) peerPresent = true;
           if (peerPresent) { sawPeer.current = true; void makeOffer(); }
           // They were here and left the call -> end it.
           else if (sawPeer.current) hangup();

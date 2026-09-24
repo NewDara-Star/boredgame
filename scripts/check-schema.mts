@@ -75,7 +75,6 @@ ok(rels.size >= 8, `only found ${rels.size} table reads — the scan is broken`)
 ok(declaredFns.size >= 15, `only found ${declaredFns.size} functions in schema.sql — the scan is broken`);
 ok(declaredRels.size >= 12, `only found ${declaredRels.size} tables in schema.sql — the scan is broken`);
 
-if (bad) { console.error(`\n${bad} of ${n} schema assertions failed`); process.exit(1); }
 // The daily is played on the phone's own date. Every daily function must take
 // a day either side of UTC (touch_streak's rule): UTC-and-yesterday only shut the
 // daily for an hour after midnight in Dublin and Lagos.
@@ -97,4 +96,20 @@ for (const fn of ["daily_next", "daily_answer", "submit_daily"]) {
      "claim_board_win pays from the room's current game (rooms.mode), not the first table with a row");
 }
 
+// A call is set up only between the room's players (F44, V2). The voice
+// channel is private, and realtime.messages lets on only seated players.
+{
+  const voice = readFileSync(join(root, "src/features/voice/VoiceProvider.tsx"), "utf8");
+  ok(/channel\(`voice:\$\{t\.roomId\}`,\s*\{\s*config:\s*\{\s*private:\s*true/.test(voice),
+     "the voice channel is private");
+  ok(/if \(msg\.from !== t\.peerId\) return;/.test(voice), "a call takes signals only from the opponent");
+  for (const cmd of ["select", "insert"]) {
+    const at = schema.search(new RegExp(`create policy "voice: room members \\w+" on realtime\\.messages\\s+for ${cmd}`));
+    ok(at >= 0 && /public\.voice_topic_ok\(\(select realtime\.topic\(\)\)\)/.test(schema.slice(at, at + 400)),
+       `realtime.messages ${cmd} on voice topics is for room members only`);
+  }
+}
+
+// Every assertion above counts; exit only once they have all run.
+if (bad) { console.error(`\n${bad} of ${n} schema assertions failed`); process.exit(1); }
 console.log(`${n} schema assertions hold (${rpcs.size} rpcs, ${rels.size} relations)`);

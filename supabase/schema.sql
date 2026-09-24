@@ -2376,3 +2376,32 @@ create table if not exists public.app_secrets (
 );
 alter table public.app_secrets enable row level security;
 revoke all on public.app_secrets from anon, authenticated;
+
+-- ============================================================================
+-- Voice calls. Signalling runs on the private realtime channel 'voice:<room id>'
+-- (F44, V2). It used to be public, and room ids count up from 1, so any
+-- signed-in stranger could join and answer a call. Only players seated in the
+-- room may listen to or send on it; every other topic stays shut to clients.
+-- ============================================================================
+create or replace function public.voice_topic_ok(p_topic text)
+returns boolean language plpgsql stable security definer set search_path = public as $$
+begin
+  if p_topic is null or p_topic !~ '^voice:[0-9]{1,18}$' then return false; end if;
+  return exists (select 1 from public.room_players p
+                 where p.room_id = split_part(p_topic, ':', 2)::bigint
+                   and p.user_id = auth.uid());
+end $$;
+revoke execute on function public.voice_topic_ok(text) from public, anon;
+grant execute on function public.voice_topic_ok(text) to authenticated;
+
+drop policy if exists "voice: room members listen" on realtime.messages;
+create policy "voice: room members listen" on realtime.messages
+  for select to authenticated
+  using (realtime.messages.extension in ('broadcast', 'presence')
+         and public.voice_topic_ok((select realtime.topic())));
+
+drop policy if exists "voice: room members talk" on realtime.messages;
+create policy "voice: room members talk" on realtime.messages
+  for insert to authenticated
+  with check (realtime.messages.extension in ('broadcast', 'presence')
+              and public.voice_topic_ok((select realtime.topic())));
