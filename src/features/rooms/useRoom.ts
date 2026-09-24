@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { fire } from "@/shared/lib/fire";
 import { supabase } from "@/shared/lib/supabase";
 import { attempt } from "@/shared/lib/write";
+import { sayError } from "@/shared/lib/sayError";
 import type { Room, RoomPlayer, RoomRound } from "@/shared/types/db";
 import { shuffle } from "@/features/play/content";
 import { BANK_FAILED, useRoomBank } from "./useRoomBank";
@@ -115,7 +116,7 @@ export function useRoom(code: string | undefined, userId: string | undefined) {
     if (!supabase || !room || !userId) return;
     const { data, error: e } = await supabase.rpc("join_room",
       { p_room: room.id, p_username: username });
-    if (e) { setError(`Joining didn't go through: ${e.message}`); return; }
+    if (e) { setError(sayError(e, "Joining didn't go through. Try again.")); return; }
     if (data === "full") setError("This room already has two players in it.");
     else if (data === "started") setError("That match has already started — ask them for a new room.");
     else if (data === "missing") setError("No room with that code.");

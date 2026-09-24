@@ -9,6 +9,7 @@ import { Card } from "@/shared/ui/Card";
 import { validate, isValid, type DraftPuzzle } from "./validation";
 import { forgetContent } from "@/features/play/content";
 import { clashesWith } from "@/shared/lib/normalise";
+import { sayError } from "@/shared/lib/sayError";
 
 /** A category as the database has it. The editor used to carry its own list of
     12 names, missing English and General, and saved none of them (A1, A3). */
@@ -73,7 +74,7 @@ export function AdminPage() {
   async function save() {
     setTouched(true);
     if (!ok) return;
-    if (!supabase || !user) { setMsg({ text: "Sign in with Supabase configured to publish.", bad: true }); return; }
+    if (!supabase || !user) { setMsg({ text: "Sign in to publish.", bad: true }); return; }
     setSaving(true);
     setMsg(null);
     // A Picto answer within the typo allowance of one already in the bank would
@@ -109,7 +110,8 @@ export function AdminPage() {
       created_by: user.id,
     });
     setSaving(false);
-    setMsg(error ? { text: `Couldn't publish: ${error.message}`, bad: true } : { text: "Published.", bad: false });
+    if (error) console.error("[BoredGame] publish failed", error);
+    setMsg(error ? { text: sayError(error, "Couldn't publish. Try again."), bad: true } : { text: "Published.", bad: false });
     if (!error) { forgetContent(d.game); setD(EMPTY); setTouched(false); }
   }
 

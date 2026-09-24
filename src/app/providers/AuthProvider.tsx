@@ -15,6 +15,7 @@ export const asLogin = (id: string) =>
   id.includes("@") ? id.trim() : `${id.trim().toLowerCase()}@${HOME}`;
 export const isSynthetic = (email?: string | null) => !!email?.endsWith(`@${HOME}`);
 import type { Profile } from "@/shared/types/db";
+import { sayError, NO_SERVER } from "@/shared/lib/sayError";
 
 /** Every profile column a player may read (the grant in schema.sql, F48). */
 const PROFILE_COLUMNS = "id, username, avatar, total_answered, total_correct, created_at, streak, best_streak, last_played, is_guest, best_round";
@@ -83,18 +84,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
    * cannot be the only way in until custom SMTP exists.
    */
   async function signIn(id: string, password: string) {
-    if (!supabase) return { error: "Supabase is not configured yet." };
+    if (!supabase) return { error: NO_SERVER };
     const { error } = await supabase.auth.signInWithPassword({ email: asLogin(id), password });
     if (!error) return { error: null };
     return {
       error: /invalid login/i.test(error.message)
         ? "That name and password don't match an account."
-        : error.message,
+        : sayError(error, "Couldn't sign you in. Try again."),
     };
   }
 
   async function signUp(id: string, password: string) {
-    if (!supabase) return { error: "Supabase is not configured yet." };
+    if (!supabase) return { error: NO_SERVER };
     const username = id.includes("@") ? undefined : id.trim();
 
     if (username) {
@@ -115,12 +116,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return {
       error: /already registered|already been/i.test(error.message)
         ? "That name is already taken."
-        : error.message,
+        : sayError(error, "Couldn't make your account. Try again."),
     };
   }
 
   async function signInAsGuest(name: string) {
-    if (!supabase) return { error: "Supabase is not configured yet." };
+    if (!supabase) return { error: NO_SERVER };
     const username = name.trim();
     if (username) {
       // Same check the real sign-up does. Without it the trigger silently falls
@@ -138,8 +139,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // than anything the player did.
     return {
       error: /anonymous/i.test(error.message)
-        ? "Guest play is switched off for this app. Enable anonymous sign-ins in Supabase → Authentication → Sign In / Providers."
-        : error.message,
+        ? "Playing as a guest is switched off right now. Make an account instead."
+        : sayError(error, "Couldn't start a guest game. Try again."),
     };
   }
 
@@ -149,7 +150,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
    * clears is_guest when is_anonymous flips.
    */
   async function claimAccount(name: string, password: string) {
-    if (!supabase || !user) return { error: "Supabase is not configured yet." };
+    if (!supabase || !user) return { error: NO_SERVER };
     const username = name.trim();
     const { data: free } = await supabase.rpc("username_available", { p_name: username });
     if (free === false && profile?.username.toLowerCase() !== username.toLowerCase()) {
@@ -162,7 +163,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return {
         error: /already registered|already been/i.test(error.message)
           ? "That name is already taken."
-          : error.message,
+          : sayError(error, "Couldn't save your account. Try again."),
       };
     }
     if (username) await setUsername(username);
@@ -176,12 +177,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   /** Kept as a fallback. Will hit the rate limit until custom SMTP is set up. */
   async function signInWithLink(email: string) {
-    if (!supabase) return { error: "Supabase is not configured yet." };
+    if (!supabase) return { error: NO_SERVER };
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: { emailRedirectTo: window.location.origin },
     });
-    return { error: error?.message ?? null };
+    return { error: error ? sayError(error, "Couldn't send the link. Try again.") : null };
   }
 
   /**
@@ -190,15 +191,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
    * This is that route — chosen by them, never set on their behalf.
    */
   async function setPassword(password: string) {
-    if (!supabase) return { error: "Supabase is not configured yet." };
+    if (!supabase) return { error: NO_SERVER };
     const { error } = await supabase.auth.updateUser({ password });
-    return { error: error?.message ?? null };
+    return { error: error ? sayError(error, "Couldn't save your password. Try again.") : null };
   }
 
   async function setUsername(name: string) {
-    if (!supabase) return { error: "Supabase is not configured yet." };
+    if (!supabase) return { error: NO_SERVER };
     const { data, error } = await supabase.rpc("set_username", { p_name: name });
-    if (error) return { error: error.message };
+    if (error) return { error: sayError(error, "Couldn't save your name. Try again.") };
     if (data === "taken") return { error: "That name is already taken." };
     if (data === "invalid") return { error: "3–20 characters, letters, numbers and underscores only." };
     await refreshProfile();

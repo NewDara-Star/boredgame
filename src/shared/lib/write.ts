@@ -6,18 +6,15 @@
  * which is why every bug in this app felt like a freeze, and why an expired
  * session was indistinguishable from a broken game.
  */
+import { sayError } from "./sayError";
+
 interface Failure { message: string; code?: string }
 interface Result { error: Failure | null }
 
 function friendly(label: string, err: Failure): string {
-  const m = (err.message ?? "").toLowerCase();
-  if (err.code === "PGRST301" || m.includes("jwt") || m.includes("token is expired"))
-    return "Your sign-in has expired. Open the Profile tab and sign in again.";
-  if (err.code === "42501" || m.includes("row-level security") || m.includes("not a member"))
-    return `${label} was refused — you may no longer be in this room.`;
-  if (m.includes("failed to fetch") || m.includes("network") || m.includes("load failed"))
-    return `${label} didn't send. Check your connection — it will work once you're back.`;
-  return `${label} didn't go through: ${err.message}`;
+  if (err.code === "42501" || /row-level security|not a member/i.test(err.message ?? ""))
+    return `${label} was refused. You may no longer be in this room.`;
+  return sayError(err, `${label} didn't go through. Try again.`);
 }
 
 /** Returns null when the write landed, or a sentence to put on screen. */

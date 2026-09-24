@@ -47,9 +47,6 @@ export class ErrorBoundary extends Component<
           Something on this page hit a value it did not expect. The rest of the app is fine —
           the tabs at the bottom still work.
         </p>
-        <p className="text-[13px] font-bold text-soft/70 mt-3 break-words">
-          {this.state.error.message}
-        </p>
         <button
           onClick={() => { this.setState({ error: null }); this.props.onReset?.(); }}
           className="cut tap w-full mt-5 py-3.5 font-display text-lg font-semibold cut-petal">
