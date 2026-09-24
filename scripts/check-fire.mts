@@ -104,5 +104,18 @@ for (const file of walk(join(root, "src"))) {
 }
 ok(filings >= 1, `found ${filings} record_round calls — the scan is broken`);
 
+// ---- 4. every row arrives -----------------------------------------------------
+// The server returns at most 1,000 rows per request and says nothing when it
+// stops. The trivia bank is 1,787: asked once, two thirds of some categories
+// never reached a player. The loader must page, in a fixed order.
+{
+  const src = decomment(readFileSync(join(root, "src/features/play/content.ts"), "utf8"));
+  const i = src.indexOf("async function loadLive(");
+  const body = i < 0 ? "" : src.slice(i, src.indexOf("\n}\n", i));
+  ok(i >= 0, "content.ts loads the bank through loadLive");
+  ok(/\.range\(/.test(body) && /\.order\(/.test(body), "the bank is fetched in ordered pages (.order + .range), not in one request");
+  ok(/count:\s*"exact"/.test(body) && /for\s*\(/.test(body), "the first page carries the total and the rest are fetched from it");
+}
+
 if (bad) { console.error(`\n${bad} of ${n} delivery assertions failed`); process.exit(1); }
 console.log(`${n} delivery assertions hold (${voids} void-supabase sites, ${checked} edge functions)`);

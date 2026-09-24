@@ -68,6 +68,38 @@ function fromRow(row: PuzzleRow): PlayItem {
 }
 
 /**
+ * The server hands back at most PAGE rows per request, whatever is asked for,
+ * and says nothing when it stops short. Asked once, the 1,787-question trivia
+ * bank came back as 1,000: two thirds of Film & TV never played, and rounds ran
+ * 36% hard instead of 20%. So: the first page carries the total, the rest are
+ * fetched together, all in id order so the pages can't overlap or skip.
+ */
+export const PAGE = 1000;
+
+async function loadLive(game: GameKey): Promise<PuzzleRow[]> {
+  const page = (from: number, count = false) => supabase!
+    .from("puzzles")
+    .select("*, categories(name)", count ? { count: "exact" } : undefined)
+    .eq("game", game)
+    .eq("status", "live")
+    .order("id")
+    .range(from, from + PAGE - 1);
+  const first = await page(0, true);
+  if (first.error) throw first.error;
+  const rows = (first.data ?? []) as PuzzleRow[];
+  const total = first.count ?? rows.length;
+  const rest = [];
+  for (let from = PAGE; from < total; from += PAGE) rest.push(page(from));
+  for (const r of await Promise.all(rest)) {
+    // A later page failing keeps what arrived rather than dropping to the
+    // bundled set: 1,000 real questions beat the handful in the app.
+    if (r.error) { console.error("puzzles page failed", r.error.message); continue; }
+    rows.push(...((r.data ?? []) as PuzzleRow[]));
+  }
+  return rows;
+}
+
+/**
  * Database first, bundled content as the fallback. The app is fully playable
  * before Supabase exists, which is what makes it testable on day one.
  */
@@ -81,19 +113,7 @@ export async function loadContent(game: GameKey): Promise<PlayItem[]> {
   // that simply never comes back — bad signal, captive-portal wifi — used to
   // leave every game sitting on "Dealing questions…" for as long as the tab was
   // open, with a perfectly good bundled set sitting unused in the same file.
-  const rows = await withTimeout(
-    (async () => {
-      const { data, error } = await supabase!
-        .from("puzzles")
-        .select("*, categories(name)")
-        .eq("game", game)
-        .eq("status", "live");
-      if (error) throw error;
-      return (data ?? []) as PuzzleRow[];
-    })(),
-    CONTENT_TIMEOUT_MS,
-    () => [] as PuzzleRow[],
-  );
+  const rows = await withTimeout(loadLive(game), CONTENT_TIMEOUT_MS, () => [] as PuzzleRow[]);
 
   return rows.length > 0 ? rows.map(fromRow) : bundled();
 }
