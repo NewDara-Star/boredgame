@@ -1,3 +1,4 @@
+import { BankTrouble } from "@/features/rooms/BankTrouble";
 import { ownersFor } from "@/features/play/board";
 import { useEffect, useState } from "react";
 import type { Challenge, RoomPlayer, RoomStatus } from "@/shared/types/db";
@@ -76,7 +77,9 @@ export function SquareOffRoom({
   // that came before it, which is the only reason to keep score at all.
   if (done) return <MatchOver sides={sides} myMark={t.myMark} card={card} />;
 
-  if (!t.ready) return <Dealing what="the questions" />;
+  if (!t.ready) return t.bankTrouble
+    ? <BankTrouble message={t.bankTrouble} onRetry={t.retryBank} />
+    : <Dealing what="the questions" />;
 
   if (!g) return <Dealing what="the board" />;
 

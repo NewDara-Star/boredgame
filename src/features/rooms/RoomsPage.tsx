@@ -19,6 +19,7 @@ import { SortRaceRoom } from "@/features/sort/SortRaceRoom";
 import { startSortRace } from "@/features/sort/useSortRoom";
 import { Lobby } from "./Lobby";
 import { InviteCard } from "./InviteCard";
+import { BankTrouble } from "./BankTrouble";
 import { PeerNotice } from "./matchUi";
 import { VoiceControl } from "@/features/voice/VoiceControl";
 import { AuthCard } from "@/features/profile/AuthCard";
@@ -41,7 +42,7 @@ export function RoomsPage() {
 
   const {
     room, players, present, round, currentPuzzle, error, categories, levels,
-    join, startNextRound, claimRound, setup, setReady, leave,
+    join, startNextRound, claimRound, setup, setReady, leave, bankTrouble, retryBank,
   } = useRoom(code, user?.id);
   const myRooms = useMyRooms(user?.id);
 
@@ -227,7 +228,9 @@ export function RoomsPage() {
         <p className="text-xs text-soft font-bold">{room.status}</p>
       </div>
 
-      <Note>{error ?? startError}</Note>
+      {/* A board game shows its own; this is the race's (and the lobby's). */}
+      {(room.mode === "race" || waiting) ? <BankTrouble message={bankTrouble} onRetry={retryBank} /> : null}
+      <Note>{error !== bankTrouble ? error ?? startError : startError}</Note>
 
       {iAmIn && <PeerNotice players={players} present={present} userId={user.id} waiting={waiting} />}
 

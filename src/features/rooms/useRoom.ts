@@ -3,9 +3,9 @@ import { fire } from "@/shared/lib/fire";
 import { supabase } from "@/shared/lib/supabase";
 import { attempt } from "@/shared/lib/write";
 import type { Room, RoomPlayer, RoomRound } from "@/shared/types/db";
-import { loadContent, shuffle } from "@/features/play/content";
+import { shuffle } from "@/features/play/content";
+import { BANK_FAILED, useRoomBank } from "./useRoomBank";
 import { scopePool, emptyReason, levelCounts } from "@/features/play/scope";
-import type { PlayItem } from "@/features/play/types";
 
 /**
  * The whole of the "websocket problem". Both browsers subscribe to three tables;
@@ -15,7 +15,6 @@ export function useRoom(code: string | undefined, userId: string | undefined) {
   const [room, setRoom] = useState<Room | null>(null);
   const [players, setPlayers] = useState<RoomPlayer[]>([]);
   const [round, setRound] = useState<RoomRound | null>(null);
-  const [pool, setPool] = useState<PlayItem[]>([]);
   const [error, setError] = useState<string | null>(null);
   // user_ids currently connected to this room over the realtime socket.
   const [present, setPresent] = useState<Set<string>>(new Set());
@@ -93,12 +92,10 @@ export function useRoom(code: string | undefined, userId: string | undefined) {
   // old bank in place: the category chips described the game you had just left,
   // and a race dealt out of it. Only visible now that a room can be reopened and
   // set to something else.
-  useEffect(() => {
-    if (!room) return;
-    let cancelled = false;
-    void loadContent(room.game).then((all) => { if (!cancelled) setPool(all); });
-    return () => { cancelled = true; };
-  }, [room?.game]); // eslint-disable-line react-hooks/exhaustive-deps
+  // Only stored questions (a race deals by id), and a failed load keeps trying
+  // (useRoomBank) instead of leaving the room with nothing to deal.
+  const bank = useRoomBank(room?.game ?? null);
+  const pool = bank.pool;
 
   // A heartbeat on the row both players already subscribe to: the update itself
   // is what tells the other browser you are still here.
@@ -135,7 +132,7 @@ export function useRoom(code: string | undefined, userId: string | undefined) {
       // Two very different causes, and telling someone their database is empty
       // when they simply picked Music and Places is not a useful thing to say.
       setError(pool.length === 0
-        ? "Multiplayer needs puzzles stored in the database, not bundled ones."
+        ? (bank.failed ? BANK_FAILED : "No questions are live for this game yet.")
         : emptyReason(room, false));
       return;
     }
@@ -144,7 +141,7 @@ export function useRoom(code: string | undefined, userId: string | undefined) {
     setError(await attempt("Dealing the round", supabase.from("room_rounds").insert({
       room_id: room.id, puzzle_id: Number(pick.id), round_no: used + 1,
     })));
-  }, [room, round, pool]);
+  }, [room, round, pool, bank.failed]);
 
   /** The server judges the answer and, on a correct first-in one, sets the round
       winner and the point together. The client no longer writes the winner (it
@@ -200,6 +197,9 @@ export function useRoom(code: string | undefined, userId: string | undefined) {
   return {
     room, players, present, round, currentPuzzle, error, categories, levels,
     join, startNextRound, claimRound, setup, setReady, leave,
+    /** the questions didn't load; it keeps trying, and this says so */
+    bankTrouble: bank.failed && pool.length === 0 ? BANK_FAILED : null,
+    retryBank: bank.retryNow,
   };
 }
 

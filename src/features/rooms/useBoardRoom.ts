@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/shared/lib/supabase";
-import { loadContent, shuffle } from "@/features/play/content";
-import type { PlayItem } from "@/features/play/types";
+import { shuffle } from "@/features/play/content";
+import { BANK_FAILED, useRoomBank } from "./useRoomBank";
 import { deal } from "@/features/play/dealer";
 import { scopePool, emptyReason, type Scope } from "@/features/play/scope";
 export type { Scope };
@@ -92,17 +92,14 @@ export function useBoardRoom<G extends BoardState, R extends BoardRow>(
   // which depends on it, restarts every time the row changes.
   const rowRef = useRef<R | null>(null);
   const remember = useCallback((next: R | null) => { rowRef.current = next; setRow(next); }, []);
-  const [pool, setPool] = useState<PlayItem[]>([]);
+  // Trivia boards only: nothing to ask, nothing to fetch. Keeps retrying a
+  // failed load (useRoomBank) instead of dealing for ever.
+  const bank = useRoomBank("trivia", !plain && challenge === "trivia");
+  const pool = useMemo(() => shuffle(bank.pool.filter((i) => i.choices && i.choices.length >= 2)), [bank.pool]);
   const seen = useRef<Set<string>>(new Set());
   const lastServed = useRef<string | null>(null);
   const [poolError, setPoolError] = useState<string | null>(null);
   const [writeError, setWriteError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (plain || challenge !== "trivia") return;   // nothing to ask, nothing to fetch
-    void loadContent("trivia").then((all) =>
-      setPool(shuffle(all.filter((i) => i.choices && i.choices.length >= 2 && /^\d+$/.test(i.id)))));
-  }, [plain, challenge]);
 
   useEffect(() => {
     if (!supabase || !roomId) return;
@@ -310,6 +307,9 @@ export function useBoardRoom<G extends BoardState, R extends BoardRow>(
     error: poolError ?? writeError,
     /** A plain or catapult game is never waiting for content — it has none. */
     ready: plain || challenge !== "trivia" || pool.length > 0,
+    /** the questions didn't load; it keeps trying, and this says so */
+    bankTrouble: bank.failed && pool.length === 0 ? BANK_FAILED : null,
+    retryBank: bank.retryNow,
     /** when the current question went up, so both clients run the same clock */
     askedAt: row ? Date.parse(row.updated_at) : 0,
     seats: { x: row?.x_player ?? null, o: row?.o_player ?? null },
