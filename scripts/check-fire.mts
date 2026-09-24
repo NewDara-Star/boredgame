@@ -154,5 +154,17 @@ ok(filings >= 1, `found ${filings} record_round calls — the scan is broken`);
   ok(/void fetch\(/.test(rel) && /keepalive: true/.test(rel) && !/await supabase/.test(rel), "handing back push doesn't wait on the server either");
 }
 
+// ---- 7. a profile lands only on its own person -------------------------------
+// A slow profile load for Dara, still out when Mariam signed in on the same
+// phone, arrived and put Dara's name on Mariam's app (F6).
+{
+  const auth = readFileSync(join(root, "src/app/providers/AuthProvider.tsx"), "utf8");
+  const at = auth.indexOf("async function refreshProfile(");
+  const body = auth.slice(at, auth.indexOf("\n  }\n", at));
+  ok(/const uid = uidRef\.current;/.test(body) && /if \(uidRef\.current !== uid\) return;/.test(body), "refreshProfile drops an answer for someone who has since left");
+  ok(/p\.id !== uidRef\.current\) return;/.test(auth) && /applyProfile: takeProfile/.test(auth), "a profile handed in from elsewhere (touch_streak, record_best) is checked too");
+  ok(!/setUser\((data\.session|session)\?\.user/.test(auth), "every change of person goes through takeUser, which clears the last one's profile");
+}
+
 if (bad) { console.error(`\n${bad} of ${n} delivery assertions failed`); process.exit(1); }
 console.log(`${n} delivery assertions hold (${voids} void-supabase sites, ${checked} edge functions)`);

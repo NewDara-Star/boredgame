@@ -1,5 +1,5 @@
 import { releasePush } from "@/features/push/release";
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase, isConfigured, AUTH_STORAGE_KEY, SERVER } from "@/shared/lib/supabase";
 
@@ -78,24 +78,47 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(isConfigured);
   const [claimedAs, setClaimedAs] = useState<string | null>(null);
 
+  /**
+   * Whose app this is right now, kept in step with `user` but readable inside a
+   * request that started earlier (F6). A profile load is slow; sign out and in
+   * as someone else while it's out, and the answer for the first person used
+   * to land on the second. Every profile that arrives is checked against this.
+   */
+  const uidRef = useRef<string | null>(null);
+  function takeUser(u: User | null) {
+    const id = u?.id ?? null;
+    if (id !== uidRef.current) {
+      uidRef.current = id;
+      setProfile(null);          // never show the last person's name while this one's loads
+    }
+    setUser(u);
+  }
+  /** A profile is only ever the current person's. */
+  function takeProfile(p: Profile | null) {
+    if (p && p.id !== uidRef.current) return;
+    setProfile(p);
+  }
+
   useEffect(() => {
     if (!supabase) return;
     supabase.auth.getSession().then(({ data }) => {
-      setUser(data.session?.user ?? null);
+      takeUser(data.session?.user ?? null);
       setLoading(false);
     });
     const { data: sub } = supabase.auth.onAuthStateChange((_e, session: Session | null) => {
-      setUser(session?.user ?? null);
+      takeUser(session?.user ?? null);
     });
     return () => sub.subscription.unsubscribe();
   }, []);
 
   async function refreshProfile() {
-    if (!supabase || !user) { setProfile(null); return; }
+    const uid = uidRef.current;
+    if (!supabase || !uid) { setProfile(null); return; }
     // Named columns, not "*": friend_code is readable by nobody over the API
     // (F48), so a "*" would be refused outright. PROFILE_COLUMNS matches the grant.
-    const { data } = await supabase.from("profiles").select(PROFILE_COLUMNS).eq("id", user.id).single();
-    setProfile((data as Profile | null) ?? null);
+    const { data } = await supabase.from("profiles").select(PROFILE_COLUMNS).eq("id", uid).single();
+    if (uidRef.current !== uid) return;   // someone else signed in while this was out
+    takeProfile((data as Profile | null) ?? null);
   }
 
   useEffect(() => { void refreshProfile(); /* eslint-disable-next-line */ }, [user?.id]);
@@ -284,7 +307,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         headers: { apikey: SERVER.key, Authorization: `Bearer ${token}` },
       }).catch(() => { /* offline: the refresh token expires on its own */ });
     }
-    setUser(null);
+    takeUser(null);
     setProfile(null);
     setClaimedAs(null);
     supabase.auth.startAutoRefresh();
@@ -295,7 +318,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signIn, signUp, signInWithLink, signInAsGuest, claimAccount,
       claimedAs, clearClaimed: () => setClaimedAs(null),
       checkName: (name: string) => supabase ? nameBlocked(name, profile?.username) : Promise.resolve(nameProblem(name)),
-      setPassword, setUsername, signOut, refreshProfile, applyProfile: setProfile }}>
+      setPassword, setUsername, signOut, refreshProfile, applyProfile: takeProfile }}>
       {children}
     </Ctx.Provider>
   );
