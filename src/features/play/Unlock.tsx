@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { RAMPS } from "@/shared/brand/tokens";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Link } from "react-router-dom";
@@ -146,9 +146,13 @@ export function UnlockOverlay({ unlock, onClose }: { unlock: Unlock; onClose: ()
 
 /** Waits for the score to finish counting before interrupting it. */
 export function UnlockGate({ outcome }: { outcome: RoundOutcome | null }) {
-  const unlock = unlockFrom(outcome);
+  const unlock = useMemo(() => unlockFrom(outcome), [outcome]);
   const [open, setOpen] = useState(false);
-  const [done, setDone] = useState(false);
+  // Closed for THIS outcome. A board game keeps the gate on screen from game to
+  // game, and a plain "done" flag meant that after closing one celebration, a
+  // rank-up earned in a later game on the same visit never opened.
+  const [closedFor, setClosedFor] = useState<RoundOutcome | null>(null);
+  const done = closedFor !== null && closedFor === outcome;
 
   useEffect(() => {
     if (!unlock || done) return;
@@ -160,7 +164,7 @@ export function UnlockGate({ outcome }: { outcome: RoundOutcome | null }) {
     <AnimatePresence>
       {open && unlock && (
         <UnlockOverlay key="unlock" unlock={unlock}
-          onClose={() => { setOpen(false); setDone(true); }} />
+          onClose={() => { setOpen(false); setClosedFor(outcome); }} />
       )}
     </AnimatePresence>
   );

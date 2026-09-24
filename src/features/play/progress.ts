@@ -55,7 +55,9 @@ export interface RoundOutcome {
 
 /** Records a finished round locally, and to the database when signed in. */
 export async function recordRound(
-  game: GameKey, results: RoundResult[], score: number, userId?: string,
+  /** null: these answers set no best round (board games file their questions as
+      Trivia answers, and a Trivia best of 300 from Square Off was nonsense). */
+  game: GameKey, results: RoundResult[], score: number | null, userId?: string,
 ): Promise<RoundOutcome> {
   const now = today();
   const p = readLocal(userId);
@@ -67,7 +69,7 @@ export async function recordRound(
   // has to repeat can take the ones seen longest ago (pickRound).
   const now_ids = new Set(results.map((r) => r.item.id));
   p.seen = [...p.seen.filter((id) => !now_ids.has(id)), ...now_ids].slice(-500);
-  p.bestScore[game] = Math.max(p.bestScore[game] ?? 0, score);
+  if (score !== null) p.bestScore[game] = Math.max(p.bestScore[game] ?? 0, score);
   p.streak = advance(p.streak, p.lastPlayed, now);
   p.bestStreak = Math.max(p.bestStreak, p.streak);
   p.lastPlayed = now;
@@ -110,7 +112,7 @@ export async function recordRound(
     if (error) console.error("record_round failed", error.message);
   }
   // Before touch_streak, so the profile it returns already carries the new best.
-  if (score > 0) await supabase.rpc("record_best", { p_game: game, p_score: score });
+  if (score !== null && score > 0) await supabase.rpc("record_best", { p_game: game, p_score: score });
 
   const { data: after } = await supabase
     .rpc("touch_streak", { p_local_date: now }).single<Profile>();

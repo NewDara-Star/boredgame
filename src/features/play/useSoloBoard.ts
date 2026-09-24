@@ -241,8 +241,9 @@ export function useSoloBoard<G extends BoardState, R extends BoardRow>(
   useEffect(() => {
     if (game.phase !== "over" || saved.current || results.length === 0) return;
     saved.current = true;
-    const score = results.filter((r) => r.correct).length * 100;
-    void recordRound("trivia", results, score, user?.id).then(setOutcome);
+    // Counted like any answers (totals, streak, rank), but no best score: a board
+    // game isn't a Star Trivia round.
+    void recordRound("trivia", results, null, user?.id).then(setOutcome);
   }, [game.phase, results, user?.id]);
 
   const restart = useCallback(() => {

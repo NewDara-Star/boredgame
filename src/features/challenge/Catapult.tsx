@@ -165,7 +165,7 @@ export function Catapult({
           stroke="var(--color-ink)" strokeWidth="1.6" fill="none" />
 
         {/* the pot, behind the ball once the ball is in it */}
-        {(!ball || !ball.inside) && <Pot />}
+        {(!ball || !ball.inside) && pot()}
 
         {live && (
           <>
@@ -188,8 +188,8 @@ export function Catapult({
           </>
         )}
 
-        <Ball p={ball ?? { x: 0, y: 0 }} />
-        {ball?.inside && <Pot />}
+        {ballAt(ball ?? { x: 0, y: 0 })}
+        {ball?.inside && pot()}
       </svg>
 
       <p className="text-center text-[13px] font-bold text-soft min-h-[20px]">
@@ -202,7 +202,10 @@ export function Catapult({
     </div>
   );
 
-  function Pot() {
+  // Plain drawing helpers, called, not components: a component declared inside
+  // Catapult is a new type on every render, so React threw the pot and ball
+  // away and rebuilt them on every animation frame of a flight.
+  function pot() {
     return (
       <g>
         {!sunk && (
@@ -223,7 +226,7 @@ export function Catapult({
     );
   }
 
-  function Ball({ p }: { p: { x: number; y: number } }) {
+  function ballAt(p: { x: number; y: number }) {
     return (
       <g>
         <circle cx={sx(p.x)} cy={sy(p.y) - BALL} r={BALL}
