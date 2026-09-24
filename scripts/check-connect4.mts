@@ -230,5 +230,23 @@ console.log("\nthe sentence under the board");
 console.log("\nmisc");
 ok("other() flips", other("x") === "o" && other("o") === "x");
 
+console.log("\nread aloud (G1)");
+{
+  const { columnLabel } = await import("../src/features/connect4/rules.ts");
+  const { ownersFor, whose, SOLO_OWNERS } = await import("../src/features/play/board.ts");
+  const b: Cell[] = Array(COLS * ROWS).fill(null);
+  const at = (r: number, c: number) => r * COLS + c;
+  b[at(5, 3)] = "x"; b[at(4, 3)] = "x"; b[at(3, 3)] = "o";                 // column 4: 3 discs, bot's on top
+  ok("an empty column says so", columnLabel(b, 0, SOLO_OWNERS, null) === "Column 1, empty");
+  ok("a column gives its count and whose disc is on top",
+     columnLabel(b, 3, SOLO_OWNERS, null) === "Column 4: 3 discs, top one the bot's");
+  for (let r = 0; r < 3; r++) b[at(r, 3)] = r % 2 ? "o" : "x";
+  ok("a full column says full", columnLabel(b, 3, SOLO_OWNERS, null).endsWith(", full"));
+  const room = ownersFor({ x: "Dara", o: "Tobi" }, "o");
+  ok("in a room your seat is 'you' and theirs is their name", room.o === "you" && room.x === "Dara");
+  ok("possessives read naturally", whose(room, "o") === "yours" && whose(room, "x") === "Dara's");
+  ok("the winning four is named", columnLabel(b, 3, room, [at(3, 3)]).includes("winning four"));
+}
+
 console.log(failed === 0 ? "\nall rules hold" : `\n${failed} FAILED`);
 process.exit(failed === 0 ? 0 : 1);

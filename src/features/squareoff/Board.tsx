@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { SPRING } from "@/shared/ui/motion";
 import type { Cell, Mark } from "./rules";
 import { SEAT_CSS } from "@/shared/brand/seats";
+import { SOLO_OWNERS, whose, type Owners } from "@/features/play/board";
 
 /** Drawn, not typed, and outlined: a piece is a subject (BRAND.md rule 1). The ink
     stroke underneath is the outline; the seat colour sits on top with a glint. */
@@ -26,10 +27,12 @@ function Glyph({ mark }: { mark: Mark }) {
 }
 
 export function Board({
-  board, target, line, canPick, compact = false, width, onPick,
+  board, target, line, canPick, compact = false, width, onPick, owners = SOLO_OWNERS,
 }: {
   board: Cell[]; target: number | null; line: number[] | null;
   canPick: boolean; compact?: boolean;
+  /** who each seat is, for the screen-reader labels */
+  owners?: Owners;
   /** the width the screen can give it, measured by PlayBoard. Without one it
       falls back to the old width-driven sizing, which is what the room
       screens and the result cards still want. */
@@ -55,7 +58,9 @@ export function Board({
             key={i}
             disabled={!pickable}
             onClick={() => pickable && onPick(i)}
-            aria-label={cell ? `Square ${i + 1}, taken` : `Square ${i + 1}, open`}
+            aria-label={cell
+              ? `Square ${i + 1}, ${whose(owners, cell)}${won ? ", in the winning line" : ""}`
+              : `Square ${i + 1}, open${contested ? ", being played for" : ""}`}
             className={`${pickable ? "tap" : ""} aspect-square grid place-items-center rounded-[14px]
               ${won ? "bg-leaf-hi" : contested ? "bg-petal-hi" : open ? "bg-mist" : "bg-board"}
               ${pickable ? "cursor-pointer hover:bg-sky-hi/40" : "cursor-default"}`}

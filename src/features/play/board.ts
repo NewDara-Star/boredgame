@@ -83,3 +83,16 @@ export function stallWriter(
   // else's behalf, so an abandoned pick ends the match rather than resolving.
   return null;
 }
+
+/**
+ * Who each seat is, for a screen reader: "you" for this phone's seat, the
+ * other player's name (or "the bot"). The boards used to say only "taken" or
+ * "claimed", so someone listening instead of looking couldn't play.
+ */
+export type Owners = Record<Mark, string>;
+export const SOLO_OWNERS: Owners = { x: "you", o: "the bot" };
+export const ownersFor = (names: Record<Mark, string>, me: Mark | null): Owners => ({
+  x: me === "x" ? "you" : names.x, o: me === "o" ? "you" : names.o,
+});
+/** "yours", "the bot's", "Dara's" */
+export const whose = (owners: Owners, m: Mark) => (owners[m] === "you" ? "yours" : `${owners[m]}'s`);

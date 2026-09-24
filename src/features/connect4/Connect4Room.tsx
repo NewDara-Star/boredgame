@@ -1,3 +1,4 @@
+import { ownersFor } from "@/features/play/board";
 import { useEffect, useState } from "react";
 import type { Challenge, RoomPlayer, RoomStatus } from "@/shared/types/db";
 import { TurnPanel } from "@/features/rooms/TurnPanel";
@@ -89,7 +90,7 @@ export function Connect4Room({
 
       <PlayBoard ratio={BOARD_RATIO.connect4} min={78}>
         {(width) => (
-          <Board board={g.board} target={g.target} line={g.line} width={width}
+          <Board owners={ownersFor(names, t.myMark)} board={g.board} target={g.target} line={g.line} width={width}
             canPick={g.phase === "picking" && g.turn === t.myMark}
             compact={!plain && (g.phase === "asking" || g.phase === "revealed")}
             onPick={t.choose} />

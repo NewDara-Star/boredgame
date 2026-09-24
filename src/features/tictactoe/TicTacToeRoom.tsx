@@ -1,3 +1,4 @@
+import { ownersFor } from "@/features/play/board";
 import type { RoomPlayer, RoomStatus } from "@/shared/types/db";
 import { Note, Dealing } from "@/shared/ui/Note";
 import { Board } from "@/features/squareoff/Board";
@@ -46,7 +47,7 @@ export function TicTacToeRoom({
 
       <PlayBoard min={78}>
         {(width) => (
-          <Board board={g.board} target={null} line={g.line} width={width}
+          <Board owners={ownersFor(names, t.myMark)} board={g.board} target={null} line={g.line} width={width}
             canPick={g.phase === "picking" && g.turn === t.myMark}
             onPick={t.choose} />
         )}

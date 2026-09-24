@@ -2,14 +2,17 @@ import { motion } from "framer-motion";
 import { MemoryFace } from "./Faces";
 import { SPRING } from "@/shared/ui/motion";
 import { COLS, FACES, faceUp, type Game } from "./rules";
+import { SOLO_OWNERS, whose, type Owners } from "@/features/play/board";
 
 /**
  * Sixteen tiles. A tile is face down, face up, or claimed — and a claimed one
  * keeps its face showing, because half the game is remembering where the pairs
  * you have already seen were.
  */
-export function Board({ game, canFlip, width, onFlip }: {
+export function Board({ game, canFlip, width, onFlip, owners = SOLO_OWNERS }: {
   game: Game;
+  /** who each seat is, for the screen-reader labels */
+  owners?: Owners;
   canFlip: boolean;
   /** the width the screen can give it — see PlayBoard */
   width?: number;
@@ -32,7 +35,9 @@ export function Board({ game, canFlip, width, onFlip }: {
             onClick={() => onFlip(i)}
             animate={{ scale: pair ? 1.06 : 1 }}
             transition={SPRING}
-            aria-label={shown ? `${FACES[face]}${owner ? ", claimed" : ""}` : `Tile ${i + 1}, face down`}
+            aria-label={shown
+              ? `Tile ${i + 1}, ${FACES[face]}${owner ? `, ${whose(owners, owner)}` : ", turned over"}`
+              : `Tile ${i + 1}, face down`}
             className={`cut tap aspect-square grid place-items-center leading-none
               disabled:opacity-100 [--c:10px]
               ${owner === "x" ? "cut-petal" : owner === "o" ? "cut-sky"

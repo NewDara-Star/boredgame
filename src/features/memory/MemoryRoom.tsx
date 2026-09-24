@@ -1,3 +1,4 @@
+import { ownersFor } from "@/features/play/board";
 import type { Challenge, RoomPlayer, RoomStatus } from "@/shared/types/db";
 import { Note, Dealing } from "@/shared/ui/Note";
 import {
@@ -64,7 +65,7 @@ export function MemoryRoom({
 
       <PlayBoard min={78}>
         {(width) => (
-          <Board game={g} width={width}
+          <Board owners={ownersFor(names, t.myMark)} game={g} width={width}
             canFlip={mine && (g.phase === "picking" || g.phase === "asking")}
             onFlip={t.choose} />
         )}

@@ -1,6 +1,6 @@
 import {
-  other, speaker, stallWriter as stall,
-  type Mark, type Cell, type Stall,
+  other, speaker, stallWriter as stall, whose,
+  type Mark, type Cell, type Stall, type Owners,
 } from "../play/board.ts";
 
 /**
@@ -211,3 +211,15 @@ export function stallWriter(
   // A pending answer is always owed by whoever's turn it is.
   return stall(g, g.phase === "asking" ? g.turn : null, elapsed, ms);
 }
+
+/** "Column 4: 3 discs, top one the bot's" — what a sighted player sees at a glance. */
+export function columnLabel(board: Cell[], c: number, owners: Owners, line: number[] | null): string {
+  const cells = Array.from({ length: ROWS }, (_, r) => r * COLS + c);
+  const filled = cells.filter((i) => board[i]);
+  if (filled.length === 0) return `Column ${c + 1}, empty`;
+  const top = board[filled[0]]!;
+  const inLine = filled.some((i) => line?.includes(i));
+  return `Column ${c + 1}: ${filled.length} disc${filled.length > 1 ? "s" : ""}, top one ${whose(owners, top)}`
+    + (filled.length === ROWS ? ", full" : "") + (inLine ? ", part of the winning four" : "");
+}
+

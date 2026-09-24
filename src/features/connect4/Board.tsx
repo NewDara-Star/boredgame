@@ -1,7 +1,9 @@
 import { motion } from "framer-motion";
 import { SPRING } from "@/shared/ui/motion";
-import { COLS, ROWS, landingRow, type Cell } from "./rules";
+import { COLS, ROWS, columnLabel, landingRow, type Cell } from "./rules";
 import { SEAT_RAMP } from "@/shared/brand/seats";
+import { SOLO_OWNERS, type Owners } from "@/features/play/board";
+
 
 /**
  * The whole column is the tap target, not the individual cell. On a phone the
@@ -9,10 +11,12 @@ import { SEAT_RAMP } from "@/shared/brand/seats";
  * empty slot in a stack is a worse game than asking them to hit the column.
  */
 export function Board({
-  board, target, line, canPick, compact = false, width, onPick,
+  board, target, line, canPick, compact = false, width, onPick, owners = SOLO_OWNERS,
 }: {
   board: Cell[]; target: number | null; line: number[] | null;
   canPick: boolean; compact?: boolean;
+  /** who each seat is, for the screen-reader labels */
+  owners?: Owners;
   /** the width the screen can give it — see PlayBoard */
   width?: number;
   onPick: (col: number) => void;
@@ -34,7 +38,7 @@ export function Board({
             key={c}
             disabled={!pickable}
             onClick={() => pickable && onPick(c)}
-            aria-label={open ? `Column ${c + 1}, open` : `Column ${c + 1}, full`}
+            aria-label={columnLabel(board, c, owners, line) + (contested ? ", being played for" : "")}
             className={`flex flex-col rounded-[12px] p-[2px]
               ${pickable ? "tap cursor-pointer hover:bg-sky/60" : "cursor-default"}
               ${contested ? "bg-petal/70" : "bg-transparent"}`}
