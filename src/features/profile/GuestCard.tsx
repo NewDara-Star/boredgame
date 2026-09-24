@@ -81,8 +81,8 @@ export function ClaimCard() {
   if (!open) {
     return (
       <button onClick={() => setOpen(true)}
-        className="card tap w-full bg-mist px-4 py-3 text-left">
-        <span className="block font-display text-base font-semibold">Keep this name</span>
+        className="card tap w-full bg-leaf-hi px-4 py-4 text-left">
+        <span className="block font-display text-lg font-semibold">Save my progress</span>
         <span className="block text-[12px] font-bold text-soft mt-0.5">
           Add a password and your games, streak and rank stick around. As a guest, they go 30 days
           after you last play.

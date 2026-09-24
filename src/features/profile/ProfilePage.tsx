@@ -11,6 +11,7 @@ import { Button } from "@/shared/ui/Button";
 import { Field, Input } from "@/shared/ui/Field";
 import { stagger, riseIn, popIn } from "@/shared/ui/motion";
 import { AuthCard } from "./AuthCard";
+import { ClaimCard } from "./GuestCard";
 
 /** A number worth looking at, with a word under it. That is the whole card. */
 function Stat({ value, label, accent = "" }:
@@ -91,7 +92,7 @@ function GuestView({ authError }: { authError: string | null }) {
 
 /** The dashboard, for someone who actually has an account. */
 function MemberView() {
-  const { user, profile, signOut, setPassword: savePassword, setUsername, isGuest } = useAuth();
+  const { user, profile, signOut, setPassword: savePassword, setUsername, isGuest, claimedAs } = useAuth();
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [pwDone, setPwDone] = useState(false);
@@ -224,6 +225,12 @@ function MemberView() {
         {nameNote && !nameErr && <p className="text-[12px] font-bold mt-2" role="status">{nameNote}</p>}
       </motion.section>
 
+      {(isGuest || claimedAs) ? (
+        <section className="border-t-2 border-mist pt-6 space-y-4">
+          <ClaimCard />
+          {isGuest && <StartOver name={profile?.username ?? null} signOut={signOut} />}
+        </section>
+      ) : (
       <section className="border-t-2 border-mist pt-6 space-y-4">
         <form className="space-y-3"
           onSubmit={async (e) => {
@@ -243,8 +250,9 @@ function MemberView() {
             {busy ? "Saving…" : pwDone ? "Password saved" : "Save password"}
           </Button>
         </form>
-        <SignOut name={profile?.username ?? null} guest={isGuest} signOut={signOut} />
+        <SignOut name={profile?.username ?? null} signOut={signOut} />
       </section>
+      )}
     </motion.div>
   );
 }
@@ -268,12 +276,10 @@ export function ProfilePage() {
 }
 
 /**
- * Sign out asks once, and says what happens (F5). A member's games are on the
- * server, so the sheet says so and names the sign-in to come back with. A guest
- * has no sign-in to come back with, so it says that plainly instead (F12 takes
- * the button away from guests altogether).
+ * Sign out asks once, and says what happens (F5): a member's games are on the
+ * server, so the sheet says so and names the sign-in to come back with.
  */
-function SignOut({ name, guest, signOut }: { name: string | null; guest: boolean; signOut: () => Promise<void> }) {
+function SignOut({ name, signOut }: { name: string | null; signOut: () => Promise<void> }) {
   const [asking, setAsking] = useState(false);
   const [busy, setBusy] = useState(false);
   if (!asking) {
@@ -281,16 +287,45 @@ function SignOut({ name, guest, signOut }: { name: string | null; guest: boolean
   }
   return (
     <div className="card p-4 space-y-3" role="alertdialog" aria-label="Sign out?">
-      <p className="text-sm font-semibold">
-        {guest
-          ? "You're playing as a guest. Signing out loses these games for good: keep this name first to save them."
-          : `Your games are saved. Sign back in as ${name ?? "your name"}.`}
-      </p>
+      <p className="text-sm font-semibold">Your games are saved. Sign back in as {name ?? "your name"}.</p>
       <div className="flex gap-2">
         <Button variant="ghost" className="flex-1" onClick={() => setAsking(false)} disabled={busy}>Stay</Button>
         <Button className="flex-1" disabled={busy}
           onClick={async () => { setBusy(true); await signOut(); }}>
-          {busy ? "Signing out…" : guest ? "Sign out anyway" : "Sign out"}
+          {busy ? "Signing out…" : "Sign out"}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * A guest has no sign-in to come back with, so there is no Sign out (F12): a
+ * guest who signed out lost everything, and nothing said so. Saving comes first
+ * and big (the ClaimCard above); starting over is small, and says plainly that
+ * it's for good.
+ */
+function StartOver({ name, signOut }: { name: string | null; signOut: () => Promise<void> }) {
+  const [asking, setAsking] = useState(false);
+  const [busy, setBusy] = useState(false);
+  if (!asking) {
+    return (
+      <button onClick={() => setAsking(true)}
+        className="block mx-auto text-[12px] font-bold text-soft underline underline-offset-4">
+        Start over as someone new
+      </button>
+    );
+  }
+  return (
+    <div className="card bg-petal-hi p-4 space-y-3" role="alertdialog" aria-label="Start over?">
+      <p className="text-sm font-semibold">
+        This loses {name ? `${name}'s` : "these"} games, streak and friends for good. There's no way back.
+      </p>
+      <div className="flex gap-2">
+        <Button className="flex-1" onClick={() => setAsking(false)} disabled={busy}>Keep playing</Button>
+        <Button variant="ghost" className="flex-1" disabled={busy}
+          onClick={async () => { setBusy(true); await signOut(); }}>
+          {busy ? "One moment…" : "Start over"}
         </Button>
       </div>
     </div>

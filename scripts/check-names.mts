@@ -67,6 +67,15 @@ ok(!/isn't 3–20 letters|already using that name/.test(auth), "the old catch-al
   ok(/You'll sign in as \$\{draft\.trim\(\)\} from now on\./.test(read("src/features/profile/ProfilePage.tsx")), "the rename says what you sign in as now");
 }
 
+// A guest can't lose everything by accident (F12): no Sign out for a guest,
+// saving first and big, starting over small and warned.
+{
+  const page = read("src/features/profile/ProfilePage.tsx");
+  const guestSide = page.indexOf("{(isGuest || claimedAs) ? ("), memberSide = page.indexOf("<SignOut ");
+  ok(guestSide > 0 && memberSide > guestSide && /<ClaimCard \/>/.test(page.slice(guestSide, memberSide)), "a guest's You screen offers saving, not Sign out");
+  ok(/Start over as someone new/.test(page) && /for good\. There's no way back\./.test(page), "starting over is there, small, and says it's for good");
+}
+
 // Our words, not the browser's tooltip: the name forms don't let it speak.
 for (const f of ["src/features/profile/AuthCard.tsx", "src/features/profile/GuestCard.tsx", "src/features/profile/ProfilePage.tsx"]) {
   const src = read(f);
