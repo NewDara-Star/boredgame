@@ -27,7 +27,7 @@ import { AuthCard } from "@/features/profile/AuthCard";
 import { GuestCard, ClaimCard } from "@/features/profile/GuestCard";
 import { Avatar } from "@/shared/ui/Avatar";
 import { Note, Dealing } from "@/shared/ui/Note";
-import { ROOM_GAMES } from "@/features/play/registry";
+import { ROOM_GAMES, GAMES } from "@/features/play/registry";
 import { FriendsPanel } from "@/features/friends/Friends";
 
 export function RoomsPage() {
@@ -55,6 +55,18 @@ export function RoomsPage() {
     join, startNextRound, claimRound, revealRound, setup, setReady, leave, bankTrouble, retryBank,
   } = useRoom(code, user?.id);
   const myRooms = useMyRooms(user?.id);
+
+  // "Play a friend" on the Games sheet (#14) opens a room already set to that
+  // game. Once, and only by the host, while the room is still waiting.
+  const preset = (useLocation().state as { preset?: string } | null)?.preset ?? null;
+  const presetDone = useRef(false);
+  useEffect(() => {
+    if (presetDone.current || !preset || !room || !user || room.status !== "waiting" || room.host_id !== user.id) return;
+    const g = GAMES.find((x) => x.slug === preset);
+    if (!g?.room) return;
+    presetDone.current = true;
+    void setup(g.room.mode, g.bank ?? room.game, [], room.difficulty ?? [], g.room.challenge ?? room.challenge ?? "trivia");
+  }, [preset, room, user, setup]);
 
   // Race deals a puzzle a round and scores in room_players. The board games own
   // their own row and their own writer, so everything the race UI does below is

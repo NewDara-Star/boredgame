@@ -29,6 +29,14 @@ export interface GameDef {
   Art: (p: { size: number }) => JSX.Element;
   /** The game's family sets its tile and share-card colour (BRAND.md, "Game families"). */
   family: Family;
+  /** Played on your own: against the bot, or just you (the Games sheet, #14). */
+  solo: "bot" | "alone";
+  /** Two lines on how it plays, one tap away on the Games sheet (#14). */
+  howTo: string;
+  /** Other names for this very game: a search for one finds it (#13). */
+  alsoKnown: string[];
+  /** Games it's close to but isn't. A search for one finds nothing, then names this as the nearest thing (#13). */
+  like: string[];
 }
 
 /**
@@ -43,6 +51,8 @@ export const GAMES: GameDef[] = [
     badge: "Word puzzle", bank: "picto", path: "/picto", chip: "bg-sky text-ink",
     room: { mode: "race", blurb: "Same rebus on both screens. First correct answer takes the round." },
     family: "quiz",
+    solo: "alone", howTo: "A picture hides a phrase: words placed, sized or repeated to say it. Type the phrase. A hint costs points; skipping sends it to the back.",
+    alsoKnown: ["rebus", "phrase", "picture puzzle"], like: ["wordle", "riddle", "words", "puzzle"],
     Art: ({ size }) => <GameTile slug="picto" size={size} label="Picto Phrase" />,
   },
   {
@@ -50,6 +60,8 @@ export const GAMES: GameDef[] = [
     badge: "Quiz", bank: "trivia", path: "/trivia", chip: "bg-sky text-ink",
     room: { mode: "race", blurb: "Same question on both screens. First correct answer takes the round." },
     family: "quiz",
+    solo: "alone", howTo: "Ten questions, four options each. The quicker you answer right, the more it's worth.",
+    alsoKnown: ["quiz", "questions", "general knowledge", "pub quiz", "facts"], like: ["kahoot"],
     Art: ({ size }) => <GameTile slug="trivia" size={size} label="Star Trivia" />,
   },
   {
@@ -57,6 +69,8 @@ export const GAMES: GameDef[] = [
     badge: "Board game", bank: "trivia", path: "/squareoff", chip: "bg-leaf text-ink",
     room: { mode: "squareoff", challenge: "trivia", blurb: "Tic-tac-toe. A square costs a right answer, and missing gives your opponent one shot at it." },
     family: "board",
+    solo: "bot", howTo: "Tic Tac Toe where a square costs a right answer. Miss, and the other side gets a shot at it.",
+    alsoKnown: ["quiz board", "squares"], like: ["noughts", "crosses", "tic tac toe"],
     Art: ({ size }) => <GameTile slug="squareoff" size={size} label="Square Off" />,
   },
   {
@@ -64,6 +78,8 @@ export const GAMES: GameDef[] = [
     badge: "Board game", bank: null, path: "/tictactoe", chip: "bg-leaf text-ink",
     room: { mode: "tictactoe", blurb: "The plain game. Take a square, first to three in a row." },
     family: "board",
+    solo: "bot", howTo: "Take turns placing your mark. Three in a row, across, down or diagonal, wins.",
+    alsoKnown: ["noughts", "crosses", "noughts and crosses", "x and o"], like: ["chess", "checkers", "draughts", "board game"],
     Art: ({ size }) => <GameTile slug="tictactoe" size={size} label="Tic Tac Toe" />,
   },
   {
@@ -71,6 +87,8 @@ export const GAMES: GameDef[] = [
     badge: "Board game", bank: null, path: "/connect4", chip: "bg-leaf text-ink",
     room: { mode: "connect4", blurb: "The plain game. Tap a column, the disc falls, four in a row wins." },
     family: "board",
+    solo: "bot", howTo: "Drop discs into the columns. Four in a row, any direction, wins.",
+    alsoKnown: ["four in a row", "connect four", "discs"], like: ["checkers", "draughts", "chess"],
     Art: ({ size }) => <GameTile slug="connect4" size={size} label="Connect 4" />,
   },
   {
@@ -79,6 +97,8 @@ export const GAMES: GameDef[] = [
     badge: "Card game", bank: null, path: "/memory", chip: "bg-grape text-board",
     room: { mode: "memory", blurb: "Sixteen tiles, eight pairs. Find one and you go again." },
     family: "puzzle",
+    solo: "bot", howTo: "Turn two cards over. A pair stays yours and you go again; a miss passes the turn.",
+    alsoKnown: ["pairs", "concentration", "match"], like: ["cards", "snap"],
     Art: ({ size }) => <GameTile slug="memory" size={size} label="Memory Match" />,
   },
   {
@@ -88,6 +108,8 @@ export const GAMES: GameDef[] = [
     room: { mode: "ballsort",
       blurb: "The same tubes on both screens, both of you at once. First to sort wins." },
     family: "puzzle",
+    solo: "alone", howTo: "Pour balls between tubes until each tube holds one colour. A ball only lands on its own colour or an empty tube.",
+    alsoKnown: ["sort", "balls", "tubes", "water sort"], like: ["colours", "puzzle"],
     Art: ({ size }) => <GameTile slug="ballsort" size={size} label="Ball Sort" />,
   },
   {
@@ -96,6 +118,8 @@ export const GAMES: GameDef[] = [
     badge: "Board game", bank: null, path: "/catapultsquares", chip: "bg-ember text-ink",
     room: { mode: "squareoff", challenge: "catapult", blurb: "Tic-tac-toe, but a square costs a shot rather than a right answer." },
     family: "skill",
+    solo: "bot", howTo: "Pull back, aim, let go. Land in a square to claim it; three in a row wins.",
+    alsoKnown: ["catapult", "throw", "aim"], like: ["angry birds", "physics", "launch"],
     Art: ({ size }) => <GameTile slug="catapultsquares" size={size} label="Catapult Squares" />,
   },
   {
@@ -104,6 +128,8 @@ export const GAMES: GameDef[] = [
     badge: "Board game", bank: null, path: "/connect4catapult", chip: "bg-ember text-ink",
     room: { mode: "connect4trivia", challenge: "catapult", blurb: "Name a column, then land a shot to earn it." },
     family: "skill",
+    solo: "bot", howTo: "Connect 4, but every disc is a shot: hit the target and it drops.",
+    alsoKnown: ["catapult", "four in a row", "throw"], like: ["angry birds", "physics", "launch", "aim"],
     Art: ({ size }) => <GameTile slug="connect4catapult" size={size} label="Connect 4 Catapult" />,
   },
   {
@@ -111,6 +137,8 @@ export const GAMES: GameDef[] = [
     badge: "Board game", bank: "trivia", path: "/connect4trivia", chip: "bg-leaf text-ink",
     room: { mode: "connect4trivia", challenge: "trivia", blurb: "Name a column, answer a question. Get it wrong and you lose the turn — no second chances." },
     family: "board",
+    solo: "bot", howTo: "Connect 4, but every disc costs a right answer.",
+    alsoKnown: ["four in a row", "connect four", "quiz"], like: ["questions"],
     Art: ({ size }) => <GameTile slug="connect4trivia" size={size} label="Connect 4 Trivia" />,
   },
 ];
