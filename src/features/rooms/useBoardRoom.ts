@@ -72,6 +72,9 @@ export interface BoardEngine<G extends BoardState, R extends BoardRow> {
    * hook and filled in by `observe`. Engines that need no memory ignore it.
    */
   botCell(g: G, me: Mark, rand?: () => number, seen?: Map<number, number>): number;
+  /** How long a reveal stays up before play moves on, where the game needs its
+      own: Memory's missed pair is the thing you're trying to remember. */
+  revealMs?: number;
   /** Called on every state the bot could learn from. Only Memory implements it. */
   observe?(g: G, seen: Map<number, number>): void;
   /** One line of English for what just happened. The board alone is not
@@ -301,8 +304,8 @@ export function useBoardRoom<G extends BoardState, R extends BoardRow>(
     if (plain || !game || game.phase !== "revealed" || !game.last || game.last.by !== myMark) return;
     // A correct answer has nothing to read; a miss has the right answer and
     // sometimes an explanation. One fixed pause served neither.
-    const pause = challenge !== "trivia" ? 1200
-      : game.last.correct ? 1300 : item?.explanation ? 2900 : 2200;
+    const pause = engine.revealMs ?? (challenge !== "trivia" ? 1200
+      : game.last.correct ? 1300 : item?.explanation ? 2900 : 2200);
     const t = setTimeout(() => void write(engine.advance(game)), pause);
     return () => clearTimeout(t);
   }, [plain, game, myMark, write, engine, item?.explanation, challenge]);

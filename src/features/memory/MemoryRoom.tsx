@@ -14,8 +14,8 @@ import { AWAY_MS } from "@/features/play/clock";
 
 /** How long after a deadline passes before the other player takes over. */
 const GRACE_MS = 6000;
-/** When a reveal is considered stuck. Must sit above useBoardRoom's pause for
-    a bankless game (1200ms) or this races the timer it exists to back up. */
+/** When a reveal is considered stuck. Must sit above Memory's reveal
+    (MEMORY_REVEAL_MS, 2.3 s) or this races the timer it exists to back up. */
 const REVEAL_MS = 4500;
 export function MemoryRoom({
   roomId, code, status, players, userId,

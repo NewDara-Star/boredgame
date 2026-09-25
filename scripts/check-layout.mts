@@ -143,4 +143,13 @@ for (const f of ["src/features/trivia/TriviaGame.tsx", "src/features/rooms/TurnP
   ok(/useSeenHeight\(\)/.test(solo) && /visualViewport/.test(rd("shared/lib/useSeenHeight.ts")), "the picture shares the screen with the keyboard");
 }
 
+// ---- Memory's missed pair stays up as long in rooms as solo (talk item 12) ----
+{
+  const rd = (f: string) => { try { return readFileSync(new URL(`../src/${f}`, import.meta.url), "utf8"); } catch { return ""; } };
+  ok(/MEMORY_REVEAL_MS = 2300/.test(rd("features/memory/useMemoryRoom.ts")) && /revealMs: MEMORY_REVEAL_MS/.test(rd("features/memory/useMemoryRoom.ts")),
+     "Memory has one reveal time, 2.3 s");
+  ok(/const pause = engine\.revealMs \?\?/.test(rd("features/rooms/useBoardRoom.ts")) && /engine\.revealMs \?\?/.test(rd("features/play/useSoloBoard.ts")),
+     "rooms and solo both use it");
+}
+
 console.log(`${n} layout assertions hold`);

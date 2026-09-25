@@ -7,6 +7,9 @@ import {
   useBoardRoom, startBoard, type BoardEngine, type Scope,
 } from "@/features/rooms/useBoardRoom";
 
+/** How long a missed Memory pair stays face-up, solo and in rooms alike. */
+export const MEMORY_REVEAL_MS = 2300;
+
 /**
  * Memory, on the same synced row as every other board.
  *
@@ -21,6 +24,9 @@ import {
 export const MEMORY: BoardEngine<Game, MemoryRow> = {
   table: "memory_games",
   channel: "mem",
+  // A missed pair stays up as long as it does solo (talk item 12): it was
+  // 1.2 s in rooms, less by the time it reached the other phone, and 2.3 s solo.
+  revealMs: MEMORY_REVEAL_MS,
   decode, encode,
   newGame: (first) => newGame(first),
   place: flip,

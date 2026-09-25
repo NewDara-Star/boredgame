@@ -232,7 +232,7 @@ export function useSoloBoard<G extends BoardState, R extends BoardRow>(
     // A shot has "Just long." to read and nothing else; a question can have an
     // explanation. Neither wants the other's pause.
     const t = setTimeout(() => commit(engine.advance(game)),
-      challenge === "catapult" ? 1900 : REVEAL_MS);
+      engine.revealMs ?? (challenge === "catapult" ? 1900 : REVEAL_MS));
     return () => clearTimeout(t);
   }, [game, commit, engine, challenge]);
 
