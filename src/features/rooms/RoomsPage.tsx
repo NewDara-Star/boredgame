@@ -21,6 +21,7 @@ import { Lobby } from "./Lobby";
 import { InviteCard } from "./InviteCard";
 import { BankTrouble } from "./BankTrouble";
 import { PeerNotice } from "./matchUi";
+import { serverToLocal } from "@/shared/lib/serverClock";
 import { VoiceControl } from "@/features/voice/VoiceControl";
 import { AuthCard } from "@/features/profile/AuthCard";
 import { GuestCard, ClaimCard } from "@/features/profile/GuestCard";
@@ -37,6 +38,13 @@ export function RoomsPage() {
   const [guess, setGuess] = useState("");
   /** the option you tapped in the race, lit while the server judges it */
   const [picked, setPicked] = useState<string | null>(null);
+  /** the round you're out of: one pick each in a multiple-choice race (talk item 10) */
+  const [outOf, setOutOf] = useState<number | null>(null);
+  /** a typed guess that wasn't it, shown for a moment */
+  const [notIt, setNotIt] = useState(false);
+  /** ticks, so "Show the answer" appears 20 s into a round */
+  const [tick, setTick] = useState(() => Date.now());
+  useEffect(() => { const id = setInterval(() => setTick(Date.now()), 1000); return () => clearInterval(id); }, []);
   const [startError, setStartError] = useState<string | null>(null);
   /** set by "Play" on a friend when their invite didn't go through */
   const inviteFailed = (useLocation().state as { inviteFailed?: string } | null)?.inviteFailed ?? null;
@@ -44,7 +52,7 @@ export function RoomsPage() {
 
   const {
     room, players, present, round, currentPuzzle, error, categories, levels,
-    join, startNextRound, claimRound, setup, setReady, leave, bankTrouble, retryBank,
+    join, startNextRound, claimRound, revealRound, setup, setReady, leave, bankTrouble, retryBank,
   } = useRoom(code, user?.id);
   const myRooms = useMyRooms(user?.id);
 
@@ -219,6 +227,11 @@ export function RoomsPage() {
   const iAmIn = players.some((p) => p.user_id === user.id);
   const waiting = room.status === "waiting";
   const won = round?.winner_id;
+  // Ended with nobody paid: everyone out, or "Show the answer" (talk item 10).
+  const ended = !!round && !won && !!round.ended_at;
+  const out = !!round && outOf === round.id;
+  const canReveal = !!round && !won && !ended && tick - serverToLocal(round.started_at) >= 20_000;
+  const them = players.find((p) => p.user_id !== user.id)?.username ?? "They";
 
   return (
     <div className="space-y-5">
@@ -346,15 +359,23 @@ export function RoomsPage() {
               : <p className="text-xl font-semibold text-center">{currentPuzzle.prompt}</p>}
           </Card>
 
-          {!won && currentPuzzle.choices ? (
+          {!won && !ended && currentPuzzle.choices ? (
             <div className="grid gap-2.5">
+              {out && (
+                <p className="text-sm font-bold text-center text-ember">Out this round. {them} can still take it.</p>
+              )}
               {currentPuzzle.choices.map((opt, i) => (
-                <button key={opt} disabled={picked !== null}
+                <button key={opt} disabled={picked !== null || out}
                   // A race: the claim goes at once, and the pick stays lit at
                   // least the locked-in moment before anything else shows.
+                  // One pick each: a wrong one puts you out of the round.
                   onClick={() => {
                     setPicked(opt);
-                    void Promise.all([claimRound(opt), sleep(LOCK_MS)]).then(() => setPicked(null));
+                    const id = round.id;
+                    void Promise.all([claimRound(opt), sleep(LOCK_MS)]).then(([v]) => {
+                      setPicked(null);
+                      if (v?.reason === "out") setOutOf(id);
+                    });
                   }}
                   className={`card ${picked === null ? "tap" : ""} flex items-center gap-3 text-left px-4 py-4 ${picked === opt ? "bg-petal" : "bg-board"}`}>
                   <AnswerMark index={i} />
@@ -362,10 +383,11 @@ export function RoomsPage() {
                 </button>
               ))}
             </div>
-          ) : won ? (
+          ) : won || ended ? (
             <div className="text-center">
-              <p className={`text-sm font-bold ${won === user.id ? "text-leaf" : "text-ember"}`}>
-                {won === user.id ? "You took it" : `${players.find((p) => p.user_id === won)?.username ?? "They"} took it`}
+              <p className={`text-sm font-bold ${won === user.id ? "text-leaf" : ended ? "text-soft" : "text-ember"}`}>
+                {ended ? "Nobody got it"
+                  : won === user.id ? "You took it" : `${players.find((p) => p.user_id === won)?.username ?? "They"} took it`}
               </p>
               <p className="text-lg font-semibold mt-1">{currentPuzzle.answer}</p>
               {currentPuzzle.explanation && (
@@ -381,7 +403,10 @@ export function RoomsPage() {
             <form className="flex gap-2"
               onSubmit={(e) => {
                 e.preventDefault();
-                void claimRound(guess);
+                // Typed races keep their guesses; a miss says so now (it said nothing).
+                void claimRound(guess).then((v) => {
+                  if (v && !v.won && !v.reason) { setNotIt(true); setTimeout(() => setNotIt(false), 1500); }
+                });
                 setGuess("");
               }}>
               <Input value={guess} onChange={(e) => setGuess(e.target.value)}
@@ -390,6 +415,16 @@ export function RoomsPage() {
                 autoComplete="off" autoCapitalize="none" autoCorrect="off" spellCheck={false} enterKeyHint="go" />
               <Button type="submit">Go</Button>
             </form>
+          )}
+          {!won && !ended && !currentPuzzle.choices && notIt && (
+            <p className="text-sm font-bold text-center text-ember" role="status">Not it. Keep going.</p>
+          )}
+          {/* A round nobody can get used to have no way on but Leave (talk item 10). */}
+          {canReveal && (
+            <button onClick={() => void revealRound()}
+              className="block mx-auto text-[13px] font-black text-soft underline underline-offset-4 min-h-[44px]">
+              Show the answer (nobody scores)
+            </button>
           )}
         </>
       )}

@@ -1,5 +1,9 @@
 import { useMemo } from "react";
 import type { RoomPlayer, RoomStatus } from "@/shared/types/db";
+import { serverToLocal } from "@/shared/lib/serverClock";
+
+/** Two room heartbeats (every 20 s) missed: the other phone has gone quiet. */
+export const QUIET_MS = 45_000;
 import { Note, Dealing } from "@/shared/ui/Note";
 import {
   Seats, AwayNotice, OverPanel, EndMatchLink, MatchOver, useMatchChrome,
@@ -130,6 +134,22 @@ export function SortRaceRoom({
       </p>
 
       <Note>{r.error}</Note>
+      {/* A dead phone used to leave the finisher waiting for ever (talk item 10). */}
+      {(() => {
+        if (r.won || !r.iFinished || r.finishing || r.theyFinished) return null;
+        const other = players.find((p) => p.user_id !== userId);
+        const quiet = !other || now - serverToLocal(other.last_seen) > QUIET_MS;
+        if (!quiet) return null;
+        return (
+          <div className="card bg-petal p-4 space-y-3 text-center">
+            <p className="text-sm font-bold">{them}'s phone has gone quiet.</p>
+            <button onClick={() => void r.walkover()}
+              className="cut tap w-full py-3.5 font-display text-lg font-semibold cut-leaf">
+              Take the win
+            </button>
+          </div>
+        );
+      })()}
       {r.finishDropped && !r.finishing && (
         <button onClick={r.retryFinish}
           className="cut tap w-full py-3.5 font-display text-lg font-semibold cut-petal">

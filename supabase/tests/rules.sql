@@ -4,7 +4,8 @@
 -- Run the whole file against the database (SQL Editor, or execute_sql) after
 -- changing any function it names: judge_answer, record_round, daily_next,
 -- daily_answer, submit_daily, daily_round, claim_board_win,
--- save_push_subscription, voice_topic_ok, carry_over, daily_progress, or the profiles and
+-- save_push_subscription, voice_topic_ok, carry_over, daily_progress,
+-- reveal_round, sort_walkover, or the profiles and
 -- puzzles grants.
 --
 -- It ALWAYS ends in an error, on purpose: the error rolls every write back, so
@@ -24,7 +25,7 @@ declare
   results text[] := '{}'; broken text[] := '{}';
   g31 uuid := gen_random_uuid(); g29 uuid := gen_random_uuid(); gwin uuid := gen_random_uuid(); rr bigint;
   mc2 bigint; mc2_answer text; mc2_choices text[];
-  cb uuid := gen_random_uuid(); d7 int;
+  cb uuid := gen_random_uuid(); d7 int; rid bigint; sa2 int;
 begin
   -- ---- borrowed rows -------------------------------------------------------
   select p1.user_id, p2.user_id, p1.room_id into a, b, r
@@ -196,6 +197,56 @@ begin
   reset role;
   results := array_append(results, 'R1 a room pick counts towards your totals, once per round'::text);
   if (select total_answered from public.profiles where id = a) <> n + 1
+  then broken := broken || results[cardinality(results)]; end if;
+
+  -- ---- RM1 (talk item 10): one pick each, and a round that ends -----------
+  select score into sa from public.room_players where room_id = r and user_id = a;
+  insert into public.room_rounds(room_id, puzzle_id, round_no) values (r, mc2, 951) returning id into rid;
+  perform set_config('request.jwt.claims', json_build_object('sub', a, 'role', 'authenticated')::text, true);
+  set local role authenticated;
+  perform public.claim_round(r, (select o from unnest(mc2_choices) o where o <> mc2_answer limit 1));
+  j := public.claim_round(r, mc2_answer);
+  reset role;
+  results := array_append(results, 'RM1 a wrong pick puts you out: the right one after it wins nothing'::text);
+  if j->>'won' <> 'false' or j->>'reason' <> 'out'
+  or (select score from public.room_players where room_id = r and user_id = a) <> sa
+  then broken := broken || results[cardinality(results)]; end if;
+  perform set_config('request.jwt.claims', json_build_object('sub', b, 'role', 'authenticated')::text, true);
+  set local role authenticated;
+  perform public.claim_round(r, (select o from unnest(mc2_choices) o where o <> mc2_answer limit 1));
+  reset role;
+  results := array_append(results, 'RM1 when everyone is out, the round ends with nobody paid'::text);
+  if (select ended_at is null or winner_id is not null from public.room_rounds where id = rid)
+  then broken := broken || results[cardinality(results)]; end if;
+  insert into public.room_rounds(room_id, puzzle_id, round_no) values (r, mc2, 952) returning id into rid;
+  set local role authenticated;
+  j := public.reveal_round(r);
+  reset role;
+  update public.room_rounds set started_at = now() - interval '25 seconds' where id = rid;
+  set local role authenticated;
+  err := (public.reveal_round(r))->>'ended';
+  reset role;
+  results := array_append(results, 'RM1 Show the answer ends a round only 20 seconds in'::text);
+  if j->>'ended' <> 'false' or err <> 'true' then broken := broken || results[cardinality(results)]; end if;
+  -- a Ball Sort finisher whose opponent's phone has gone quiet
+  delete from public.sort_races where room_id = r;
+  insert into public.sort_races(room_id, seed, par, colours, x_tubes, o_tubes, x_player, o_player, x_ms)
+    values (r, 1, 10, 3, 'aaa/bbb/ccc//', 'abc/abc/abc//', b, a, 42000);
+  update public.room_players set last_seen = now() where room_id = r;
+  select score into sa2 from public.room_players where room_id = r and user_id = b;
+  perform set_config('request.jwt.claims', json_build_object('sub', b, 'role', 'authenticated')::text, true);
+  set local role authenticated;
+  j := public.sort_walkover(r);
+  reset role;
+  results := array_append(results, 'RM1 no walkover while the other phone is still there'::text);
+  if j->>'winner' is not null then broken := broken || results[cardinality(results)]; end if;
+  update public.room_players set last_seen = now() - interval '60 seconds' where room_id = r and user_id = a;
+  set local role authenticated;
+  perform public.sort_walkover(r); perform public.sort_walkover(r);
+  reset role;
+  results := array_append(results, 'RM1 a finisher takes the win once the other phone is silent, paid once'::text);
+  if (select winner from public.sort_races where room_id = r) is distinct from 'x'
+  or (select score from public.room_players where room_id = r and user_id = b) <> sa2 + 1
   then broken := broken || results[cardinality(results)]; end if;
 
   -- ---- G30 (F11): a guest goes 30 days after they last played ------------

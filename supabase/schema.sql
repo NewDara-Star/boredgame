@@ -1611,6 +1611,43 @@ end $$;
 revoke all on function public.sort_concede(bigint) from public, anon;
 grant execute on function public.sort_concede(bigint) to authenticated;
 
+-- A dead phone in a Ball Sort race (talk item 10): the finisher waited for
+-- ever on "waiting for Dara", and End match left nobody the winner. Once the
+-- other player's phone has been silent for 45 seconds (the room heartbeat is
+-- every 20, so two beats missed), a player who has finished can take the win,
+-- as if the other had conceded.
+create or replace function public.sort_walkover(p_room bigint)
+returns jsonb language plpgsql security definer set search_path to 'public' as $$
+declare v_row public.sort_races; v_seat text; v_them uuid; v_seen timestamptz; v_flipped int := 0;
+begin
+  select * into v_row from public.sort_races where room_id = p_room for update;
+  if v_row.room_id is null then raise exception 'no race in room %', p_room; end if;
+  v_seat := case when v_row.x_player = auth.uid() then 'x'
+                 when v_row.o_player = auth.uid() then 'o' end;
+  if v_seat is null then raise exception 'not seated in race %', p_room; end if;
+  if v_row.winner is not null then return jsonb_build_object('winner', v_row.winner); end if;
+  if (case when v_seat = 'x' then v_row.x_ms else v_row.o_ms end) is null then
+    return jsonb_build_object('winner', null, 'reason', 'finish first');
+  end if;
+  v_them := case when v_seat = 'x' then v_row.o_player else v_row.x_player end;
+  select last_seen into v_seen from public.room_players where room_id = p_room and user_id = v_them;
+  if v_seen is not null and v_seen > now() - interval '45 seconds' then
+    return jsonb_build_object('winner', null, 'reason', 'still here');
+  end if;
+  update public.sort_races
+     set x_gave_up = case when v_seat = 'o' then true else x_gave_up end,
+         o_gave_up = case when v_seat = 'x' then true else o_gave_up end,
+         winner = v_seat, updated_at = now()
+   where room_id = p_room and winner is null;
+  get diagnostics v_flipped = row_count;
+  if v_flipped > 0 then
+    update public.room_players set score = score + 1 where room_id = p_room and user_id = auth.uid();
+  end if;
+  return jsonb_build_object('winner', v_seat);
+end $$;
+revoke all on function public.sort_walkover(bigint) from public, anon;
+grant execute on function public.sort_walkover(bigint) to authenticated;
+
 -- c4_games shipped without this once already: the board only moves for whoever
 -- tapped it, and the opponent's screen never hears a thing.
 do $$ begin
@@ -2228,20 +2265,42 @@ grant execute on function public.server_now() to anon, authenticated;
 -- round: a multiple-choice pick right or wrong (one pick is all there is), a
 -- typed answer when it's right (wrong guesses on the way aren't filed, as a
 -- solo round files only the answer you finish on).
+-- One pick per question in a multiple-choice race (talk item 10, Daramola):
+-- a wrong pick used to show nothing and let you pick again, so tapping all
+-- four fast beat knowing. A wrong pick now puts you out of that round; when
+-- everyone is out, the round ends with nobody paid. A typed race (Picto)
+-- keeps its guesses: typing is the skill.
+create table if not exists public.room_round_outs (
+  round_id   bigint not null references public.room_rounds(id) on delete cascade,
+  user_id    uuid   not null references auth.users(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  primary key (round_id, user_id)
+);
+create index if not exists room_round_outs_user_id_idx on public.room_round_outs(user_id);
+alter table public.room_round_outs enable row level security;
+-- No policies: claim_round is the only reader and writer.
+
 create or replace function public.claim_round(p_room bigint, p_given text)
 returns jsonb language plpgsql security definer set search_path to 'public' as $$
 declare uid uuid := auth.uid(); v_round public.room_rounds;
         v_answer text; v_accept text[]; v_choices text[]; v_correct boolean; v_upd int;
+        v_mc boolean; v_outs int; v_players int;
 begin
   if uid is null then raise exception 'sign in first'; end if;
   if not public.is_room_member(p_room) then raise exception 'not a member of room %', p_room; end if;
+  -- The open round: nobody has won it and it hasn't ended unanswered.
   select * into v_round from public.room_rounds
-    where room_id = p_room and winner_id is null
+    where room_id = p_room and winner_id is null and ended_at is null
     order by round_no desc limit 1;
   if v_round.id is null then return jsonb_build_object('won', false, 'reason', 'no open round'); end if;
   select answer, accept, choices into v_answer, v_accept, v_choices from public.puzzles where id = v_round.puzzle_id;
+  v_mc := cardinality(coalesce(v_choices, '{}'::text[])) > 0;
+  if v_mc and exists (select 1 from public.room_round_outs o
+                       where o.round_id = v_round.id and o.user_id = uid) then
+    return jsonb_build_object('won', false, 'reason', 'out');
+  end if;
   v_correct := public.judge_answer(p_given, v_answer, v_accept, v_choices);
-  if (v_correct or cardinality(coalesce(v_choices, '{}'::text[])) > 0)
+  if (v_correct or v_mc)
      and not exists (select 1 from public.attempts a
                       where a.user_id = uid and a.puzzle_id = v_round.puzzle_id
                         and a.created_at >= v_round.started_at) then
@@ -2249,9 +2308,20 @@ begin
       values (uid, v_round.puzzle_id, v_correct,
               least(greatest(extract(epoch from now() - v_round.started_at) * 1000, 0), 600000)::int);
   end if;
-  if not v_correct then return jsonb_build_object('won', false); end if;
+  if not v_correct then
+    if not v_mc then return jsonb_build_object('won', false); end if;
+    insert into public.room_round_outs (round_id, user_id) values (v_round.id, uid) on conflict do nothing;
+    select count(*) into v_outs from public.room_round_outs where round_id = v_round.id;
+    select count(*) into v_players from public.room_players where room_id = p_room;
+    if v_outs >= v_players then
+      update public.room_rounds set ended_at = now()
+       where id = v_round.id and winner_id is null and ended_at is null;
+      return jsonb_build_object('won', false, 'reason', 'out', 'ended', true);
+    end if;
+    return jsonb_build_object('won', false, 'reason', 'out');
+  end if;
   update public.room_rounds set winner_id = uid, ended_at = now()
-    where id = v_round.id and winner_id is null;
+    where id = v_round.id and winner_id is null and ended_at is null;
   get diagnostics v_upd = row_count;
   if v_upd = 0 then return jsonb_build_object('won', false, 'reason', 'taken'); end if;
   update public.room_players set score = score + 1 where room_id = p_room and user_id = uid;
@@ -2259,6 +2329,30 @@ begin
 end $$;
 revoke all on function public.claim_round(bigint, text) from public, anon;
 grant execute on function public.claim_round(bigint, text) to authenticated;
+
+-- "Show the answer" (talk item 10): a round nobody can get used to have no
+-- way on but Leave. Either player can end it 20 seconds in; nobody is paid.
+create or replace function public.reveal_round(p_room bigint)
+returns jsonb language plpgsql security definer set search_path to 'public' as $$
+declare v_round public.room_rounds; v_upd int;
+begin
+  if auth.uid() is null then raise exception 'sign in first'; end if;
+  if not public.is_room_member(p_room) then raise exception 'not a member of room %', p_room; end if;
+  select * into v_round from public.room_rounds
+    where room_id = p_room and winner_id is null and ended_at is null
+    order by round_no desc limit 1;
+  if v_round.id is null then return jsonb_build_object('ended', false, 'reason', 'no open round'); end if;
+  if now() - v_round.started_at < interval '20 seconds' then
+    return jsonb_build_object('ended', false, 'reason', 'too soon',
+      'wait_ms', ceil(extract(epoch from (v_round.started_at + interval '20 seconds' - now())) * 1000)::int);
+  end if;
+  update public.room_rounds set ended_at = now()
+   where id = v_round.id and winner_id is null and ended_at is null;
+  get diagnostics v_upd = row_count;
+  return jsonb_build_object('ended', v_upd = 1);
+end $$;
+revoke all on function public.reveal_round(bigint) from public, anon;
+grant execute on function public.reveal_round(bigint) to authenticated;
 
 -- ============================================================================
 -- Friends: a code you share, the people who've added you, and "come play"

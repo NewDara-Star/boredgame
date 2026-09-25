@@ -212,6 +212,15 @@ export function useSortRoom(roomId: number | null, userId: string | undefined) {
       supabase.rpc("sort_concede", { p_room: roomId })));
   }, [roomId]);
 
+  /** Finished, and the other phone has gone quiet (talk item 10): take the
+      win. The server checks both: that you finished, and that they've been
+      silent 45 seconds. */
+  const walkover = useCallback(async () => {
+    if (!supabase || !roomId) return;
+    setError(await attempt("Taking the win",
+      supabase.rpc("sort_walkover", { p_room: roomId })));
+  }, [roomId]);
+
   const rematch = useCallback(async () => {
     if (!supabase || !roomId) return;
     const seed = Date.now();
@@ -256,7 +265,7 @@ export function useSortRoom(roomId: number | null, userId: string | undefined) {
     theirProgress: theirTubes && row ? solvedCount(theirTubes, row.cap) : 0,
     won: row?.winner ?? null,
     iWon: !!row?.winner && row.winner === seat,
-    pick, takeBack, concede, rematch, quit, changeGame,
+    pick, takeBack, concede, walkover, rematch, quit, changeGame,
     finishDropped, retryFinish,
   };
 }

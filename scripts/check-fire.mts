@@ -222,5 +222,17 @@ ok(filings >= 1, `found ${filings} record_round calls — the scan is broken`);
   ok(/pts · \{secs\(r\.ms\)\}/.test(page), "the board shows the points it ranks by");
 }
 
+// ---- 11. the race (talk item 10) ---------------------------------------------
+{
+  const rd = (p: string) => { try { return readFileSync(join(root, p), "utf8"); } catch { return ""; } };
+  const page = rd("src/features/rooms/RoomsPage.tsx"), sort = rd("src/features/sort/SortRaceRoom.tsx");
+  ok(/if \(v\?\.reason === "out"\) setOutOf\(id\)/.test(page) && /disabled=\{picked !== null \|\| out\}/.test(page),
+     "a wrong multiple-choice pick puts you out of the round on screen");
+  ok(/const ended = !!round && !won && !!round\.ended_at/.test(page) && /Nobody got it/.test(page), "a round that ends unanswered shows the answer and moves on");
+  ok(/canReveal/.test(page) && /revealRound\(\)/.test(page), "either player can show the answer 20 seconds in");
+  ok(/Not it\. Keep going\./.test(page), "a typed miss says so");
+  ok(/r\.walkover\(\)/.test(sort) && /QUIET_MS = 45_000/.test(sort), "a Ball Sort finisher can take the win from a phone gone quiet");
+}
+
 if (bad) { console.error(`\n${bad} of ${n} delivery assertions failed`); process.exit(1); }
 console.log(`${n} delivery assertions hold (${voids} void-supabase sites, ${checked} edge functions)`);

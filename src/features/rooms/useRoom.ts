@@ -10,6 +10,9 @@ import { shuffle } from "@/features/play/content";
 import { BANK_FAILED, useRoomBank } from "./useRoomBank";
 import { scopePool, emptyReason, levelCounts } from "@/features/play/scope";
 
+/** claim_round's verdict. */
+export interface Claim { won: boolean; reason?: "out" | "taken" | "no open round"; ended?: boolean }
+
 /**
  * The whole of the "websocket problem". Both browsers subscribe to three tables;
  * Postgres pushes every change. No socket code is written anywhere in this app.
@@ -153,13 +156,25 @@ export function useRoom(code: string | undefined, userId: string | undefined) {
       winner and the point together. The client no longer writes the winner (it
       could be set without answering) or names who to pay. */
   const markPlayed = useMarkPlayed();
-  const claimRound = useCallback(async (given: string) => {
-    if (!supabase || !round || !userId || !room) return;
+  const claimRound = useCallback(async (given: string): Promise<Claim | null> => {
+    if (!supabase || !round || !userId || !room) return null;
     // claim_round judges it, and files it for your totals too (talk item 1).
+    // Its verdict says whether you're out of a multiple-choice round now
+    // (one pick each, talk item 10) or a typed guess just wasn't it.
+    let verdict: Claim | null = null;
     setError(await attempt("Answering the round",
-      supabase.rpc("claim_round", { p_room: room.id, p_given: given })));
+      supabase.rpc("claim_round", { p_room: room.id, p_given: given })
+        .then((res) => { verdict = (res.data as Claim | null) ?? null; return res; })));
     void markPlayed();
+    return verdict;
   }, [round, userId, room, markPlayed]);
+
+  /** "Show the answer": ends a round nobody can get, 20 s in; nobody is paid. */
+  const revealRound = useCallback(async () => {
+    if (!supabase || !room) return;
+    setError(await attempt("Showing the answer",
+      supabase.rpc("reveal_round", { p_room: room.id })));
+  }, [room]);
 
   const currentPuzzle = round ? pool.find((i) => i.id === String(round.puzzle_id)) ?? null : null;
 
@@ -205,7 +220,7 @@ export function useRoom(code: string | undefined, userId: string | undefined) {
 
   return {
     room, players, present, round, currentPuzzle, error, categories, levels,
-    join, startNextRound, claimRound, setup, setReady, leave,
+    join, startNextRound, claimRound, revealRound, setup, setReady, leave,
     /** the questions didn't load; it keeps trying, and this says so */
     bankTrouble: bank.failed && pool.length === 0 ? BANK_FAILED : null,
     retryBank: bank.retryNow,
