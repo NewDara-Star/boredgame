@@ -1,3 +1,4 @@
+import { hideLaunch } from "./launch";
 import { Component, type ReactNode } from "react";
 
 /**
@@ -18,6 +19,7 @@ export class ErrorBoundary extends Component<
   static getDerivedStateFromError(error: Error) { return { error }; }
 
   componentDidCatch(error: Error) {
+    hideLaunch();   // the error screen must never sit behind the launch flower (F1)
     // Deliberately console, not a toast: this is for whoever is debugging it.
     console.error("[BoredGame] screen crashed:", error);
   }

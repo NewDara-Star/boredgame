@@ -3,6 +3,7 @@ import { createContext, useContext, useEffect, useRef, useState, type ReactNode 
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase, isConfigured, AUTH_STORAGE_KEY, SERVER } from "@/shared/lib/supabase";
 import { captchaToken, CaptchaFailed } from "@/shared/lib/captcha";
+import { hideLaunch } from "@/app/launch";
 
 /**
  * Supabase Auth has no username login, so a name becomes an address on a domain
@@ -124,6 +125,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   useEffect(() => { void refreshProfile(); /* eslint-disable-next-line */ }, [user?.id]);
+
+  // Who you are is known: the launch flower can go (F1). Until now it covered
+  // the screens, so a member never sees Sign up or the guest card first.
+  useEffect(() => { if (!loading) hideLaunch(); }, [loading]);
 
   /**
    * Password is the primary method on purpose. Supabase's built-in mailer allows
