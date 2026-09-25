@@ -3,6 +3,19 @@ import { supabase } from "@/shared/lib/supabase";
 import { fire } from "@/shared/lib/fire";
 import { useAuth } from "@/app/providers/AuthProvider";
 
+/** A bare code, or the code at the end of an /add/<code> link. */
+export const codeOf = (raw: string) => raw.trim().replace(/^.*\/add\//, "").toUpperCase().slice(0, 12);
+
+/** Whose code it is, before you add them (talk item 16). null: no one has it
+    (an old link, or a typo); "unknown": the lookup itself failed. */
+export type CodeOwner = { name: string; self: boolean; already: boolean };
+export async function whoseCode(raw: string): Promise<CodeOwner | null | "unknown"> {
+  if (!supabase) return "unknown";
+  const { data, error } = await supabase.rpc("friend_by_code", { p_code: codeOf(raw) });
+  if (error) return "unknown";
+  return (data as CodeOwner | null) ?? null;
+}
+
 export interface Friend { id: string; username: string; avatar: string | null; }
 export interface Invite {
   id: number; room_id: number; room_code: string;
@@ -75,7 +88,7 @@ export function useFriends() {
   /** Accepts a bare code or a full /add/<code> link. */
   const addFriend = useCallback(async (raw: string): Promise<string | null> => {
     if (!supabase) return null;
-    const codeStr = raw.trim().replace(/^.*\/add\//, "").toUpperCase().slice(0, 12);
+    const codeStr = codeOf(raw);
     if (!codeStr) { setError("Paste a friend code or link."); return null; }
     const { data, error: e } = await supabase.rpc("add_friend", { p_code: codeStr });
     if (e) { setError("Couldn't add that friend — try again."); return null; }
@@ -110,5 +123,25 @@ export function useFriends() {
     void loadInvites();
   }, [loadInvites]);
 
-  return { code, friends, invites, error, setError, addFriend, invite, respond };
+  /** Remove a friend, on both sides; anything they'd invited you to goes too
+      (talk item 16). true when it went through. */
+  const removeFriend = useCallback(async (friendId: string): Promise<boolean> => {
+    if (!supabase) return false;
+    const { error: e } = await supabase.rpc("remove_friend", { p_friend: friendId });
+    if (e) { setError("Couldn't remove them. Try again."); return false; }
+    setFriends((fs) => fs.filter((f) => f.id !== friendId));
+    setInvites((is) => is.filter((i) => i.from_id !== friendId));
+    return true;
+  }, []);
+
+  /** A new code: the old link stops working, the friends you have stay. */
+  const newCode = useCallback(async (): Promise<boolean> => {
+    if (!supabase) return false;
+    const { data, error: e } = await supabase.rpc("new_friend_code");
+    if (e || !data) { setError("Couldn't make a new code. Try again."); return false; }
+    setCode(data as string);
+    return true;
+  }, []);
+
+  return { code, friends, invites, error, setError, addFriend, invite, respond, removeFriend, newCode };
 }

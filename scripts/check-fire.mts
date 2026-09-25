@@ -262,5 +262,18 @@ ok(filings >= 1, `found ${filings} record_round calls — the scan is broken`);
      "a daily Ball Sort finish is timed by the server");
 }
 
+// ---- 14. friends you can remove, and a link you can replace (talk item 16) -----
+// No Remove, a code that never changed, and an add screen that didn't say who.
+{
+  const rd = (p: string) => { try { return readFileSync(join(root, p), "utf8"); } catch { return ""; } };
+  const hook = rd("src/features/friends/useFriends.ts"), panel = rd("src/features/friends/Friends.tsx"), add = rd("src/features/friends/AddFriendPage.tsx");
+  ok(/supabase\.rpc\("remove_friend"/.test(hook) && /removeFriend\(f\.id\)/.test(panel), "each friend has a Remove that reaches the server");
+  ok(/Remove \{f\.username\}\?/.test(panel), "Remove asks once, by name, before it goes");
+  ok(/supabase\.rpc\("new_friend_code"/.test(hook) && /newCode\(\)/.test(panel), "you can replace your link");
+  ok(/supabase\.rpc\("friend_by_code"/.test(hook) && /whoseCode\(code\)/.test(add) && /`Add \$\{name\}\?`/.test(add),
+     "the add screen names who you're adding before you add them");
+  ok(/That link doesn't work any more/.test(add), "an old link says so instead of failing on the tap");
+}
+
 if (bad) { console.error(`\n${bad} of ${n} delivery assertions failed`); process.exit(1); }
 console.log(`${n} delivery assertions hold (${voids} void-supabase sites, ${checked} edge functions)`);

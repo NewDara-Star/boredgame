@@ -6,7 +6,8 @@
 -- daily_answer, submit_daily, daily_round, claim_board_win,
 -- save_push_subscription, voice_topic_ok, carry_over, daily_progress,
 -- reveal_round, sort_walkover, claim_board_win, board_winner, sort_reveal,
--- sort_finish, sort_solo_start, sort_solo_finish, or the profiles and puzzles grants.
+-- sort_finish, sort_solo_start, sort_solo_finish, friend_by_code, remove_friend,
+-- new_friend_code, add_friend, invite_friend, or the profiles and puzzles grants.
 --
 -- It ALWAYS ends in an error, on purpose: the error rolls every write back, so
 -- it can run against the live database. Read the message:
@@ -27,6 +28,7 @@ declare
   mc2 bigint; mc2_answer text; mc2_choices text[];
   cb uuid := gen_random_uuid(); d7 int; rid bigint; sa2 int;
   ts1 timestamptz; ts2 timestamptz; sid bigint; sid2 bigint;
+  n5inv bigint; oldc text; newc text; j2 jsonb;
 begin
   -- ---- borrowed rows -------------------------------------------------------
   select p1.user_id, p2.user_id, p1.room_id into a, b, r
@@ -360,6 +362,61 @@ begin
   then broken := broken || results[cardinality(results)]; end if;
   results := array_append(results, 'S4 a daily Ball Sort is timed by the server: a phone claiming 5 s gets its real 30 s'::text);
   if public.sort_solo_finish(sid, c, 10, 5000) is distinct from 30000 then broken := broken || results[cardinality(results)]; end if;
+
+  -- ---- N5 (talk item 16): friends you can remove, and a code you can change -
+  -- a and b are friends, and b has an invite out to a.
+  delete from public.friendships where (user_id = a and friend_id = b) or (user_id = b and friend_id = a);
+  insert into public.friendships(user_id, friend_id) values (a, b), (b, a);
+  insert into public.game_invites(room_id, room_code, from_user, to_user) values (r, 'N5TEST', b, a) returning id into n5inv;
+  perform set_config('request.jwt.claims', json_build_object('sub', a, 'role', 'authenticated')::text, true);
+  set local role authenticated;
+  oldc := public.my_friend_code();
+  reset role;
+  perform set_config('request.jwt.claims', json_build_object('sub', b, 'role', 'authenticated')::text, true);
+  set local role authenticated;
+  j := public.friend_by_code(lower(oldc));
+  reset role;
+  results := array_append(results, 'N5 the add screen can say whose code it is'::text);
+  if j->>'name' is distinct from (select username from public.profiles where id = a) or j->>'self' <> 'false' or j->>'already' <> 'true'
+  then broken := broken || results[cardinality(results)]; end if;
+  perform set_config('request.jwt.claims', json_build_object('sub', a, 'role', 'authenticated')::text, true);
+  set local role authenticated;
+  got := public.remove_friend(b);
+  reset role;
+  results := array_append(results, 'N5 removing a friend ends it on both sides'::text);
+  if got <> 1 or exists (select 1 from public.friendships where (user_id = a and friend_id = b) or (user_id = b and friend_id = a))
+  then broken := broken || results[cardinality(results)]; end if;
+  results := array_append(results, 'N5 an invite still waiting from them is declined, so it can''t ping you'::text);
+  if (select status from public.game_invites where id = n5inv) <> 'declined' then broken := broken || results[cardinality(results)]; end if;
+  perform set_config('request.jwt.claims', json_build_object('sub', b, 'role', 'authenticated')::text, true);
+  set local role authenticated;
+  err := null;
+  begin perform public.invite_friend(r, a); exception when others then err := sqlerrm; end;
+  reset role;
+  results := array_append(results, 'N5 once removed, they can''t invite you'::text);
+  if err is null then broken := broken || results[cardinality(results)]; end if;
+  perform set_config('request.jwt.claims', json_build_object('sub', a, 'role', 'authenticated')::text, true);
+  set local role authenticated;
+  newc := public.new_friend_code();
+  reset role;
+  perform set_config('request.jwt.claims', json_build_object('sub', b, 'role', 'authenticated')::text, true);
+  set local role authenticated;
+  j := public.add_friend(oldc);
+  j2 := public.friend_by_code(oldc);
+  reset role;
+  results := array_append(results, 'N5 a new code kills the old link'::text);
+  if newc = oldc or j->>'ok' <> 'false' or j2 is not null then broken := broken || results[cardinality(results)]; end if;
+  perform set_config('request.jwt.claims', json_build_object('sub', b, 'role', 'authenticated')::text, true);
+  set local role authenticated;
+  j := public.add_friend(newc);
+  reset role;
+  results := array_append(results, 'N5 the new code works'::text);
+  if j->>'ok' <> 'true' then broken := broken || results[cardinality(results)]; end if;
+  results := array_append(results, 'N5 someone signed out can''t look up codes, remove friends or change codes'::text);
+  if has_function_privilege('anon', 'public.friend_by_code(text)', 'execute')
+  or has_function_privilege('anon', 'public.remove_friend(uuid)', 'execute')
+  or has_function_privilege('anon', 'public.new_friend_code()', 'execute')
+  then broken := broken || results[cardinality(results)]; end if;
 
   -- ---- verdict (always an error, so everything above rolls back) -----------
   if cardinality(broken) = 0 then

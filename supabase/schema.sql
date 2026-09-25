@@ -2550,6 +2550,55 @@ begin
 end $function$;
 grant execute on function public.add_friend(text) to authenticated;
 
+-- Who a code belongs to, before you add them (talk item 16, Daramola): the add
+-- screen said "Add this friend?" and you found out who after. The name only;
+-- 'self' when it's your own code, null when no one has it (an old link).
+create or replace function public.friend_by_code(p_code text)
+returns jsonb language plpgsql stable security definer set search_path to 'public' as $$
+declare uid uuid := auth.uid(); v_id uuid; v_name text;
+begin
+  if uid is null then raise exception 'sign in first'; end if;
+  select id, username into v_id, v_name from public.profiles
+   where friend_code = upper(btrim(coalesce(p_code, '')));
+  if v_id is null then return null; end if;
+  return jsonb_build_object('name', v_name, 'self', v_id = uid,
+    'already', exists (select 1 from public.friendships where user_id = uid and friend_id = v_id));
+end $$;
+revoke all on function public.friend_by_code(text) from public, anon;
+grant execute on function public.friend_by_code(text) to authenticated;
+
+-- Remove a friend (talk item 16). Both sides, since a friendship is mutual, and
+-- any invite still waiting between you is declined, so it can't ping you after.
+-- They can add you again only with your current code: see new_friend_code().
+create or replace function public.remove_friend(p_friend uuid)
+returns int language plpgsql security definer set search_path to 'public' as $$
+declare uid uuid := auth.uid(); n int;
+begin
+  if uid is null then raise exception 'sign in first'; end if;
+  delete from public.friendships
+   where (user_id = uid and friend_id = p_friend) or (user_id = p_friend and friend_id = uid);
+  get diagnostics n = row_count;
+  update public.game_invites set status = 'declined'
+   where status = 'pending'
+     and ((from_user = uid and to_user = p_friend) or (from_user = p_friend and to_user = uid));
+  return n / 2;
+end $$;
+revoke all on function public.remove_friend(uuid) from public, anon;
+grant execute on function public.remove_friend(uuid) to authenticated;
+
+-- A new code (talk item 16): your old link and code stop working at once.
+-- The friends you have stay; only new adds need the new one.
+create or replace function public.new_friend_code()
+returns text language plpgsql security definer set search_path to 'public' as $$
+declare uid uuid := auth.uid();
+begin
+  if uid is null then raise exception 'sign in first'; end if;
+  update public.profiles set friend_code = null where id = uid;
+  return public.my_friend_code();
+end $$;
+revoke all on function public.new_friend_code() from public, anon;
+grant execute on function public.new_friend_code() to authenticated;
+
 -- Invite a friend into a room you're in. One live invite per room per friend.
 create or replace function public.invite_friend(p_room bigint, p_friend uuid)
  returns void
