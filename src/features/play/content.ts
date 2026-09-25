@@ -87,6 +87,10 @@ async function loadLive(game: GameKey): Promise<PuzzleRow[]> {
     .select(COLUMNS, count ? { count: "exact" } : undefined)
     .eq("game", game)
     .eq("status", "live")
+    // The daily's reserve (talk item 19). The server already hides it from
+    // players; this keeps it out of an admin's solo rounds too, where it
+    // would spoil the dailies to come.
+    .eq("daily_reserve", false)
     .order("id")
     .range(from, from + PAGE - 1);
   const first = await page(0, true);

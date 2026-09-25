@@ -59,6 +59,14 @@ export function AdminPage() {
   // once: null while asking, false redirects, true renders the tool. The gate
   // is a courtesy; the RLS is the guarantee.
   const [allowed, setAllowed] = useState<boolean | null>(null);
+  // How long the daily reserve lasts (talk item 19): 10 questions a day.
+  const [reserve, setReserve] = useState<{ easy: number; medium: number; hard: number; days: number } | null>(null);
+  const loadReserve = async () => {
+    if (!supabase) return;
+    const { data } = await supabase.rpc("daily_reserve_left");
+    if (data) setReserve(data as { easy: number; medium: number; hard: number; days: number });
+  };
+  useEffect(() => { if (allowed) void loadReserve(); }, [allowed]);
   useEffect(() => {
     if (!supabase) { setAllowed(true); return; }  // offline design mode, no DB to gate on
     if (!user) { setAllowed(false); return; }
@@ -107,12 +115,16 @@ export function AdminPage() {
       difficulty: d.difficulty,
       category_id: Number(d.category),
       status: "live",
+      // New trivia is the daily's first (talk item 19): nobody downloads it
+      // until it has been a daily question, then it joins solo and rooms.
+      daily_reserve: d.game === "trivia",
       created_by: user.id,
     });
     setSaving(false);
     if (error) console.error("[BoredGame] publish failed", error);
-    setMsg(error ? { text: sayError(error, "Couldn't publish. Try again."), bad: true } : { text: "Published.", bad: false });
-    if (!error) { forgetContent(d.game); setD(EMPTY); setTouched(false); }
+    setMsg(error ? { text: sayError(error, "Couldn't publish. Try again."), bad: true }
+      : { text: d.game === "trivia" ? "Added to the daily reserve. It joins solo and rooms after its daily." : "Published.", bad: false });
+    if (!error) { forgetContent(d.game); setD(EMPTY); setTouched(false); void loadReserve(); }
   }
 
   if (allowed === false) return <Navigate to="/" replace />;
@@ -121,6 +133,13 @@ export function AdminPage() {
   return (
     <div className="space-y-5">
       <h1 className="text-2xl font-bold">Add a puzzle</h1>
+      {reserve && (
+        <p className={`text-[13px] font-semibold ${reserve.days < 7 ? "text-ember" : "text-soft"}`}>
+          Daily reserve: {reserve.days} day{reserve.days === 1 ? "" : "s"} left
+          ({reserve.easy} easy, {reserve.medium} medium, {reserve.hard} hard; a day takes 4, 4 and 2).
+          {reserve.days < 7 && " Add trivia soon, or the daily starts drawing from questions anyone may have saved."}
+        </p>
+      )}
       {offline && <p className="text-xs text-ember">No database connected — you can design and preview here, but not publish.</p>}
 
       <div className="flex gap-2">

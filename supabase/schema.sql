@@ -2916,3 +2916,103 @@ revoke execute on function public.sweep_stale_guests(integer) from public, anon,
 
 -- Nightly at 03:30 UTC, after the rooms are tidied. Replaces a job of the same name.
 select cron.schedule('sweep-stale-guests', '30 3 * * *', 'select public.sweep_stale_guests(30)');
+
+-- ============================================================================
+-- The daily reserve (talk item 19, 25 Sep)
+-- ============================================================================
+-- The daily's own questions (talk item 19, Daramola). Solo play downloads the
+-- whole bank, answers included, so a daily drawn from it could be looked up in
+-- a copy saved earlier. The reserve is never downloaded: the daily draws from
+-- it, and its ten go into solo and rooms once their daily has closed (the day
+-- after). New trivia from the editor goes into the reserve first.
+alter table public.puzzles add column if not exists daily_reserve boolean not null default false;
+comment on column public.puzzles.daily_reserve is
+  'Held back for the daily: nobody downloads it until its daily has closed.';
+
+drop policy if exists "live puzzles are public" on puzzles;
+create policy "live puzzles are public" on puzzles for select
+  using ((status = 'live' and not daily_reserve
+          and not (id = any ((select public.open_daily_ids())::bigint[]))) or is_admin());
+
+create or replace function public.daily_round(p_day date)
+returns bigint[] language plpgsql security definer set search_path to 'public' as $$
+declare ids bigint[]; v_recent bigint[];
+begin
+  select puzzle_ids into ids from public.daily_rounds where day = p_day;
+  if ids is not null then return ids; end if;
+
+  select coalesce(array_agg(x), '{}') into v_recent
+    from public.daily_rounds dr, unnest(dr.puzzle_ids) x
+   where dr.day >= p_day - 60;
+
+  -- The reserve first (talk item 19); only when it runs short of a level does
+  -- the public bank fill the gap, least recently used first.
+  select array_agg(id order by random()) into ids
+  from (
+    (select id from public.puzzles
+      where game='trivia' and status='live' and difficulty='easy' and not in_app
+      order by daily_reserve desc, (id = any(v_recent)), random() limit 4)
+    union all
+    (select id from public.puzzles
+      where game='trivia' and status='live' and difficulty='medium' and not in_app
+      order by daily_reserve desc, (id = any(v_recent)), random() limit 4)
+    union all
+    (select id from public.puzzles
+      where game='trivia' and status='live' and difficulty='hard' and not in_app
+      order by daily_reserve desc, (id = any(v_recent)), random() limit 2)
+  ) picked;
+
+  if ids is null or array_length(ids, 1) = 0 then return null; end if;
+
+  insert into public.daily_rounds(day, puzzle_ids) values (p_day, ids)
+  on conflict (day) do nothing;
+
+  -- A new day: the dailies that have closed (older than yesterday, by the
+  -- server's clock) hand their questions to solo and rooms.
+  update public.puzzles set daily_reserve = false
+   where daily_reserve
+     and id in (select x from public.daily_rounds dr, unnest(dr.puzzle_ids) x
+                 where dr.day < (now() at time zone 'utc')::date - 1);
+
+  -- Whoever lost the race takes the row that landed, not their own draft.
+  select puzzle_ids into ids from public.daily_rounds where day = p_day;
+  return ids;
+end $$;
+revoke all on function public.daily_round(date) from public, anon, authenticated;
+
+-- How long the reserve lasts, for the editor. Admins only.
+create or replace function public.daily_reserve_left()
+returns jsonb language plpgsql stable security definer set search_path to 'public' as $$
+declare e int; m int; h int;
+begin
+  if not public.is_admin() then raise exception 'admins only'; end if;
+  select count(*) filter (where difficulty = 'easy'), count(*) filter (where difficulty = 'medium'),
+         count(*) filter (where difficulty = 'hard')
+    into e, m, h
+    from public.puzzles
+   where daily_reserve and game = 'trivia' and status = 'live' and not in_app
+     and not (id = any (public.open_daily_ids()));
+  return jsonb_build_object('easy', e, 'medium', m, 'hard', h, 'days', least(e / 4, m / 4, h / 2));
+end $$;
+revoke all on function public.daily_reserve_left() from public, anon;
+grant execute on function public.daily_reserve_left() to authenticated;
+
+-- The first reserve: 30 days, 120 easy, 120 medium, 60 hard, drawn from
+-- questions no daily has used. Runs once: only while the reserve is empty.
+do $$
+begin
+  if not exists (select 1 from public.puzzles where daily_reserve) then
+    update public.puzzles p set daily_reserve = true
+      from (
+        (select id from public.puzzles where game='trivia' and status='live' and not in_app and difficulty='easy'
+            and id not in (select x from public.daily_rounds, unnest(puzzle_ids) x) order by random() limit 120)
+        union all
+        (select id from public.puzzles where game='trivia' and status='live' and not in_app and difficulty='medium'
+            and id not in (select x from public.daily_rounds, unnest(puzzle_ids) x) order by random() limit 120)
+        union all
+        (select id from public.puzzles where game='trivia' and status='live' and not in_app and difficulty='hard'
+            and id not in (select x from public.daily_rounds, unnest(puzzle_ids) x) order by random() limit 60)
+      ) r
+     where p.id = r.id;
+  end if;
+end $$;

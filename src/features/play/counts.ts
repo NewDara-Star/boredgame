@@ -19,7 +19,7 @@ export function useCounts() {
         supabase.from("puzzles").select("id", { count: "exact", head: true })
           .eq("game", "picto").eq("status", "live"),
         supabase.from("puzzles").select("id", { count: "exact", head: true })
-          .eq("game", "trivia").eq("status", "live"),
+          .eq("game", "trivia").eq("status", "live").eq("daily_reserve", false),
       ]);
       if (cancelled) return;
       setCounts({

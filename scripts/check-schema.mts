@@ -142,10 +142,10 @@ for (const fn of ["daily_next", "daily_answer", "submit_daily"]) {
   for (const fn of ["judge_answer", "record_round", "daily_next", "daily_answer", "submit_daily", "daily_round",
                     "claim_board_win", "save_push_subscription", "sweep_stale_guests", "claim_round", "carry_over", "reveal_round", "sort_walkover", "board_winner",
                     "sort_reveal", "sort_finish", "sort_solo_start", "sort_solo_finish",
-                    "friend_by_code", "remove_friend", "new_friend_code"]) {
+                    "friend_by_code", "remove_friend", "new_friend_code", "daily_reserve_left"]) {
     ok(rules.includes(`public.${fn}(`), `rules.sql tests ${fn}`);
   }
-  for (const tag of ["Q12", "D1", "D2", "F30", "RM2", "F36", "V2", "DB1", "N1", "DB2", "G30", "R1", "C1", "D7", "RM1", "RM7", "S4", "N5"]) {
+  for (const tag of ["Q12", "D1", "D2", "F30", "RM2", "F36", "V2", "DB1", "N1", "DB2", "G30", "R1", "C1", "D7", "RM1", "RM7", "S4", "N5", "DP"]) {
     ok(rules.includes(`'${tag} `), `rules.sql keeps its ${tag} test`);
   }
   ok(/raise exception 'RULES HOLD/.test(rules), "rules.sql always ends in an error, so it rolls back");

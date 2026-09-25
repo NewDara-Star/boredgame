@@ -7,7 +7,8 @@
 -- save_push_subscription, voice_topic_ok, carry_over, daily_progress,
 -- reveal_round, sort_walkover, claim_board_win, board_winner, sort_reveal,
 -- sort_finish, sort_solo_start, sort_solo_finish, friend_by_code, remove_friend,
--- new_friend_code, add_friend, invite_friend, or the profiles and puzzles grants.
+-- new_friend_code, add_friend, invite_friend, daily_reserve_left, or the profiles
+-- and puzzles grants.
 --
 -- It ALWAYS ends in an error, on purpose: the error rolls every write back, so
 -- it can run against the live database. Read the message:
@@ -29,6 +30,7 @@ declare
   cb uuid := gen_random_uuid(); d7 int; rid bigint; sa2 int;
   ts1 timestamptz; ts2 timestamptz; sid bigint; sid2 bigint;
   n5inv bigint; oldc text; newc text; j2 jsonb;
+  dp_adm uuid; dp_ids bigint[]; dp_ids2 bigint[]; dp_closed bigint[];
 begin
   -- ---- borrowed rows -------------------------------------------------------
   select p1.user_id, p2.user_id, p1.room_id into a, b, r
@@ -416,6 +418,54 @@ begin
   if has_function_privilege('anon', 'public.friend_by_code(text)', 'execute')
   or has_function_privilege('anon', 'public.remove_friend(uuid)', 'execute')
   or has_function_privilege('anon', 'public.new_friend_code()', 'execute')
+  then broken := broken || results[cardinality(results)]; end if;
+
+  -- ---- DP (talk item 19): the daily draws from a reserve nobody downloads --
+  select user_id into dp_adm from public.admins limit 1;
+  perform set_config('request.jwt.claims', json_build_object('sub', dp_adm, 'role', 'authenticated')::text, true);
+  set local role authenticated;
+  j := public.daily_reserve_left();
+  reset role;
+  results := array_append(results, 'DP the editor can see how many days the reserve lasts'::text);
+  if j->>'days' is null then broken := broken || results[cardinality(results)]; end if;
+  -- a fresh reserve for the tests, whatever is left of the real one
+  update public.puzzles set daily_reserve = true
+   where id in ((select id from public.puzzles where game='trivia' and status='live' and not in_app and difficulty='easy' order by random() limit 12)
+          union all (select id from public.puzzles where game='trivia' and status='live' and not in_app and difficulty='medium' order by random() limit 12)
+          union all (select id from public.puzzles where game='trivia' and status='live' and not in_app and difficulty='hard' order by random() limit 6));
+  perform set_config('request.jwt.claims', json_build_object('sub', c, 'role', 'authenticated')::text, true);
+  set local role authenticated;
+  select count(*) into n from public.puzzles where daily_reserve;
+  err := null; begin perform public.daily_reserve_left(); exception when others then err := sqlerrm; end;
+  reset role;
+  perform set_config('request.jwt.claims', json_build_object('role', 'anon')::text, true);
+  set local role anon;
+  select count(*) into n2 from public.puzzles where daily_reserve;
+  reset role;
+  results := array_append(results, 'DP a player, signed in or out, downloads none of the reserve'::text);
+  if n <> 0 or n2 <> 0 then broken := broken || results[cardinality(results)]; end if;
+  results := array_append(results, 'DP only an admin can see how long the reserve lasts'::text);
+  if err is null then broken := broken || results[cardinality(results)]; end if;
+  dp_ids := public.daily_round(today + 20);
+  results := array_append(results, 'DP a new daily is drawn from the reserve, 4 easy, 4 medium, 2 hard'::text);
+  if (select count(*) from public.puzzles where id = any(dp_ids) and daily_reserve) <> 10
+  or (select count(*) from public.puzzles where id = any(dp_ids) and difficulty = 'hard') <> 2
+  then broken := broken || results[cardinality(results)]; end if;
+  select array_agg(id) into dp_closed from (select id from public.puzzles where daily_reserve and not (id = any(dp_ids)) limit 10) s;
+  insert into public.daily_rounds(day, puzzle_ids) values (today - 10, dp_closed)
+    on conflict (day) do update set puzzle_ids = excluded.puzzle_ids;
+  dp_ids2 := public.daily_round(today + 21);
+  results := array_append(results, 'DP a closed daily''s questions go into solo and rooms the next new day; an open one''s stay held'::text);
+  if exists (select 1 from public.puzzles where id = any(dp_closed) and daily_reserve)
+  or (select count(*) from public.puzzles where id = any(dp_ids) and daily_reserve) <> 10
+  then broken := broken || results[cardinality(results)]; end if;
+  update public.puzzles set daily_reserve = false
+   where daily_reserve and difficulty = 'easy'
+     and id not in (select id from public.puzzles where daily_reserve and difficulty = 'easy' order by id limit 2);
+  dp_ids := public.daily_round(today + 22);
+  results := array_append(results, 'DP a reserve short of a level still makes a full daily: what it has, then the public bank'::text);
+  if array_length(dp_ids, 1) <> 10
+  or (select count(*) from public.puzzles where id = any(dp_ids) and difficulty = 'easy' and daily_reserve) <> 2
   then broken := broken || results[cardinality(results)]; end if;
 
   -- ---- verdict (always an error, so everything above rolls back) -----------

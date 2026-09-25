@@ -275,5 +275,19 @@ ok(filings >= 1, `found ${filings} record_round calls — the scan is broken`);
   ok(/That link doesn't work any more/.test(add), "an old link says so instead of failing on the tap");
 }
 
+// ---- 15. the daily's reserve (talk item 19) ------------------------------------
+// Solo downloads the whole bank with its answers; the daily's questions must not
+// be in it until their daily has closed.
+{
+  const rd = (p: string) => { try { return readFileSync(join(root, p), "utf8"); } catch { return ""; } };
+  const sql = rd("supabase/schema.sql"), admin = rd("src/features/admin/AdminPage.tsx");
+  const policy = sql.slice(sql.lastIndexOf('create policy "live puzzles are public"'));
+  ok(/not daily_reserve/.test(policy.slice(0, 300)), "the public list leaves the reserve out");
+  const round = sql.slice(sql.lastIndexOf("create or replace function public.daily_round("));
+  ok(/order by daily_reserve desc/.test(round) && /set daily_reserve = false/.test(round), "the daily draws from the reserve and releases closed days");
+  ok(/\.eq\("daily_reserve", false\)/.test(rd("src/features/play/content.ts")), "an admin's solo rounds leave the reserve out too");
+  ok(/daily_reserve: d\.game === "trivia"/.test(admin) && /daily_reserve_left/.test(admin), "new trivia goes to the reserve, and the editor shows the days left");
+}
+
 if (bad) { console.error(`\n${bad} of ${n} delivery assertions failed`); process.exit(1); }
 console.log(`${n} delivery assertions hold (${voids} void-supabase sites, ${checked} edge functions)`);
