@@ -27,4 +27,11 @@ ok(/hideLaunch\(\)/.test(src("../src/app/ErrorBoundary.tsx")), "a crash takes it
 ok(/prefers-reduced-motion:reduce/.test(html), "reduced motion gets it still");
 ok(!/setTimeout\([^)]*hideLaunch|min(imum)?Time/i.test(src("../src/app/launch.ts")), "no minimum time");
 
+// F8: once the app is up, a screen's own code can still be on its way. The wait
+// belongs in the page area, never above the header and nav.
+const shell = src("../src/app/layout/Shell.tsx"), app = src("../src/app/App.tsx");
+ok(/<Suspense fallback=\{<ScreenLoading \/>\}>\s*<Outlet \/>/.test(shell), "a screen loading waits inside the frame (header and nav stay)");
+ok(!/<Suspense/.test(app), "nothing above Shell can blank the header and nav");
+ok(/SHOW_AFTER_MS = 300/.test(src("../src/app/layout/ScreenLoading.tsx")), "a quick load shows nothing; the flower only after 0.3 s");
+
 console.log(`${n} launch assertions hold`);

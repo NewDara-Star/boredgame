@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { lazy } from "react";
 import { MotionConfig } from "framer-motion";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/app/providers/AuthProvider";
@@ -12,8 +12,8 @@ import { HomePage } from "@/features/home/HomePage";
  * The whole app used to arrive as one 745 kB file before anything appeared on
  * screen — the admin screen, both room games and every board engine downloaded
  * by someone who opened the home page on mobile data and never left it. Route
- * splitting is the entire fix, and React Router already renders a fallback
- * while a chunk is in flight.
+ * splitting is the entire fix. While a screen's file is in flight, Shell's
+ * Suspense keeps the header and nav and waits in the page area (F8).
  */
 const PictoGame = lazy(() => import("@/features/picto/PictoGame").then((m) => ({ default: m.PictoGame })));
 const TriviaGame = lazy(() => import("@/features/trivia/TriviaGame").then((m) => ({ default: m.TriviaGame })));
@@ -33,23 +33,12 @@ const SortSoloPage = lazy(() => import("@/features/sort/SortSoloPage").then((m) 
 const RoomsPage = lazy(() => import("@/features/rooms/RoomsPage").then((m) => ({ default: m.RoomsPage })));
 const AddFriendPage = lazy(() => import("@/features/friends/AddFriendPage").then((m) => ({ default: m.AddFriendPage })));
 
-/**
- * Deliberately plain, and deliberately NOT the shared `Dealing` note — that one
- * means "the content is on its way". This one means the screen itself has not
- * arrived yet, which is a different thing and lasts about 80ms on a fast
- * connection. A spinner for that is worse than nothing.
- */
-function Loading() {
-  return <p className="text-[13px] font-bold text-soft">Loading…</p>;
-}
-
 export function App() {
   return (
     <MotionConfig reducedMotion="user">
     <AuthProvider>
       <BrowserRouter>
         <VoiceProvider>
-        <Suspense fallback={<Loading />}>
           <Routes>
             <Route element={<Shell />}>
               <Route path="/" element={<HomePage />} />
@@ -74,7 +63,6 @@ export function App() {
               <Route path="*" element={<Navigate to="/" replace />} />
             </Route>
           </Routes>
-        </Suspense>
         </VoiceProvider>
       </BrowserRouter>
     </AuthProvider>
