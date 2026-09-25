@@ -43,16 +43,6 @@ function InviteCards({ invites, onJoin, onDismiss }: {
   );
 }
 
-/** Home banner: just the invites waiting for you. */
-export function Invites() {
-  const { invites, respond } = useFriends();
-  const nav = useNavigate();
-  const join = async (i: Invite) => { await respond(i.id, true); nav(`/rooms/${i.room_code}`); };
-  const dismiss = (i: Invite) => void respond(i.id, false);
-  if (invites.length === 0) return null;
-  return <div className="mb-4"><InviteCards invites={invites} onJoin={join} onDismiss={dismiss} /></div>;
-}
-
 /** Head-to-head panel: invites, your people (one tap to play), and your link. */
 export function FriendsPanel() {
   const { user, profile, isGuest, claimedAs } = useAuth();

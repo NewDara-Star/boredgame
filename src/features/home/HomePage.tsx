@@ -1,173 +1,192 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useAuth } from "@/app/providers/AuthProvider";
-import { useCounts } from "@/features/play/counts";
 import { GAMES } from "@/features/play/registry";
 import { useProgress } from "@/features/play/useProgress";
 import { readCarry } from "@/features/play/carry";
 import { rankFor } from "@/features/play/rank";
-import { RankBadge } from "@/features/play/RankBadge";
 import { useDailyStatus } from "@/features/daily/useDaily";
+import { useFriends, type Invite } from "@/features/friends/useFriends";
 import { Avatar } from "@/shared/ui/Avatar";
-import { Starburst } from "@/shared/ui/Wordmark";
 import { Sunflower } from "@/shared/brand/Sunflower";
+import { IconFlame } from "@/app/layout/Icons";
 import { stagger, riseIn, popIn } from "@/shared/ui/motion";
-import { WeekStrip } from "./WeekStrip";
-import { StatCarousel, type Stat } from "./StatCarousel";
-import { Carousel } from "@/shared/ui/Carousel";
-import { Invites } from "@/features/friends/Friends";
 
-const greeting = () => {
-  const h = new Date().getHours();
-  return h < 12 ? "Morning" : h < 18 ? "Afternoon" : "Evening";
-};
+/**
+ * Home, redrawn (#8–#11, H4). One thing leads, picked by what matters now: an
+ * invite someone is waiting on, then your streak (on the line, or safe), and
+ * today's round. The greeting, week strip and stat tiles are gone: for a new
+ * player they were all zeros, and the numbers live on You now.
+ */
 
-/** A section title with a way through to the whole thing. */
-function Head({ title, to, cta = "View all" }: { title: string; to?: string; cta?: string }) {
+/** The four games Home shows, then All (drawings #8, #10). No bank counts (F23). */
+const FEATURED = ["tictactoe", "trivia", "memory", "connect4"];
+
+function Section({ title, to, cta, children }: { title: string; to?: string; cta?: string; children: React.ReactNode }) {
   return (
-    <div className="flex items-baseline justify-between mt-7 mb-3">
-      <h2 className="font-display text-[21px] font-semibold">{title}</h2>
-      {to && (
-        <Link to={to} className="text-[13px] font-black text-soft
-          underline underline-offset-4">{cta}</Link>
-      )}
-    </div>
+    <motion.section variants={riseIn} className="mt-6">
+      <div className="flex items-baseline justify-between mb-2.5">
+        <h2 className="font-display text-[21px] font-semibold">{title}</h2>
+        {to && <Link to={to} className="text-[13px] font-black underline underline-offset-4 py-2">{cta}</Link>}
+      </div>
+      {children}
+    </motion.section>
+  );
+}
+
+function GamesRow() {
+  const games = FEATURED.map((s) => GAMES.find((g) => g.slug === s)).filter((g): g is (typeof GAMES)[number] => !!g);
+  return (
+    <Section title="Games" to="/play" cta={`All ${GAMES.length}`}>
+      <div className="grid grid-cols-2 gap-2.5">
+        {games.map((g) => (
+          <Link key={g.slug} to={g.path} className="card tap flex items-center gap-2.5 p-2.5 min-h-[62px]">
+            <g.Art size={44} />
+            <span className="font-bold text-[14px] leading-tight">{g.name}</span>
+          </Link>
+        ))}
+      </div>
+    </Section>
+  );
+}
+
+/** Someone is waiting in a room for you (#11): it beats everything else. */
+function InviteHero({ i, onJoin, onLater }: { i: Invite; onJoin: () => void; onLater: () => void }) {
+  const game = GAMES.find((g) => g.room?.mode === i.mode)?.name ?? "a game";
+  const code = i.room_code.length === 6 ? `${i.room_code.slice(0, 3)} ${i.room_code.slice(3)}` : i.room_code;
+  return (
+    <motion.section variants={popIn} className="card p-4 flex items-center gap-3">
+      <Sunflower state="look-right" stem={false} size={64} />
+      <div className="min-w-0 flex-1">
+        <p className="font-display text-[22px] leading-tight font-semibold truncate">{i.from_name}'s waiting</p>
+        <p className="text-[13px] font-bold text-soft">{game} · room <span className="font-mono">{code}</span></p>
+        <div className="grid grid-cols-[1.4fr_1fr] gap-2 mt-3">
+          <button onClick={onJoin} className="cut tap cut-leaf min-h-[44px] font-display text-[16px]">Join {i.from_name}</button>
+          <button onClick={onLater} className="cut tap cut-board min-h-[44px] font-display text-[16px]">Not now</button>
+        </div>
+      </div>
+    </motion.section>
+  );
+}
+
+/** The flower and one line about your day (#8, #9, #10). */
+function Hero({ state, title, line, children }: { state: "bored" | "awake"; title: string; line: string; children?: React.ReactNode }) {
+  return (
+    <motion.section variants={riseIn} className="flex items-center gap-3">
+      <Sunflower state={state} size={92} className="shrink-0 -mb-2" />
+      <div className="min-w-0 flex-1">
+        <p className="font-display text-[26px] leading-[1.05] font-semibold">{title}</p>
+        <p className="text-[14px] font-bold mt-1.5">{line}</p>
+        {children}
+      </div>
+    </motion.section>
+  );
+}
+
+function Flame({ n }: { n: number }) {
+  return (
+    <span className="inline-flex items-center gap-1 mt-2 chip bg-board px-2.5 py-1 text-[13px] font-black tabular-nums"
+      aria-label={`${n}-day streak`}>
+      <IconFlame /> {n}
+    </span>
+  );
+}
+
+function DailyCard() {
+  const d = useDailyStatus();
+  const n = Math.max(d.players, d.faces.length);
+  const played = d.played !== null;
+  const ordinal = (k: number) => `${k}${k % 100 >= 11 && k % 100 <= 13 ? "th" : ["th", "st", "nd", "rd"][k % 10] ?? "th"}`;
+  return (
+    <motion.div variants={popIn} className="mt-5">
+      <Link to="/daily" className={`cut tap block p-4 ${played ? "cut-board" : "cut-petal"}`}>
+        <p className="font-display text-[23px] leading-tight font-semibold">
+          {played ? `Today's round: ${d.played}/10` : d.progress > 0 ? "Finish today's round" : "Today's round"}
+        </p>
+        <p className="text-[13px] font-bold mt-1">
+          {played ? (d.place ? `${ordinal(d.place)} of ${n} so far` : `${n} have played`)
+            : d.progress > 0 ? `${d.progress} of 10 answered. They already count; the board takes all ten.`
+            : "Ten questions, the same for everyone. One go."}
+        </p>
+        <div className="flex items-center gap-2 mt-3">
+          <div className="flex -space-x-2.5">
+            {d.faces.slice(0, 3).map((f) => <Avatar key={f.user_id} id={f.user_id} name={f.username} size={28} />)}
+          </div>
+          {/* Never claim nobody has played while showing their faces. */}
+          <span className="text-[12px] font-bold">
+            {n === 0 ? "Nobody yet. Be first." : n === 1 ? "1 has played" : `${n} have played`}
+          </span>
+          <span className="flex-1" />
+          <span className="font-display text-[17px]">{played ? "The board →" : d.progress > 0 ? "Carry on →" : "Play →"}</span>
+        </div>
+      </Link>
+    </motion.div>
+  );
+}
+
+function PlaySomeone({ names }: { names: string[] }) {
+  const who = names.length === 0 ? null : names.length === 1 ? names[0] : `${names[0]} or ${names[1]}`;
+  return (
+    <Section title="Play someone" to="/you/everyone" cta="Leaderboard">
+      <div className={`grid gap-2.5 ${who ? "grid-cols-2" : ""}`}>
+        {who && <Link to="/rooms" className="cut tap cut-sky min-h-[52px] grid place-items-center px-3 font-display text-[16px] text-center leading-tight">Play {who}</Link>}
+        <Link to="/rooms" className="cut tap cut-petal min-h-[52px] grid place-items-center font-display text-[16px]">Start a room</Link>
+      </div>
+    </Section>
   );
 }
 
 export function HomePage() {
-  const { user, profile, offline, isGuest } = useAuth();
+  const { user, offline, isGuest } = useAuth();
   const p = useProgress();
+  const nav = useNavigate();
+  const { friends, invites, respond } = useFriends();
   // What an account made now would take with it (F17), not the phone's lifetime tally.
   const kept = user ? 0 : readCarry().rows.length;
-  const counts = useCounts();
-  const daily = useDailyStatus();
-  const { current, next } = rankFor(p.answered);
-  const name = profile?.username ?? "there";
-
-  const stats: Stat[] = [
-    { label: "Day streak", value: p.streak, bg: p.streak > 0 ? "bg-petal" : "bg-board",
-      note: p.streak === 0 ? "one round starts it" : p.playedToday ? "safe until tomorrow" : "play today to keep it" },
-    { label: "Answered", value: p.answered, bg: "bg-board",
-      note: next ? `${next.min - p.answered} to ${next.name}` : "top rank" },
-    { label: "Accuracy", value: p.answered ? `${Math.round((p.correct / p.answered) * 100)}%` : "—",
-      bg: "bg-leaf-hi", note: `${p.correct} right` },
-    // The badge is the point of a rank, and it cannot overflow.
-    { label: "Rank", art: <RankBadge rank={current.key} size={34} />, headline: current.name,
-      bg: "bg-sky text-ink", note: `${p.bestStreak}-day best run` },
-  ];
+  const { next } = rankFor(p.answered);
+  const waiting = invites[0];
+  const fresh = p.answered === 0;
+  const names = friends.map((f) => f.username).slice(0, 2);
 
   return (
     <motion.div variants={stagger(0.07)} initial="hidden" animate="show" className="pb-4">
-      <Invites />
-      <motion.div variants={riseIn} className="flex items-center gap-3">
-        <div className="min-w-0 flex-1">
-          <p className="text-[13px] font-bold text-soft">
-            {new Date().toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" })}
-          </p>
-          <h1 className="font-display text-[32px] leading-[1.05] font-semibold truncate">
-            {greeting()}{user ? "," : ""}<br />
-            {user ? name : "stranger"}
-          </h1>
-        </div>
-        {/* The flower says how the day is going: bored until you've played today. */}
-        <Link to="/play" aria-label="Play something" className="shrink-0 -mb-2">
-          <Sunflower state={p.playedToday ? "awake" : "bored"} size={74} />
-        </Link>
-      </motion.div>
-
-      {/* The one thing everyone is doing at the same time. */}
-      {daily.signedIn && (
-        <motion.div variants={popIn} className="mt-5">
-          <Link to="/daily"
-            className={`cut tap block p-5 relative overflow-hidden
-              ${daily.played === null ? "cut-petal text-ink" : "bg-board"}`}>
-            <Starburst size={82}
-              className="absolute -right-3 -top-3 rotate-12" />
-            <p className="relative text-[12px] font-black opacity-75">
-              Daily challenge
-            </p>
-            <p className="relative font-display text-[26px] leading-tight font-semibold mt-1">
-              {daily.played !== null ? `You got ${daily.played} out of 10`
-                : daily.progress > 0 ? "Finish today's round"
-                : "Ten questions, same for everyone"}
-            </p>
-            {daily.played === null && daily.progress > 0 && (
-              <p className="relative text-[13px] font-bold mt-1">
-                {daily.progress} of 10 answered. They already count; the board takes all ten.
-              </p>
-            )}
-            <div className="relative flex items-center gap-2 mt-3">
-              <div className="flex -space-x-2.5">
-                {daily.faces.slice(0, 4).map((f) => (
-                  <Avatar key={f.user_id} id={f.user_id} name={f.username} size={30} />
-                ))}
-              </div>
-              {/* Never claim nobody has played while showing their faces: an
-                  exact count needs a header that can go missing. */}
-              {(() => {
-                const n = Math.max(daily.players, daily.faces.length);
-                return (
-                  <span className={`text-[12px] font-bold ${daily.played === null ? "opacity-90" : "text-soft"}`}>
-                    {n === 0 ? "Nobody has played yet — be first"
-                      : n === 1 ? "1 person has played"
-                      : `${n} have played`}
-                  </span>
-                );
-              })()}
-              <span className="flex-1" />
-              <span className="font-display text-xl font-semibold">→</span>
-            </div>
-          </Link>
-        </motion.div>
+      {waiting && (
+        <InviteHero i={waiting}
+          onJoin={() => { void respond(waiting.id, true).then(() => nav(`/rooms/${waiting.room_code}`)); }}
+          onLater={() => void respond(waiting.id, false)} />
       )}
 
-      <motion.div variants={riseIn} className="mt-3">
-        <WeekStrip streak={p.streak} lastPlayed={p.lastPlayed} />
-      </motion.div>
+      {!waiting && (fresh ? (
+        <Hero state="bored" title="I'm so bored." line="Ten quick questions? Takes two minutes.">
+          <Link to="/trivia" className="cut tap cut-petal inline-grid place-items-center mt-3 px-5 min-h-[48px] font-display text-[17px]">
+            Play Star Trivia
+          </Link>
+        </Hero>
+      ) : !p.playedToday ? (
+        <Hero state="bored"
+          title={p.streak > 0 ? `${p.streak} day${p.streak === 1 ? "" : "s"} in a row` : "Nothing yet today"}
+          line={p.streak > 0 ? `Play anything today to make it ${p.streak + 1}.` : "Play anything today to start a streak."}>
+          {p.streak > 0 && <Flame n={p.streak} />}
+        </Hero>
+      ) : (
+        <Hero state="awake"
+          title={`${p.streak} day${p.streak === 1 ? "" : "s"}. Safe till tomorrow.`}
+          line={next ? `${next.min - p.answered} more question${next.min - p.answered === 1 ? "" : "s"} to ${next.name}.` : "Top of the road. Nobody's past you."}>
+          {p.streak > 0 && <Flame n={p.streak} />}
+        </Hero>
+      ))}
 
-      <Head title="Your week" />
-      <StatCarousel stats={stats} />
+      {/* Today's round is for players with a name; signed out, Daily says how to get one. */}
+      {user && !offline && <DailyCard />}
 
-      <Head title="Games" to="/play" />
-      <motion.div variants={stagger(0.06)}>
-        <Carousel>
-          {GAMES.map((g) => (
-            <motion.div key={g.slug} variants={riseIn} className="snap-start shrink-0 w-[168px]">
-              <Link to={g.path} className="card tap flex flex-col h-full p-4">
-                <div className="h-[72px] grid place-items-center mb-3"><g.Art size={68} /></div>
-                {/* nowrap and ordinary tracking: at 12px "WORD PUZZLE" with widest
-                    tracking broke over two lines in a carousel card. Letter-spacing
-                    is what was costing the width, not the size. */}
-                <span className={`chip inline-block self-start whitespace-nowrap text-[12px]
-                  font-black px-2 py-0.5 ${g.chip}`}>{g.badge}</span>
-                <h3 className="font-display text-[17px] leading-tight font-semibold mt-2">{g.name}</h3>
-                <p className="text-[12px] text-soft font-semibold leading-snug line-clamp-3 mt-0.5">
-                  {g.tagline}
-                </p>
-                <span className="flex-1" />
-                <p className="text-[13px] text-soft/70 font-bold mt-2 tabular-nums">
-                  {g.bank ? `${counts[g.bank] ?? 0} in the bank` : "Head-to-head"}
-                </p>
-              </Link>
-            </motion.div>
-          ))}
-
-          {/* Swiping to the end lands somewhere, rather than stopping dead. */}
-          <motion.div variants={riseIn} className="snap-start shrink-0 w-[132px]">
-            <Link to="/play"
-              className="card tap flex flex-col items-center justify-center h-full p-4 bg-mist text-center">
-              <span className="font-display text-3xl font-semibold leading-none">→</span>
-              <span className="font-display text-[15px] font-semibold mt-2 leading-tight">
-                All {GAMES.length} games
-              </span>
-            </Link>
-          </motion.div>
-        </Carousel>
-      </motion.div>
+      {/* Played today, or new: the games lead (#8, #10). Otherwise they wait
+          below the people you play with (#9). */}
+      {(fresh || p.playedToday) && <GamesRow />}
+      {user && !fresh && <PlaySomeone names={names} />}
+      {!fresh && !p.playedToday && <GamesRow />}
 
       {!user && !offline && (
-        <motion.div variants={popIn} className="mt-5">
+        <motion.div variants={popIn} className="mt-6">
           <Link to="/you" className="cut tap block cut-ink text-ground p-4">
             <p className="font-display text-lg font-semibold">
               {kept > 0 ? `${kept} answer${kept === 1 ? "" : "s"} on this phone` : "Playing signed out"}
@@ -175,16 +194,16 @@ export function HomePage() {
             <p className="text-[13px] font-semibold opacity-80 mt-0.5">
               {kept > 0
                 ? "Make an account and they come with you, with up to 7 days of streak →"
-                : "Make an account to keep your answers and streak, play the daily and take a place on the board →"}
+                : "Pick a name to keep your streak and play the daily →"}
             </p>
           </Link>
         </motion.div>
       )}
 
       {/* A guest's games go 30 days after they last play (F11). Home says so
-          once, and where to keep them (F13, drawing #8). */}
+          once, and where to keep them (F13). */}
       {isGuest && !offline && (
-        <motion.div variants={popIn} className="mt-5">
+        <motion.div variants={popIn} className="mt-6">
           <Link to="/you" className="cut tap block cut-ink text-ground p-4">
             <p className="font-display text-lg font-semibold">Playing as a guest</p>
             <p className="text-[13px] font-semibold opacity-80 mt-0.5">
@@ -193,13 +212,6 @@ export function HomePage() {
           </Link>
         </motion.div>
       )}
-
-      <Head title="Play someone" to="/you/everyone" cta="Leaderboard" />
-      <motion.div variants={popIn}>
-        <Link to="/rooms" className="cut tap block p-4 text-center font-display font-semibold cut-petal">
-          Start a room →
-        </Link>
-      </motion.div>
     </motion.div>
   );
 }

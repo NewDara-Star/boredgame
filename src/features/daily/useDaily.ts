@@ -226,6 +226,7 @@ export function useDailyStatus() {
   const [progress, setProgress] = useState(0);
   const [players, setPlayers] = useState(0);
   const [faces, setFaces] = useState<{ user_id: string; username: string }[]>([]);
+  const [place, setPlace] = useState<number | null>(null);
 
   useEffect(() => {
     if (!supabase || !user) return;
@@ -246,9 +247,19 @@ export function useDailyStatus() {
         user_id: r.user_id as string,
         username: (r.profiles as { username?: string } | null)?.username ?? "?",
       })));
+      // Your place on today's board (Home, drawing #10), in the board's own
+      // order (D8): right answers, then points, then time.
+      if (mine.data) {
+        const { data: order } = await supabase!.from("daily_scores").select("user_id")
+          .eq("day", day).order("correct", { ascending: false }).order("score", { ascending: false })
+          .order("ms", { ascending: true }).limit(500);
+        if (cancelled) return;
+        const at = ((order ?? []) as { user_id: string }[]).findIndex((r) => r.user_id === user.id);
+        setPlace(at >= 0 ? at + 1 : null);
+      } else setPlace(null);
     })();
     return () => { cancelled = true; };
   }, [day, user?.id]);
 
-  return { played, progress, players, faces, signedIn: !!user };
+  return { played, progress, players, faces, place, signedIn: !!user };
 }
