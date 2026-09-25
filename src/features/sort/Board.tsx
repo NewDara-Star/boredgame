@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { BOARD, INK, RAMPS } from "@/shared/brand/tokens";
 import { motion } from "framer-motion";
 import type { Tube } from "./rules";
+import { markPath, MARK_WORD } from "./marks";
 
 /**
  * The tubes, drawn. One SVG so the geometry is exact whatever the width, and
@@ -10,6 +11,8 @@ import type { Tube } from "./rules";
  * Balls are lit from top-left — a specular arc on the upper-left face, colour
  * falling off to the lower-right, a sliver of rim light on the shadow edge and
  * one soft cast shadow at the bottom of the tube. Six gradients, one light.
+ * Every ball also carries a mark for its colour (marks.ts), so a colour-blind
+ * player can tell red from green.
  *
  * It does not hint. No tube lights up to say "put it here": the board is the
  * board, the way a real set of tubes is, and where a ball can go is part of
@@ -70,7 +73,8 @@ export function Board({
   const label = (i: number) => {
     const t = tubes[i];
     if (t.length === 0) return `Tube ${i + 1}, empty`;
-    const top = COLOUR[t[t.length - 1] % COLOUR.length];
+    const c = t[t.length - 1];
+    const top = `${COLOUR[c % COLOUR.length]} ${MARK_WORD[c % MARK_WORD.length]}`;
     const base = `Tube ${i + 1}, ${t.length} ball${t.length > 1 ? "s" : ""}, top ${top}`;
     return selected === i ? `${base}, lifted` : base;
   };
@@ -170,6 +174,9 @@ export function Board({
                       fill={INK} opacity=".22" />
                   )}
                   <circle cx={x + TW / 2} cy={restY} r={R} fill={`url(#ball-${size}-${c % BALL.length})`} />
+                  {/* its mark, so colour is never the only difference (talk item 15) */}
+                  <path d={markPath(c, x + TW / 2, restY + R * 0.06, R * 0.44)}
+                    fill={INK} fillRule="evenodd" opacity=".8" />
                   <path d={`M ${x + TW / 2 - R * 0.86} ${restY + R * 0.42}
                             A ${R} ${R} 0 0 0 ${x + TW / 2 + R * 0.45} ${restY + R * 0.88}`}
                     fill="none" stroke={BALL[c % BALL.length][0]} strokeWidth="1.6"

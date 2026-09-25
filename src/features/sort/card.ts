@@ -3,6 +3,7 @@
 import { INK as INK_, type Box, type Ctx, type Glyph, type Hero } from "@/shared/card/frame";
 import { BOARD } from "@/shared/brand/tokens";
 import { BALL } from "./Board";
+import { markPath } from "./marks";
 import type { Flight, Tube } from "./rules";
 
 /** The tubes, drawn — the way the board lights them — with a ball in flight
@@ -18,6 +19,10 @@ export function drawTubes(c: Ctx, box: Box, tubes: Tube[], cap: number, flight: 
     const g = c.createRadialGradient(cx - r * 0.3, cy - r * 0.4, r * 0.1, cx, cy, r * 1.1);
     g.addColorStop(0, hi); g.addColorStop(0.34, mid); g.addColorStop(1, lo);
     c.beginPath(); c.arc(cx, cy, r, 0, Math.PI * 2); c.fillStyle = g; c.fill();
+    // the colour's mark, as on the board (talk item 15)
+    c.save(); c.globalAlpha = 0.8; c.fillStyle = INK_;
+    c.fill(new Path2D(markPath(colour, cx, cy + r * 0.06, r * 0.44)), "evenodd");
+    c.restore();
   };
   tubes.forEach((t, i) => {
     const x = x0 + i * (tw + gap);
@@ -52,8 +57,12 @@ export const sortHero = (tubes: Tube[], cap: number): Hero => (c, box) => drawTu
 /** A seat is a ball here, not an X or an O: the host's red, the guest's blue. */
 export const ballGlyph: Glyph = (c, mark, cx, cy, s) => {
   const r = s / 2;
-  const [hi, mid, lo] = BALL[mark === "x" ? 0 : 1];
+  const colour = mark === "x" ? 0 : 1;
+  const [hi, mid, lo] = BALL[colour];
   const g = c.createRadialGradient(cx - r * 0.3, cy - r * 0.4, r * 0.1, cx, cy, r * 1.1);
   g.addColorStop(0, hi); g.addColorStop(0.34, mid); g.addColorStop(1, lo);
   c.beginPath(); c.arc(cx, cy, r, 0, Math.PI * 2); c.fillStyle = g; c.fill();
+  c.save(); c.globalAlpha = 0.8; c.fillStyle = INK_;
+  c.fill(new Path2D(markPath(colour, cx, cy + r * 0.06, r * 0.44)), "evenodd");
+  c.restore();
 };
