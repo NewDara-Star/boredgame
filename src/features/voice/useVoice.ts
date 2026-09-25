@@ -18,11 +18,30 @@ export function troubleText(t: VoiceTrouble | null, name: string): string {
   }
 }
 
-// STUN only for now: a direct connection, which lands on Wi-Fi. A TURN relay
-// for the mobile-data case is a later bolt-on.
+// The direct route only: what a call falls back to when the relay can't be
+// had. It lands on Wi-Fi, and often not on mobile data.
 export const RTC: RTCConfiguration = {
   iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
 };
+
+/** The call's route: direct first, and Cloudflare's relay when direct is
+    blocked (talk item 17), from the voice-ice function, which only a room
+    member can ask. Never holds a call up: 3 seconds, then the direct route. */
+export async function routeFor(
+  invoke: (body: { room: number }) => PromiseLike<{ data: unknown; error: unknown }>,
+  roomId: number,
+): Promise<RTCConfiguration> {
+  try {
+    const got = await Promise.race([
+      Promise.resolve(invoke({ room: roomId })),
+      new Promise<null>((r) => setTimeout(() => r(null), 3000)),
+    ]);
+    const servers = (got && !got.error ? (got.data as { iceServers?: RTCIceServer[] } | null)?.iceServers : null) ?? null;
+    return servers && servers.length > 0 ? { iceServers: servers } : RTC;
+  } catch {
+    return RTC;
+  }
+}
 
 export type SigBody =
   | { kind: "desc"; desc: RTCSessionDescriptionInit }

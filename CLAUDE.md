@@ -1242,6 +1242,11 @@ Variables), not in the repo:
 `SUPABASE_SERVICE_KEY` is for `scripts/seed.mjs` only. It never goes near Vercel
 and never gets committed — it bypasses row-level security entirely.
 
+The voice relay (talk item 17) needs two Edge Function secrets in Supabase
+(Project → Edge Functions → Secrets), never in Vercel or the repo:
+`CF_TURN_KEY_ID` and `CF_TURN_KEY_API_TOKEN`, from a Cloudflare Realtime TURN
+key. Without them `voice-ice` answers with the direct route only, as before.
+
 ## Conventions
 
 - `normalise()` in `src/shared/lib/normalise.ts` must stay identical to

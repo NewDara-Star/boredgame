@@ -2,7 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useRef, useState } f
 import { useLocation, useNavigate } from "react-router-dom";
 import { supabase } from "@/shared/lib/supabase";
 import { useAuth } from "@/app/providers/AuthProvider";
-import { RTC, troubleText, type CallTarget, type Sig, type SigBody, type VoiceState, type VoiceTrouble } from "./useVoice";
+import { routeFor, troubleText, type CallTarget, type Sig, type SigBody, type VoiceState, type VoiceTrouble } from "./useVoice";
 
 /**
  * A room voice call that outlives the room screen.
@@ -14,8 +14,9 @@ import { RTC, troubleText, type CallTarget, type Sig, type SigBody, type VoiceSt
  * this provider unmounts -- i.e. the tab closes.
  *
  * WebRTC audio, peer to peer, signalled over a dedicated `voice:<room>` realtime
- * channel. STUN only. The smaller user id offers, the other answers, so there is
- * no glare; audio is negotiated once.
+ * channel. Direct first, with Cloudflare's relay (TURN) when direct is blocked,
+ * as on mobile data (voice-ice, talk item 17). The smaller user id offers, the
+ * other answers, so there is no glare; audio is negotiated once.
  */
 interface VoiceCtx {
   state: VoiceState;
@@ -111,6 +112,8 @@ export function VoiceProvider({ children }: { children: React.ReactNode }) {
     setTrouble(null);
     setState("connecting");
     const me = ++run.current;
+    // Ask for the relay while the phone asks for the mic, so it costs no wait.
+    const route = routeFor((body) => supabase!.functions.invoke("voice-ice", { body }), t.roomId);
     (async () => {
       let local: MediaStream;
       try {
@@ -132,7 +135,7 @@ export function VoiceProvider({ children }: { children: React.ReactNode }) {
         const send = (s: SigBody) =>
           void chan.send({ type: "broadcast", event: "sig", payload: { from: user.id, ...s } });
 
-        const pc = new RTCPeerConnection(RTC);
+        const pc = new RTCPeerConnection(await route);
         pcRef.current = pc;
         local.getTracks().forEach((tr) => pc.addTrack(tr, local));
 
