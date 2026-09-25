@@ -15,6 +15,8 @@ export interface DailyStanding {
   score: number;
   correct: number;
   ms: number;
+  /** a guest account: on the daily board, tagged, but not the main leaderboard */
+  guest: boolean;
 }
 
 /** The verdict the server returns for one answered question. */
@@ -91,9 +93,13 @@ export function useDaily() {
     if (!supabase) return;
     const { data, error: boardFailed } = await supabase
       .from("daily_scores")
-      .select("user_id, score, correct, ms, profiles(username)")
+      .select("user_id, score, correct, ms, profiles(username, is_guest)")
       .eq("day", day)
+      // Right answers first, so knowing always wins; then points, so speed and a
+      // run of right answers decide among equals (talk item 8). It used to be
+      // right answers then time, while the round showed points all the way.
       .order("correct", { ascending: false })
+      .order("score", { ascending: false })
       .order("ms", { ascending: true })
       .limit(50);
     // A failed read is not an empty board: it used to say "You're first".
@@ -105,6 +111,7 @@ export function useDaily() {
       score: r.score as number,
       correct: r.correct as number,
       ms: (r.ms as number) ?? 0,
+      guest: !!(r.profiles as { is_guest?: boolean } | null)?.is_guest,
     }));
     setBoard(rows);
     const found = rows.find((r) => r.user_id === user?.id) ?? null;
@@ -112,7 +119,7 @@ export function useDaily() {
     // A player ranked past the top 50 is still someone who has played today.
     const { data: own } = await supabase
       .from("daily_scores")
-      .select("user_id, score, correct, ms, profiles(username)")
+      .select("user_id, score, correct, ms, profiles(username, is_guest)")
       .eq("day", day)
       .eq("user_id", user.id)
       .maybeSingle();
@@ -123,6 +130,7 @@ export function useDaily() {
       score: o.score as number,
       correct: o.correct as number,
       ms: (o.ms as number) ?? 0,
+      guest: !!(o.profiles as { is_guest?: boolean } | null)?.is_guest,
     } : null);
   }, [day, user?.id]);
 
@@ -189,7 +197,7 @@ export function useDaily() {
     // The result is yours as soon as the server has it, not when the board next
     // loads: a board that failed to load left "Counting you in…" up for good.
     setMine((m) => m ?? { user_id: user?.id ?? "", username: profile?.username ?? "you",
-                          score: f.score, correct: f.correct, ms: f.ms });
+                          score: f.score, correct: f.correct, ms: f.ms, guest: !!user?.is_anonymous });
     if (Array.isArray(f.grid)) keepGrid(day, f.grid);
     setFiling("saved");
     // Today's round keeps your streak like any other round (and submit_daily has
@@ -227,7 +235,7 @@ export function useDailyStatus() {
         supabase!.from("daily_scores").select("correct").eq("day", day).eq("user_id", user.id).maybeSingle(),
         supabase!.from("daily_scores")
           .select("user_id, profiles(username)", { count: "exact" })
-          .eq("day", day).order("correct", { ascending: false }).limit(4),
+          .eq("day", day).order("correct", { ascending: false }).order("score", { ascending: false }).limit(4),
         supabase!.rpc("daily_progress", { p_day: day }),
       ]);
       if (cancelled) return;

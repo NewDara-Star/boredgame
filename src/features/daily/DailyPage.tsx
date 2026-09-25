@@ -16,6 +16,7 @@ import { drawCard, shareResult, type MatchCard } from "@/shared/card/frame";
 import { ShareButtons } from "@/shared/card/ShareButtons";
 import { linkTo } from "@/shared/card/voice";
 import { roundHero } from "@/features/play/roundCard";
+import { GuestCard } from "@/features/profile/GuestCard";
 
 const secs = (ms: number) => `${Math.round(ms / 1000)}s`;
 
@@ -44,13 +45,17 @@ function Board({ rows, meId, error, onRetry }:
             <Avatar id={r.user_id} name={r.username} size={32} />
             <span className="flex-1 font-bold text-[15px] truncate">
               {r.username}
+              {r.guest && <span className="text-soft font-black text-[12px] ml-1.5">guest</span>}
               {me && <span className="text-soft font-black text-[12px] ml-1.5">you</span>}
             </span>
+            {/* Ranked by right answers, then points (talk item 8): both shown. */}
             <span className="text-right">
               <b className="block font-display text-lg font-semibold tabular-nums leading-none">
                 {r.correct}<span className="text-soft text-sm">/10</span>
               </b>
-              <span className="text-[12px] font-bold text-soft tabular-nums">{secs(r.ms)}</span>
+              <span className="text-[12px] font-bold text-soft tabular-nums">
+                {r.score.toLocaleString("en-GB")} pts · {secs(r.ms)}
+              </span>
             </span>
           </div>
         );
@@ -111,15 +116,19 @@ export function DailyPage() {
   if (offline) {
     return <p className="text-sm text-soft font-bold">The daily round needs a database. Single-player works without one.</p>;
   }
+  // Everyone can play it (talk item 8): a name makes a guest, as a room
+  // invite does. It used to say "Sign in", as if an account were needed.
   if (!user) {
     return (
-      <div className="card p-6 text-center">
-        <h1 className="font-display text-2xl font-semibold">Today's round</h1>
-        <p className="text-sm text-soft font-semibold mt-2">
-          Ten questions, the same ten for everyone, once a day. Sign in to play it and take a place on the board.
-        </p>
-        <Link to="/profile" className="cut tap block mt-5 py-3.5 font-display text-lg font-semibold cut-petal">
-          Sign in
+      <div className="space-y-4">
+        <div>
+          <p className="text-[12px] font-black text-soft">Today's round</p>
+          <h1 className="font-display text-[30px] leading-none font-semibold mt-1">Ten questions, same for everyone</h1>
+          <p className="text-sm text-soft font-semibold mt-2">Once a day, and a place on today's board.</p>
+        </div>
+        <GuestCard note="Type a name and play today's ten. No password." />
+        <Link to="/profile" className="block text-center text-[13px] font-bold text-soft underline underline-offset-4">
+          I have an account
         </Link>
       </div>
     );
@@ -138,7 +147,7 @@ export function DailyPage() {
             {d.mine ? `${d.mine.correct} out of 10` : d.filing === "failed" ? "Not saved yet" : "Saving your round…"}
           </h1>
           <p className="text-sm text-soft font-semibold mt-1">
-            {d.mine ? `In ${secs(d.mine.ms)}. One go a day — back tomorrow.`
+            {d.mine ? `${d.mine.score.toLocaleString("en-GB")} points, in ${secs(d.mine.ms)}. One go a day — back tomorrow.`
               : d.filing === "failed" ? "Your answers are safe on the server. It just needs filing." : "One moment."}
           </p>
           {/* Only a real failure shows, with the one thing that fixes it. Filing

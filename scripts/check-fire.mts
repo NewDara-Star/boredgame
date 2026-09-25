@@ -211,5 +211,16 @@ ok(filings >= 1, `found ${filings} record_round calls — the scan is broken`);
      "Home no longer calls signed-out play 'guest' or promises what didn't carry");
 }
 
+// ---- 10. who the daily is for, and what ranks it (talk item 8) ---------------
+{
+  const rd = (p: string) => { try { return readFileSync(join(root, p), "utf8"); } catch { return ""; } };
+  const daily = rd("src/features/daily/useDaily.ts"), page = rd("src/features/daily/DailyPage.tsx");
+  ok(/\.order\("correct", \{ ascending: false \}\)\s*\.order\("score", \{ ascending: false \}\)\s*\.order\("ms", \{ ascending: true \}\)/.test(daily),
+     "the daily board ranks right answers, then points, then time");
+  ok(/profiles\(username, is_guest\)/.test(daily) && /r\.guest && /.test(page), "guests on the daily board are tagged");
+  ok(/<GuestCard /.test(page) && !/Sign in to play it/.test(page), "signed out, the daily offers a name instead of Sign in");
+  ok(/pts · \{secs\(r\.ms\)\}/.test(page), "the board shows the points it ranks by");
+}
+
 if (bad) { console.error(`\n${bad} of ${n} delivery assertions failed`); process.exit(1); }
 console.log(`${n} delivery assertions hold (${voids} void-supabase sites, ${checked} edge functions)`);
