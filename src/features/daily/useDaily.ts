@@ -214,6 +214,8 @@ export function useDailyStatus() {
   const { user } = useAuth();
   const day = today();
   const [played, setPlayed] = useState<number | null>(null);
+  /** answered so far in a round not yet finished (talk item 7) */
+  const [progress, setProgress] = useState(0);
   const [players, setPlayers] = useState(0);
   const [faces, setFaces] = useState<{ user_id: string; username: string }[]>([]);
 
@@ -221,14 +223,16 @@ export function useDailyStatus() {
     if (!supabase || !user) return;
     let cancelled = false;
     (async () => {
-      const [mine, all] = await Promise.all([
+      const [mine, all, so] = await Promise.all([
         supabase!.from("daily_scores").select("correct").eq("day", day).eq("user_id", user.id).maybeSingle(),
         supabase!.from("daily_scores")
           .select("user_id, profiles(username)", { count: "exact" })
           .eq("day", day).order("correct", { ascending: false }).limit(4),
+        supabase!.rpc("daily_progress", { p_day: day }),
       ]);
       if (cancelled) return;
       setPlayed((mine.data as { correct: number } | null)?.correct ?? null);
+      setProgress(typeof so.data === "number" ? so.data : 0);
       setPlayers(all.count ?? 0);
       setFaces(((all.data ?? []) as Record<string, unknown>[]).map((r) => ({
         user_id: r.user_id as string,
@@ -238,5 +242,5 @@ export function useDailyStatus() {
     return () => { cancelled = true; };
   }, [day, user?.id]);
 
-  return { played, players, faces, signedIn: !!user };
+  return { played, progress, players, faces, signedIn: !!user };
 }

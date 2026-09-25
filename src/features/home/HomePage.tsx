@@ -88,9 +88,15 @@ export function HomePage() {
               Daily challenge
             </p>
             <p className="relative font-display text-[26px] leading-tight font-semibold mt-1">
-              {daily.played === null ? "Ten questions, same for everyone"
-                : `You got ${daily.played} out of 10`}
+              {daily.played !== null ? `You got ${daily.played} out of 10`
+                : daily.progress > 0 ? "Finish today's round"
+                : "Ten questions, same for everyone"}
             </p>
+            {daily.played === null && daily.progress > 0 && (
+              <p className="relative text-[13px] font-bold mt-1">
+                {daily.progress} of 10 answered. They already count; the board takes all ten.
+              </p>
+            )}
             <div className="relative flex items-center gap-2 mt-3">
               <div className="flex -space-x-2.5">
                 {daily.faces.slice(0, 4).map((f) => (

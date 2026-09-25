@@ -4,7 +4,7 @@
 -- Run the whole file against the database (SQL Editor, or execute_sql) after
 -- changing any function it names: judge_answer, record_round, daily_next,
 -- daily_answer, submit_daily, daily_round, claim_board_win,
--- save_push_subscription, voice_topic_ok, carry_over, or the profiles and
+-- save_push_subscription, voice_topic_ok, carry_over, daily_progress, or the profiles and
 -- puzzles grants.
 --
 -- It ALWAYS ends in an error, on purpose: the error rolls every write back, so
@@ -24,7 +24,7 @@ declare
   results text[] := '{}'; broken text[] := '{}';
   g31 uuid := gen_random_uuid(); g29 uuid := gen_random_uuid(); gwin uuid := gen_random_uuid(); rr bigint;
   mc2 bigint; mc2_answer text; mc2_choices text[];
-  cb uuid := gen_random_uuid();
+  cb uuid := gen_random_uuid(); d7 int;
 begin
   -- ---- borrowed rows -------------------------------------------------------
   select p1.user_id, p2.user_id, p1.room_id into a, b, r
@@ -87,6 +87,9 @@ begin
   if n <> 3 then broken := broken || results[cardinality(results)]; end if;
 
   -- ---- D2: only a question the server served can be answered ---------------
+  reset role;
+  select count(*) into d7 from public.attempts where user_id = c and puzzle_id = ids[1];
+  set local role authenticated;
   perform public.daily_next(today);                       -- serves ids[1]
   results := array_append(results, 'D2 answering a question that was never served is refused'::text);
   err := null;
@@ -97,6 +100,12 @@ begin
     j := public.daily_answer(today, ids[1], 'x');
     if j ? 'correct' is not true then broken := broken || results[cardinality(results)]; end if;
   exception when others then broken := broken || results[cardinality(results)]; end;
+  -- ---- D7 (talk item 7): a daily answer counts at once, finished or not ----
+  reset role;
+  results := array_append(results, 'D7 a daily answer counts towards your totals at once, before the round is finished'::text);
+  if (select count(*) from public.attempts where user_id = c and puzzle_id = ids[1]) <> d7 + 1
+  then broken := broken || results[cardinality(results)]; end if;
+  set local role authenticated;
 
   -- ---- F30: today's daily questions can't be read ahead --------------------
   results := array_append(results, 'F30 a player can''t read today''s daily questions from the bank'::text);

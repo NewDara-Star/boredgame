@@ -177,6 +177,10 @@ ok(filings >= 1, `found ${filings} record_round calls — the scan is broken`);
      "every room game keeps the streak");
   ok(!/results\.length === 0\) return;/.test(rd("src/features/play/useSoloBoard.ts")), "a solo game with no questions still keeps the streak");
   ok(/recordRound\("trivia", \[\], null, userId\)/.test(rd("src/features/sort/useSortSolo.ts")), "a Ball Sort solve keeps the streak");
+  ok(/void markPlayed\(\)\.then\(\(\) => refreshProfile\(\)\)/.test(rd("src/features/daily/useDailyPlay.ts")),
+     "a daily answer keeps the streak and moves the totals at once (talk item 7)");
+  ok(/rpc\("daily_progress"/.test(rd("src/features/daily/useDaily.ts")) && /Finish today's round/.test(rd("src/features/home/HomePage.tsx")),
+     "Home says a started daily is unfinished, and that its answers already count");
 }
 
 // ---- 9. play from before you had an account comes with you (F17) -------------

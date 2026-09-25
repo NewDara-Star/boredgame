@@ -1784,6 +1784,24 @@ create table if not exists public.daily_picks (
 );
 alter table public.daily_picks enable row level security;
 revoke all on public.daily_picks from anon, authenticated;
+-- Whether the answer is in attempts yet (talk item 7). Rounds already on the
+-- board were filed by submit_daily; the one unfinished round from before
+-- (7 Sep) stays uncounted, as talk item 2 decided.
+alter table public.daily_picks add column if not exists filed boolean not null default false;
+update public.daily_picks dp set filed = true
+ where not dp.filed and dp.answered_at is not null
+   and exists (select 1 from public.daily_scores s where s.day = dp.day and s.user_id = dp.user_id);
+
+-- How many of a day's questions you've answered, for Home's "Finish today's
+-- round: 3 of 10". Read-only: daily_next would serve (and start the clock on)
+-- the next question.
+create or replace function public.daily_progress(p_day date)
+returns int language sql stable security definer set search_path to 'public' as $$
+  select count(*)::int from public.daily_picks
+   where day = p_day and user_id = auth.uid() and answered_at is not null;
+$$;
+revoke all on function public.daily_progress(date) from public, anon;
+grant execute on function public.daily_progress(date) to authenticated;
 
 -- A player's daily so far, worked out one way for everyone who needs it: the
 -- running score and streak daily_answer returns after each pick (the phone
@@ -1883,7 +1901,7 @@ create or replace function public.daily_answer(p_day date, p_puzzle bigint, p_gi
 returns jsonb language plpgsql security definer set search_path to 'public' as $$
 declare uid uuid := auth.uid();
         v_ids bigint[]; v_answer text; v_accept text[]; v_choices text[]; v_expl text;
-        v_correct boolean; v_pick public.daily_picks; t0 record; t1 record;
+        v_correct boolean; v_pick public.daily_picks; t0 record; t1 record; v_new int;
 begin
   if uid is null then raise exception 'sign in first'; end if;
   -- The phone asks for its own date. A day either side of UTC is accepted, the
@@ -1913,9 +1931,18 @@ begin
   v_correct := public.judge_answer(p_given, v_answer, v_accept, v_choices);
   select * into t0 from public.daily_tally(p_day, uid);
   update public.daily_picks
-     set given = p_given, correct = v_correct, answered_at = now()
+     set given = p_given, correct = v_correct, answered_at = now(), filed = true
    where day = p_day and user_id = uid and puzzle_id = p_puzzle
      and answered_at is null;                            -- first answer wins
+  -- Each answer counts the moment it's judged (talk item 7): totals, rank and
+  -- the leaderboard move now, not only when all ten are done. Leaving after
+  -- three used to count nothing, ever. The board still takes finished rounds.
+  get diagnostics v_new = row_count;
+  if v_new = 1 then
+    insert into public.attempts (user_id, puzzle_id, correct, ms_taken)
+      values (uid, p_puzzle, v_correct,
+              greatest(0, least(60000, (extract(epoch from (now() - v_pick.served_at)) * 1000)::int)));
+  end if;
   -- The points are the ones submit_daily will file: the phone shows these
   -- instead of its own estimate.
   select * into t1 from public.daily_tally(p_day, uid);
@@ -1929,7 +1956,7 @@ end $$;
 -- dominate. One score per day per player; a second call is a no-op.
 create or replace function public.submit_daily(p_day date)
 returns jsonb language plpgsql security definer set search_path to 'public' as $$
-declare uid uuid := auth.uid(); v_ids bigint[]; t record; v_filed int := 0;
+declare uid uuid := auth.uid(); v_ids bigint[]; t record;
         cap_ms constant int := 60000;   -- max a single question can contribute
 begin
   if uid is null then raise exception 'sign in first'; end if;
@@ -1946,20 +1973,18 @@ begin
   insert into public.daily_scores(day, user_id, score, correct, answered, ms)
     values (p_day, uid, t.score, t.correct, t.answered, t.ms)
     on conflict (day, user_id) do nothing;
-  -- Today's round counts like any other questions answered: its answers go into
-  -- attempts, so the counters, rank and leaderboard move (they didn't: six rounds
-  -- had been played and none counted). Only on the FIRST filing, so calling this
-  -- twice can't count the same answers twice. The verdicts are the ones
-  -- daily_answer already judged; nothing here takes the client's word.
-  get diagnostics v_filed = row_count;
-  if v_filed = 1 then
-    insert into public.attempts (user_id, puzzle_id, correct, ms_taken)
-    select uid, dp.puzzle_id, coalesce(dp.correct, false),
-           greatest(0, least(cap_ms,
-             (extract(epoch from (dp.answered_at - dp.served_at)) * 1000)::int))
-      from public.daily_picks dp
-     where dp.day = p_day and dp.user_id = uid and dp.answered_at is not null;
-  end if;
+  -- Each answer is filed into attempts by daily_answer as it's judged (talk
+  -- item 7). This only catches an answer that wasn't: one given before that
+  -- change, in a round finished after it. `filed` means no answer counts twice,
+  -- however often this is called. The verdicts are daily_answer's.
+  with f as (
+    update public.daily_picks dp set filed = true
+     where dp.day = p_day and dp.user_id = uid and dp.answered_at is not null and not dp.filed
+    returning dp.puzzle_id, dp.correct, dp.served_at, dp.answered_at)
+  insert into public.attempts (user_id, puzzle_id, correct, ms_taken)
+  select uid, f.puzzle_id, coalesce(f.correct, false),
+         greatest(0, least(cap_ms, (extract(epoch from (f.answered_at - f.served_at)) * 1000)::int))
+    from f;
   -- The grid (right/wrong in round order) is the server's, so the text share has
   -- all ten squares even when the round was played on two phones.
   return jsonb_build_object('ok', true, 'correct', t.correct,

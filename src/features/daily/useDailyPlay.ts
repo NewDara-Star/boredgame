@@ -3,6 +3,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { keepGrid, readGrid } from "./grid";
 import type { PlayItem } from "@/features/play/types";
 import type { useDaily } from "./useDaily";
+import { useAuth } from "@/app/providers/AuthProvider";
+import { useMarkPlayed } from "@/features/play/played";
 
 type DailyApi = ReturnType<typeof useDaily>;
 export type DailyPhase = "loading" | "empty" | "playing" | "revealed" | "done";
@@ -29,6 +31,8 @@ interface Last {
  */
 
 export function useDailyPlay(d: DailyApi, enabled: boolean) {
+  const { refreshProfile } = useAuth();
+  const markPlayed = useMarkPlayed();
   const [phase, setPhase] = useState<DailyPhase>("loading");
   const [current, setCurrent] = useState<PlayItem | undefined>(undefined);
   const [index, setIndex] = useState(0);
@@ -84,10 +88,13 @@ export function useDailyPlay(d: DailyApi, enabled: boolean) {
     setScore(v.score);
     setStreak(v.streak);
     setLast({ correct: v.correct, given, gained: v.gained, near: false, answer: v.answer, explanation: v.explanation, streak: v.streak });
+    // Each answer counts as it's judged (talk item 7): the server has filed it,
+    // so the day's streak and the header's totals move now, not at question ten.
+    void markPlayed().then(() => refreshProfile());
     setGrid((g0) => { const g1 = [...(readGrid(d.day) ?? g0), v.correct]; keepGrid(d.day, g1); return g1; });
     setPending(null);
     setPhase("revealed");
-  }, [phase, current, pending, d]);
+  }, [phase, current, pending, d, markPlayed, refreshProfile]);
 
   const next = useCallback(async () => {
     const n = await d.next();
