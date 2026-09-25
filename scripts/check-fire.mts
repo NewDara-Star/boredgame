@@ -234,5 +234,19 @@ ok(filings >= 1, `found ${filings} record_round calls — the scan is broken`);
   ok(/r\.walkover\(\)/.test(sort) && /QUIET_MS = 45_000/.test(sort), "a Ball Sort finisher can take the win from a phone gone quiet");
 }
 
+// ---- 12. Ball Sort: hidden until Start, and the first finish counts (talk item 13)
+{
+  const rd = (p: string) => { try { return readFileSync(join(root, p), "utf8"); } catch { return ""; } };
+  const gate = rd("src/features/sort/StartGate.tsx");
+  ok(/COUNT_FROM = 3/.test(gate), "Start counts 3, 2, 1 before the tubes appear");
+  ok(/<StartGate /.test(rd("src/features/sort/SortSoloPage.tsx")) && /<StartGate /.test(rd("src/features/sort/SortRaceRoom.tsx")),
+     "solo and the race both hide the tubes until Start");
+  ok(/startedAt === null\) return;\s+\/\/ hidden until Start/.test(rd("src/features/sort/useSortSolo.ts"))
+     && /startedRef\.current === null\) return;\s+\/\/ hidden until Start/.test(rd("src/features/sort/useSortRoom.ts")),
+     "no move before the tubes appear, so the clock can't be dodged");
+  ok(/r\.theirTubes && r\.revealed/.test(rd("src/features/sort/SortRaceRoom.tsx")), "the other player's tubes stay hidden too");
+  ok(/order by s\.day, s\.level, s\.user_id, s\.finished_at asc/.test(rd("supabase/schema.sql")), "today's board is each player's first finish");
+}
+
 if (bad) { console.error(`\n${bad} of ${n} delivery assertions failed`); process.exit(1); }
 console.log(`${n} delivery assertions hold (${voids} void-supabase sites, ${checked} edge functions)`);

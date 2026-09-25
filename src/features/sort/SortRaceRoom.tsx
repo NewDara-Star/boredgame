@@ -14,6 +14,7 @@ import { ballGlyph, sortHero } from "./card";
 import { ReplayPlayer } from "./ReplayPlayer";
 import { decodeLog, type Replay } from "./rules";
 import { useSortRoom } from "./useSortRoom";
+import { StartGate } from "./StartGate";
 
 /** ms -> "12.3s", or "1:04.2" once it runs past a minute. */
 function clock(ms: number): string {
@@ -80,7 +81,7 @@ export function SortRaceRoom({
 
   const them = r.seat === "x" ? names.o : names.x;
 
-  // My clock: 0 until my first lift, then ticking from it, then frozen on my solve.
+  // My clock: 0 until my tubes appear (Start, then 3-2-1), then ticking, then frozen on my solve.
   const liveMs = r.startedMs === null ? 0 : Math.max(0, now - r.startedMs);
   const myMs = r.myMs ?? liveMs;
 
@@ -110,11 +111,14 @@ export function SortRaceRoom({
         const me = r.me;
         return (
           <PlayBoard ratio={TUBES_RATIO} min={0}>
-            {(width) => (
+            {(width) => r.revealed ? (
               <div className="card bg-board p-3 pt-1" style={{ width }}>
                 <Board tubes={me.tubes} cap={me.cap} selected={r.selected} refused={r.refused}
                   width={width - 26} onPick={r.pick} disabled={!playing} />
               </div>
+            ) : (
+              <StartGate width={width} onGo={r.go}
+                note="Your tubes stay hidden until you start. Your clock runs from the moment they appear." />
             )}
           </PlayBoard>
         );
@@ -129,6 +133,7 @@ export function SortRaceRoom({
                : `Done in ${clock(myMs)} — waiting for ${them}.`)
             : r.theyFinished
               ? `${them} finished in ${r.theirMs != null ? clock(r.theirMs) : "—"}. Beat it or give up.`
+              : !r.revealed ? "Tap Start when you're ready."
               : r.selected === null ? "Tap a tube to lift its top ball."
               : "Now tap where it goes."}
       </p>
@@ -159,7 +164,8 @@ export function SortRaceRoom({
 
       {playing && (
         <div className="flex items-center gap-3">
-          {r.theirTubes && (
+          {/* Their tubes began as yours: not shown until yours are (talk item 13). */}
+          {r.theirTubes && r.revealed && (
             <div className="card bg-mist p-2 shrink-0" style={{ width: 150 }}>
               <p className="text-[12px] font-black text-soft text-center mb-1">
                 {them} · {r.theirMoves}

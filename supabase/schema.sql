@@ -1739,13 +1739,17 @@ grant execute on function public.sort_solo_finish(bigint, uuid, int, int, text) 
 
 -- Each player's best finished attempt on a day's level. security_invoker so
 -- the caller's own read rights on sort_solo and profiles apply.
+-- Each player's FIRST finish of the day's board, not their best (talk item 13,
+-- Daramola): the board is the same all day, so replays could learn the answer
+-- and post a time for a board already solved. Going again is for fun.
+-- (The name stays: the app and the edge function read it.)
 create or replace view public.sort_daily_best with (security_invoker = true) as
   select distinct on (s.day, s.level, s.user_id)
          s.day, s.level, s.user_id, p.username, s.ms, s.moves, s.finished_at, s.id, s.log
     from public.sort_solo s
     join public.profiles p on p.id = s.user_id
    where s.ms is not null
-   order by s.day, s.level, s.user_id, s.ms asc, s.moves asc;
+   order by s.day, s.level, s.user_id, s.finished_at asc, s.id asc;
 grant select on public.sort_daily_best to authenticated;
 
 -- ---------------------------------------------------------------------------

@@ -26,7 +26,12 @@ export interface Standing {
  * the first lift and the edge function stamps the finish after replaying the
  * moves, so the time on the board is never a number this phone chose.
  *
- * Going again is a fresh attempt at the same board. Your best stands.
+ * (Since talk item 13 the tubes are hidden until Start and a 3-second count,
+ * and the clock, here and on the server, starts when they appear.)
+ *
+ * Going again is a fresh attempt at the same board, for fun: your FIRST finish
+ * is the one on today's board (talk item 13; it was your best, so replays
+ * could learn the answer).
  *
  * Practice is the same game off the record: a random board from the bank,
  * timed here only, no attempt row, no ladder. `shuffle()` deals another.
@@ -87,8 +92,11 @@ export function useSortSolo(level: Level, userId: string | undefined, practice =
   }, [day, level, userId, practice]);
   useEffect(() => { void loadBoard(); }, [loadBoard]);
 
-  /** The first lift starts the clock — here, and as a row on the server. */
+  /** Whether this run is the one that counts: no finish on today's board yet. */
+  const [counts, setCounts] = useState(true);
+  /** The tubes appearing starts the clock — here, and as a row on the server. */
   const start = useCallback(() => {
+    setCounts(!practice && !mine);
     setStartedAt(Date.now());
     if (!supabase || !userId || practice) { attempt.current = Promise.resolve(null); return; }
     attempt.current = Promise.resolve(supabase.rpc("sort_solo_start", { p_day: day, p_level: level }))
@@ -96,7 +104,7 @@ export function useSortSolo(level: Level, userId: string | undefined, practice =
         if (e) { setError("The clock could not start on the server — this run will not be ranked."); return null; }
         return Number(data);
       });
-  }, [day, level, userId, practice]);
+  }, [day, level, userId, practice, mine]);
 
   /** Sorted. The moves go to the referee; the time comes back from it. */
   const finish = useCallback(async (g: Game, localMs: number) => {
@@ -125,10 +133,9 @@ export function useSortSolo(level: Level, userId: string | undefined, practice =
   /** Tap a tube: the first lifts its top ball, the second drops it there. A
       tube that cannot take it — only ever a full one — refuses visibly. */
   const pick = useCallback((i: number) => {
-    if (result || finishing) return;
+    if (result || finishing || startedAt === null) return;   // hidden until Start
     if (selected === null) {
       if (me.tubes[i].length === 0) return;
-      if (startedAt === null) start();
       setSelected(i);
       return;
     }
@@ -159,5 +166,7 @@ export function useSortSolo(level: Level, userId: string | undefined, practice =
     board, mine, practice, boardFailed, refreshBoard: loadBoard,
     progress: solvedCount(me.tubes, me.cap),
     pick, takeBack, again: reset, shuffle,
+    /** Start's count is over: show the tubes and start the clock */
+    go: start, counts,
   };
 }

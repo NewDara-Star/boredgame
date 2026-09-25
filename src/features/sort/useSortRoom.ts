@@ -72,10 +72,12 @@ export function useSortRoom(roomId: number | null, userId: string | undefined) {
   // moves. This is the time that gets compared, and the on-screen clock freezes
   // on it while you wait for the other board.
   const [solvedMs, setSolvedMs] = useState<number | null>(null);
-  // When YOUR clock started: the moment of your first lift, not the deal. A ref,
-  // so a tick does not depend on it; the first-lift setSelected re-render surfaces
-  // it to the screen.
+  // When YOUR clock started: the moment YOUR tubes appeared after Start and the
+  // count (talk item 13), not the deal and not your first lift. A ref, so a tick
+  // does not depend on it; `revealed` is the same moment, for the screen.
   const startedRef = useRef<number | null>(null);
+  const [revealed, setRevealed] = useState(false);
+  const go = useCallback(() => { startedRef.current = Date.now(); setRevealed(true); }, []);
 
   const seat: Seat | null = !row || !userId ? null
     : row.x_player === userId ? "x" : row.o_player === userId ? "o" : null;
@@ -94,7 +96,7 @@ export function useSortRoom(roomId: number | null, userId: string | undefined) {
     setMe(newGame(puzzle));
     setSelected(null); setRefused(null);
     setFinishing(false); setSolvedMs(null);
-    startedRef.current = null;
+    startedRef.current = null; setRevealed(false);
   }, [puzzle, row?.seed]);
 
   // the row, then every change to it
@@ -176,13 +178,9 @@ export function useSortRoom(roomId: number | null, userId: string | undefined) {
       tube that cannot take it — only ever a full one — refuses visibly and the
       ball stays lifted. */
   const pick = useCallback((i: number) => {
-    if (!me || row?.winner || solvedMs !== null) return;
+    if (!me || row?.winner || solvedMs !== null || startedRef.current === null) return;   // hidden until Start
     if (selected === null) {
-      if (me.tubes[i].length > 0) {
-        // Your clock starts at your first lift, not the shared deal.
-        if (startedRef.current === null) startedRef.current = Date.now();
-        setSelected(i);
-      }
+      if (me.tubes[i].length > 0) setSelected(i);
       return;
     }
     if (selected === i) { setSelected(null); return; }
@@ -265,7 +263,7 @@ export function useSortRoom(roomId: number | null, userId: string | undefined) {
     theirProgress: theirTubes && row ? solvedCount(theirTubes, row.cap) : 0,
     won: row?.winner ?? null,
     iWon: !!row?.winner && row.winner === seat,
-    pick, takeBack, concede, walkover, rematch, quit, changeGame,
+    pick, takeBack, concede, walkover, rematch, quit, changeGame, go, revealed,
     finishDropped, retryFinish,
   };
 }

@@ -10,6 +10,7 @@ import { stagger, riseIn, popIn } from "@/shared/ui/motion";
 import { drawCard, shareResult, type MatchCard } from "@/shared/card/frame";
 import { Board, TUBES_RATIO } from "./Board";
 import { PlayBoard, PlayRow, PlaySurface } from "@/features/play/PlaySurface";
+import { StartGate } from "./StartGate";
 import { sortHero } from "./card";
 import { useSortSolo, type Standing } from "./useSortSolo";
 
@@ -101,7 +102,7 @@ export function SortSoloPage() {
         <>
           <PlayRow className="grid grid-cols-3 gap-2 text-center">
             <Stat label="Time" value={clock(elapsed)}
-              sub={r.startedAt === null ? "on first lift" : practice ? "practice" : "server-timed"} />
+              sub={r.startedAt === null ? "starts when the tubes appear" : practice ? "practice" : "server-timed"} />
             <Stat label="Moves" value={String(r.me.moves)} sub={`par ${r.puzzle.par}`} />
             {practice
               ? <Stat label="Board" value="random" sub="not ranked" />
@@ -113,17 +114,23 @@ export function SortSoloPage() {
               sorted board above a film of the sorted board was the same
               picture twice on a phone that had to be scrolled past it. */}
           <PlayBoard ratio={TUBES_RATIO} min={120}>
-            {(width) => (
+            {(width) => r.startedAt !== null ? (
               <div className="card bg-board p-3 pt-1" style={{ width }}>
                 <Board tubes={r.me.tubes} cap={r.me.cap} selected={r.selected} refused={r.refused}
                   width={width - 26} onPick={r.pick} disabled={r.finishing} />
               </div>
+            ) : (
+              <StartGate width={width} onGo={r.go}
+                note={practice ? "The tubes stay hidden until you start."
+                  : r.mine ? "You've a time on today's board. Only your first finish counts: this one is for fun."
+                  : "The tubes stay hidden until you start. Your first finish today is the one that counts."} />
             )}
           </PlayBoard>
 
           <PlayRow>
             <p className="text-center text-[15px] font-bold text-soft">
               {r.finishing ? "Checking with the referee…"
+                : r.startedAt === null ? "Tap Start when you're ready."
                 : r.selected === null ? "Tap a tube to lift its top ball."
                 : "Now tap where it goes."}
             </p>
@@ -144,7 +151,9 @@ export function SortSoloPage() {
             <p className="font-display text-2xl font-semibold tabular-nums">{clock(r.result.ms)}</p>
             <p className="text-[13px] font-bold opacity-90 text-right">
               {r.result.moves} moves, {overPar <= 0 ? "par" : `par ${r.puzzle.par}`}
-              {rank ? ` · #${rank} today` : practice ? " · practice" : r.result.server ? " · on the board" : " · timed here"}
+              {practice ? " · practice"
+                : !r.counts ? " · for fun: your first finish stands"
+                : rank ? ` · #${rank} today` : r.result.server ? " · on the board" : " · timed here"}
             </p>
           </div>
           {film && (
