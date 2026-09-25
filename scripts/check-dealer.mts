@@ -102,5 +102,25 @@ console.log("stuck on a picture (talk item 5)");
   ok("Picto offers Skip, then Show me", /r\.canSkip \? r\.skip : r\.giveUp/.test(picto) && /counts as a miss/.test(picto));
 }
 
+console.log("how hard the solo board questions are (talk item 9)");
+{
+  let lv: { readLevels?: () => string[]; toggle?: (l: string[], x: string) => string[]; atLevels?: <T extends { difficulty: string }>(p: T[], l: string[]) => T[] } = {};
+  try { lv = await import("../src/features/play/levels.ts"); } catch { /* not there */ }
+  const { readLevels, toggle, atLevels } = lv;
+  ok("solo boards have a level choice", typeof readLevels === "function" && typeof toggle === "function" && typeof atLevels === "function");
+  if (readLevels && toggle && atLevels) {
+    ok("a new phone starts on easy + medium: nothing hard until asked for", readLevels().join(",") === "easy,medium");
+    ok("hard can be added, in order", toggle(["easy", "medium"], "hard").join(",") === "easy,medium,hard");
+    ok("a level can be taken off", toggle(["easy", "medium"], "medium").join(",") === "easy");
+    ok("but never the last one", toggle(["easy"], "easy").join(",") === "easy");
+    const bank = [{ difficulty: "easy" }, { difficulty: "hard" }, { difficulty: "medium" }];
+    ok("the pool is the chosen levels", atLevels(bank, ["easy"]).length === 1 && atLevels(bank, ["easy", "medium"]).every((q) => q.difficulty !== "hard"));
+    ok("a level with nothing in it falls back to the whole bank", atLevels([{ difficulty: "hard" }], ["easy"]).length === 1);
+  }
+  const rd = (f: string) => { try { return readFileSync(new URL(`../src/${f}`, import.meta.url), "utf8"); } catch { return ""; } };
+  ok("the solo board deals from the chosen levels", /atLevels\(everyRef\.current, readLevels\(\)\)/.test(rd("features/play/useSoloBoard.ts")));
+  ok("the choice shows before a game's first question", /g\.phase === "picking" && s\.results\.length === 0/.test(rd("features/play/BoardSoloPage.tsx")));
+}
+
 console.log(failed === 0 ? "\ndealing is sound" : `\n${failed} FAILED`);
 process.exit(failed === 0 ? 0 : 1);

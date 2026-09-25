@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "@/app/providers/AuthProvider";
 import { loadContent, shuffle } from "@/features/play/content";
+import { atLevels, readLevels, writeLevels, type Level } from "@/features/play/levels";
 import { recordRound, type RoundOutcome } from "@/features/play/progress";
 import { deal } from "@/features/play/dealer";
 import { askMs } from "@/features/play/clock";
@@ -62,14 +63,28 @@ export function useSoloBoard<G extends BoardState, R extends BoardRow>(
   // timeouts, where reading it out of a setState updater would fire a side
   // effect twice under StrictMode.
   const poolRef = useRef<PlayItem[]>([]);
+  /** every usable question; the pool is these at the chosen levels (talk item 9) */
+  const everyRef = useRef<PlayItem[]>([]);
+  const [levels, setLevelsState] = useState<Level[]>(readLevels);
   useEffect(() => {
     if (plain || challenge !== "trivia") return;
     void loadContent("trivia").then((all) => {
-      const usable = shuffle(all.filter((i) => i.choices && i.choices.length >= 2));
+      everyRef.current = shuffle(all.filter((i) => i.choices && i.choices.length >= 2));
+      const usable = atLevels(everyRef.current, readLevels());
       poolRef.current = usable;
       setPool(usable);
     });
   }, [plain, challenge]);
+  /** The next question comes from the new levels; the phone remembers them. */
+  const setLevels = useCallback((next: Level[]) => {
+    writeLevels(next);
+    setLevelsState(next);
+    if (everyRef.current.length) {
+      const usable = atLevels(everyRef.current, next);
+      poolRef.current = usable;
+      setPool(usable);
+    }
+  }, []);
 
   // The catapult's target moves every turn but the physics never do, so getting
   // better at it is a real thing that happens — which is the whole point of it
@@ -287,5 +302,6 @@ export function useSoloBoard<G extends BoardState, R extends BoardRow>(
     iAnswer: game.phase === "asking" && engine.answerer(game) === "x",
     choose, submit, restart, fire,
     target, botFires, challenge,
+    levels, setLevels,
   };
 }

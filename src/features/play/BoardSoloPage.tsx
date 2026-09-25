@@ -9,6 +9,7 @@ import { drawCard, type Glyph, type Hero, type MatchCard } from "@/shared/card/f
 import { botVoice, gamePath } from "@/shared/card/voice";
 import { ResultScreen } from "@/features/play/ResultScreen";
 import { useSoloBoard } from "@/features/play/useSoloBoard";
+import { LEVELS, toggle } from "@/features/play/levels";
 import { TurnPanel } from "@/features/rooms/TurnPanel";
 
 import type { BoardEngine, BoardRow, BoardState, Mark } from "@/features/rooms/useBoardRoom";
@@ -124,6 +125,25 @@ export function BoardSoloPage<G extends BoardState & { target: number | null; li
           rather than pushing them off the bottom. When a question is up on a
           short phone that can be 100px — small, but the board is reference
           then, and the four answers are the screen. */}
+      {/* How hard (talk item 9): before the first question of each game, so
+          it never takes board space mid-game. The phone remembers the pick. */}
+      {!plain && challenge === "trivia" && g.phase === "picking" && s.results.length === 0 && (
+        <PlayRow>
+          <div className="flex items-center justify-center gap-2" role="group" aria-label="How hard are the questions?">
+            <span className="text-[13px] font-black text-soft">Questions</span>
+            {LEVELS.map((l) => {
+              const on = s.levels.includes(l);
+              return (
+                <button key={l} aria-pressed={on} onClick={() => s.setLevels(toggle(s.levels, l))}
+                  className={`cut tap px-3 min-h-[44px] text-[13px] font-black capitalize ${on ? "cut-petal text-ink" : "bg-board text-soft"}`}>
+                  {l}
+                </button>
+              );
+            })}
+          </div>
+        </PlayRow>
+      )}
+
       <PlayBoard ratio={ratio} min={78}>
         {(width) => board({ game: g, myTurn: s.myTurn, width, onPick: s.choose })}
       </PlayBoard>
