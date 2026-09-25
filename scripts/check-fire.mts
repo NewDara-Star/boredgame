@@ -248,5 +248,19 @@ ok(filings >= 1, `found ${filings} record_round calls — the scan is broken`);
   ok(/order by s\.day, s\.level, s\.user_id, s\.finished_at asc/.test(rd("supabase/schema.sql")), "today's board is each player's first finish");
 }
 
+// ---- 13. Ball Sort: the server keeps the clock (talk item 14) -----------------
+// The phone's own time won whenever it was lower, so a script could post ~4 s.
+{
+  const rd = (p: string) => { try { return readFileSync(join(root, p), "utf8"); } catch { return ""; } };
+  const room = rd("src/features/sort/useSortRoom.ts"), sql = rd("supabase/schema.sql");
+  ok(/const go = useCallback\(\(\) => \{[\s\S]{0,160}fire\(supabase\.rpc\("sort_reveal"/.test(room),
+     "the race's Start stamps the reveal on the server (sent, not a bare void)");
+  ok(/v_ms := greatest\(1, \(extract\(epoch from \(now\(\) - v_revealed\)\)/.test(sql)
+     && !/least\(p_ms, v_wall\)/.test(sql.slice(sql.lastIndexOf("create or replace function public.sort_finish("))),
+     "a race finish is timed by the server, never by the phone's number");
+  ok(/v_ms := v_wall;/.test(sql.slice(sql.lastIndexOf("create or replace function public.sort_solo_finish("))),
+     "a daily Ball Sort finish is timed by the server");
+}
+
 if (bad) { console.error(`\n${bad} of ${n} delivery assertions failed`); process.exit(1); }
 console.log(`${n} delivery assertions hold (${voids} void-supabase sites, ${checked} edge functions)`);

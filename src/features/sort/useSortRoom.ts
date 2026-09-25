@@ -77,7 +77,13 @@ export function useSortRoom(roomId: number | null, userId: string | undefined) {
   // does not depend on it; `revealed` is the same moment, for the screen.
   const startedRef = useRef<number | null>(null);
   const [revealed, setRevealed] = useState(false);
-  const go = useCallback(() => { startedRef.current = Date.now(); setRevealed(true); }, []);
+  // The server keeps the clock that counts (talk item 14): this stamps the
+  // moment on the race row, and the finish is timed from it. Without a stamp
+  // the server times you from the deal, which is never shorter.
+  const go = useCallback(() => {
+    startedRef.current = Date.now(); setRevealed(true);
+    if (supabase && roomId) fire(supabase.rpc("sort_reveal", { p_room: roomId }), "Starting your clock");
+  }, [roomId]);
 
   const seat: Seat | null = !row || !userId ? null
     : row.x_player === userId ? "x" : row.o_player === userId ? "o" : null;

@@ -1278,6 +1278,33 @@ create policy "sort races readable by the people in the room" on public.sort_rac
 -- Deliberately NO insert/update/delete policy. The functions below are the
 -- only way in, and each writes one seat's columns and no others.
 
+-- When each seat's tubes appeared (talk item 13's Start and count), so the
+-- server can time the race itself (talk item 14). A stamp from an earlier
+-- deal (before started_at) doesn't count for this one.
+alter table public.sort_races add column if not exists x_revealed_at timestamptz;
+alter table public.sort_races add column if not exists o_revealed_at timestamptz;
+
+create or replace function public.sort_reveal(p_room bigint)
+returns timestamptz language plpgsql security definer set search_path to 'public' as $$
+declare v_row public.sort_races; v_seat text; v_at timestamptz;
+begin
+  select * into v_row from public.sort_races where room_id = p_room for update;
+  if v_row.room_id is null then raise exception 'no race in room %', p_room; end if;
+  v_seat := case when v_row.x_player = auth.uid() then 'x'
+                 when v_row.o_player = auth.uid() then 'o' end;
+  if v_seat is null then raise exception 'not seated in race %', p_room; end if;
+  v_at := case when v_seat = 'x' then v_row.x_revealed_at else v_row.o_revealed_at end;
+  -- The first reveal of this deal stands: revealing again can't restart your clock.
+  if v_at is not null and v_at >= v_row.started_at then return v_at; end if;
+  update public.sort_races
+     set x_revealed_at = case when v_seat = 'x' then now() else x_revealed_at end,
+         o_revealed_at = case when v_seat = 'o' then now() else o_revealed_at end
+   where room_id = p_room;
+  return now();
+end $$;
+revoke all on function public.sort_reveal(bigint) from public, anon;
+grant execute on function public.sort_reveal(bigint) to authenticated;
+
 create or replace function public.sort_seat(p_room bigint)
 returns text language sql stable security definer set search_path to 'public' as $$
   select case
@@ -1500,7 +1527,7 @@ create or replace function public.sort_finish(
   p_log text default null, p_ms int default null
 ) returns text language plpgsql security definer set search_path to 'public' as $$
 declare
-  v_seat text; v_row public.sort_races; v_wall int; v_ms int;
+  v_seat text; v_row public.sort_races; v_ms int; v_revealed timestamptz;
   v_x_ms int; v_o_ms int; v_x_up boolean; v_o_up boolean;
   v_win text; v_flipped int := 0;
 begin
@@ -1519,14 +1546,22 @@ begin
     raise exception 'a % move solve is below par (%)', p_moves, v_row.par;
   end if;
 
-  -- The client's own time, never trusted: capped at the server wall-clock since
-  -- the deal, floored at 150ms/move (~3s at par) so a replay bot cannot post an
-  -- instant solve. started_at resets on every deal, so it measures this game.
-  v_wall := greatest(1, (extract(epoch from (now() - v_row.started_at)) * 1000)::int);
-  if p_ms is not null then
-    v_ms := least(p_ms, v_wall);
-    if v_ms < p_moves * 150 then raise exception 'too fast to have been played'; end if;
+  -- The server's time (talk item 14, Daramola): from this seat's reveal
+  -- (sort_reveal, stamped when Start's count ends) to this finish arriving. The
+  -- phone's own number was trusted when lower, so a script could post ~4 s.
+  -- The network delay on the reveal and on the finish roughly cancel; the
+  -- finish also carries the referee's replay, the same for both players.
+  -- No stamp this deal (an app from before the reveal, or a script that skips
+  -- it): timed from the deal itself, which is never shorter. The phone's p_ms
+  -- is not used for time at all. Floored at 150ms/move either way, so a replay
+  -- bot cannot post an instant solve.
+  v_revealed := case when v_seat = 'x' then v_row.x_revealed_at else v_row.o_revealed_at end;
+  if v_revealed is not null and v_revealed >= v_row.started_at then
+    v_ms := greatest(1, (extract(epoch from (now() - v_revealed)) * 1000)::int);
+  else
+    v_ms := greatest(1, (extract(epoch from (now() - v_row.started_at)) * 1000)::int);
   end if;
+  if v_ms is not null and v_ms < p_moves * 150 then raise exception 'too fast to have been played'; end if;
 
   -- A legacy caller (no ms, e.g. a stale tab mid-deploy) keeps first-to-arrive.
   if p_ms is null and v_row.winner is not null then return v_row.winner; end if;
@@ -1695,15 +1730,13 @@ begin
     raise exception 'that is not today';
   end if;
   if p_level not in ('easy','medium','hard') then raise exception 'no such level'; end if;
-  -- Reuse an unfinished attempt for today rather than piling up an orphan row on
-  -- every abandoned first lift; a real retry just resets its clock. Finished
-  -- attempts are kept -- your best stands.
-  update public.sort_solo set started_at = now()
-    where id = (
-      select id from public.sort_solo
-       where user_id = auth.uid() and day = p_day and level = p_level and finished_at is null
-       order by started_at desc limit 1)
-    returning id into v_id;
+  -- Reuse an unfinished attempt for today rather than piling up an orphan row.
+  -- It keeps its clock (talk item 14): the tubes appeared when it started, and
+  -- reloading used to reset it, so a look and a reload was a free study.
+  -- Finished attempts are kept; the first finish is the one on the board.
+  select id into v_id from public.sort_solo
+   where user_id = auth.uid() and day = p_day and level = p_level and finished_at is null
+   order by started_at desc limit 1;
   if v_id is not null then return v_id; end if;
   insert into public.sort_solo (user_id, day, level)
     values (auth.uid(), p_day, p_level) returning id into v_id;
@@ -1721,15 +1754,12 @@ begin
   select * into v from public.sort_solo where id = p_id for update;
   if v.id is null or v.user_id <> p_user then raise exception 'not your attempt'; end if;
   if v.finished_at is not null then return v.ms; end if;
-  -- The server wall-clock from first lift INCLUDES this request's round-trip and
-  -- the move-replay, so it is a ceiling, not the time: the solve happened before
-  -- this call landed. Ball Sort is a millisecond board, so the honest number is
-  -- the client's own solve time -- measuring it here billed everyone for the
-  -- verify latency (the bug this fixes). Trust the client, but only within proven
-  -- bounds: never below the bot floor, never above the wall-clock. The replay in
-  -- the edge function is what proves the solve was real.
+  -- The server's time (talk item 14, Daramola): from the tubes appearing
+  -- (sort_solo_start) to this finish arriving. It includes the referee's
+  -- replay, a fraction of a second and the same for everyone. The phone's own
+  -- number (p_ms) used to win when lower, so a script could post ~4 s.
   v_wall := greatest(1, (extract(epoch from (now() - v.started_at)) * 1000)::int);
-  v_ms := least(coalesce(p_ms, v_wall), v_wall);
+  v_ms := v_wall;
   if v_ms < p_moves * 150 then raise exception 'too fast to have been played'; end if;
   update public.sort_solo set finished_at = now(), moves = p_moves, ms = v_ms, log = p_log where id = p_id;
   return v_ms;

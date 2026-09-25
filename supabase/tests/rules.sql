@@ -5,8 +5,8 @@
 -- changing any function it names: judge_answer, record_round, daily_next,
 -- daily_answer, submit_daily, daily_round, claim_board_win,
 -- save_push_subscription, voice_topic_ok, carry_over, daily_progress,
--- reveal_round, sort_walkover, claim_board_win, board_winner, or the profiles and
--- puzzles grants.
+-- reveal_round, sort_walkover, claim_board_win, board_winner, sort_reveal,
+-- sort_finish, sort_solo_start, sort_solo_finish, or the profiles and puzzles grants.
 --
 -- It ALWAYS ends in an error, on purpose: the error rolls every write back, so
 -- it can run against the live database. Read the message:
@@ -26,6 +26,7 @@ declare
   g31 uuid := gen_random_uuid(); g29 uuid := gen_random_uuid(); gwin uuid := gen_random_uuid(); rr bigint;
   mc2 bigint; mc2_answer text; mc2_choices text[];
   cb uuid := gen_random_uuid(); d7 int; rid bigint; sa2 int;
+  ts1 timestamptz; ts2 timestamptz; sid bigint; sid2 bigint;
 begin
   -- ---- borrowed rows -------------------------------------------------------
   select p1.user_id, p2.user_id, p1.room_id into a, b, r
@@ -322,6 +323,43 @@ begin
   results := array_append(results, 'C1 someone signed out can''t carry anything'::text);
   if has_function_privilege('anon', 'public.carry_over(uuid,jsonb,date[],jsonb,date)', 'execute')
   then broken := broken || results[cardinality(results)]; end if;
+
+  -- ---- S4 (talk item 14): the server keeps the Ball Sort clock -------------
+  -- now() is fixed inside this transaction, so "time passing" is a stamp moved back.
+  delete from public.sort_races where room_id = r;
+  insert into public.sort_races(room_id, seed, par, colours, cap, x_tubes, o_tubes, x_player, o_player, started_at)
+    values (r, 2, 10, 3, 3, 'abc/abc/abc//', 'abc/abc/abc//', b, a, now() - interval '60 seconds');
+  perform set_config('request.jwt.claims', json_build_object('sub', b, 'role', 'authenticated')::text, true);
+  set local role authenticated;
+  ts1 := public.sort_reveal(r);
+  reset role;
+  update public.sort_races set x_revealed_at = now() - interval '20 seconds' where room_id = r;
+  set local role authenticated;
+  ts2 := public.sort_reveal(r);
+  reset role;
+  results := array_append(results, 'S4 revealing again doesn''t restart your race clock'::text);
+  if ts2 is distinct from now() - interval '20 seconds' then broken := broken || results[cardinality(results)]; end if;
+  perform public.sort_finish(r, b, 'aaa/bbb/ccc//', 10, null, 4000);
+  results := array_append(results, 'S4 a race is timed from your reveal: a phone claiming 4 s gets its real 20 s'::text);
+  if (select x_ms from public.sort_races where room_id = r) is distinct from 20000 then broken := broken || results[cardinality(results)]; end if;
+  perform public.sort_finish(r, a, 'aaa/bbb/ccc//', 10, null, 4000);
+  results := array_append(results, 'S4 skipping the reveal times you from the deal, never from the phone'::text);
+  if (select o_ms from public.sort_races where room_id = r) is distinct from 60000 then broken := broken || results[cardinality(results)]; end if;
+  results := array_append(results, 'S4 someone signed out can''t stamp a reveal'::text);
+  if has_function_privilege('anon', 'public.sort_reveal(bigint)', 'execute') then broken := broken || results[cardinality(results)]; end if;
+  perform set_config('request.jwt.claims', json_build_object('sub', c, 'role', 'authenticated')::text, true);
+  set local role authenticated;
+  sid := public.sort_solo_start(current_date, 'hard');
+  reset role;
+  update public.sort_solo set started_at = now() - interval '30 seconds' where id = sid;
+  set local role authenticated;
+  sid2 := public.sort_solo_start(current_date, 'hard');
+  reset role;
+  results := array_append(results, 'S4 reloading the daily Ball Sort keeps its clock running'::text);
+  if sid2 <> sid or (select started_at from public.sort_solo where id = sid) <> now() - interval '30 seconds'
+  then broken := broken || results[cardinality(results)]; end if;
+  results := array_append(results, 'S4 a daily Ball Sort is timed by the server: a phone claiming 5 s gets its real 30 s'::text);
+  if public.sort_solo_finish(sid, c, 10, 5000) is distinct from 30000 then broken := broken || results[cardinality(results)]; end if;
 
   -- ---- verdict (always an error, so everything above rolls back) -----------
   if cardinality(broken) = 0 then
