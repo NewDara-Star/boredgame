@@ -130,4 +130,17 @@ for (const f of ["src/features/trivia/TriviaGame.tsx", "src/features/rooms/TurnP
   ok(/addEventListener\("visibilitychange"/.test(src) && /addEventListener\("pageshow"/.test(src), "the sky updates when the app comes back into view");
 }
 
+// ---- Picto's answer boxes (talk item 6) -------------------------------------
+// Autocorrect turned right answers wrong (Nollywood -> Hollywood), and the
+// keyboard opened by itself over the picture on every new one.
+{
+  const rd = (f: string) => { try { return readFileSync(new URL(`../src/${f}`, import.meta.url), "utf8"); } catch { return ""; } };
+  const solo = rd("features/picto/PictoGame.tsx"), race = rd("features/rooms/RoomsPage.tsx");
+  const quiet = (src: string) => /autoCorrect="off"/.test(src) && /spellCheck=\{false\}/.test(src) && /autoCapitalize="none"/.test(src) && /enterKeyHint="go"/.test(src);
+  ok(quiet(solo), "solo Picto's box: no autocorrect, spellcheck or capital, and Go on the keyboard");
+  ok(quiet(race.slice(race.indexOf('placeholder="Answer first to win the round"') - 200)), "the race's box: the same");
+  ok(!/\.focus\(\)/.test(solo), "solo Picto doesn't open the keyboard by itself");
+  ok(/useSeenHeight\(\)/.test(solo) && /visualViewport/.test(rd("shared/lib/useSeenHeight.ts")), "the picture shares the screen with the keyboard");
+}
+
 console.log(`${n} layout assertions hold`);

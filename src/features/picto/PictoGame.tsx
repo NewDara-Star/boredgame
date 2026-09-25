@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useSeenHeight } from "@/shared/lib/useSeenHeight";
 import { RAMPS } from "@/shared/brand/tokens";
 import { Dealing } from "@/shared/ui/Note";
 import { AnimatePresence, motion } from "framer-motion";
@@ -17,10 +18,14 @@ export function PictoGame() {
     <CategoryBar categories={r.categories} selected={cats} onChange={chooseCats} />
   );
   const [guess, setGuess] = useState("");
-  const inputRef = useRef<HTMLInputElement>(null);
+  const pictureRef = useRef<HTMLDivElement>(null);
+  const seen = useSeenHeight();
 
+  // The picture comes first (talk item 6): the keyboard waits for a tap on the
+  // box. Putting the cursor there on every picture opened the keyboard over
+  // the picture on Android (iPhones ignore a focus that isn't from a tap).
   useEffect(() => {
-    if (r.phase === "playing") { setGuess(""); inputRef.current?.focus(); }
+    if (r.phase === "playing") setGuess("");
   }, [r.phase, r.index, r.current?.id]);   // a skip keeps the index, not the picture
 
   if (r.phase === "loading") return <>{filterBar}<Dealing what="the puzzles" /></>;
@@ -76,7 +81,11 @@ export function PictoGame() {
             animate={wrong ? { opacity: 1, scale: 1, rotate: 0, ...shake } : { opacity: 1, scale: 1, rotate: 0 }}
             exit={{ opacity: 0, scale: 0.94, y: -12 }}
             transition={SPRING}
-            className="card aspect-square max-h-[46vh] mx-auto w-full grid place-items-center p-7 text-ember"
+            ref={pictureRef}
+            // With the keyboard up, the picture shrinks to share what's left of
+            // the screen with the box, instead of being pushed off the top.
+            style={{ maxHeight: `min(46vh, ${Math.round(seen * 0.42)}px)` }}
+            className="card aspect-square mx-auto w-full grid place-items-center p-7 text-ember scroll-mt-20"
           >
             {item.render === "image" && item.imageUrl
               ? <img src={item.imageUrl} alt={PICTURE_ALT} className="max-h-full object-contain rounded-xl" />
@@ -93,8 +102,12 @@ export function PictoGame() {
         <>
           <form onSubmit={(e) => { e.preventDefault(); if (guess.trim()) r.submit(guess); }}
             className="mt-4 flex gap-2.5">
-            <input ref={inputRef} value={guess} onChange={(e) => setGuess(e.target.value)}
+            <input value={guess} onChange={(e) => setGuess(e.target.value)}
               aria-label="Your guess" placeholder="What phrase is this?" autoComplete="off" autoCapitalize="none"
+              // Autocorrect "fixed" right answers into wrong ones (Nollywood ->
+              // Hollywood); the judge already forgives a slip or two.
+              autoCorrect="off" spellCheck={false} enterKeyHint="go"
+              onFocus={() => setTimeout(() => pictureRef.current?.scrollIntoView({ block: "start", behavior: "smooth" }), 350)}
               className="flex-1 bg-board shadow-lift-sm rounded-2xl px-4 py-3.5
                 font-bold text-ink placeholder:text-soft/60 outline-none
                 focus:shadow-[0_5px_0_var(--color-ink)] transition-shadow" />

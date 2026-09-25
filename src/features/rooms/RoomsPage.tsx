@@ -385,7 +385,9 @@ export function RoomsPage() {
                 setGuess("");
               }}>
               <Input value={guess} onChange={(e) => setGuess(e.target.value)}
-                placeholder="Answer first to win the round" />
+                placeholder="Answer first to win the round"
+                // as in solo Picto (talk item 6): no autocorrect, no capital
+                autoComplete="off" autoCapitalize="none" autoCorrect="off" spellCheck={false} enterKeyHint="go" />
               <Button type="submit">Go</Button>
             </form>
           )}
