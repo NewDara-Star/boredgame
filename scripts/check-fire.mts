@@ -289,5 +289,13 @@ ok(filings >= 1, `found ${filings} record_round calls — the scan is broken`);
   ok(/daily_reserve: d\.game === "trivia"/.test(admin) && /daily_reserve_left/.test(admin), "new trivia goes to the reserve, and the editor shows the days left");
 }
 
+// ---- 16. a round is never lost to a login that went quietly (24 Sep) -----------
+{
+  const rd = (p: string) => { try { return readFileSync(join(root, p), "utf8"); } catch { return ""; } };
+  const prog = rd("src/features/play/progress.ts");
+  ok(/auth\.getSession\(\)[\s\S]{0,80}if \(!session\) \{ keepSignedOut\(/.test(prog), "no login when the round ends: it's kept on the phone for the next sign-in");
+  ok(/if \(error && status === 401\) \{ keepSignedOut\(/.test(prog), "the server saying 'no login' keeps the round too");
+}
+
 if (bad) { console.error(`\n${bad} of ${n} delivery assertions failed`); process.exit(1); }
 console.log(`${n} delivery assertions hold (${voids} void-supabase sites, ${checked} edge functions)`);

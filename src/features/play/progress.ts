@@ -87,6 +87,12 @@ export async function recordRound(
   // Signed out: kept answer by answer so an account made later can take it
   // (F17). The totals above are only the phone's view until then.
   if (!userId) { keepSignedOut(game, results, score, now); return offline; }
+  // The app can still think you're signed in after the login has gone: on
+  // 24 Sep a round was sent with no login, refused twice, and lost. With no
+  // session it's kept like signed-out play, and your next sign-in offers it
+  // back (F17's carry-over).
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { keepSignedOut(game, results, score, now); return offline; }
 
   // Read before writing: the attempt rows bump the counters by trigger, so the
   // only moment the previous total exists is now.
@@ -108,11 +114,14 @@ export async function recordRound(
   // server refusing it outright, as it did for the null-character answers,
   // fails both times and shows in the console instead of vanishing.)
   if (rows.length) {
-    let { error } = await supabase.rpc("record_round", { p_rows: rows });
-    if (error) {
+    let { error, status } = await supabase.rpc("record_round", { p_rows: rows });
+    if (error && status !== 401) {
       await new Promise((r) => setTimeout(r, 1500));
-      ({ error } = await supabase.rpc("record_round", { p_rows: rows }));
+      ({ error, status } = await supabase.rpc("record_round", { p_rows: rows }));
     }
+    // "No login": the session went between the check above and the send. Keep
+    // the round on the phone rather than lose it.
+    if (error && status === 401) { keepSignedOut(game, results, score, now); return offline; }
     if (error) console.error("record_round failed", error.message);
   }
   // Before touch_streak, so the profile it returns already carries the new best.
