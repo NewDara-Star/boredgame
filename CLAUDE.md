@@ -1247,6 +1247,12 @@ The voice relay (talk item 17) needs two Edge Function secrets in Supabase
 `CF_TURN_KEY_ID` and `CF_TURN_KEY_API_TOKEN`, from a Cloudflare Realtime TURN
 key. Without them `voice-ice` answers with the direct route only, as before.
 
+The bot check on sign-in (talk item 20) is built and off. To switch it on at
+launch: Cloudflare Turnstile widget (Managed) → `VITE_TURNSTILE_SITE_KEY` in
+Vercel and redeploy → only then Supabase → Authentication → Attack Protection:
+CAPTCHA on, Turnstile, the secret key. The other order locks everyone out.
+See `src/shared/lib/captcha.ts`.
+
 ## Conventions
 
 - `normalise()` in `src/shared/lib/normalise.ts` must stay identical to

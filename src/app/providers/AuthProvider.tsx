@@ -2,6 +2,7 @@ import { releasePush } from "@/features/push/release";
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase, isConfigured, AUTH_STORAGE_KEY, SERVER } from "@/shared/lib/supabase";
+import { captchaToken, CaptchaFailed } from "@/shared/lib/captcha";
 
 /**
  * Supabase Auth has no username login, so a name becomes an address on a domain
@@ -150,10 +151,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return takenSentence(null);
   }
 
+  /** The bot check's one-use token (talk item 20): undefined while it's
+      switched off, or the sentence to show when it can't be passed. */
+  async function tokenOr(): Promise<string | undefined | { error: string }> {
+    try { return await captchaToken(); }
+    catch (e) { return { error: e instanceof CaptchaFailed ? e.say : "Couldn't pass the safety check. Try again." }; }
+  }
+
   async function signIn(id: string, password: string) {
     if (!supabase) return { error: NO_SERVER };
     if (!id.trim() || !password) return { error: "Type your name and your password." };
-    const { error } = await supabase.auth.signInWithPassword({ email: asLogin(id), password });
+    const captcha = await tokenOr();
+    if (typeof captcha === "object") return captcha;
+    const { error } = await supabase.auth.signInWithPassword({ email: asLogin(id), password, options: { captchaToken: captcha } });
     if (!error) return { error: null };
     return {
       error: /invalid login/i.test(error.message)
@@ -172,13 +182,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     if (password.length < 6) return { error: SHORT_PASSWORD };
 
+    const captcha = await tokenOr();
+    if (typeof captcha === "object") return captcha;
     markMaking();   // the play on this phone goes to the account made here (F17)
     const { error } = await supabase.auth.signUp({
       email: asLogin(id), password,
       // The trigger reads this, so the name you chose is the name you get
       // rather than one derived from the address we invented for you.
       options: { data: username ? { username } : undefined,
-                 emailRedirectTo: window.location.origin },
+                 emailRedirectTo: window.location.origin, captchaToken: captcha },
     });
     if (!error) return { error: null };
     return {
@@ -195,9 +207,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // back to guest_ab12 and the player wonders who that is.
     const blocked = await nameBlocked(username);
     if (blocked) return { error: blocked };
+    const captcha = await tokenOr();
+    if (typeof captcha === "object") return captcha;
     markMaking();   // the play on this phone goes to the guest made here (F17)
     const { error } = await supabase.auth.signInAnonymously({
-      options: { data: username ? { username } : undefined },
+      options: { data: username ? { username } : undefined, captchaToken: captcha },
     });
     if (!error) return { error: null };
     // The one failure worth naming, because it is a project setting rather
@@ -254,9 +268,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   /** Kept as a fallback. Will hit the rate limit until custom SMTP is set up. */
   async function signInWithLink(email: string) {
     if (!supabase) return { error: NO_SERVER };
+    const captcha = await tokenOr();
+    if (typeof captcha === "object") return captcha;
     const { error } = await supabase.auth.signInWithOtp({
       email,
-      options: { emailRedirectTo: window.location.origin },
+      options: { emailRedirectTo: window.location.origin, captchaToken: captcha },
     });
     return { error: error ? sayError(error, "Couldn't send the link. Try again.") : null };
   }
