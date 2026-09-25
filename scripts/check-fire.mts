@@ -207,7 +207,8 @@ ok(filings >= 1, `found ${filings} record_round calls — the scan is broken`);
      "only an account made here takes it unasked; any other is asked first");
   ok(/c\.declined\.includes\(user\.id\)/.test(ca), "'Not mine' isn't asked again");
   const home = rd("src/features/home/HomePage.tsx");
-  ok(!/Make an account to keep your streak, play the daily/.test(home) && !/Playing as a guest/.test(home),
+  const signedOut = home.slice(home.indexOf("{!user && !offline && ("), home.indexOf("{isGuest && !offline && ("));
+  ok(!/Make an account to keep your streak, play the daily/.test(home) && signedOut.length > 0 && !/Playing as a guest/.test(signedOut),
      "Home no longer calls signed-out play 'guest' or promises what didn't carry");
 }
 

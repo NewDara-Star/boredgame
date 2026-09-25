@@ -39,7 +39,7 @@ export function PushOnboarding() {
   const close = () => { markDismissed(); setDismissed(true); };
 
   // Don't cover an active game; only offer where there's nothing to interrupt.
-  const onQuietScreen = pathname === "/" || pathname.startsWith("/rooms") || pathname === "/profile";
+  const onQuietScreen = pathname === "/" || pathname.startsWith("/rooms") || pathname.startsWith("/you");
 
   const canOfferNow = state === "default" || state === "granted";
   const show =

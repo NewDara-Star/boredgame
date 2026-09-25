@@ -5,6 +5,10 @@ import { rankFor, RANKS } from "@/features/play/rank";
 import { rankStory } from "@/shared/card/moments";
 import { ShareButtons } from "@/shared/card/ShareButtons";
 import type { MatchCard } from "@/shared/card/frame";
+import { Avatar } from "@/shared/ui/Avatar";
+
+/** A friend standing at their rank on the road (#48). */
+export interface OnRoad { id: string; name: string; answered: number }
 
 /** Where each rank stands on the road, in % of the scene: Novice at the foot of
     the hill, Legend up by the sun. */
@@ -28,7 +32,7 @@ const ROAD = road([[8, 104], ...AT]);
  * colour, yours is big with a ring showing how far to the next, the ones ahead
  * are grey, and Legend is at the top by the sun.
  */
-export function SunRoad({ answered }: { answered: number }) {
+export function SunRoad({ answered, friends = [] }: { answered: number; friends?: OnRoad[] }) {
   const { current, next, progress } = rankFor(answered);
   const idx = RANKS.findIndex((r) => r.key === current.key);
   const [card, setCard] = useState<MatchCard | null>(null);
@@ -75,6 +79,24 @@ export function SunRoad({ answered }: { answered: number }) {
             </div>
           );
         })}
+        {/* Friends stand beside their rank, up to three a stop, named. */}
+        {RANKS.map((r, i) => {
+          const here = friends.filter((f) => rankFor(f.answered).current.key === r.key).slice(0, 3);
+          if (here.length === 0) return null;
+          const [x, y] = AT[i];
+          const right = x < 60;
+          return (
+            <div key={`f-${r.key}`} className="absolute flex items-center gap-0.5"
+              style={{ top: `${y}%`, [right ? "left" : "right"]: `${right ? x + (i === idx ? 18 : 8) : 100 - x + (i === idx ? 18 : 8)}%`, transform: "translateY(-50%)", zIndex: 3 }}>
+              {here.map((f) => (
+                <span key={f.id} className="grid justify-items-center" title={`${f.name}, ${r.name}`}>
+                  <Avatar id={f.id} name={f.name} size={24} />
+                  <span className="chip bg-board text-ink text-[12px] font-bold mt-0.5 max-w-[64px] truncate">{f.name}</span>
+                </span>
+              ))}
+            </div>
+          );
+        })}
       </div>
 
       <div className="card mt-3 p-4 grid gap-3">
@@ -86,7 +108,7 @@ export function SunRoad({ answered }: { answered: number }) {
         </div>
         <div className="grid grid-cols-[1.3fr_1fr] gap-2.5">
           <ShareButtons card={card} story={false} />
-          <Link to="/trivia" className="cut tap cut-sky py-3.5 text-center font-display text-lg">Play a round</Link>
+          <Link to="/trivia" className="cut tap cut-sky py-3.5 text-center font-display text-lg">Play to grow</Link>
         </div>
       </div>
     </div>

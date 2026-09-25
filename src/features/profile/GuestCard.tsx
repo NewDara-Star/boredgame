@@ -58,7 +58,10 @@ export function GuestCard({ note }: { note?: string }) {
  * takes it on the server before anything else, and only then the password.
  * If the password step fails, the name stays yours and Save tries again.
  */
-export function ClaimCard() {
+export function ClaimCard({ inline = false }: {
+  /** The You screen for a guest (#51): the form itself, always open, no button to open it. */
+  inline?: boolean;
+} = {}) {
   const { profile, claimAccount, checkName, claimedAs, clearClaimed } = useAuth();
   const [name, setName] = useState(profile?.username ?? "");
   // The name copied in once, at first sight: if the profile hadn't arrived
@@ -66,7 +69,7 @@ export function ClaimCard() {
   const typed = useRef(false);
   useEffect(() => { if (!typed.current && profile?.username) setName(profile.username); }, [profile?.username]);
   const [password, setPassword] = useState("");
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(inline);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const live = useNameCheck(open ? name : "", checkName);
@@ -97,7 +100,7 @@ export function ClaimCard() {
   }
 
   return (
-    <form className="card p-5 space-y-3" noValidate
+    <form className={inline ? "space-y-3" : "card p-5 space-y-3"} noValidate
       onSubmit={async (e) => {
         e.preventDefault();
         setError(null); setBusy(true);
@@ -105,7 +108,7 @@ export function ClaimCard() {
         setBusy(false);
         if (error) setError(error);
       }}>
-      <p className="font-display text-lg font-semibold">Keep this name</p>
+      {!inline && <p className="font-display text-lg font-semibold">Keep this name</p>}
       <Field label="Name" error={(error && errorField(error) !== "password" ? error : null) ?? (live.state === "bad" ? live.text : null)}
         hint={error ? undefined : live.state === "ok" ? live.text : live.state === "checking" ? "Checking…" : undefined}>
         <Input value={name} autoCapitalize="none" maxLength={20}
@@ -116,7 +119,7 @@ export function ClaimCard() {
           autoComplete="new-password" onChange={(e) => setPassword(e.target.value)} />
       </Field>
       <Button type="submit" disabled={busy} className="w-full">
-        {busy ? "Saving…" : "Save my account"}
+        {busy ? "Saving…" : inline ? "Save my progress" : "Save my account"}
       </Button>
     </form>
   );
@@ -127,12 +130,15 @@ export function ClaimCard() {
  * name is free or the sentence that says why not. Only the latest answer is
  * shown, however the requests come back.
  */
-function useNameCheck(name: string, check: (n: string) => Promise<string | null>) {
+export function useNameCheck(name: string, check: (n: string) => Promise<string | null>,
+  okText: (n: string) => string = (n) => `${n} is yours to keep.`) {
   const [res, setRes] = useState<{ state: "idle" | "checking" | "ok" | "bad"; text: string; for: string }>(
     { state: "idle", text: "", for: "" });
   // The provider hands over a new function every render; only the name matters.
   const checkRef = useRef(check);
   checkRef.current = check;
+  const okRef = useRef(okText);
+  okRef.current = okText;
   useEffect(() => {
     const n = name.trim();
     if (!n) { setRes({ state: "idle", text: "", for: "" }); return; }
@@ -140,7 +146,7 @@ function useNameCheck(name: string, check: (n: string) => Promise<string | null>
     setRes({ state: "checking", text: "", for: n });
     const t = setTimeout(() => {
       void checkRef.current(n).then((why) => {
-        if (live) setRes(why ? { state: "bad", text: why, for: n } : { state: "ok", text: `${n} is yours to keep.`, for: n });
+        if (live) setRes(why ? { state: "bad", text: why, for: n } : { state: "ok", text: okRef.current(n), for: n });
       });
     }, 400);
     return () => { live = false; clearTimeout(t); };

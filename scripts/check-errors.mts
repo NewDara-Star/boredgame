@@ -69,7 +69,7 @@ ok(!/return[^;]*\be\.message\b/.test(src) && !/return[^;]*\bm\b[^.]/.test(src.re
   ok(main === 'import "@/shared/lib/linkError";', "the failed-link reason is read before anything else in the app");
   ok(!/error_description/.test(read("src/shared/lib/linkError.ts").replace(/^\s*(\*|\/\/).*$/gm, "")) && !/error_description/.test(read("src/features/profile/ProfilePage.tsx")),
      "Supabase's own description of a failed link never reaches the screen");
-  ok(/hasLinkError\(\) && pathname !== "\/profile"/.test(read("src/app/layout/Shell.tsx")), "a failed link that lands on Home goes on to the You screen");
+  ok(/hasLinkError\(\) && pathname !== "\/you"/.test(read("src/app/layout/Shell.tsx")), "a failed link that lands on Home goes on to the You screen");
 }
 
 const FB = "Couldn't do that. Try again.";

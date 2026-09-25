@@ -9,9 +9,15 @@ import { errorField } from "@/shared/lib/names";
  * knows to look for the other tab; a first-time player who lands on a login form
  * assumes the app is not for them yet and leaves.
  */
-export function AuthCard({ kept }: { kept?: string }) {
+export function AuthCard({ kept, start = "signup", note }: {
+  kept?: string;
+  /** A guest who has an account elsewhere starts on Sign in (#51). */
+  start?: "signup" | "signin";
+  /** A line above the form, e.g. what signing in leaves behind. */
+  note?: string;
+}) {
   const { signIn, signUp, signInWithLink } = useAuth();
-  const [mode, setMode] = useState<"signup" | "signin">("signup");
+  const [mode, setMode] = useState<"signup" | "signin">(start);
   const [id, setId] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
@@ -37,6 +43,7 @@ export function AuthCard({ kept }: { kept?: string }) {
           ? kept ?? "A name and a password. Keeps your rank, streak and place on the leaderboard."
           : "Sign in to pick up where you left off."}
       </p>
+      {note && <p className="text-[13px] font-bold mt-2">{note}</p>}
 
       <form className="space-y-3 mt-4" noValidate
         onSubmit={async (e) => {

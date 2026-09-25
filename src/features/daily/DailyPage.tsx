@@ -127,7 +127,7 @@ export function DailyPage() {
           <p className="text-sm text-soft font-semibold mt-2">Once a day, and a place on today's board.</p>
         </div>
         <GuestCard note="Type a name and play today's ten. No password." />
-        <Link to="/profile" className="block text-center text-[13px] font-bold text-soft underline underline-offset-4">
+        <Link to="/you" className="block text-center text-[13px] font-bold text-soft underline underline-offset-4">
           I have an account
         </Link>
       </div>

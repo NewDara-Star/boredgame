@@ -239,7 +239,7 @@ function Ladder({ rows, mine, meId, level, film, failed, onRetry }:
           whether or not anyone has played: say why, not "you're first". */}
       {!meId ? (
         <p className="text-sm font-bold text-soft">
-          <Link to="/profile" className="underline underline-offset-4">Sign in</Link> to see today's times.
+          <Link to="/you" className="underline underline-offset-4">Sign in</Link> to see today's times.
         </p>
       ) : failed ? (
         <p className="text-sm font-bold text-soft">

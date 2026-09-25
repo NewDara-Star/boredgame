@@ -71,8 +71,10 @@ ok(!/isn't 3–20 letters|already using that name/.test(auth), "the old catch-al
 // saving first and big, starting over small and warned.
 {
   const page = read("src/features/profile/ProfilePage.tsx");
-  const guestSide = page.indexOf("{(isGuest || claimedAs) ? ("), memberSide = page.indexOf("<SignOut ");
-  ok(guestSide > 0 && memberSide > guestSide && /<ClaimCard \/>/.test(page.slice(guestSide, memberSide)), "a guest's You screen offers saving, not Sign out");
+  // The guest's You screen (#51, F13) is its own component: saving, never Sign out.
+  const guest = page.slice(page.indexOf("function GuestYou()"), page.indexOf("export function ProfilePage()"));
+  ok(/<ClaimCard inline \/>/.test(guest) && !/<SignOut /.test(guest) && !/PasswordSheet/.test(guest), "a guest's You screen offers saving, not Sign out or Set a password");
+  ok(/return isGuest \|\| claimedAs \? <GuestYou \/> : <MemberView \/>;/.test(page), "a guest gets that screen, not the member one");
   ok(/Start over as someone new/.test(page) && /for good\. There's no way back\./.test(page), "starting over is there, small, and says it's for good");
 }
 

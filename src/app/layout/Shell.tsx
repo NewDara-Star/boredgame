@@ -20,7 +20,7 @@ const TABS = [
   { to: "/", label: "Home", exact: true, Icon: IconHome },
   { to: "/play", label: "Games", Icon: IconPlay },
   { to: "/rooms", label: "Rooms", Icon: IconRooms },
-  { to: "/ranks", label: "Ranks", Icon: IconRanks },
+  { to: "/you", label: "You", Icon: IconRanks },
 ];
 
 const isActive = (pathname: string, to: string, exact?: boolean) =>
@@ -33,7 +33,7 @@ export function Shell() {
   // A failed email link lands wherever it was sent (usually Home); its reason
   // is shown on the You screen, so go there (F14).
   useEffect(() => {
-    if (hasLinkError() && pathname !== "/profile") nav("/profile", { replace: true });
+    if (hasLinkError() && pathname !== "/you") nav("/you", { replace: true });
   }, [pathname, nav]);
   const p = useProgress();
   const rank = rankFor(p.answered).current;
@@ -82,12 +82,12 @@ export function Shell() {
               header should be the way in — the previous build showed a rank
               badge, which read as "you are already logged in". */}
           {user || offline ? (
-            <NavLink to="/profile" aria-label="Profile"
+            <NavLink to="/you" aria-label="You"
               className="shrink-0 grid place-items-center h-11 w-11 ml-1">
               <RankBadge rank={rank.key} size={30} />
             </NavLink>
           ) : (
-            <NavLink to="/profile"
+            <NavLink to="/you"
               className="chip  tap shrink-0 ml-1.5 bg-board text-ink px-3 py-1.5
                 text-[12px] font-black">
               Sign up

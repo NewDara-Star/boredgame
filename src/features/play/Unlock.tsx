@@ -134,7 +134,7 @@ export function UnlockOverlay({ unlock, onClose }: { unlock: Unlock; onClose: ()
             className="cut tap w-full py-3 font-display text-lg cut-board">
             Nice
           </button>
-          <Link to="/profile" onClick={onClose}
+          <Link to="/you" onClick={onClose}
             className="block text-xs font-bold text-soft underline underline-offset-4 py-1">
             See everything you've unlocked
           </Link>

@@ -21,6 +21,7 @@ const CataloguePage = lazy(() => import("@/features/play/CataloguePage").then((m
 const DailyPage = lazy(() => import("@/features/daily/DailyPage").then((m) => ({ default: m.DailyPage })));
 const SquareOffPage = lazy(() => import("@/features/squareoff/SquareOffPage").then((m) => ({ default: m.SquareOffPage })));
 const LeaderboardPage = lazy(() => import("@/features/leaderboard/LeaderboardPage").then((m) => ({ default: m.LeaderboardPage })));
+const RoadPage = lazy(() => import("@/features/leaderboard/RoadPage").then((m) => ({ default: m.RoadPage })));
 const ProfilePage = lazy(() => import("@/features/profile/ProfilePage").then((m) => ({ default: m.ProfilePage })));
 const AdminPage = lazy(() => import("@/features/admin/AdminPage").then((m) => ({ default: m.AdminPage })));
 const TicTacToeSoloPage = lazy(() => import("@/features/tictactoe/TicTacToeSoloPage").then((m) => ({ default: m.TicTacToeSoloPage })));
@@ -54,8 +55,13 @@ export function App() {
               <Route path="/catapultsquares" element={<SquareOffCatapultPage />} />
               <Route path="/memory" element={<MemorySoloPage />} />
               <Route path="/ballsort" element={<SortSoloPage />} />
-              <Route path="/ranks" element={<LeaderboardPage />} />
-              <Route path="/profile" element={<ProfilePage />} />
+              {/* You (#46–#51): your profile, the road and everyone. The old
+                  addresses still work, for links already shared. */}
+              <Route path="/you" element={<ProfilePage />} />
+              <Route path="/you/road" element={<RoadPage />} />
+              <Route path="/you/everyone" element={<LeaderboardPage />} />
+              <Route path="/profile" element={<Navigate to="/you" replace />} />
+              <Route path="/ranks" element={<Navigate to="/you/everyone" replace />} />
               <Route path="/admin" element={<AdminPage />} />
               <Route path="/rooms" element={<RoomsPage />} />
               <Route path="/rooms/:code" element={<RoomsPage />} />

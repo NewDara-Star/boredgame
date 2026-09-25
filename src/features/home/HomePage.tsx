@@ -36,7 +36,7 @@ function Head({ title, to, cta = "View all" }: { title: string; to?: string; cta
 }
 
 export function HomePage() {
-  const { user, profile, offline } = useAuth();
+  const { user, profile, offline, isGuest } = useAuth();
   const p = useProgress();
   // What an account made now would take with it (F17), not the phone's lifetime tally.
   const kept = user ? 0 : readCarry().rows.length;
@@ -168,7 +168,7 @@ export function HomePage() {
 
       {!user && !offline && (
         <motion.div variants={popIn} className="mt-5">
-          <Link to="/profile" className="cut tap block cut-ink text-ground p-4">
+          <Link to="/you" className="cut tap block cut-ink text-ground p-4">
             <p className="font-display text-lg font-semibold">
               {kept > 0 ? `${kept} answer${kept === 1 ? "" : "s"} on this phone` : "Playing signed out"}
             </p>
@@ -181,7 +181,20 @@ export function HomePage() {
         </motion.div>
       )}
 
-      <Head title="Play someone" to="/ranks" cta="Leaderboard" />
+      {/* A guest's games go 30 days after they last play (F11). Home says so
+          once, and where to keep them (F13, drawing #8). */}
+      {isGuest && !offline && (
+        <motion.div variants={popIn} className="mt-5">
+          <Link to="/you" className="cut tap block cut-ink text-ground p-4">
+            <p className="font-display text-lg font-semibold">Playing as a guest</p>
+            <p className="text-[13px] font-semibold opacity-80 mt-0.5">
+              Add a password to keep your streak for good and get on the leaderboard →
+            </p>
+          </Link>
+        </motion.div>
+      )}
+
+      <Head title="Play someone" to="/you/everyone" cta="Leaderboard" />
       <motion.div variants={popIn}>
         <Link to="/rooms" className="cut tap block p-4 text-center font-display font-semibold cut-petal">
           Start a room →

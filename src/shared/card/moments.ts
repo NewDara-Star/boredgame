@@ -33,7 +33,7 @@ export async function rankStory(rank: Rank): Promise<MatchCard> {
   const b = badges[rank.key];
   const img = await badgeImage(rank.key, b.viewBox, b.paths);
   return drawStory({
-    title: `rank ${rank.name}`, code: null, ramp: RAMPS.petal, path: "/ranks",
+    title: `rank ${rank.name}`, code: null, ramp: RAMPS.petal, path: "/you/road",
     headline: `I made ${rank.name}`,
     sub: `${rank.min} questions answered`,
     hero: (c, box) => { burst(c, box, RAMPS.petal); if (img) fit(c, img, box, 0.86); },

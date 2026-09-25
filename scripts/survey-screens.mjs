@@ -64,8 +64,8 @@ async function measure(p, name, vh) {
 }
 
 const PAGES = [
-  ["Home", "/"], ["Games", "/play"], ["Rooms", "/rooms"], ["Ranks", "/ranks"],
-  ["Profile", "/profile"], ["Daily", "/daily"], ["Trivia", "/trivia"], ["Picto", "/picto"],
+  ["Home", "/"], ["Games", "/play"], ["Rooms", "/rooms"], ["Everyone", "/you/everyone"], ["Road", "/you/road"],
+  ["You", "/you"], ["Daily", "/daily"], ["Trivia", "/trivia"], ["Picto", "/picto"],
   ["Square Off", "/squareoff"], ["Tic Tac Toe", "/tictactoe"], ["Connect 4", "/connect4"],
   ["Connect 4 Trivia", "/connect4trivia"], ["Connect 4 Catapult", "/connect4catapult"],
   ["Catapult Squares", "/catapultsquares"], ["Memory", "/memory"], ["Ball Sort", "/ballsort"],

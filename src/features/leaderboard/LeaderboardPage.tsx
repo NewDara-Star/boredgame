@@ -5,8 +5,16 @@ import { Avatar } from "@/shared/ui/Avatar";
 import { SPRING, stagger, riseIn } from "@/shared/ui/motion";
 import { rankFor } from "@/features/play/rank";
 import { RankBadge } from "@/features/play/RankBadge";
-import { SunRoad } from "./SunRoad";
 import { useLeaderboard, type Standing } from "./useLeaderboard";
+
+/** Back to You: the road and Everyone open from there (#46–#49). */
+export function BackToYou() {
+  return (
+    <Link to="/you" className="inline-flex items-center min-h-[44px] text-[14px] font-black">
+      ‹ You
+    </Link>
+  );
+}
 
 /** 2nd, 1st, 3rd — the order they stand in, not the order they finished. */
 const PODIUM_ORDER = [1, 0, 2];
@@ -112,14 +120,14 @@ export function LeaderboardPage() {
 
   return (
     <motion.div variants={stagger(0.07)} initial="hidden" animate="show" className="pb-24">
-      <motion.h1 variants={riseIn} className="font-display text-[34px] leading-none font-semibold">
-        Leaderboard
+      <motion.div variants={riseIn}><BackToYou /></motion.div>
+      <motion.h1 variants={riseIn} className="font-display text-[34px] leading-none font-semibold mt-2">
+        Everyone
       </motion.h1>
       <motion.p variants={riseIn} className="text-soft text-sm font-semibold mt-2">
         Ranked by questions answered — turning up beats being clever.
       </motion.p>
 
-      {!loading && you && <motion.div variants={riseIn}><SunRoad answered={you.answered} /></motion.div>}
 
       {loading ? (
         <div className="mt-6 space-y-2">
@@ -167,14 +175,14 @@ export function LeaderboardPage() {
       )}
       {!loading && isGuest && rows.length > 0 && (
         <StickyBar>
-          <Link to="/profile" className="cut tap block cut-petal px-4 py-3 text-center font-display font-semibold">
+          <Link to="/you" className="cut tap block cut-petal px-4 py-3 text-center font-display font-semibold">
             Guests aren't on the board. Save your progress to join it →
           </Link>
         </StickyBar>
       )}
       {!loading && !user && rows.length > 0 && (
         <StickyBar>
-          <Link to="/profile" className="cut tap block cut-petal px-4 py-3 text-center font-display font-semibold">
+          <Link to="/you" className="cut tap block cut-petal px-4 py-3 text-center font-display font-semibold">
             Sign in to take a place on this list →
           </Link>
         </StickyBar>
