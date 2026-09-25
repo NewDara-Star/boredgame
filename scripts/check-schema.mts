@@ -140,13 +140,21 @@ for (const fn of ["daily_next", "daily_answer", "submit_daily"]) {
   try { rules = readFileSync(join(root, "supabase/tests/rules.sql"), "utf8"); } catch { /* missing */ }
   ok(rules.length > 0, "supabase/tests/rules.sql exists");
   for (const fn of ["judge_answer", "record_round", "daily_next", "daily_answer", "submit_daily", "daily_round",
-                    "claim_board_win", "save_push_subscription", "sweep_stale_guests", "claim_round", "carry_over", "reveal_round", "sort_walkover"]) {
+                    "claim_board_win", "save_push_subscription", "sweep_stale_guests", "claim_round", "carry_over", "reveal_round", "sort_walkover", "board_winner"]) {
     ok(rules.includes(`public.${fn}(`), `rules.sql tests ${fn}`);
   }
-  for (const tag of ["Q12", "D1", "D2", "F30", "RM2", "F36", "V2", "DB1", "N1", "DB2", "G30", "R1", "C1", "D7", "RM1"]) {
+  for (const tag of ["Q12", "D1", "D2", "F30", "RM2", "F36", "V2", "DB1", "N1", "DB2", "G30", "R1", "C1", "D7", "RM1", "RM7"]) {
     ok(rules.includes(`'${tag} `), `rules.sql keeps its ${tag} test`);
   }
   ok(/raise exception 'RULES HOLD/.test(rules), "rules.sql always ends in an error, so it rolls back");
+}
+
+// Board rooms (RM7, talk item 11): the winner comes from the board, and only
+// claim_board_win marks a game paid. The trigger must be on all three tables.
+{
+  for (const tbl of ["ttt_games", "c4_games", "memory_games"])
+    ok(new RegExp(`create trigger board_truth_\\w+ before insert or update on public\\.${tbl}`).test(schema), `${tbl} has its winner worked out from the board`);
+  ok(/set_config\('boredgame\.paying', 'on', true\)/.test(schema), "claim_board_win is the one that marks a game paid");
 }
 
 // Every assertion above counts; exit only once they have all run.

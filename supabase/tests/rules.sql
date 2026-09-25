@@ -5,7 +5,7 @@
 -- changing any function it names: judge_answer, record_round, daily_next,
 -- daily_answer, submit_daily, daily_round, claim_board_win,
 -- save_push_subscription, voice_topic_ok, carry_over, daily_progress,
--- reveal_round, sort_walkover, or the profiles and
+-- reveal_round, sort_walkover, claim_board_win, board_winner, or the profiles and
 -- puzzles grants.
 --
 -- It ALWAYS ends in an error, on purpose: the error rolls every write back, so
@@ -128,8 +128,10 @@ begin
   update public.rooms set mode = 'connect4' where id = r;
   delete from public.ttt_games where room_id = r;
   delete from public.c4_games where room_id = r;
-  insert into public.ttt_games(room_id, phase, winner, x_player, o_player, scored) values (r, 'over', 'x', a, b, false);
-  insert into public.c4_games (room_id, phase, winner, x_player, o_player, scored) values (r, 'over', 'o', a, b, false);
+  -- (Winners come from the boards since RM7, so the boards are real ones.)
+  insert into public.ttt_games(room_id, board, phase, winner, x_player, o_player, scored) values (r, 'xxxoo----', 'over', 'x', a, b, false);
+  insert into public.c4_games (room_id, board, phase, winner, x_player, o_player, scored)
+    values (r, '----------------------------xxx----oooo---', 'over', 'o', a, b, false);
   select score into sa from public.room_players where room_id = r and user_id = a;
   select score into sb from public.room_players where room_id = r and user_id = b;
   perform set_config('request.jwt.claims', json_build_object('sub', a, 'role', 'authenticated')::text, true);
@@ -143,6 +145,35 @@ begin
   then broken := broken || results[cardinality(results)]; end if;
   results := array_append(results, 'F36 a win is paid once, however many phones claim it'::text);
   if again <> 0 then broken := broken || results[cardinality(results)]; end if;
+
+  -- ---- RM7 (talk item 11): the board says who won; "paid" is the server's --
+  -- x (a) lost this Connect 4. a's phone writes itself the winner, then clears
+  -- "paid" on the won board and claims again.
+  perform set_config('request.jwt.claims', json_build_object('sub', a, 'role', 'authenticated')::text, true);
+  set local role authenticated;
+  update public.c4_games set winner = 'x' where room_id = r;
+  update public.c4_games set scored = false where room_id = r;
+  again := public.claim_board_win(r);
+  reset role;
+  results := array_append(results, 'RM7 a phone can''t write who won: the board decides'::text);
+  if (select winner from public.c4_games where room_id = r) is distinct from 'o'
+  then broken := broken || results[cardinality(results)]; end if;
+  results := array_append(results, 'RM7 a phone can''t clear "paid" on a won board and collect again'::text);
+  if again <> 0 or not (select scored from public.c4_games where room_id = r)
+  or (select score from public.room_players where room_id = r and user_id = b) <> sb + 1
+  then broken := broken || results[cardinality(results)]; end if;
+  set local role authenticated;
+  update public.c4_games set board = '------------------------------------------', scored = false, phase = 'picking' where room_id = r;
+  reset role;
+  results := array_append(results, 'RM7 the server reads lines, draws and Memory pairs like the app'::text);
+  if public.board_winner('ttt', 'xoxxoxoxo') is distinct from 'draw'
+  or public.board_winner('c4', '-----------------x-----x-----xoo---xooo---') is distinct from 'x'
+  or public.board_winner('memory', 'xxxxxxxxxxoooooo') is distinct from 'x'
+  or public.board_winner('memory', 'xxxx--oo') is not null
+  then broken := broken || results[cardinality(results)]; end if;
+  results := array_append(results, 'RM7 a fresh board starts unpaid, with no winner'::text);
+  if (select scored or winner is not null from public.c4_games where room_id = r)
+  then broken := broken || results[cardinality(results)]; end if;
 
   -- ---- V2 (F44): only the room's players get on its voice channel ----------
   insert into realtime.messages(topic, extension, event, payload, private)

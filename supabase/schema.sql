@@ -2205,12 +2205,15 @@ begin
   end if;
   v_seat := case v_winner when 'x' then v_x when 'o' then v_o end;
   if v_seat is null then return 0; end if;
+  -- board_truth lets only this function mark a game paid (talk item 11).
+  perform set_config('boredgame.paying', 'on', true);
   if    v_mode in ('squareoff', 'tictactoe')     then update public.ttt_games    set scored = true where room_id = p_room and not scored;
   elsif v_mode in ('connect4', 'connect4trivia') then update public.c4_games     set scored = true where room_id = p_room and not scored;
   else                                                update public.memory_games set scored = true where room_id = p_room and not scored;
   end if;
   -- Both phones may call at once: only the call that flipped `scored` pays.
-  if not found then return 0; end if;
+  if not found then perform set_config('boredgame.paying', 'off', true); return 0; end if;
+  perform set_config('boredgame.paying', 'off', true);
   update public.room_players set score = score + 1
    where room_id = p_room and user_id = v_seat returning score into new_score;
   return coalesce(new_score, 0);
@@ -2246,6 +2249,76 @@ create trigger stamp_c4_games before insert or update on public.c4_games
 drop trigger if exists stamp_memory_games on public.memory_games;
 create trigger stamp_memory_games before insert or update on public.memory_games
   for each row execute function public.stamp_move_time();
+
+-- Board rooms trusted each phone (talk item 11, RM7). Either player could
+-- write who won, or clear "already paid" and collect the same win again. Now
+-- the winner is worked out here from the board, whatever the phone sends, and
+-- "already paid" is claim_board_win's alone: a phone can only clear it by
+-- starting a fresh, empty board. (A phone can still write a board it didn't
+-- play: moves aren't run on the server. That is the rule to meet before room
+-- wins count anywhere public.)
+create or replace function public.board_winner(p_game text, p_board text)
+returns text language plpgsql immutable set search_path to 'public' as $$
+declare ln int[]; m text; r int; c int; d int[]; k int; rr int; cc int; nx int; no int;
+begin
+  if p_board is null then return null; end if;
+  if p_game = 'ttt' then
+    foreach ln slice 1 in array array[[1,2,3],[4,5,6],[7,8,9],[1,4,7],[2,5,8],[3,6,9],[1,5,9],[3,5,7]] loop
+      m := substr(p_board, ln[1], 1);
+      if m in ('x','o') and m = substr(p_board, ln[2], 1) and m = substr(p_board, ln[3], 1) then return m; end if;
+    end loop;
+  elsif p_game = 'c4' then
+    for r in 0..5 loop
+      for c in 0..6 loop
+        m := substr(p_board, r * 7 + c + 1, 1);
+        continue when m not in ('x','o');
+        foreach d slice 1 in array array[[0,1],[1,0],[1,1],[1,-1]] loop
+          k := 1;
+          while k < 4 loop
+            rr := r + d[1] * k; cc := c + d[2] * k;
+            exit when rr < 0 or rr > 5 or cc < 0 or cc > 6 or substr(p_board, rr * 7 + cc + 1, 1) <> m;
+            k := k + 1;
+          end loop;
+          if k = 4 then return m; end if;
+        end loop;
+      end loop;
+    end loop;
+  elsif p_game = 'memory' then
+    if position('-' in p_board) > 0 then return null; end if;
+    nx := length(p_board) - length(replace(p_board, 'x', ''));
+    no := length(p_board) - length(replace(p_board, 'o', ''));
+    return case when nx = no then 'draw' when nx > no then 'x' else 'o' end;
+  else
+    return null;
+  end if;
+  if position('-' in p_board) = 0 then return 'draw'; end if;
+  return null;
+end $$;
+
+create or replace function public.board_truth()
+returns trigger language plpgsql set search_path to 'public' as $$
+begin
+  new.winner := public.board_winner(case tg_table_name when 'ttt_games' then 'ttt'
+                                                        when 'c4_games' then 'c4' else 'memory' end, new.board);
+  if tg_op = 'INSERT' then
+    new.scored := false;
+  elsif new.scored is distinct from old.scored
+        and coalesce(current_setting('boredgame.paying', true), '') <> 'on'
+        and not (new.scored = false and position('x' in new.board) = 0 and position('o' in new.board) = 0) then
+    new.scored := old.scored;
+  end if;
+  return new;
+end $$;
+revoke all on function public.board_truth() from public, anon, authenticated;
+drop trigger if exists board_truth_ttt on public.ttt_games;
+create trigger board_truth_ttt before insert or update on public.ttt_games
+  for each row execute function public.board_truth();
+drop trigger if exists board_truth_c4 on public.c4_games;
+create trigger board_truth_c4 before insert or update on public.c4_games
+  for each row execute function public.board_truth();
+drop trigger if exists board_truth_memory on public.memory_games;
+create trigger board_truth_memory before insert or update on public.memory_games
+  for each row execute function public.board_truth();
 
 create or replace function public.server_now()
 returns timestamptz language sql stable set search_path to 'public' as $$
