@@ -5,7 +5,7 @@ import { onColour, RAMPS, type Hue } from "@/shared/brand/tokens";
 const HUES: Hue[] = ["petal", "sky", "leaf", "ember", "grape", "gum"];
 
 /** Same id, same colour, forever — including across devices, so it reads as identity. */
-function hue(seed: string): Hue {
+export function hue(seed: string): Hue {
   let h = 0;
   if (!seed) return HUES[0];
   for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
@@ -13,9 +13,11 @@ function hue(seed: string): Hue {
 }
 
 export function Avatar({
-  id, name, size = 44, className = "",
-}: { id?: string | null; name?: string | null; size?: number; className?: string }) {
-  const h = hue(id ?? "");
+  id, name, size = 44, className = "", tone,
+}: { id?: string | null; name?: string | null; size?: number; className?: string;
+     /** your own disc is gold on You (#46, #47); everyone else's comes from their id */
+     tone?: Hue }) {
+  const h = tone ?? hue(id ?? "");
   const r = RAMPS[h];
   return (
     <span

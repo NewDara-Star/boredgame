@@ -121,7 +121,7 @@ export function ClaimCard({ inline = false }: {
   }
 
   return (
-    <form className={inline ? "space-y-3" : "card p-5 space-y-3"} noValidate
+    <form className={inline ? "grid gap-2" : "card p-5 grid gap-2"} noValidate
       onSubmit={async (e) => {
         e.preventDefault();
         setError(null); setBusy(true);
@@ -130,13 +130,13 @@ export function ClaimCard({ inline = false }: {
         if (error) setError(error);
       }}>
       {!inline && <p className="font-display text-lg font-semibold">Keep this name</p>}
-      <Field label="Name" error={(error && errorField(error) !== "password" ? error : null) ?? (live.state === "bad" ? live.text : null)}
-        hint={error ? undefined : live.state === "ok" ? live.text : live.state === "checking" ? "Checking…" : undefined}>
-        <Input value={name} autoCapitalize="none" maxLength={20}
+      <Field label={inline ? "Pick a name" : "Name"} error={(error && errorField(error) !== "password" ? error : null) ?? (live.state === "bad" ? live.text : null)}
+        hint={error ? undefined : live.state === "ok" ? live.text : live.state === "checking" ? "Checking…" : undefined} good={live.state === "ok"}>
+        <Input value={name} autoCapitalize="none" maxLength={20} placeholder="yourname"
           onChange={(e) => { typed.current = true; setName(e.target.value); setError(null); }} />
       </Field>
-      <Field label="Password" hint="At least 6 characters" error={error && errorField(error) === "password" ? error : null}>
-        <Input type="password" required minLength={6} value={password} placeholder="••••••••"
+      <Field label="Password" error={error && errorField(error) === "password" ? error : null}>
+        <Input type="password" required minLength={6} value={password} placeholder="At least 6 characters"
           autoComplete="new-password" onChange={(e) => setPassword(e.target.value)} />
       </Field>
       <Button type="submit" disabled={busy} className="w-full">

@@ -106,7 +106,7 @@ const REQUIRES = [
     ["share-match", "src/features/rooms/matchUi.tsx"], ["share-solo", "src/features/play/BoardSoloPage.tsx"],
     ["share-round", "src/features/play/RoundChrome.tsx"], ["share-sort", "src/features/sort/SortSoloPage.tsx"],
     ["share-daily", "src/features/daily/DailyPage.tsx"], ["share-rankup", "src/features/play/Unlock.tsx"],
-    ["share-ranks", "src/features/leaderboard/SunRoad.tsx"], ["share-invite", "src/features/rooms/InviteCard.tsx"],
+    ["share-ranks", "src/features/leaderboard/RoadPage.tsx"], ["share-invite", "src/features/rooms/InviteCard.tsx"],
   ].map(([id, f]) => ({ id, why: `${f} shares through the new share API (shareResult, or ShareButtons / ResultScreen which call it)`,
     ok: () => /\bshareResult\b|<ShareButtons\b|<ResultScreen\b/.test(read(f) ?? "") })),
   { id: "share-buttons", why: "ShareButtons calls shareResult and ResultScreen uses ShareButtons, so the share points above really share",

@@ -63,7 +63,7 @@ export const GAMES: GameDef[] = [
     Art: ({ size }) => <GameTile slug="picto" size={size} label="Picto Phrase" />,
   },
   {
-    slug: "trivia", name: "Star Trivia", tagline: "Four options, one right, ten questions.",
+    slug: "trivia", name: "Star Trivia", tagline: "Four options, one right.",
     badge: "Quiz", bank: "trivia", path: "/trivia", chip: "bg-sky text-ink",
     room: { mode: "race", blurb: "Same question on both screens. First correct answer takes the round." },
     family: "quiz",
@@ -81,7 +81,7 @@ export const GAMES: GameDef[] = [
     Art: ({ size }) => <GameTile slug="squareoff" size={size} label="Square Off" />,
   },
   {
-    slug: "tictactoe", name: "Tic Tac Toe", tagline: "Three in a row. No questions asked.",
+    slug: "tictactoe", name: "Tic Tac Toe", tagline: "Three in a row.",
     badge: "Board game", bank: null, path: "/tictactoe", chip: "bg-leaf text-ink",
     room: { mode: "tictactoe", blurb: "The plain game. Take a square, first to three in a row." },
     family: "board",
@@ -110,7 +110,7 @@ export const GAMES: GameDef[] = [
   },
   {
     slug: "ballsort", name: "Ball Sort",
-    tagline: "Today's tubes, against the clock. Or race a friend.",
+    tagline: "Sort the tubes against the clock.",
     badge: "Puzzle", bank: null, path: "/ballsort", chip: "bg-grape text-board",
     room: { mode: "ballsort",
       blurb: "The same tubes on both screens, both of you at once. First to sort wins." },

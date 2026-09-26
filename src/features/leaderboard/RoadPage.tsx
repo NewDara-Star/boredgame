@@ -1,17 +1,22 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useAuth } from "@/app/providers/AuthProvider";
 import { supabase } from "@/shared/lib/supabase";
 import { useProgress } from "@/features/play/useProgress";
 import { rankFor, RANKS } from "@/features/play/rank";
-import { stagger, riseIn } from "@/shared/ui/motion";
+import { rankStory } from "@/shared/card/moments";
+import { ShareButtons } from "@/shared/card/ShareButtons";
+import type { MatchCard } from "@/shared/card/frame";
+import { useFocusMode } from "@/app/layout/focus";
+import { BackDisc } from "@/app/layout/ScreenTitle";
+import { riseIn } from "@/shared/ui/motion";
 import { SunRoad, type OnRoad } from "./SunRoad";
-import { BackToYou } from "./LeaderboardPage";
 
 /**
- * The road to the sun (#48): the whole climb in one picture, opened from the
- * ladder on You. Ranks you've passed in colour, yours big with the ring, the
- * rest grey, Legend as the sun, and your friends standing at their ranks.
+ * The road to the sun (#48), opened from the ladder on You. The whole phone
+ * is the picture (no tab bar): back and "Rank 5 of 10" at the top, the climb
+ * behind, and one card at the foot with your rank, Play to grow and Share.
  */
 export function RoadPage() {
   const { user } = useAuth();
@@ -19,17 +24,36 @@ export function RoadPage() {
   const { current, next } = rankFor(p.answered);
   const idx = RANKS.findIndex((r) => r.key === current.key);
   const friends = useFriendsOnRoad(user?.id);
+  useFocusMode(true);
+  const [card, setCard] = useState<MatchCard | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    void rankStory(current).then((m) => { if (!cancelled) setCard(m); }).catch(() => {});
+    return () => { cancelled = true; };
+  }, [current]);
 
   return (
-    <motion.div variants={stagger(0.07)} initial="hidden" animate="show" className="pb-6">
-      <motion.div variants={riseIn}><BackToYou /></motion.div>
-      <motion.p variants={riseIn} className="text-[12px] font-black text-soft mt-2">Rank {idx + 1} of {RANKS.length}</motion.p>
-      <motion.h1 variants={riseIn} className="font-display text-[34px] leading-none font-semibold mt-1">{current.name}</motion.h1>
-      <motion.p variants={riseIn} className="text-sm font-bold mt-2 tabular-nums">
-        {p.answered.toLocaleString()} answered{next ? `, ${next.min - p.answered} to ${next.name}` : ". Top of the road."}
-      </motion.p>
-      <motion.div variants={riseIn}><SunRoad answered={p.answered} friends={friends} /></motion.div>
-    </motion.div>
+    <div className="flex flex-col gap-[11px] min-h-[calc(100dvh-20px-env(safe-area-inset-top)-env(safe-area-inset-bottom))]">
+      <div className="fixed inset-0 z-0 overflow-hidden"><SunRoad answered={p.answered} friends={friends} /></div>
+      <div className="relative z-10 flex items-center justify-between gap-2.5 min-h-10">
+        <BackDisc to="/you" label="Back to You" />
+        <span className="chip bg-board text-ink rounded-full px-[11px] py-[5px] text-[13px] font-bold">Rank {idx + 1} of {RANKS.length}</span>
+      </div>
+      <div className="flex-1" />
+      <motion.section variants={riseIn} initial="hidden" animate="show"
+        className="relative z-10 card shadow-lift-sm rounded-[20px] p-3.5 grid gap-2.5 text-ink">
+        <div>
+          <h1 className="font-display text-[22px] leading-[1.15]">{current.name}</h1>
+          <small className="block text-[14px] font-semibold text-soft tabular-nums">
+            {p.answered.toLocaleString()} answered{next ? `, ${(next.min - p.answered).toLocaleString()} to ${next.name}` : ". Top of the road."}
+          </small>
+        </div>
+        <div className="grid grid-cols-[1.35fr_1fr] gap-[9px]">
+          <Link to="/trivia" className="cut tap cut-petal min-h-[52px] grid place-items-center font-display text-[19px]">Play to grow</Link>
+          <ShareButtons card={card} story={false} tone="sky" className="contents" />
+        </div>
+      </motion.section>
+    </div>
   );
 }
 

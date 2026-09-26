@@ -48,7 +48,7 @@ ok(mixStart(41) === mixStart(41) && turnKindOf("mix", null, 41) === mixStart(41)
   ok(missed.board[4] === null && after.phase === "picking" && after.turn === "o", "a miss leaves the spot open and passes the turn");
 }
 
-const reg = read("src/features/play/registry.tsx"), app = read("src/app/App.tsx"), cat = read("src/features/play/CataloguePage.tsx");
+const reg = read("src/features/play/registry.tsx"), app = read("src/app/App.tsx"), cat = read("src/features/play/CataloguePage.tsx"), gameSheet = read("src/features/play/GameSheet.tsx");
 for (const slug of ["squareoff", "catapultsquares", "connect4trivia", "connect4catapult"]) {
   const block = reg.slice(reg.indexOf(`slug: "${slug}"`), reg.indexOf("like:", reg.indexOf(`slug: "${slug}"`)));
   ok(/hidden: true/.test(block), `${slug} is off the Games list`);
@@ -57,7 +57,7 @@ ok((reg.match(/withs: true/g) ?? []).length === 2, "Tic Tac Toe and Connect 4 ar
 ok(/const GAMES = ALL\.filter\(\(g\) => !g\.hidden\)/.test(cat), "the list and search show only the two");
 ok(/"\/tictactoe\?with=trivia"/.test(app) && /"\/tictactoe\?with=cup"/.test(app) && /"\/connect4\?with=trivia"/.test(app) && /"\/connect4\?with=cup"/.test(app),
    "the old games' links land on the board with the challenge set");
-ok(/Play it with/.test(cat) && /CHALLENGES\.map/.test(cat) && /writeWith\(g\.slug, c\)/.test(cat) && /\?with=\$\{w\}/.test(cat), "#14: Play it with, remembered, and passed to the board");
+ok(/Play it with/.test(gameSheet) && /CHALLENGES\.map/.test(gameSheet) && /writeWith\(g\.slug, c\)/.test(gameSheet) && /\?with=\$\{w\}/.test(gameSheet), "#14: Play it with, remembered, and passed to the board");
 
 const hook = read("src/features/play/useSoloBoard.ts"), page = read("src/features/play/BoardSoloPage.tsx");
 ok(/const kind = mixing \? turnKind/.test(hook) && /if \(kind === "trivia"\) dealQuestion\(\); else newTarget\(\);/.test(hook), "each turn deals what that turn costs");

@@ -9,7 +9,8 @@ import { readFileSync } from "node:fs";
 let n = 0;
 const ok = (c: boolean, m: string) => { n++; if (!c) { console.error("FAIL " + m); process.exit(1); } };
 const read = (p: string) => readFileSync(new URL("../src/" + p, import.meta.url), "utf8");
-const page = read("features/play/CataloguePage.tsx");
+const page = read("features/play/CataloguePage.tsx") + read("features/play/GameSheet.tsx");
+const home = read("features/home/HomePage.tsx");
 const counts = read("features/play/counts.ts");
 const reg = read("features/play/registry.tsx");
 const rooms = read("features/rooms/RoomsPage.tsx");
@@ -30,6 +31,10 @@ ok(/"Play the bot" : "Play"/.test(page) && /Play a friend/.test(page) && /How to
 ok(/state: \{ preset, with: g\.withs \? w : undefined \}/.test(page) && /room\.host_id !== user\.id/.test(rooms) && /presetDone\.current = true/.test(rooms),
    "Play a friend opens a room already set to that game, once, by the host only");
 
-ok(/grid grid-cols-1 gap-2\.5/.test(page) && /w-full min-w-0/.test(page) && !/truncate/.test(page), "tiles fit a phone: a long tagline wraps instead of widening the page");
+ok(/grid grid-cols-2 gap-\[9px\]/.test(page) && /min-w-0/.test(page) && /line-clamp-2/.test(page) && !/truncate/.test(page),
+   "two tiles a row (.tiles, .gtile, Daramola 26 Sep); a long tagline wraps to two lines instead of widening the page");
+ok(/ScreenTitle>Games</.test(page) && /FAMILY_CHIP\[fam\]/.test(page), "the title row with the streak pill, and each family as its coloured chip (#12)");
+ok(/<GameSheet g=\{open\}/.test(home) && /See more games/.test(home) && /overflow-x-auto snap-x/.test(home),
+   "Home's games are one swipe row ending in See more games, and a tap opens the same sheet as Games");
 
 console.log(`${n} Games assertions hold`);

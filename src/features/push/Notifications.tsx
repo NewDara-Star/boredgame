@@ -59,3 +59,32 @@ export function NotificationsCard() {
 
   return null; // unsupported, non-iOS: nothing useful to offer
 }
+
+/**
+ * The Notifications row on You (#47): a plain .li like Name and Password,
+ * saying what it's set to, with the one thing you can do about it at the end.
+ */
+export function NotificationsRow() {
+  const { state, busy, enable, disable, needsInstall, signedIn, error } = usePush();
+  if (!signedIn) return null;
+  const on = state === "subscribed";
+  const line = on ? "On: invites and your turn"
+    : needsInstall ? "On iPhone, add BoredGame to your Home Screen first (Share, then Add to Home Screen)"
+    : state === "denied" ? "Blocked. Turn them back on in your browser settings"
+    : state === "default" || state === "granted" ? "Off. Get a ping for invites and your turn"
+    : "This browser can't do them";
+  const act = on ? { label: "Turn off", go: disable } : state === "default" || state === "granted" ? { label: "Turn on", go: enable } : null;
+  return (
+    <div className="card shadow-lift-sm rounded-[16px] px-3 py-[9px] flex items-center gap-2.5 text-ink">
+      <span className="min-w-0 flex-1">
+        <b className="block text-[15px] leading-[1.2]">Notifications</b>
+        <small className="block text-[12px] font-semibold text-soft">{busy ? "One moment…" : line}</small>
+        {error && <small className="block text-[12px] font-bold text-ember-lo">{error}</small>}
+      </span>
+      {act && (
+        <button onClick={() => void act.go()} disabled={busy}
+          className="shrink-0 min-h-[44px] -my-2 text-[13px] font-extrabold text-soft underline underline-offset-4">{act.label}</button>
+      )}
+    </div>
+  );
+}

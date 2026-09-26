@@ -32,6 +32,8 @@ export const HAIR = "#D3DCEF";
 export const SCENE = {
   air: "#DFF2FF", wood: "#E9A86A", woodHi: "#F6C891", woodLo: "#C98347", grain: "rgba(160,95,40,.25)",
   courtHi: "#F3E3C4", court: "#E3C08E", cupMouth: "#7A1E12", dawn: "#FFF4D6",
+  /* the road to the sun (#48): a sand path, the shade under each stop, the sun's glow */
+  roadEdge: "#C9B77E", road: "#F6EDCB", roadDash: "#E2D2A0", shade: "#0B3A10", sunCore: "#FFF6B0", sunGlow: "#FFE56A",
 } as const;
 
 /** Letters on colour are ink, except on grape (4.4:1 white). */

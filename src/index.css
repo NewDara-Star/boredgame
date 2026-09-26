@@ -46,7 +46,7 @@ html, body, #root { height: 100%; }
 /* What the app itself takes off the screen before a page gets any: the sticky
    header, main's own padding, and — on a phone — the bottom bar. Measured, not
    guessed: see the screen survey in STATUS.md. */
-:root { --chrome: calc(62px + 1rem + 5rem + 6px + env(safe-area-inset-bottom)); }
+:root { --chrome: calc(6px + env(safe-area-inset-top) + 5rem + env(safe-area-inset-bottom)); } /* no app bar on a phone: main's top and the tab bar */
 @media (min-width: 640px) { :root { --chrome: calc(62px + 3rem); } }
 /* the 6px is the hard shadow: every .piece casts 0 5px 0, so a surface sized
    to the pixel scrolls by five of them. */
@@ -170,8 +170,15 @@ html[data-sky="night"] :where(.card, .cut, .chip, header, nav, [role="dialog"] >
    ink at night: every Next in a round was a blank dark bar. */
 html[data-sky="night"] :is(.cut-ink, .cut-grape) { color: var(--color-board); }
 
-:focus-visible { outline: 3px solid var(--color-sky); outline-offset: 3px; }
+/* In the base layer, so a field that shows its own focus (the sky ring on .field)
+   can say outline-none and mean it. */
+@layer base { :focus-visible { outline: 3px solid var(--color-sky); outline-offset: 3px; } }
 
 @media (prefers-reduced-motion: reduce) {
   .tap, .tap:active { transition: none; transform: none; }
 }
+
+/* Home's wordmark: ink on a day sky, gold on the night one (#8–#11). */
+.wm-night { display: none; }
+html[data-sky="night"] .wm-day { display: none; }
+html[data-sky="night"] .wm-night { display: block; }

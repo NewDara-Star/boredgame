@@ -3,62 +3,37 @@ import { motion } from "framer-motion";
 import { useAuth } from "@/app/providers/AuthProvider";
 import { Avatar } from "@/shared/ui/Avatar";
 import { SPRING, stagger, riseIn } from "@/shared/ui/motion";
+import { SubTitle } from "@/app/layout/ScreenTitle";
 import { rankFor } from "@/features/play/rank";
 import { RankBadge } from "@/features/play/RankBadge";
 import { useLeaderboard, type Standing } from "./useLeaderboard";
 
-/** Back to You: the road and Everyone open from there (#46–#49). */
-export function BackToYou() {
-  return (
-    <Link to="/you" className="inline-flex items-center min-h-[44px] text-[14px] font-black">
-      ‹ You
-    </Link>
-  );
-}
-
-/** 2nd, 1st, 3rd — the order they stand in, not the order they finished. */
+/**
+ * #49, from the drawing's code: the top three in one white card, 2nd, 1st,
+ * 3rd (a face, the name, their rank's flower, the count in mono), then the
+ * rest as plain rows (.li). Nothing here is a button, so nothing looks like
+ * one (R8).
+ */
 const PODIUM_ORDER = [1, 0, 2];
-const PLINTH = [
-  { h: 96, bg: "bg-petal" },      // 1st
-  { h: 68, bg: "bg-mist" },     // 2nd
-  { h: 52, bg: "bg-board" },  // 3rd
-];
 
 function Podium({ top, meId }: { top: Standing[]; meId?: string }) {
   return (
-    <div className="flex items-end justify-center gap-2.5 sm:gap-4 mt-6 shadow-lift-sm">
-      {PODIUM_ORDER.map((i, slot) => {
+    <motion.div variants={riseIn}
+      className="card shadow-lift-sm rounded-[20px] p-3.5 grid grid-cols-[1fr_1.15fr_1fr] items-end text-center gap-1.5 text-ink">
+      {PODIUM_ORDER.map((i) => {
         const p = top[i];
-        if (!p) return null;
+        if (!p) return <span key={i} />;
         const first = i === 0;
         return (
-          <motion.div key={p.id} className="flex-1 max-w-[140px] text-center"
-            initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }}
-            transition={{ ...SPRING, delay: 0.1 + slot * 0.09 }}>
-            <motion.div
-              initial={{ scale: 0.4, rotate: -18 }} animate={{ scale: 1, rotate: 0 }}
-              transition={{ type: "spring", stiffness: 300, damping: 15, delay: 0.24 + slot * 0.09 }}
-              className="grid place-items-center">
-              <Avatar id={p.id} name={p.username} size={first ? 60 : 48} />
-            </motion.div>
-            <p className={`mt-2 font-display font-semibold truncate px-1
-              ${first ? "text-[15px]" : "text-[13px]"} ${p.id === meId ? "text-ember" : ""}`}>
-              {p.username}
-            </p>
-            <p className="text-[13px] font-bold text-soft tabular-nums">{p.answered}</p>
-            {/* The plinths are what make it a podium rather than three avatars in
-                a row, so they carry the numeral and the height difference. */}
-            <motion.div
-              className={`card ${PLINTH[i].bg} mt-2 grid place-items-center rounded-b-none`}
-              style={{ boxShadow: "none" }}
-              initial={{ height: 0 }} animate={{ height: PLINTH[i].h }}
-              transition={{ ...SPRING, delay: 0.16 + slot * 0.09 }}>
-              <span className="font-display text-3xl font-semibold">{i + 1}</span>
-            </motion.div>
-          </motion.div>
+          <div key={p.id} className="grid justify-items-center min-w-0">
+            <Avatar id={p.id} name={p.username} size={first ? 52 : 34} tone={p.id === meId ? "petal" : undefined} />
+            <b className={`block max-w-full truncate ${first ? "text-[15px]" : "text-[13px]"}`}>{p.id === meId ? "You" : p.username}</b>
+            <RankBadge rank={rankFor(p.answered).current.key} size={first ? 38 : i === 1 ? 30 : 28} />
+            <small className="block font-mono text-[12px] tabular-nums">{p.answered.toLocaleString()}</small>
+          </div>
         );
       })}
-    </div>
+    </motion.div>
   );
 }
 
@@ -66,31 +41,23 @@ function Row({ p, meId }: { p: Standing; meId?: string }) {
   const me = p.id === meId;
   const rank = rankFor(p.answered).current;
   return (
-    <div className={`cut tap flex items-center gap-3 px-3 py-2.5 ${me ? "cut-petal" : ""}`}>
-      <span className="w-7 shrink-0 text-center font-display text-lg font-semibold tabular-nums text-soft">
-        {p.position}
-      </span>
-      <Avatar id={p.id} name={p.username} size={36} />
+    <div className={`card shadow-lift-sm rounded-[16px] px-3 py-[9px] flex items-center gap-2.5 text-ink ${me ? "bg-petal" : ""}`}>
+      <Avatar id={p.id} name={p.username} size={26} tone={me ? "petal" : undefined} />
       <span className="min-w-0 flex-1">
-        <span className="block font-bold text-[15px] truncate">
-          {p.username}{me && <span className="text-soft font-black text-[12px] ml-1.5">you</span>}
-        </span>
-        <span className="block text-[13px] font-bold text-soft tabular-nums">
-          {p.answered} answered
-          {p.answered > 0 && ` · ${Math.round((p.correct / p.answered) * 100)}%`}
-          {p.streak > 1 && ` · ${p.streak}-day streak`}
-        </span>
+        <b className="block text-[15px] leading-[1.2] truncate tabular-nums">{p.position}{" "}{me ? "You" : p.username}</b>
+        <small className={`block text-[12px] font-semibold tabular-nums ${me ? "" : "text-soft"}`}>
+          {p.answered.toLocaleString()} answered{p.answered > 0 && `, ${Math.round((p.correct / p.answered) * 100)}% right`}
+        </small>
       </span>
-      <RankBadge rank={rank.key} size={30} />
+      <RankBadge rank={rank.key} size={28} className="shrink-0" />
     </div>
   );
 }
 
-/** The fade is what stops a floating bar reading as a row that got cut in half. */
+/** Your row, held at the foot of the screen when the page doesn't reach you (#49). */
 function StickyBar({ children }: { children: React.ReactNode }) {
   return (
-    <div className="fixed inset-x-0 bottom-[62px] sm:bottom-0 z-20 px-4 pt-10 pb-3.5 pointer-events-none"
-      style={{ background: "linear-gradient(to top, var(--color-ground) 62%, transparent)" }}>
+    <div className="fixed inset-x-0 bottom-[calc(62px+env(safe-area-inset-bottom))] sm:bottom-0 z-20 px-[14px] pb-[14px] pointer-events-none">
       <div className="max-w-3xl mx-auto pointer-events-auto">{children}</div>
     </div>
   );
@@ -106,7 +73,7 @@ export function LeaderboardPage() {
   if (offline) {
     return (
       <div className="card p-6">
-        <h1 className="font-display text-2xl font-semibold">Leaderboard</h1>
+        <h1 className="font-display text-2xl">Leaderboard</h1>
         <p className="text-sm text-soft font-semibold mt-2">
           There is no backend configured, so there is nobody to rank. Add Supabase keys and it fills in.
         </p>
@@ -119,48 +86,35 @@ export function LeaderboardPage() {
   const youOnPage = !!you && rows.some((r) => r.id === you.id);
 
   return (
-    <motion.div variants={stagger(0.07)} initial="hidden" animate="show" className="pb-24">
-      <motion.div variants={riseIn}><BackToYou /></motion.div>
-      <motion.h1 variants={riseIn} className="font-display text-[34px] leading-none font-semibold mt-2">
-        Everyone
-      </motion.h1>
-      <motion.p variants={riseIn} className="text-soft text-sm font-semibold mt-2">
-        Ranked by questions answered — turning up beats being clever.
-      </motion.p>
-
+    <motion.div variants={stagger(0.07)} initial="hidden" animate="show" className="grid gap-[11px] pb-24">
+      <SubTitle back="/you" backLabel="Back to You">Everyone</SubTitle>
 
       {loading ? (
-        <div className="mt-6 space-y-2">
+        <div className="grid gap-2">
           {Array.from({ length: 5 }, (_, i) => (
-            <div key={i} className="card h-[62px] animate-pulse opacity-40" />
+            <div key={i} className="card h-[46px] animate-pulse opacity-40" />
           ))}
         </div>
       ) : failed ? (
-        <div className="card p-6 mt-6 text-center">
-          <p className="font-display text-xl font-semibold">Couldn't load the board</p>
-          <p className="text-sm text-soft font-semibold mt-1">Check your signal and try again.</p>
-          <button onClick={retry} className="cut tap inline-block mt-4 px-5 py-3 cut-petal font-display font-semibold">
-            Try again
-          </button>
+        <div className="card shadow-lift-sm p-5 grid gap-2 justify-items-center text-center text-ink">
+          <h2 className="font-display text-[22px] leading-[1.1]">Couldn't load the board</h2>
+          <p className="text-[14px] text-soft font-semibold">Check your signal and try again.</p>
+          <button onClick={retry} className="cut tap w-full min-h-[52px] cut-petal font-display text-[19px]">Try again</button>
         </div>
       ) : rows.length === 0 ? (
-        <div className="card p-6 mt-6 text-center">
-          <p className="font-display text-xl font-semibold">Nobody has played yet.</p>
-          <p className="text-sm text-soft font-semibold mt-1">
-            Answer one question and the top spot is yours.
-          </p>
-          <Link to="/trivia" className="cut tap inline-block mt-4 px-5 py-3 cut-petal font-display font-semibold">
-            Start a round
-          </Link>
+        <div className="card shadow-lift-sm p-5 grid gap-2 justify-items-center text-center text-ink">
+          <h2 className="font-display text-[22px] leading-[1.1]">Nobody has played yet.</h2>
+          <p className="text-[14px] text-soft font-semibold">Answer one question and the top spot is yours.</p>
+          <Link to="/trivia" className="cut tap w-full min-h-[52px] grid place-items-center cut-petal font-display text-[19px]">Start a round</Link>
         </div>
       ) : (
         <>
           {rows.length >= 3 && <Podium top={top} meId={user?.id} />}
-          <div className="mt-4 space-y-2">
+          <div className="grid gap-2">
             {rest.map((p, i) => (
               <motion.div key={p.id}
                 initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }}
-                transition={{ ...SPRING, delay: 0.35 + i * 0.035 }}>
+                transition={{ ...SPRING, delay: 0.2 + i * 0.035 }}>
                 <Row p={p} meId={user?.id} />
               </motion.div>
             ))}
@@ -175,15 +129,15 @@ export function LeaderboardPage() {
       )}
       {!loading && isGuest && rows.length > 0 && (
         <StickyBar>
-          <Link to="/you" className="cut tap block cut-petal px-4 py-3 text-center font-display font-semibold">
-            Guests aren't on the board. Save your progress to join it →
+          <Link to="/you" className="cut tap block cut-petal px-4 py-3 text-center font-display text-[17px]">
+            Guests aren't on the board. Save your progress to join it
           </Link>
         </StickyBar>
       )}
       {!loading && !user && rows.length > 0 && (
         <StickyBar>
-          <Link to="/you" className="cut tap block cut-petal px-4 py-3 text-center font-display font-semibold">
-            Sign in to take a place on this list →
+          <Link to="/you" className="cut tap block cut-petal px-4 py-3 text-center font-display text-[17px]">
+            Sign in to take a place on this list
           </Link>
         </StickyBar>
       )}

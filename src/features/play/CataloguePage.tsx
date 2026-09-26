@@ -1,25 +1,25 @@
 import { useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { useAuth } from "@/app/providers/AuthProvider";
-import { createRoom } from "@/features/rooms/useRoom";
 import { Sunflower } from "@/shared/brand/Sunflower";
+import { ScreenTitle } from "@/app/layout/ScreenTitle";
 import { stagger, riseIn } from "@/shared/ui/motion";
 import type { Family } from "@/shared/brand/tokens";
 import { useLiveBanks } from "./counts";
 import { GAMES as ALL, type GameDef } from "./registry";
-import { CHALLENGES, readWith, writeWith, type Challenge } from "@/features/challenge/kinds";
+import { GameSheet } from "./GameSheet";
 
 /** The games on the list: Square Off and the catapult and trivia versions are
     Tic Tac Toe and Connect 4 played with a challenge now (Daramola 26 Sep). */
 const GAMES = ALL.filter((g) => !g.hidden);
 
 /**
- * Games (#12–#14): grouped by family, one line each, no bank counts. Tapping a
- * game opens a sheet (#14) instead of dropping you straight into a bot game:
- * play it now, or start a room for a person, with how to play one tap away.
+ * Games (#12–#14), from the drawings' code: the title row, the search field
+ * (.field), then each family as a chip over two tiles a row (.tiles, .gtile:
+ * icon, name, tagline), no bank counts. Tapping a game opens its sheet (#14).
  */
 const FAMILY_NAMES: [Family, string][] = [["quiz", "Quiz"], ["board", "Board"], ["puzzle", "Puzzle"], ["skill", "Skill"], ["party", "Party"]];
+/** The family chip's colour (.chip.sky, .chip.leaf …): the family's own. */
+const FAMILY_CHIP: Record<Family, string> = { quiz: "bg-sky-hi", board: "bg-leaf-hi", puzzle: "bg-grape-hi", skill: "bg-ember-hi", party: "bg-gum-hi" };
 
 /** A whole word or phrase inside the search: "aim" doesn't find "claim". */
 const says = (needle: string, w: string) => ` ${needle} `.includes(` ${w} `);
@@ -37,74 +37,6 @@ function nearest(needle: string): GameDef {
     ?? GAMES.find((g) => g.slug === "trivia") ?? GAMES[0];
 }
 
-function Sheet({ g, onClose }: { g: GameDef; onClose: () => void }) {
-  const { user, profile } = useAuth();
-  const nav = useNavigate();
-  const [how, setHow] = useState(false);
-  const [busy, setBusy] = useState(false);
-  const [failed, setFailed] = useState(false);
-  // "Play it with…" (#14): what a spot costs, remembered per game.
-  const [w, setW] = useState<Challenge>(() => (g.withs ? readWith(g.slug) : "none"));
-  const choose = (c: Challenge) => { setW(c); writeWith(g.slug, c); };
-  // A room plays every choice (rooms slice 2): the room opens set to it.
-  const preset = g.slug;
-  const friend = async () => {
-    if (!user) { nav("/rooms"); return; }                 // signed out: Rooms asks for a name first
-    setBusy(true); setFailed(false);
-    const r = await createRoom(user.id, profile?.username ?? "player");
-    setBusy(false);
-    if (!r) { setFailed(true); return; }
-    nav(`/rooms/${r.code}`, { state: { preset, with: g.withs ? w : undefined } });
-  };
-  return (
-    <div className="fixed inset-0 z-50 grid items-end" role="dialog" aria-modal="true" aria-label={g.name}>
-      <button aria-label="Close" onClick={onClose} className="absolute inset-0 bg-ink/50" />
-      <motion.div initial={{ y: 40, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
-        className="relative bg-board rounded-t-[26px] px-4 pt-3 pb-[calc(18px+env(safe-area-inset-bottom))] max-w-3xl w-full mx-auto space-y-3">
-        <div className="w-10 h-1.5 rounded-full bg-mist mx-auto" />
-        <div className="flex items-center gap-3">
-          <g.Art size={64} />
-          <div className="min-w-0">
-            <p className="font-display text-[24px] leading-tight font-semibold">{g.name}</p>
-            <p className="text-[14px] font-semibold text-soft">{g.tagline}</p>
-          </div>
-        </div>
-        {g.withs && (
-          <div className="grid gap-1.5">
-            <span className="text-[12px] font-extrabold text-soft">Play it with</span>
-            <div className="flex flex-wrap gap-1.5" role="group" aria-label="Play it with">
-              {CHALLENGES.map((c) => (
-                <button key={c.key} aria-pressed={w === c.key} onClick={() => choose(c.key)}
-                  className="min-h-[44px] -my-[7px] grid place-items-center">
-                  <span className={`chip rounded-full px-[11px] py-[5px] text-[13px] font-extrabold text-ink ${w === c.key ? "bg-petal" : "bg-board"}`}>{c.name}</span>
-                </button>
-              ))}
-            </div>
-            <p className="text-[13px] font-semibold text-soft">{CHALLENGES.find((c) => c.key === w)?.says}</p>
-          </div>
-        )}
-        <div className={`grid gap-2 ${g.room ? "grid-cols-2" : ""}`}>
-          <Link to={g.withs ? `${g.path}?with=${w}` : g.path} className="cut tap cut-petal min-h-[52px] grid place-items-center font-display text-[17px]">
-            {g.solo === "bot" ? "Play the bot" : "Play"}
-          </Link>
-          {g.room && (
-            <button onClick={() => void friend()} disabled={busy}
-              className="cut tap cut-leaf min-h-[52px] grid place-items-center font-display text-[17px]">
-              {busy ? "Opening a room…" : "Play a friend"}
-            </button>
-          )}
-        </div>
-        {failed && <p className="text-[13px] font-bold text-ember">Couldn't open a room. Try again.</p>}
-        {how ? <p className="text-[14px] font-semibold">{g.howTo}</p> : (
-          <button onClick={() => setHow(true)} className="block mx-auto text-[13px] font-black underline underline-offset-4 min-h-[44px]">
-            How to play
-          </button>
-        )}
-      </motion.div>
-    </div>
-  );
-}
-
 export function CataloguePage() {
   const live = useLiveBanks();
   const [q, setQ] = useState("");
@@ -115,41 +47,38 @@ export function CataloguePage() {
   const near = shown.length === 0 && needle ? nearest(needle) : null;
 
   return (
-    <motion.div variants={stagger(0.06)} initial="hidden" animate="show" className="pb-6">
-      <motion.h1 variants={riseIn} className="font-display text-[34px] leading-none font-semibold">Games</motion.h1>
+    <motion.div variants={stagger(0.06)} initial="hidden" animate="show" className="grid gap-[11px] pb-6">
+      <ScreenTitle>Games</ScreenTitle>
       <motion.input variants={riseIn} value={q} onChange={(e) => setQ(e.target.value)}
         placeholder="Search games" type="search" aria-label="Search games"
-        className="w-full mt-4 bg-board shadow-lift-sm rounded-2xl px-4 py-3 font-bold text-ink placeholder:text-soft/60 outline-none
-          focus:shadow-[0_5px_0_var(--color-ink)] transition-shadow" />
+        className={`w-full bg-board rounded-[14px] px-3.5 py-3 text-[16px] font-semibold text-ink placeholder:text-soft outline-none focus-visible:outline-none
+          ${needle ? "shadow-[inset_0_0_0_2.5px_var(--color-sky)]" : "shadow-[inset_0_0_0_2px_var(--color-hair)]"} focus:shadow-[inset_0_0_0_2.5px_var(--color-sky)]`} />
 
       {near ? (
-        <motion.div variants={riseIn} className="card p-5 mt-5 flex items-center gap-4">
-          <Sunflower state="look-left" size={72} className="shrink-0" />
-          <div className="min-w-0">
-            <p className="font-display text-[22px] leading-tight font-semibold">No {q.trim()} yet</p>
-            <p className="text-[14px] font-semibold mt-1">The nearest thing is {near.name}.</p>
-            <button onClick={() => setOpen(near)}
-              className="cut tap cut-petal mt-3 px-4 min-h-[44px] font-display text-[16px]">Play {near.name}</button>
-          </div>
+        // #13: .card.center, 20px in: the flower looking for it, 100px; h3 22px; the button full width.
+        <motion.div variants={riseIn} className="card shadow-lift-sm rounded-[20px] p-5 grid gap-2 justify-items-center text-center">
+          <Sunflower state="look-left" size={100} />
+          <h2 className="font-display text-[22px] leading-[1.1]">No {q.trim()} yet</h2>
+          <p className="text-[14px] font-semibold text-soft">The nearest thing is {near.name}.</p>
+          <button onClick={() => setOpen(near)}
+            className="cut tap cut-petal w-full min-h-[52px] font-display text-[19px]">Play {near.name}</button>
         </motion.div>
       ) : (
         FAMILY_NAMES.map(([fam, label]) => {
           const games = shown.filter((g) => g.family === fam);
           if (games.length === 0) return null;
           return (
-            <motion.section key={fam} variants={riseIn} className="mt-6">
-              <h2 className="font-display text-[21px] font-semibold mb-2.5">{label}</h2>
-              <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+            <motion.section key={fam} variants={riseIn} className="grid gap-[11px]" aria-label={label}>
+              <h2 className="flex"><span className={`chip shadow-none rounded-full px-[9px] py-0.5 text-[12px] font-extrabold text-ink ${FAMILY_CHIP[fam]}`}>{label}</span></h2>
+              <div className="grid grid-cols-2 gap-[9px]">
                 {games.map((g) => {
                   const ok = playable(g);
                   return (
                     <button key={g.slug} onClick={() => ok && setOpen(g)} disabled={!ok}
-                      className={`card ${ok ? "tap" : "opacity-55"} p-3 flex items-center gap-3 text-left w-full min-w-0`}>
+                      className={`card shadow-lift-sm rounded-[20px] p-3 grid gap-1.5 justify-items-start content-start text-left min-w-0 ${ok ? "tap" : "opacity-55"}`}>
                       <g.Art size={64} />
-                      <span className="min-w-0 flex-1">
-                        <span className="block font-display text-[19px] leading-tight font-semibold">{g.name}</span>
-                        <span className="block text-[13px] font-semibold text-soft line-clamp-2">{ok ? g.tagline : "Nothing live yet"}</span>
-                      </span>
+                      <span className="font-display text-[18px] leading-[1.1]">{g.name}</span>
+                      <span className="text-[13px] leading-[1.3] font-semibold text-soft line-clamp-2">{ok ? g.tagline : "Nothing live yet"}</span>
                     </button>
                   );
                 })}
@@ -159,7 +88,7 @@ export function CataloguePage() {
         })
       )}
 
-      {open && <Sheet g={open} onClose={() => setOpen(null)} />}
+      {open && <GameSheet g={open} onClose={() => setOpen(null)} />}
     </motion.div>
   );
 }

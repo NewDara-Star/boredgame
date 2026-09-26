@@ -18,7 +18,8 @@ export function Button({
   return (
     <button
       {...rest}
-      className={`cut tap font-display text-[16px] px-5 py-3.5
+      // The drawings' .cut: 52px tall, the display face at 19px.
+      className={`cut tap font-display text-[19px] min-h-[52px] px-4
         disabled:cursor-not-allowed ${styles[variant]} ${className}`}
     />
   );

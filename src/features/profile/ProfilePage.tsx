@@ -12,8 +12,10 @@ import { Field, Input } from "@/shared/ui/Field";
 import { stagger, riseIn, popIn } from "@/shared/ui/motion";
 import { AuthCard } from "./AuthCard";
 import { ClaimCard, useNameCheck } from "./GuestCard";
-import { IconFlame } from "@/app/layout/Icons";
-import { NotificationsCard } from "@/features/push/Notifications";
+import { NotificationsRow } from "@/features/push/Notifications";
+import { ScreenTitle } from "@/app/layout/ScreenTitle";
+import { StreakPill } from "@/features/play/RoundChrome";
+import { Sunflower } from "@/shared/brand/Sunflower";
 import { useLeaderboard, type Standing } from "@/features/leaderboard/useLeaderboard";
 import { takeLinkError } from "@/shared/lib/linkError";
 import { readCarry } from "@/features/play/carry";
@@ -39,10 +41,10 @@ function GuestView({ authError }: { authError: string | null }) {
   const kept = readCarry().rows.length;   // what an account made now takes with it (F17)
 
   return (
-    <motion.div variants={stagger(0.07)} initial="hidden" animate="show" className="space-y-4">
-      <motion.div variants={riseIn}>
-        <h1 className="font-display text-[34px] leading-none font-semibold">You</h1>
-        <p className="text-sm text-soft font-semibold mt-2">
+    <motion.div variants={stagger(0.07)} initial="hidden" animate="show" className="grid gap-[11px]">
+      <motion.div variants={riseIn} className="grid gap-1.5">
+        <ScreenTitle end={false}>You</ScreenTitle>
+        <p className="text-[14px] text-soft font-semibold">
           {played ? "Keep your progress: make an account, or sign in." : "Save your progress: make an account, or sign in."}
         </p>
       </motion.div>
@@ -59,7 +61,7 @@ function GuestView({ authError }: { authError: string | null }) {
 
       {/* Shown as a small aside, not as a dashboard — it is what you stand to keep,
           not a profile you already have. */}
-      <motion.div variants={riseIn} className="card p-4 flex items-center gap-3">
+      <motion.div variants={riseIn} className="card shadow-lift-sm rounded-[20px] px-3 py-2.5 flex items-center gap-2.5 text-ink">
         <RankBadge rank={current.key} size={38} />
         <div className="min-w-0 flex-1">
           <p className="text-[13px] font-bold">
@@ -74,78 +76,104 @@ function GuestView({ authError }: { authError: string | null }) {
   );
 }
 
-/** The page title, the same on every You screen (#46, #51). */
+/** The page title, the same on every You screen (#46, #51): no pill here,
+    it sits in your card instead. */
 function Title() {
-  return <motion.h1 variants={riseIn} className="font-display text-[34px] leading-none font-semibold">You</motion.h1>;
+  return <ScreenTitle end={false}>You</ScreenTitle>;
 }
 
-/** Your rank, big: the badge, the name and what it took (#46, #51). */
-function RankCard({ answered, line }: { answered: number; line: ReactNode }) {
-  const { current, next, progress } = rankFor(answered);
+const CARD = "card shadow-lift-sm rounded-[20px] p-3.5 grid gap-2 text-ink";
+const LI = "card shadow-lift-sm rounded-[16px] px-3 py-[9px] flex items-center gap-2.5 text-ink";
+const LINK = "text-[13px] font-extrabold underline underline-offset-4 min-h-[44px] -my-2 grid place-items-center";
+
+/** #46: you, in one card: your disc in gold, the name, since when, the streak
+    pill; then your rank's flower big, its name and what it took. */
+function ProfileCard({ id, name, since, answered, streak }:
+  { id: string; name: string; since?: string; answered: number; streak: number }) {
+  const { current } = rankFor(answered);
   return (
-    <motion.section variants={riseIn} className="card p-4 flex items-center gap-4">
-      <RankBadge rank={current.key} size={64} animate className="shrink-0" />
-      <div className="min-w-0 flex-1">
-        <p className="font-display text-[26px] leading-none font-semibold">{current.name}</p>
-        <p className="text-[13px] font-bold mt-1.5 tabular-nums">{line}</p>
-        {next && (
-          <>
-            <div className="h-2.5 bg-mist rounded-full mt-2 overflow-hidden">
-              <motion.div className="h-full bg-petal" initial={{ width: 0 }} animate={{ width: `${Math.round(progress * 100)}%` }}
-                transition={{ type: "spring", stiffness: 90, damping: 18, delay: 0.3 }} />
-            </div>
-            <p className="text-[12px] font-bold text-soft mt-1 tabular-nums">{next.min - answered} more to {next.name}</p>
-          </>
-        )}
+    <motion.section variants={riseIn} className={CARD}>
+      <div className="flex items-center gap-2.5">
+        <Avatar id={id} name={name} size={52} tone="petal" />
+        <div className="min-w-0 flex-1">
+          <b className="block font-display font-normal text-[23px] leading-tight truncate">{name}</b>
+          {since && (
+            <small className="block text-[14px] font-semibold text-soft">
+              Playing since {new Date(since).toLocaleDateString(undefined, { month: "long", year: new Date(since).getFullYear() === new Date().getFullYear() ? undefined : "numeric" })}
+            </small>
+          )}
+        </div>
+        {streak > 0 && <StreakPill />}
+      </div>
+      <div className="grid justify-items-center text-center pt-1">
+        <RankBadge rank={current.key} size={96} animate />
+        <h2 className="font-display text-[28px] leading-[1.1]">{current.name}</h2>
+        <span className="text-[14px] font-semibold text-soft tabular-nums">{answered.toLocaleString()} questions answered</span>
       </div>
     </motion.section>
   );
 }
 
-/** All ten ranks in a row; tapping it opens the road (#46 → #48). */
+/** #46: how far to the next rank, as a ring (.ring-s) and one line. */
+function NextRank({ answered }: { answered: number }) {
+  const { next, progress } = rankFor(answered);
+  if (!next) return null;
+  const pct = Math.round(progress * 100);
+  return (
+    <motion.section variants={riseIn} className="card shadow-lift-sm rounded-[20px] px-3 py-2.5 flex items-center gap-2.5 text-ink">
+      <span aria-hidden className="relative shrink-0 w-[46px] h-[46px] rounded-full"
+        style={{ background: `conic-gradient(var(--color-petal) ${pct}%, var(--color-mist) 0)` }}>
+        <span className="absolute inset-2 rounded-full bg-board" />
+      </span>
+      <div className="min-w-0 flex-1">
+        <b className="block text-[15px] leading-tight tabular-nums">{(next.min - answered).toLocaleString()} more to {next.name}</b>
+        <small className="block text-[13px] font-semibold text-soft tabular-nums">Your flower blooms at {next.min.toLocaleString()}.</small>
+      </div>
+    </motion.section>
+  );
+}
+
+/** All ten ranks, two rows of five (.badges), yours lit; See the road (#46 → #48). */
 function Ladder({ answered }: { answered: number }) {
+  const idx = RANKS.filter((r) => answered >= r.min).length - 1;
   return (
-    <motion.div variants={riseIn}>
-      <Link to="/you/road" className="card tap block p-4">
-        <span className="flex items-baseline justify-between">
-          <span className="text-[12px] font-black text-soft">
-            All ten ranks · {RANKS.filter((r) => answered >= r.min).length} of {RANKS.length}
+    <motion.section variants={riseIn} className={CARD}>
+      <div className="flex items-center gap-2.5">
+        <b className="flex-1 text-[15px]">All ten ranks</b>
+        <Link to="/you/road" className={`${LINK} text-sky-lo`}>See the road</Link>
+      </div>
+      <Link to="/you/road" aria-label={`All ten ranks. You're ${RANKS[idx].name}, ${idx + 1} of ${RANKS.length}. See the road`}
+        className="grid grid-cols-5 gap-1.5 justify-items-center items-end">
+        {RANKS.map((rk, i) => (
+          <span key={rk.key} className={i === idx ? "rounded-[12px] bg-petal-hi p-[3px]" : i > idx ? "grayscale opacity-35" : ""}>
+            <RankBadge rank={rk.key} size={34} />
           </span>
-          <span className="text-[13px] font-black">See the road →</span>
-        </span>
-        <span className="grid grid-cols-10 gap-0.5 mt-3 items-end">
-          {RANKS.map((rk) => (
-            <span key={rk.key} className="grid place-items-center">
-              <RankBadge rank={rk.key} size={26} locked={answered < rk.min} />
-            </span>
-          ))}
-        </span>
+        ))}
       </Link>
-    </motion.div>
+    </motion.section>
   );
 }
 
-/** A number worth looking at, with a word under it. That is the whole card. */
-function Stat({ value, label, accent = "" }: { value: string | number; label: string; accent?: string }) {
+/** .stat: a number worth looking at, with a word under it. */
+function Stat({ value, label, gold = false }: { value: string | number; label: string; gold?: boolean }) {
   return (
-    <motion.div variants={popIn} className={`card p-3 ${accent}`}>
-      <b className="block font-display text-[26px] leading-none font-semibold tabular-nums">{value}</b>
-      <span className="block text-[12px] font-black text-soft mt-1.5">{label}</span>
+    <motion.div variants={popIn} className={`card shadow-lift-sm rounded-[16px] px-2.5 py-[9px] text-ink ${gold ? "bg-petal" : ""}`}>
+      <b className="block font-display font-normal text-[26px] leading-none tabular-nums">{value}</b>
+      <small className={`text-[12px] font-extrabold ${gold ? "" : "text-soft"}`}>{label}</small>
     </motion.div>
   );
 }
 
-/** Where you stand, in two rows: the top of the board and you (#47 → #49). */
+/** Where you stand, in two rows (.li): the top of the board and you (#47 → #49). */
 function Standing1({ p, me }: { p: Standing; me: boolean }) {
   return (
-    <div className={`flex items-center gap-3 rounded-2xl px-2 py-2 ${me ? "bg-petal" : ""}`}>
-      <span className="w-7 text-center font-display text-lg font-semibold tabular-nums">{p.position}</span>
-      <Avatar id={p.id} name={p.username} size={32} />
+    <div className={`${LI} ${me ? "bg-petal" : ""}`}>
+      <Avatar id={p.id} name={p.username} size={26} tone={me ? "petal" : undefined} />
       <span className="min-w-0 flex-1">
-        <span className="block font-bold text-[15px] truncate">{me ? "You" : p.username}</span>
-        <span className="block text-[12px] font-bold text-soft tabular-nums">{p.answered.toLocaleString()} answered</span>
+        <b className="block text-[15px] leading-[1.2] truncate tabular-nums">{p.position}{"\u2002"}{me ? "You" : p.username}</b>
+        <small className={`block text-[12px] font-semibold tabular-nums ${me ? "" : "text-soft"}`}>{p.answered.toLocaleString()} answered</small>
       </span>
-      <RankBadge rank={rankFor(p.answered).current.key} size={26} />
+      <RankBadge rank={rankFor(p.answered).current.key} size={26} className="shrink-0" />
     </div>
   );
 }
@@ -153,19 +181,19 @@ function Standing1({ p, me }: { p: Standing; me: boolean }) {
 function EveryoneCard({ userId }: { userId?: string }) {
   const { rows, you, loading, failed } = useLeaderboard(userId, 1);
   return (
-    <motion.section variants={riseIn} className="card p-3">
-      <div className="flex items-baseline justify-between px-2 pt-1">
-        <p className="text-[12px] font-black text-soft">Everyone</p>
-        <Link to="/you/everyone" className="text-[13px] font-black py-2">See all →</Link>
+    <motion.section variants={riseIn} className="card shadow-lift-sm rounded-[20px] px-3 py-2.5 grid gap-2 text-ink">
+      <div className="flex items-center gap-2.5">
+        <b className="flex-1 text-[15px]">Everyone</b>
+        <Link to="/you/everyone" className={`${LINK} text-sky-lo`}>See all</Link>
       </div>
-      {loading ? <p className="text-[13px] font-bold text-soft px-2 pb-2">One moment…</p>
-        : failed ? <p className="text-[13px] font-bold text-soft px-2 pb-2">Couldn't load the board. It's there under See all.</p>
-        : rows.length === 0 ? <p className="text-[13px] font-bold text-soft px-2 pb-2">Nobody's on it yet. Answer one question and the top spot is yours.</p>
+      {loading ? <p className="text-[13px] font-semibold text-soft">One moment…</p>
+        : failed ? <p className="text-[13px] font-semibold text-soft">Couldn't load the board. It's there under See all.</p>
+        : rows.length === 0 ? <p className="text-[13px] font-semibold text-soft">Nobody's on it yet. Answer one question and the top spot is yours.</p>
         : (
-          <div className="grid gap-1">
+          <>
             <Standing1 p={rows[0]} me={rows[0].id === userId} />
             {you && you.id !== rows[0].id && <Standing1 p={you} me />}
-          </div>
+          </>
         )}
     </motion.section>
   );
@@ -175,11 +203,11 @@ function EveryoneCard({ userId }: { userId?: string }) {
 function Sheet({ title, onClose, children }: { title: string; onClose: () => void; children: ReactNode }) {
   return (
     <div className="fixed inset-0 z-50 grid items-end" role="dialog" aria-modal="true" aria-label={title}>
-      <button aria-label="Close" onClick={onClose} className="absolute inset-0 bg-ink/50" />
+      <button aria-label="Close" onClick={onClose} className="absolute inset-0 bg-ink-day/55" />
       <motion.div initial={{ y: 40, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
-        className="relative bg-board rounded-t-[26px] px-4 pt-3 pb-[calc(18px+env(safe-area-inset-bottom))] max-w-3xl w-full mx-auto space-y-3">
-        <div className="w-10 h-1.5 rounded-full bg-mist mx-auto" />
-        <p className="font-display text-[22px] leading-tight font-semibold">{title}</p>
+        className="relative bg-board rounded-t-[26px] px-4 pt-[14px] pb-[calc(18px+env(safe-area-inset-bottom))] max-w-3xl w-full mx-auto grid gap-[10px] shadow-[0_-10px_30px_rgba(14,74,176,.25)]">
+        <div className="w-10 h-[5px] rounded-full bg-hair mx-auto" />
+        <b className="font-display font-normal text-[22px] leading-tight">{title}</b>
         {children}
       </motion.div>
     </div>
@@ -198,7 +226,7 @@ function NameSheet({ onClose }: { onClose: () => void }) {
   const live = useNameCheck(changed && !nameMsg ? draft : "", (n) => checkName(n), (n) => `${n} is free.`);
   return (
     <Sheet title="Change your name" onClose={onClose}>
-      <form className="space-y-3" noValidate
+      <form className="grid gap-[10px]" noValidate
         onSubmit={async (e) => {
           e.preventDefault();
           setNameErr(null); setNameMsg(null); setNameNote(null); setNameBusy(true);
@@ -210,17 +238,23 @@ function NameSheet({ onClose }: { onClose: () => void }) {
             if (isSynthetic(user?.email)) setNameNote(`You'll sign in as ${draft.trim()} from now on.`);
           }
         }}>
-        <Field label="Name" error={nameErr ?? (live.state === "bad" ? live.text : null)}
-          hint={nameErr ? undefined : live.state === "ok" ? live.text : live.state === "checking" ? "Checking…" : "Friends and the leaderboard see the new name straight away."}>
-          <Input value={draft} onChange={(e) => { setDraft(e.target.value); setNameMsg(null); setNameNote(null); setNameErr(null); }}
-            maxLength={20} placeholder="yourname" autoComplete="off" autoCapitalize="none" />
-        </Field>
-        {nameNote && !nameErr && <p className="text-[13px] font-bold" role="status">{nameNote}</p>}
-        <div className="grid grid-cols-2 gap-2">
-          <Button type="button" variant="ghost" onClick={onClose}>{nameMsg ? "Done" : "Cancel"}</Button>
+        {/* #50: the field, then one line under it (green when the name is
+            free), then what changing it does; Save first, Cancel second. */}
+        <div className="grid gap-1.5">
+          <Input value={draft} aria-label="Name" onChange={(e) => { setDraft(e.target.value); setNameMsg(null); setNameNote(null); setNameErr(null); }}
+            maxLength={20} placeholder="yourname" autoComplete="off" autoCapitalize="none" autoFocus />
+          {(nameErr ?? (live.state === "bad" ? live.text : null)) ? (
+            <small className="text-[13px] font-bold text-ember-lo" role="alert">{nameErr ?? live.text}</small>
+          ) : live.state === "ok" || live.state === "checking" ? (
+            <small className={`text-[13px] font-bold ${live.state === "ok" ? "text-leaf-deep" : "text-soft"}`}>{live.state === "ok" ? live.text : "Checking…"}</small>
+          ) : null}
+        </div>
+        <p className="text-[14px] font-semibold text-soft">{nameNote && !nameErr ? nameNote : "Friends and the leaderboard see the new name straight away."}</p>
+        <div className="grid grid-cols-[1.35fr_1fr] gap-[9px]">
           <Button type="submit" disabled={nameBusy || !changed || !!nameMsg}>
             {nameBusy ? "…" : nameMsg ?? "Save"}
           </Button>
+          <Button type="button" variant="ghost" onClick={onClose}>{nameMsg ? "Done" : "Cancel"}</Button>
         </div>
       </form>
     </Sheet>
@@ -236,7 +270,7 @@ function PasswordSheet({ onClose, has }: { onClose: () => void; has: boolean }) 
   const [error, setError] = useState<string | null>(null);
   return (
     <Sheet title={has ? "Change your password" : "Set a password"} onClose={onClose}>
-      <form className="space-y-3"
+      <form className="grid gap-[10px]"
         onSubmit={async (e) => {
           e.preventDefault();
           setError(null); setBusy(true);
@@ -244,28 +278,28 @@ function PasswordSheet({ onClose, has }: { onClose: () => void; has: boolean }) 
           setBusy(false);
           if (error) setError(error); else { setDone(true); setPassword(""); }
         }}>
-        <Field label="New password" hint={done ? "Saved. Use it next time you sign in." : "At least 6 characters"} error={error}>
-          <Input type="password" required minLength={6} value={password} placeholder="••••••••"
+        <Field label="New password" hint={done ? "Saved. Use it next time you sign in." : undefined} good={done} error={error}>
+          <Input type="password" required minLength={6} value={password} placeholder="At least 6 characters"
             autoComplete="new-password" onChange={(e) => { setPassword(e.target.value); setDone(false); }} />
         </Field>
-        <div className="grid grid-cols-2 gap-2">
-          <Button type="button" variant="ghost" onClick={onClose}>{done ? "Done" : "Cancel"}</Button>
+        <div className="grid grid-cols-[1.35fr_1fr] gap-[9px]">
           <Button type="submit" disabled={busy || password.length === 0}>{busy ? "Saving…" : done ? "Saved" : "Save"}</Button>
+          <Button type="button" variant="ghost" onClick={onClose}>{done ? "Done" : "Cancel"}</Button>
         </div>
       </form>
     </Sheet>
   );
 }
 
-/** One line of the Account card: what it is, what it's set to, and Change. */
+/** One Account row (.li): what it is, what it's set to, and Change (#47). */
 function AccountRow({ label, value, action, onClick }: { label: string; value: string; action: string; onClick: () => void }) {
   return (
-    <div className="flex items-center gap-3 py-1">
+    <div className={LI}>
       <span className="min-w-0 flex-1">
-        <span className="block text-[12px] font-black text-soft">{label}</span>
-        <span className="block font-bold truncate">{value}</span>
+        <b className="block text-[15px] leading-[1.2]">{label}</b>
+        <small className="block text-[12px] font-semibold text-soft truncate">{value}</small>
       </span>
-      <button onClick={onClick} className="text-[13px] font-black underline underline-offset-4 min-h-[44px] px-2">{action}</button>
+      <button onClick={onClick} className={`${LINK} text-soft shrink-0`}>{action}</button>
     </div>
   );
 }
@@ -284,52 +318,34 @@ function MemberView() {
   const hasPassword = isSynthetic(user?.email);   // a name account always has one; an email one may not
 
   return (
-    <motion.div variants={stagger(0.06)} initial="hidden" animate="show" className="space-y-4 pb-6">
+    <motion.div variants={stagger(0.06)} initial="hidden" animate="show" className="grid gap-[11px] pb-6">
       <Title />
-      <motion.section variants={riseIn} className="flex items-center gap-3">
-        <Avatar id={user?.id ?? "anon"} name={name} size={52} />
-        <div className="min-w-0 flex-1">
-          <p className="font-display text-[22px] leading-tight font-semibold truncate">{name}</p>
-          {since && (
-            <p className="text-[13px] font-bold text-soft">
-              Playing since {new Date(since).toLocaleDateString(undefined, { month: "long", year: new Date(since).getFullYear() === new Date().getFullYear() ? undefined : "numeric" })}
-            </p>
-          )}
-        </div>
-        {p.streak > 0 && (
-          <span className="chip flex items-center gap-1 bg-board text-ink px-2.5 py-1 text-[14px] font-black tabular-nums shrink-0"
-            title={`${p.streak}-day streak`}>
-            <IconFlame /> {p.streak}
-          </span>
-        )}
-      </motion.section>
-
-      <RankCard answered={p.answered} line={`${p.answered.toLocaleString()} questions answered`} />
+      <ProfileCard id={user?.id ?? "anon"} name={name} since={since} answered={p.answered} streak={p.streak} />
+      <NextRank answered={p.answered} />
       <Ladder answered={p.answered} />
 
-      <motion.section variants={stagger(0.05)} className="grid grid-cols-3 gap-2.5">
-        <Stat value={p.streak} label="Day streak" accent={p.streak > 0 ? "bg-petal" : ""} />
+      <motion.section variants={stagger(0.05)} className="grid grid-cols-3 gap-2">
+        <Stat value={p.streak} label="Day streak" gold={p.streak > 0} />
         <Stat value={p.answered ? Math.round((p.correct / p.answered) * 100) + "%" : "—"} label="Right" />
         <Stat value={best || "—"} label="Best round" />
       </motion.section>
 
       <EveryoneCard userId={user?.id} />
 
-      <motion.section variants={riseIn} className={`card p-4 ${generated ? "bg-petal" : ""}`}>
-        <p className="text-[12px] font-black text-soft">Account</p>
+      <motion.section variants={riseIn} className="grid gap-2" aria-label="Account">
+        <span className="text-[12px] font-extrabold text-soft">Account</span>
         {generated && (
-          <p className="text-[13px] font-semibold mt-1">
+          <p className="card shadow-lift-sm rounded-[16px] bg-petal px-3 py-[9px] text-[13px] font-semibold text-ink">
             This name was made up for you at signup. Pick your own before anyone sees you on the leaderboard.
           </p>
         )}
         <AccountRow label="Name" value={name} action="Change" onClick={() => setSheet("name")} />
         <AccountRow label="Password" value={hasPassword ? "Set" : "Not set"} action={hasPassword ? "Change" : "Set"}
           onClick={() => setSheet("password")} />
+        <NotificationsRow />
       </motion.section>
 
-      <motion.div variants={riseIn}><NotificationsCard /></motion.div>
-
-      <motion.div variants={riseIn} className="pt-2">
+      <motion.div variants={riseIn}>
         <SignOut name={profile?.username ?? null} signOut={signOut} />
       </motion.div>
 
@@ -349,38 +365,47 @@ function GuestYou() {
   const [haveAccount, setHaveAccount] = useState(false);
   const p = useProgress();
   const name = profile?.username ?? null;
+  const { current } = rankFor(p.answered);
   return (
-    <motion.div variants={stagger(0.06)} initial="hidden" animate="show" className="space-y-4 pb-6">
+    <motion.div variants={stagger(0.06)} initial="hidden" animate="show" className="grid gap-[11px] pb-6">
       <Title />
-      <RankCard answered={p.answered}
-        line={`${p.answered.toLocaleString()} answered${p.streak > 0 ? `, ${p.streak}-day streak` : ""}`} />
+      {/* #51: the flower, your rank and what it's counted from, the badge. */}
+      <motion.section variants={riseIn} className={CARD}>
+        <div className="flex items-center gap-2.5">
+          <Sunflower state="look-right" size={58} className="shrink-0" />
+          <div className="min-w-0 flex-1">
+            <b className="block font-display font-normal text-[21px] leading-tight">{current.name}</b>
+            <small className="block text-[14px] font-semibold text-soft tabular-nums">
+              {p.answered.toLocaleString()} answered on this phone{p.streak > 0 ? `, ${p.streak}-day streak` : ""}
+            </small>
+          </div>
+          <RankBadge rank={current.key} size={52} className="shrink-0" />
+        </div>
+      </motion.section>
       {claimedAs ? (
         <motion.div variants={riseIn}><ClaimCard /></motion.div>
       ) : haveAccount ? (
-        <motion.div variants={riseIn} className="space-y-2">
+        <motion.div variants={riseIn} className="grid gap-2">
           <AuthCard start="signin"
             note={`Signing in leaves ${name ? `${name}'s` : "these"} guest games behind. To keep them, save them instead.`} />
-          <button onClick={() => setHaveAccount(false)}
-            className="block mx-auto text-[13px] font-black underline underline-offset-4 min-h-[44px]">
+          <button onClick={() => setHaveAccount(false)} className={`${LINK} text-soft mx-auto`}>
             Save my progress instead
           </button>
         </motion.div>
       ) : (
-        <motion.section variants={riseIn} className="card bg-leaf-hi p-5 space-y-3">
-          <div>
-            <p className="font-display text-[22px] leading-tight font-semibold">Keep all of it</p>
-            <p className="text-[13px] font-semibold mt-1">
+        <>
+          <motion.section variants={riseIn} className={CARD}>
+            <b className="font-display font-normal text-[20px] leading-tight">Keep all of it</b>
+            <p className="text-[14px] font-semibold text-soft">
               Kept for 30 days after you last play. Add a password to keep it for good and get on the board.
             </p>
-          </div>
-          <ClaimCard inline />
-          <button onClick={() => setHaveAccount(true)}
-            className="block mx-auto text-[13px] font-black underline underline-offset-4 min-h-[44px]">
+            <ClaimCard inline />
+          </motion.section>
+          <motion.button variants={riseIn} onClick={() => setHaveAccount(true)} className={`${LINK} text-soft mx-auto`}>
             I have an account
-          </button>
-        </motion.section>
+          </motion.button>
+        </>
       )}
-      <Ladder answered={p.answered} />
       {!claimedAs && <StartOver name={name} signOut={signOut} />}
     </motion.div>
   );
@@ -414,14 +439,15 @@ function SignOut({ name, signOut }: { name: string | null; signOut: () => Promis
   const [asking, setAsking] = useState(false);
   const [busy, setBusy] = useState(false);
   if (!asking) {
-    return <Button variant="ghost" className="w-full" onClick={() => setAsking(true)}>Sign out</Button>;
+    // Last, and small (#47): nobody needs it often, and it's never an accident.
+    return <button onClick={() => setAsking(true)} className={`${LINK} text-soft mx-auto`}>Sign out</button>;
   }
   return (
-    <div className="card p-4 space-y-3" role="alertdialog" aria-label="Sign out?">
-      <p className="text-sm font-semibold">Your games are saved. Sign back in as {name ?? "your name"}.</p>
-      <div className="flex gap-2">
-        <Button variant="ghost" className="flex-1" onClick={() => setAsking(false)} disabled={busy}>Stay</Button>
-        <Button className="flex-1" disabled={busy}
+    <div className="card shadow-lift-sm rounded-[20px] p-3.5 grid gap-2.5 text-ink" role="alertdialog" aria-label="Sign out?">
+      <p className="text-[14px] font-semibold">Your games are saved. Sign back in as {name ?? "your name"}.</p>
+      <div className="grid grid-cols-2 gap-[9px]">
+        <Button variant="ghost" onClick={() => setAsking(false)} disabled={busy}>Stay</Button>
+        <Button disabled={busy}
           onClick={async () => { setBusy(true); await signOut(); }}>
           {busy ? "Signing out…" : "Sign out"}
         </Button>
@@ -448,13 +474,13 @@ function StartOver({ name, signOut }: { name: string | null; signOut: () => Prom
     );
   }
   return (
-    <div className="card bg-petal-hi p-4 space-y-3" role="alertdialog" aria-label="Start over?">
-      <p className="text-sm font-semibold">
+    <div className="card shadow-lift-sm rounded-[20px] bg-petal-hi p-3.5 grid gap-2.5 text-ink" role="alertdialog" aria-label="Start over?">
+      <p className="text-[14px] font-semibold">
         This loses {name ? `${name}'s` : "these"} games, streak and friends for good. There's no way back.
       </p>
-      <div className="flex gap-2">
-        <Button className="flex-1" onClick={() => setAsking(false)} disabled={busy}>Keep playing</Button>
-        <Button variant="ghost" className="flex-1" disabled={busy}
+      <div className="grid grid-cols-2 gap-[9px]">
+        <Button onClick={() => setAsking(false)} disabled={busy}>Keep playing</Button>
+        <Button variant="ghost" disabled={busy}
           onClick={async () => { setBusy(true); await signOut(); }}>
           {busy ? "One moment…" : "Start over"}
         </Button>

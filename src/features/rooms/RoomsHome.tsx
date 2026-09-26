@@ -4,7 +4,7 @@ import type { Room } from "@/shared/types/db";
 import { useAuth } from "@/app/providers/AuthProvider";
 import { Sunflower } from "@/shared/brand/Sunflower";
 import { RAMPS } from "@/shared/brand/tokens";
-import { StreakPill } from "@/features/play/RoundChrome";
+import { ScreenTitle } from "@/app/layout/ScreenTitle";
 import { ROOM_GAMES } from "@/features/play/registry";
 import { rankFor } from "@/features/play/rank";
 import { FriendsPanel } from "@/features/friends/Friends";
@@ -36,12 +36,7 @@ function about(f: { total_answered?: number; last_played?: string | null }): str
   return `${rank} · ${days <= 0 ? "played today" : days === 1 ? "played yesterday" : days < 14 ? `played ${days} days ago` : "not played lately"}`;
 }
 
-const Title = ({ children }: { children: string }) => (
-  <div className="flex items-center justify-between gap-2.5 min-h-10">
-    <h1 className="font-display font-normal text-[29px] leading-none">{children}</h1>
-    <StreakPill />
-  </div>
-);
+const Title = ScreenTitle;
 
 function JoinByCode({ label = "Join with a code" }: { label?: string }) {
   const nav = useNavigate();

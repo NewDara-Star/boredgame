@@ -3,10 +3,7 @@ import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { hasLinkError } from "@/shared/lib/linkError";
 import { motion } from "framer-motion";
 import { useAuth } from "@/app/providers/AuthProvider";
-import { useProgress } from "@/features/play/useProgress";
-import { rankFor } from "@/features/play/rank";
-import { RankBadge } from "@/features/play/RankBadge";
-import { IconHome, IconPlay, IconRooms, IconRanks, IconFlame } from "./Icons";
+import { IconHome, IconPlay, IconRooms, IconRanks } from "./Icons";
 import { Wordmark } from "@/shared/ui/Wordmark";
 import { ErrorBoundary } from "@/app/ErrorBoundary";
 import { ScreenLoading } from "./ScreenLoading";
@@ -28,7 +25,7 @@ const isActive = (pathname: string, to: string, exact?: boolean) =>
   exact ? pathname === to : pathname.startsWith(to);
 
 export function Shell() {
-  const { offline, user } = useAuth();
+  const { offline } = useAuth();
   const { pathname } = useLocation();
   const nav = useNavigate();
   // A failed email link lands wherever it was sent (usually Home); its reason
@@ -36,66 +33,34 @@ export function Shell() {
   useEffect(() => {
     if (hasLinkError() && pathname !== "/you") nav("/you", { replace: true });
   }, [pathname, nav]);
-  const p = useProgress();
-  const rank = rankFor(p.answered).current;
   // A round in play hides the header and the tab bar (#16); its own X leads out.
   const focused = useFocused();
 
   return (
     <div className="min-h-full flex flex-col">
       <Sky />
-      {!focused && <header className="sticky top-0 z-30 bg-board/90 backdrop-blur shadow-lift">
+      {/* Phones have no app bar (the drawings, Daramola 26 Sep): each screen
+          carries its own title row with the streak pill, and Home the wordmark.
+          A laptop keeps a slim bar, because its tabs live there. */}
+      {!focused && <header className="hidden sm:block sticky top-0 z-30 bg-board/90 backdrop-blur shadow-lift">
         <nav className="max-w-3xl mx-auto flex items-center gap-1 px-3 h-[62px]">
-          <NavLink to="/" className="mr-1 sm:mr-3 shrink-0 grid place-items-center" aria-label="BoredGame home">
+          <NavLink to="/" className="mr-3 shrink-0 grid place-items-center" aria-label="BoredGame home">
             <Wordmark height={26} />
           </NavLink>
-
-          {/* Five labelled tabs do not fit a phone, so on small screens they move
-              to the bottom bar and the header carries status instead. */}
-          <div className="hidden sm:flex items-center gap-1">
-            {TABS.slice(1).map((t) => {
-              const active = isActive(pathname, t.to, t.exact);
-              return (
-                <NavLink key={t.to} to={t.to}
-                  className="relative px-3 py-1.5 text-sm font-bold rounded-xl shrink-0">
-                  {active && (
-                    <motion.span layoutId="tab-pill-top"
-                      className="absolute inset-0 bg-petal rounded-xl"
-                      transition={{ type: "spring", stiffness: 420, damping: 32 }} />
-                  )}
-                  <span className={`relative ${active ? "text-ink" : "text-soft"}`}>{t.label}</span>
-                </NavLink>
-              );
-            })}
-          </div>
-
-          <div className="flex-1" />
-
-          {p.streak > 0 && (
-            <motion.span
-              initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
-              className="chip flex items-center gap-1 bg-board text-ink
-                px-2.5 py-1 text-[13px] font-black tabular-nums shrink-0"
-              title={`${p.streak}-day streak`}>
-              <IconFlame />
-              {p.streak}
-            </motion.span>
-          )}
-          {/* A badge is not a call to action. Signed out, the only thing in the
-              header should be the way in — the previous build showed a rank
-              badge, which read as "you are already logged in". */}
-          {user || offline ? (
-            <NavLink to="/you" aria-label="You"
-              className="shrink-0 grid place-items-center h-11 w-11 ml-1">
-              <RankBadge rank={rank.key} size={30} />
-            </NavLink>
-          ) : (
-            <NavLink to="/you"
-              className="chip  tap shrink-0 ml-1.5 bg-board text-ink px-3 py-1.5
-                text-[12px] font-black">
-              Sign up
-            </NavLink>
-          )}
+          {TABS.slice(1).map((t) => {
+            const active = isActive(pathname, t.to, t.exact);
+            return (
+              <NavLink key={t.to} to={t.to}
+                className="relative px-3 py-1.5 text-sm font-bold rounded-xl shrink-0">
+                {active && (
+                  <motion.span layoutId="tab-pill-top"
+                    className="absolute inset-0 bg-petal rounded-xl"
+                    transition={{ type: "spring", stiffness: 420, damping: 32 }} />
+                )}
+                <span className={`relative ${active ? "text-ink" : "text-soft"}`}>{t.label}</span>
+              </NavLink>
+            );
+          })}
         </nav>
       </header>}
 
@@ -109,9 +74,9 @@ export function Shell() {
           is fixed and extends into env(safe-area-inset-bottom), so 5rem alone
           left the last ~30px of content under it on a notched iPhone. --chrome
           in index.css carries the same term, and .play-surface subtracts it. */}
-      <main className={`flex-1 max-w-3xl w-full mx-auto px-4 sm:py-6 ${focused
+      <main className={`flex-1 max-w-3xl w-full mx-auto px-[14px] sm:py-6 ${focused
         ? "pt-[calc(6px+env(safe-area-inset-top))] pb-[calc(14px+env(safe-area-inset-bottom))]"
-        : "pt-4 pb-[calc(5rem+env(safe-area-inset-bottom))]"}`}>
+        : "pt-[calc(6px+env(safe-area-inset-top))] pb-[calc(5rem+env(safe-area-inset-bottom))]"}`}>
         {/* Keyed on the path so navigating away from a broken screen clears it. */}
         <ErrorBoundary key={pathname}>
           <CarryAcross />
