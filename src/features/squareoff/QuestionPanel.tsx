@@ -40,13 +40,16 @@ export function QuestionPanel({
   const correctAnswer = answer ?? item.answer;
   return (
     <div>
-      <span className="inline-block text-[12px] font-black
-        bg-sky text-board rounded-full px-2.5 py-1">
-        {item.category} · {item.difficulty}
+      {/* #16: the question sits on its own white card, in the reading face, so
+          it holds on any sky, day or night. It was bare display type on the sky. */}
+      <span className="chip inline-block text-[12px] font-black bg-sky-hi text-ink rounded-full px-2.5 py-1">
+        {item.category} · {item.difficulty.charAt(0).toUpperCase() + item.difficulty.slice(1)}
       </span>
-      <h2 className="mt-2.5 font-display text-[22px] leading-tight font-semibold text-balance">
+      {/* A heading for screen readers, but not an <h2>: index.css sets every h2
+          in the display face at 400, and a question reads in the reading face. */}
+      <p role="heading" aria-level={2} className="card mt-2 px-4 py-3.5 text-[19px] leading-snug font-extrabold text-balance">
         {item.prompt}
-      </h2>
+      </p>
 
       <motion.div variants={stagger(0.05)} initial="hidden" animate="show" className="mt-4 grid gap-2">
         {options.map((opt, i) => {
@@ -71,7 +74,7 @@ export function QuestionPanel({
               </span>
               {revealed && isAnswer && <span className="sr-only">Correct answer: </span>}
               {revealed && isMine && !isAnswer && <span className="sr-only">Your incorrect answer: </span>}
-              <span className="text-[15px] font-bold flex-1">{opt}</span>
+              <span className="text-[16px] font-extrabold flex-1">{opt}</span>
               {tag && <span aria-hidden className="shrink-0 text-[12px] font-black bg-board/80 text-ink rounded-full px-2 py-0.5">{tag}</span>}
             </motion.button>
           );

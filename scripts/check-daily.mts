@@ -28,4 +28,6 @@ ok(/"Right" : revealed && isMine \? "You"/.test(panel), "the options say Right a
 ok(!/opacity-40/.test(panel) && /bg-board\/50 text-soft/.test(panel), "the rest step back (an opacity class never showed: the rise-in sets it inline)");
 ok(!/7 out of 10|\$\{d\.mine\.correct\} out of 10/.test(daily) && /<Board rows=\{d\.board\}/.test(daily), "done: the card first, then everyone on the board (#19; everyone, Daramola 26 Sep)");
 
+ok(/role="heading" aria-level=\{2\} className="card /.test(panel) && /bg-sky-hi text-ink/.test(panel), "the question sits on a white card, the chip is ink on pale sky (#16)");
+
 console.log(`${n} Daily assertions hold`);
