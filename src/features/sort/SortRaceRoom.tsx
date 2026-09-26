@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { useMemo } from "react";
 import type { RoomPlayer, RoomStatus } from "@/shared/types/db";
 import { serverToLocal } from "@/shared/lib/serverClock";
@@ -6,14 +7,16 @@ import { serverToLocal } from "@/shared/lib/serverClock";
 export const QUIET_MS = 45_000;
 import { Note, Dealing } from "@/shared/ui/Note";
 import {
-  Seats, AwayNotice, OverPanel, EndMatchLink, MatchOver, useMatchChrome,
+  EndMatchLink, MatchOver, useMatchChrome,
 } from "@/features/rooms/matchUi";
 import { Board, TUBES_RATIO } from "./Board";
-import { PlayBoard, PlayRow, PlaySurface } from "@/features/play/PlaySurface";
+import { PlayBoard, PlaySurface } from "@/features/play/PlaySurface";
 import { ballGlyph, sortHero } from "./card";
 import { ReplayPlayer } from "./ReplayPlayer";
 import { decodeLog, type Replay } from "./rules";
 import { useSortRoom } from "./useSortRoom";
+import { BetweenGames, NudgeButton, quietPeer, RoomBanner } from "@/features/rooms/RoomBoard";
+import { SEAT_RAMP } from "@/shared/brand/seats";
 import { StartGate } from "./StartGate";
 
 /** ms -> "12.3s", or "1:04.2" once it runs past a minute. */
@@ -37,8 +40,12 @@ function clock(ms: number): string {
  * server.
  */
 export function SortRaceRoom({
-  roomId, code, status, players, userId,
+  top, topWith, roomId, code, status, players, userId,
 }: {
+  /** the room's top bar (code, call) and its notices */
+  top?: ReactNode;
+  /** the same, with something else at its right-hand end: here, your clock (41) */
+  topWith?: (end: ReactNode) => ReactNode;
   roomId: number; code: string; status: RoomStatus;
   players: RoomPlayer[]; userId: string;
 }) {
@@ -76,7 +83,7 @@ export function SortRaceRoom({
     [w, wLog, wDone, wMs, tubes, capp, startedAt, rowMoves, par, level, winnerName, code],
   );
 
-  if (done) return <MatchOver sides={sides} myMark={r.seat ?? "x"} card={card} />;
+  if (done) return <MatchOver sides={sides} myMark={r.seat ?? "x"} card={card} roomId={roomId} />;
   if (!r.row || !r.me) return <Dealing what="the tubes" />;
 
   const them = r.seat === "x" ? names.o : names.x;
@@ -88,24 +95,33 @@ export function SortRaceRoom({
   // Only truly playing (not won, not already finished) shows the board.
   const playing = !r.won && !r.iFinished;
 
-  return (
-    <PlaySurface>
-      <PlayRow className="space-y-3">
-      <Seats
-        names={names}
-        scores={{ x: r.seat === "x" ? r.myProgress : r.theirProgress,
-                  o: r.seat === "o" ? r.myProgress : r.theirProgress }}
-        active={r.seat ?? "x"}
-        dimmed={!!r.won}
-        glyph={(m) => (m === "x" ? "tile" : "disc")} />
+  const total = r.row.colours;
+  const quiet = !r.won ? quietPeer(players, userId, now) : null;
+  const theirSeat = r.seat === "x" ? "o" : "x";
 
-      <div className="grid grid-cols-3 gap-2 text-center">
-        <Stat label="Moves" value={String(r.me.moves)} sub={`par ${r.row.par}`} />
-        <Stat label="Your time" value={clock(myMs)} sub="lower time wins" />
-        <Stat label="Tubes home" value={String(r.myProgress)}
-          sub={`${them} ${r.theirProgress}`} />
-      </div>
-      </PlayRow>
+  return (
+    <PlaySurface focus>
+      {topWith ? topWith(<b className="font-mono text-[16px] font-bold tabular-nums">{clock(myMs)}</b>) : top}
+
+      {r.won ? (
+        <RoomBanner b={{ title: r.iWon ? "You were faster" : `${them} was faster`, tone: r.iWon ? "petal" : "white",
+          flower: r.iWon ? "bloom" : "bored",
+          sub: `You ${r.myMs != null ? clock(r.myMs) : "—"} · ${them} ${r.theirMs != null ? clock(r.theirMs) : "gave up"}` }} />
+      ) : quiet && !r.theyFinished ? (
+        <RoomBanner b={{ title: `${them}'s gone quiet`, sub: "Their phone may be locked", tone: "white", flower: "look-right", end: <NudgeButton roomId={roomId} /> }} />
+      ) : (
+        // Their tubes as a bar of how many are sorted (41): enough to feel the
+        // pressure without watching their board.
+        <div className="card shrink-0 flex items-center gap-2.5 rounded-[20px] bg-board px-3 py-2.5 text-ink">
+          <SeatDot mark={theirSeat} name={them} />
+          <div className="min-w-0 flex-1">
+            <b className="block text-[14px]">{them} · {r.theyFinished ? `done in ${r.theirMs != null ? clock(r.theirMs) : "—"}` : `${r.theirProgress} of ${total} tubes`}</b>
+            <div className="mt-1 h-2 rounded-full bg-mist overflow-hidden">
+              <i className="block h-full rounded-full bg-sky" style={{ width: `${Math.min(1, r.theirProgress / Math.max(1, total)) * 100}%` }} />
+            </div>
+          </div>
+        </div>
+      )}
 
       {playing && (() => {
         const me = r.me;
@@ -124,104 +140,64 @@ export function SortRaceRoom({
         );
       })()}
 
-      <PlayRow className="space-y-3">
-      <p className="text-center text-[15px] font-bold text-soft">
-        {r.won
-          ? (r.iWon ? "You were faster." : `${them} was faster.`)
-          : r.iFinished
-            ? (r.finishing ? "Posting your finish…"
-               : `Done in ${clock(myMs)} — waiting for ${them}.`)
-            : r.theyFinished
-              ? `${them} finished in ${r.theirMs != null ? clock(r.theirMs) : "—"}. Beat it or give up.`
-              : !r.revealed ? "Tap Start when you're ready."
-              : r.selected === null ? "Tap a tube to lift its top ball."
-              : "Now tap where it goes."}
-      </p>
+      {!playing && !r.won && (
+        <p className="flex-1 grid place-items-center text-center text-[15px] font-bold text-soft">
+          {r.finishing ? "Posting your finish…" : `Done in ${clock(myMs)}. Waiting for ${them}.`}
+        </p>
+      )}
 
       <Note>{r.error}</Note>
       {/* A dead phone used to leave the finisher waiting for ever (talk item 10). */}
       {(() => {
         if (r.won || !r.iFinished || r.finishing || r.theyFinished) return null;
         const other = players.find((p) => p.user_id !== userId);
-        const quiet = !other || now - serverToLocal(other.last_seen) > QUIET_MS;
-        if (!quiet) return null;
+        const gone = !other || now - serverToLocal(other.last_seen) > QUIET_MS;
+        if (!gone) return null;
         return (
-          <div className="card bg-petal p-4 space-y-3 text-center">
-            <p className="text-sm font-bold">{them}'s phone has gone quiet.</p>
-            <button onClick={() => void r.walkover()}
-              className="cut tap w-full py-3.5 font-display text-lg font-semibold cut-leaf">
-              Take the win
-            </button>
-          </div>
+          <button onClick={() => void r.walkover()}
+            className="cut tap cut-leaf shrink-0 min-h-[52px] font-display text-[19px]">
+            {them}'s phone has gone quiet. Take the win
+          </button>
         );
       })()}
       {r.finishDropped && !r.finishing && (
-        <button onClick={r.retryFinish}
-          className="cut tap w-full py-3.5 font-display text-lg font-semibold cut-petal">
+        <button onClick={r.retryFinish} className="cut tap cut-petal shrink-0 min-h-[52px] font-display text-[19px]">
           Send my finish again
         </button>
       )}
 
       {playing && (
-        <div className="flex items-center gap-3">
-          {/* Their tubes began as yours: not shown until yours are (talk item 13). */}
-          {r.theirTubes && r.revealed && (
-            <div className="card bg-mist p-2 shrink-0" style={{ width: 150 }}>
-              <p className="text-[12px] font-black text-soft text-center mb-1">
-                {them} · {r.theirMoves}
-              </p>
-              <Board tubes={r.theirTubes} cap={r.row.cap} size="mini" />
-            </div>
-          )}
+        <div className="shrink-0 grid grid-cols-2 items-center gap-[9px]">
           <button onClick={r.takeBack} disabled={r.me.history.length === 0}
-            className="card tap flex-1 py-3 font-display font-semibold bg-board">
-            Take it back
+            className="cut tap cut-board min-h-[44px] font-display text-[17px] disabled:opacity-50">
+            Take back
+          </button>
+          <button onClick={() => void r.concede()}
+            className="min-h-[44px] text-[13px] font-extrabold text-soft underline underline-offset-4">
+            Give up
           </button>
         </div>
       )}
 
-      {playing && (
-        <button onClick={() => void r.concede()}
-          className="block mx-auto text-[13px] font-black
-            text-ember underline underline-offset-4 pt-1">
-          Give up this race
-        </button>
-      )}
-
-      <AwayNotice players={players} userId={userId} now={now} />
-
-      {!r.won && <EndMatchLink onQuit={() => void r.quit()} />}
-      </PlayRow>
-
       {r.won && (
         <>
-          <PlayRow>
-            <p className="text-center text-[13px] font-bold text-soft">
-              You {r.myMs != null ? clock(r.myMs) : "—"} · {them} {r.theirMs != null ? clock(r.theirMs) : "gave up"}
-            </p>
-          </PlayRow>
           {film && <div className="flex-1 min-h-0 overflow-y-auto"><ReplayPlayer replay={film} /></div>}
-          <PlayRow>
-          <OverPanel
-            headline={r.iWon ? "You win" : `${them} wins`}
-            mine={r.iWon}
-            draw={false}
-            onRematch={() => void r.rematch()}
-            onQuit={() => void r.quit()}
-            onChangeGame={() => void r.changeGame()} />
-          </PlayRow>
+          <BetweenGames onRematch={() => void r.rematch()} onQuit={() => void r.quit()} onChangeGame={() => void r.changeGame()} />
         </>
       )}
+      {!r.won && !playing && <EndMatchLink onQuit={() => void r.quit()} />}
     </PlaySurface>
   );
 }
 
-function Stat({ label, value, sub }: { label: string; value: string; sub: string }) {
+/** .av, small: a seat's colour and first letter. */
+function SeatDot({ mark, name }: { mark: "x" | "o"; name: string }) {
+  const c = SEAT_RAMP[mark];
   return (
-    <div className="card bg-board px-2 py-2.5">
-      <p className="text-[12px] font-black text-soft">{label}</p>
-      <p className="font-display text-2xl font-semibold leading-none mt-1 tabular-nums">{value}</p>
-      <p className="text-[12px] font-bold text-soft mt-1">{sub}</p>
-    </div>
+    <span aria-hidden className="shrink-0 grid place-items-center w-[26px] h-[26px] rounded-full font-display text-[12px] text-ink"
+      style={{ background: `radial-gradient(circle at 35% 30%, ${c.hi}, ${c.base} 60%)`, border: "2px solid var(--color-ink-day)", boxShadow: "0 2px 0 var(--color-ink-day)" }}>
+      {(name.trim()[0] ?? "?").toUpperCase()}
+    </span>
   );
 }
+

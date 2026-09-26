@@ -1,19 +1,17 @@
+import type { ReactNode } from "react";
 import { BankTrouble } from "@/features/rooms/BankTrouble";
 import { ownersFor } from "@/features/play/board";
 import { useEffect, useState } from "react";
+import { BoardRoomBody } from "@/features/rooms/RoomBoard";
 import type { RoomPlayer, RoomStatus } from "@/shared/types/db";
-import { challengeName, isShot, levelOf, SHOT_MS, type Challenge } from "@/features/challenge/kinds";
-import { RoomShot } from "@/features/challenge/RoomShot";
-import { Note, Dealing } from "@/shared/ui/Note";
-import { TurnPanel } from "@/features/rooms/TurnPanel";
+import { isShot, SHOT_MS, type Challenge } from "@/features/challenge/kinds";
+import { Dealing } from "@/shared/ui/Note";
 import { Board } from "./Board";
-import { PlayBoard, PlayRow, PlaySurface } from "@/features/play/PlaySurface";
 import { gridHero } from "./card";
 import { describe, stallWriter, squareName, type Mark } from "./rules";
 import { useTttRoom } from "./useTttRoom";
 import { askMs } from "@/features/play/clock";
 import {
-  Seats, AwayNotice, OverPanel, EndMatchLink,
   MatchOver, useMatchChrome, useStallRescue,
 } from "@/features/rooms/matchUi";
 
@@ -25,8 +23,10 @@ const GRACE_MS = 6000;
 const REVEAL_MS = 4500;
 
 export function SquareOffRoom({
-  roomId, code, status, categories, difficulty, challenge, players, userId,
+  top, roomId, code, status, categories, difficulty, challenge, players, userId,
 }: {
+  /** the room's top bar (code, call) and its notices */
+  top?: ReactNode;
   roomId: number; code: string; status: RoomStatus;
   categories: string[] | null; difficulty: string[] | null;
   /** what a move costs (Play it with): a question, a shot, or Mix */
@@ -38,7 +38,6 @@ export function SquareOffRoom({
 
   const g = t.game;
   const asking = g?.phase === "asking";
-  const mine = asking && g.answerer === t.myMark;
 
   // One clock, derived from when the question was written, so both screens agree.
   // It runs outside a question too, or the "they have gone" notice never appears
@@ -77,7 +76,7 @@ export function SquareOffRoom({
 
   // Quitting ends the session, not the game — the tally survives the rematches
   // that came before it, which is the only reason to keep score at all.
-  if (done) return <MatchOver sides={sides} myMark={t.myMark} card={card} />;
+  if (done) return <MatchOver sides={sides} myMark={t.myMark} card={card} roomId={roomId} />;
 
   if (!t.ready) return t.bankTrouble
     ? <BankTrouble message={t.bankTrouble} onRetry={t.retryBank} />
@@ -85,91 +84,28 @@ export function SquareOffRoom({
 
   if (!g) return <Dealing what="the board" />;
 
-  const other: Mark = (g.answerer ?? g.turn) === "x" ? "o" : "x";
-  const revealed = g.phase === "revealed" || g.phase === "over";
-  // who owes the shot, and each seat's shot level where shots are in play
+  // who owes the answer or the shot
   const shooter: Mark = g.answerer ?? g.last?.by ?? g.turn;
-  const shots = challenge !== "trivia" && challenge !== "none";
-  const tags = shots ? { x: levelOf(t.play, "x") === "easy" ? "Easy shots" : null, o: levelOf(t.play, "o") === "easy" ? "Easy shots" : null } : undefined;
 
   return (
-    <PlaySurface>
-      <PlayRow>
-        <Seats
-          names={names}
-          scores={{ x: scoreOf("x"), o: scoreOf("o") }}
-          tags={tags}
-          active={g.phase === "asking" ? g.answerer : g.turn}
-          dimmed={g.phase === "over"}
-          glyph={(m: Mark) => (m === "x" ? "cross" : "ring")} />
-      </PlayRow>
-
-      <PlayBoard min={78}>
-        {(width) => (
-          <Board owners={ownersFor(names, t.myMark)} board={g.board} target={g.target} line={g.line} width={width}
+    <BoardRoomBody top={top} roomId={roomId} userId={userId} players={players} now={now}
+      names={names} scores={{ x: scoreOf("x"), o: scoreOf("o") }}
+      game={g} myMark={t.myMark} answerer={shooter}
+      plain={false} challenge={challenge} kind={t.kind} play={t.play}
+      unit="square" spot={(i) => (i === null ? "" : squareName(i))}
+      said={describe(g, names, t.myMark)} youAre={t.myMark === "o" ? "You're rings" : "You're crosses"}
+      ratio={1}
+      board={(width) => (
+        <Board owners={ownersFor(names, t.myMark)} board={g.board} target={g.target} line={g.line} width={width}
             canPick={g.phase === "picking" && g.turn === t.myMark}
-            compact={g.phase === "asking" || g.phase === "revealed"}
             onPick={t.choose} />
-        )}
-      </PlayBoard>
-
-      <PlayRow className="space-y-3">
-        <p className="text-center text-[15px] font-bold text-soft">
-          {describe(g, names, t.myMark)}
-          {/* Mix names the turn's challenge before the pick, so it's never a surprise. */}
-          {challenge === "mix" && g.phase === "picking" && t.kind && ` This one's ${challengeName(t.kind).toLowerCase()}.`}
-        </p>
-
-        {/* A room that cannot serve a question is broken, and saying so beats a
-            board that never advances. */}
-        <Note>{t.error}</Note>
-
-        <AwayNotice players={players} userId={userId} now={now} />
-
-        {/* Only while the board is yours to look at: with a question up the
-            four options are the screen, and a link under them that ends the
-            match is both a wrong tap waiting to happen and 32px of a 534px
-            phone. */}
-        {g.phase === "picking" && <EndMatchLink onQuit={() => void t.quit()} />}
-      </PlayRow>
-
-      {g.phase === "over" ? (
-        <PlayRow>
-        <OverPanel
-          headline={g.winner === "draw" ? "Draw"
-            : g.winner === t.myMark ? "You win" : `${names[g.winner as Mark]} wins`}
-          mine={g.winner === t.myMark}
-          draw={g.winner === "draw"}
-          onRematch={() => void t.rematch()}
-          onQuit={() => void t.quit()}
-          onChangeGame={() => void t.changeGame()} />
-        </PlayRow>
-      ) : !shotTurn && (g.phase === "asking" || g.phase === "revealed") ? (
-        <PlayRow>
-        <TurnPanel
-          challenge="trivia"
-          item={t.item} options={t.item?.choices ?? []}
-          chosen={chosen} setChosen={setChosen}
-          onAnswer={(correct: boolean, given?: string) => t.submit(correct, given)}
-          asking={asking} revealed={revealed} mine={!!mine}
-          fraction={Math.max(0, left / ask)} askedAt={t.askedSeed}
-          waitingOn={names[other]}
-          advanceOwner={g.phase === "revealed" && g.last ? g.last.by : null}
-          stall={stall} myMark={t.myMark}
-          onAdvanceNow={t.advanceNow} onForceAdvance={t.forceAdvance}
-          nextLabel="Next" />
-        </PlayRow>
-      ) : null}
-
-      {/* A shot takes the whole phone on both screens: the thrower's sheet, and
-          the same scene on the other phone, which plays the throw back. */}
-      {shotTurn && t.kind && isShot(t.kind) && (
-        <RoomShot active={g.phase === "asking"} kind={t.kind} seed={t.askedSeed}
-          level={levelOf(t.play, shooter)} by={shooter} myMark={t.myMark} names={names}
-          board={g.board} target={g.target} spot={(i) => (i === null ? "" : squareName(i))}
-          askedAt={t.askedAt} now={now} flight={t.shot}
-          onSettle={(hit, rec) => t.submitShot(hit, rec)} onFly={setFlying} />
       )}
-    </PlaySurface>
+      item={t.item} chosen={chosen} setChosen={setChosen}
+      fraction={Math.max(0, left / ask)} askedAt={t.askedAt} askedSeed={t.askedSeed}
+      stall={stall} error={t.error} shot={t.shot}
+      onAnswer={(correct, given) => t.submit(correct, given)}
+      onShot={(hit, rec) => t.submitShot(hit, rec)} onFly={setFlying}
+      onAdvanceNow={t.advanceNow} onForceAdvance={t.forceAdvance}
+      onRematch={() => void t.rematch()} onQuit={() => void t.quit()} onChangeGame={() => void t.changeGame()} />
   );
 }

@@ -44,7 +44,11 @@ function InviteCards({ invites, onJoin, onDismiss }: {
 }
 
 /** Head-to-head panel: invites, your people (one tap to play), and your link. */
-export function FriendsPanel() {
+export function FriendsPanel({ manage = false }: {
+  /** Under Rooms' "Add a friend" (34): adding, removing and notifications only.
+      The people and their Play buttons, and invites, are on Rooms itself. */
+  manage?: boolean;
+} = {}) {
   const { user, profile, isGuest, claimedAs } = useAuth();
   const uname = profile?.username ?? user?.email?.split("@")[0] ?? "player";
   const { code, friends, invites, error, setError, addFriend, invite, respond, removeFriend, newCode } = useFriends();
@@ -93,7 +97,7 @@ export function FriendsPanel() {
   return (
     <div className="space-y-4">
       <NotificationsCard />
-      <InviteCards invites={invites} onJoin={join} onDismiss={dismiss} />
+      {!manage && <InviteCards invites={invites} onJoin={join} onDismiss={dismiss} />}
 
       {friends.length > 0 && (
         <div className="space-y-2">
@@ -120,10 +124,12 @@ export function FriendsPanel() {
                 className="text-[12px] font-black text-ink/50 px-2 min-h-[44px]">
                 Remove
               </button>
-              <button onClick={() => void play(f.id, f.username)} disabled={busy}
-                className="cut tap cut-ink text-ground px-4 min-h-[44px] inline-flex items-center font-display font-semibold">
-                {pendingFrom(f.id) ? "Join" : "Play"}
-              </button>
+              {!manage && (
+                <button onClick={() => void play(f.id, f.username)} disabled={busy}
+                  className="cut tap cut-ink text-ground px-4 min-h-[44px] inline-flex items-center font-display font-semibold">
+                  {pendingFrom(f.id) ? "Join" : "Play"}
+                </button>
+              )}
             </div>
           ))}
         </div>

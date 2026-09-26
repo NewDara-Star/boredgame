@@ -1,5 +1,8 @@
 /**
- * "X wants to play" -> a push on their phone.
+ * "X wants to play" -> a push on their phone. And, with kind "nudge", "X nudged
+ * you. It's your move." to the other player in a room whose phone has gone
+ * quiet (drawing 39, Daramola 26 Sep): claim_nudge checks the room and holds
+ * the once-a-minute limit, as the caller.
  *
  * Called by the client right after invite_friend succeeds. The caller must
  * actually hold a pending invite from themselves to the target for this room --
@@ -64,19 +67,32 @@ Deno.serve(async (req: Request) => {
   const me = who?.user;
   if (!me) return json({ error: "not signed in" }, 401);
 
-  let body: { room?: number; to?: string };
+  let body: { room?: number; to?: string; kind?: string };
   try { body = await req.json(); } catch { return json({ error: "bad body" }, 400); }
-  const room = Number(body.room), to = String(body.to ?? "");
-  if (!Number.isFinite(room) || !to) return json({ error: "room and to are required" }, 400);
-
-  // Gate: you can only notify someone you actually have a pending invite out to.
-  const { data: inv } = await asUser.from("game_invites")
-    .select("room_code")
-    .eq("room_id", room).eq("from_user", me.id).eq("to_user", to).eq("status", "pending")
-    .maybeSingle();
-  if (!inv) return json({ error: "no pending invite to that person" }, 403);
+  const room = Number(body.room), nudge = body.kind === "nudge";
+  let to = String(body.to ?? "");
+  if (!Number.isFinite(room) || (!to && !nudge)) return json({ error: "room and to are required" }, 400);
 
   const admin = createClient(URL_, SERVICE, { auth: { persistSession: false } });
+  let roomCode: string;
+  if (nudge) {
+    // Gate: you're in the room, it's playing, and you haven't nudged in a minute.
+    const { data: them, error } = await asUser.rpc("claim_nudge", { p_room: room });
+    if (error) return json({ error: error.message }, 403);
+    if (!them) return json({ sent: 0, reason: "too soon" });
+    to = String(them);
+    const { data: r } = await admin.from("rooms").select("code").eq("id", room).maybeSingle();
+    roomCode = r?.code ?? "";
+  } else {
+    // Gate: you can only notify someone you actually have a pending invite out to.
+    const { data: inv } = await asUser.from("game_invites")
+      .select("room_code")
+      .eq("room_id", room).eq("from_user", me.id).eq("to_user", to).eq("status", "pending")
+      .maybeSingle();
+    if (!inv) return json({ error: "no pending invite to that person" }, 403);
+    roomCode = inv.room_code;
+  }
+
   const [prof, subsRes, secretsRes] = await Promise.all([
     admin.from("profiles").select("username").eq("id", me.id).maybeSingle(),
     admin.from("push_subscriptions").select("endpoint, p256dh, auth").eq("user_id", to),
@@ -94,9 +110,10 @@ Deno.serve(async (req: Request) => {
 
   const payload = JSON.stringify({
     title: "BoredGame",
-    body: `${prof.data?.username ?? "A friend"} wants to play`,
-    url: `/rooms/${inv.room_code}`,
-    tag: `invite-${room}`,
+    body: nudge ? `${prof.data?.username ?? "Your friend"} nudged you. It's your move.`
+      : `${prof.data?.username ?? "A friend"} wants to play`,
+    url: `/rooms/${roomCode}`,
+    tag: `${nudge ? "nudge" : "invite"}-${room}`,
   });
 
   let sent = 0;

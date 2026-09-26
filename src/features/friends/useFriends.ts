@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/shared/lib/supabase";
 import { fire } from "@/shared/lib/fire";
 import { useAuth } from "@/app/providers/AuthProvider";
@@ -16,7 +16,9 @@ export async function whoseCode(raw: string): Promise<CodeOwner | null | "unknow
   return (data as CodeOwner | null) ?? null;
 }
 
-export interface Friend { id: string; username: string; avatar: string | null; }
+export interface Friend { id: string; username: string; avatar: string | null;
+  /** for "Skilled · played yesterday" on Rooms (34) */
+  total_answered?: number; last_played?: string | null; }
 export interface Invite {
   id: number; room_id: number; room_code: string;
   from_id: string; from_name: string; game: string; mode: string;
@@ -34,11 +36,12 @@ export function useFriends() {
   const [friends, setFriends] = useState<Friend[]>([]);
   const [invites, setInvites] = useState<Invite[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const instance = useRef(Math.random().toString(36).slice(2, 8));
 
   const loadFriends = useCallback(async () => {
     if (!supabase || !user) { setFriends([]); return; }
     const { data } = await supabase.from("friendships")
-      .select("friend:profiles!friend_id(id, username, avatar)")
+      .select("friend:profiles!friend_id(id, username, avatar, total_answered, last_played)")
       .eq("user_id", user.id);
     // PostgREST types a to-one embed as an array; it is really 0-or-1 rows.
     setFriends(((data ?? []) as unknown as { friend: Friend | null }[])
@@ -78,7 +81,10 @@ export function useFriends() {
   // Live: a new friend or a new invite lights up without a refresh.
   useEffect(() => {
     if (!supabase || !user) return;
-    const ch = supabase.channel(`friends:${user.id}`)
+    // One channel per use of this hook: supabase-js hands back the SAME channel
+    // for the same name, and adding listeners to one already subscribed throws.
+    // Rooms uses it twice at once (the list and "Add a friend").
+    const ch = supabase.channel(`friends:${user.id}:${instance.current}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "friendships", filter: `user_id=eq.${user.id}` }, () => void loadFriends())
       .on("postgres_changes", { event: "*", schema: "public", table: "game_invites", filter: `to_user=eq.${user.id}` }, () => void loadInvites())
       .subscribe();

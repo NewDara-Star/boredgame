@@ -226,8 +226,9 @@ ok(filings >= 1, `found ${filings} record_round calls — the scan is broken`);
 // ---- 11. the race (talk item 10) ---------------------------------------------
 {
   const rd = (p: string) => { try { return readFileSync(join(root, p), "utf8"); } catch { return ""; } };
-  const page = rd("src/features/rooms/RoomsPage.tsx"), sort = rd("src/features/sort/SortRaceRoom.tsx");
-  ok(/if \(v\?\.reason === "out"\) setOutOf\(id\)/.test(page) && /disabled=\{picked !== null \|\| out\}/.test(page),
+  // the race moved out of RoomsPage into its own screen (40) in the rooms rebuild
+  const page = rd("src/features/rooms/RaceRoom.tsx"), sort = rd("src/features/sort/SortRaceRoom.tsx");
+  ok(/if \(v\?\.reason === "out"\) setOutOf\(id\)/.test(page) && /locked=\{picked !== null \|\| out \|\| over\}/.test(page),
      "a wrong multiple-choice pick puts you out of the round on screen");
   ok(/const ended = !!round && !won && !!round\.ended_at/.test(page) && /Nobody got it/.test(page), "a round that ends unanswered shows the answer and moves on");
   ok(/canReveal/.test(page) && /revealRound\(\)/.test(page), "either player can show the answer 20 seconds in");
@@ -245,7 +246,8 @@ ok(filings >= 1, `found ${filings} record_round calls — the scan is broken`);
   ok(/startedAt === null\) return;\s+\/\/ hidden until Start/.test(rd("src/features/sort/useSortSolo.ts"))
      && /startedRef\.current === null\) return;\s+\/\/ hidden until Start/.test(rd("src/features/sort/useSortRoom.ts")),
      "no move before the tubes appear, so the clock can't be dodged");
-  ok(/r\.theirTubes && r\.revealed/.test(rd("src/features/sort/SortRaceRoom.tsx")), "the other player's tubes stay hidden too");
+  // 41: their tubes are a bar of how many are sorted, never their board
+  ok(!/r\.theirTubes/.test(rd("src/features/sort/SortRaceRoom.tsx")) && /r\.theirProgress \/ Math\.max\(1, total\)/.test(rd("src/features/sort/SortRaceRoom.tsx")), "the other player's tubes stay hidden: only how many they've sorted shows");
   ok(/order by s\.day, s\.level, s\.user_id, s\.finished_at asc/.test(rd("supabase/schema.sql")), "today's board is each player's first finish");
 }
 

@@ -30,13 +30,17 @@ const read = (p: string) => readFileSync(new URL("../" + p, import.meta.url), "u
 /** every screen where a board or a puzzle is played */
 const PLAY_SCREENS = [
   "src/features/play/BoardSoloPage.tsx",
-  "src/features/squareoff/SquareOffRoom.tsx",
-  "src/features/tictactoe/TicTacToeRoom.tsx",
-  "src/features/connect4/Connect4Room.tsx",
+  // the room boards share one body since the rooms rebuild (38)
+  "src/features/rooms/RoomBoard.tsx",
   "src/features/memory/MemoryRoom.tsx",
   "src/features/sort/SortRaceRoom.tsx",
   "src/features/sort/SortSoloPage.tsx",
+  "src/features/rooms/RaceRoom.tsx",
 ];
+for (const p of ["src/features/squareoff/SquareOffRoom.tsx", "src/features/tictactoe/TicTacToeRoom.tsx", "src/features/connect4/Connect4Room.tsx"]) {
+  const src = read(p);
+  ok(/<BoardRoomBody /.test(src) && /width=\{width\}/.test(src), `${p}: is drawn by the shared room body, the board at the measured width`);
+}
 
 for (const p of PLAY_SCREENS) {
   const src = read(p);
@@ -45,7 +49,7 @@ for (const p of PLAY_SCREENS) {
   // A board inside a play surface must be told how wide it may be. Without it
   // the board sizes itself off the width of the phone and pushes the control
   // off the bottom — the exact bug the survey found.
-  ok(/width=\{width(\s*-\s*\d+)?\}|\bwidth,/.test(src), `${p}: draws the board at the measured width`);
+  ok(/width=\{width(\s*-\s*\d+)?\}|\bwidth,|\.board\(width\)/.test(src), `${p}: draws the board at the measured width`);
 }
 
 // The surface subtracts the app's own chrome. If those numbers stop matching
@@ -110,7 +114,7 @@ for (const p of PLAY_SCREENS) {
 // your pick lights on its own before right or wrong shows. A new screen that
 // renders options without it would reveal instantly again.
 for (const f of ["src/features/trivia/TriviaGame.tsx", "src/features/rooms/TurnPanel.tsx",
-                 "src/features/daily/useDailyPlay.ts", "src/features/rooms/RoomsPage.tsx"]) {
+                 "src/features/daily/useDailyPlay.ts", "src/features/rooms/RaceRoom.tsx"]) {
   const src = read(f);
   ok(/from "@\/features\/play\/lockIn"/.test(src) && /LOCK_MS|useLockIn/.test(src), `${f} locks a tapped option in before the verdict`);
 }
@@ -137,10 +141,10 @@ for (const f of ["src/features/trivia/TriviaGame.tsx", "src/features/rooms/TurnP
 // keyboard opened by itself over the picture on every new one.
 {
   const rd = (f: string) => { try { return readFileSync(new URL(`../src/${f}`, import.meta.url), "utf8"); } catch { return ""; } };
-  const solo = rd("features/picto/PictoGame.tsx"), race = rd("features/rooms/RoomsPage.tsx");
+  const solo = rd("features/picto/PictoGame.tsx"), race = rd("features/rooms/RaceRoom.tsx");
   const quiet = (src: string) => /autoCorrect="off"/.test(src) && /spellCheck=\{false\}/.test(src) && /autoCapitalize="none"/.test(src) && /enterKeyHint="go"/.test(src);
   ok(quiet(solo), "solo Picto's box: no autocorrect, spellcheck or capital, and Go on the keyboard");
-  ok(quiet(race.slice(race.indexOf('placeholder="Answer first to win the round"') - 200)), "the race's box: the same");
+  ok(quiet(race.slice(race.indexOf('aria-label="Your answer"'))), "the race's box: the same");
   ok(!/\.focus\(\)/.test(solo), "solo Picto doesn't open the keyboard by itself");
   ok(/useSeenHeight\(\)/.test(solo) && /visualViewport/.test(rd("shared/lib/useSeenHeight.ts")), "the picture shares the screen with the keyboard");
 }

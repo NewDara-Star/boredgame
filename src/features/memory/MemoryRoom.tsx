@@ -1,12 +1,11 @@
+import type { ReactNode } from "react";
 import { ownersFor } from "@/features/play/board";
 import type { Challenge, RoomPlayer, RoomStatus } from "@/shared/types/db";
 import { Note, Dealing } from "@/shared/ui/Note";
-import {
-  Seats, AwayNotice, OverPanel, EndMatchLink,
-  MatchOver, useMatchChrome, useStallRescue,
-} from "@/features/rooms/matchUi";
+import { EndMatchLink, MatchOver, useMatchChrome, useStallRescue } from "@/features/rooms/matchUi";
+import { BetweenGames, NudgeButton, quietPeer, RoomBanner, RoomSeatRow, type BannerProps } from "@/features/rooms/RoomBoard";
 import { Board } from "./Board";
-import { PlayBoard, PlayRow, PlaySurface } from "@/features/play/PlaySurface";
+import { PlayBoard, PlaySurface } from "@/features/play/PlaySurface";
 import { memoryHero } from "./card";
 import { describe, scoreOf, stallWriter, type Mark } from "./rules";
 import { useMemoryRoom } from "./useMemoryRoom";
@@ -18,8 +17,10 @@ const GRACE_MS = 6000;
     (MEMORY_REVEAL_MS, 2.3 s) or this races the timer it exists to back up. */
 const REVEAL_MS = 4500;
 export function MemoryRoom({
-  roomId, code, status, players, userId,
+  top, roomId, code, status, players, userId,
 }: {
+  /** the room's top bar (code, call) and its notices */
+  top?: ReactNode;
   roomId: number; code: string; status: RoomStatus;
   challenge?: Challenge;
   players: RoomPlayer[]; userId: string;
@@ -47,54 +48,43 @@ export function MemoryRoom({
     : null;
   useStallRescue(stall, t.myMark, t.askedAt, true, t);
 
-  if (done) return <MatchOver sides={sides} myMark={t.myMark} card={card} />;
+  if (done) return <MatchOver sides={sides} myMark={t.myMark} card={card} roomId={roomId} />;
   if (!g) return <Dealing what="the tiles" />;
 
   const mine = g.turn === t.myMark;
+  const me: Mark = t.myMark ?? "x", them: Mark = me === "x" ? "o" : "x";
+  const pairs = { x: scoreOf(g, "x"), o: scoreOf(g, "o") };
+  const quiet = g.phase !== "over" && !mine ? quietPeer(players, userId, now) : null;
+  const said = describe(g, names, t.myMark);
+  const tally = <b className="font-mono font-bold text-[24px] shrink-0">{pairs[me]}–{pairs[them]}</b>;
+  const banner: BannerProps = g.phase === "over"
+    ? (g.winner === me ? { title: "You win this one", tone: "petal", flower: "bloom", end: tally }
+      : g.winner === them ? { title: `${names[them]} wins this one`, tone: "white", flower: "bored", end: tally }
+      : { title: "All square", tone: "white", flower: "awake", end: tally })
+    : quiet ? { title: `${names[them]}'s gone quiet`, sub: "Their phone may be locked", tone: "white", flower: "look-right", end: <NudgeButton roomId={roomId} /> }
+    : mine ? { title: "Your move", sub: said, tone: "petal", flower: "awake" }
+    : { title: `${names[them]}'s move`, sub: said, tone: "white", flower: "look-right" };
 
   return (
-    <PlaySurface>
-      <PlayRow>
-        <Seats
-          names={names}
-          scores={{ x: scoreOf(g, "x"), o: scoreOf(g, "o") }}
-          active={g.turn}
-          dimmed={g.phase === "over"}
-          glyph={(m: Mark) => (m === "x" ? "tile" : "disc")} />
-      </PlayRow>
-
-      <PlayBoard min={78}>
+    <PlaySurface focus>
+      {top}
+      <RoomBanner b={banner} />
+      <PlayBoard min={78} top reserve={g.phase === "over" ? 69 : 113}>
         {(width) => (
-          <Board owners={ownersFor(names, t.myMark)} game={g} width={width}
-            canFlip={mine && (g.phase === "picking" || g.phase === "asking")}
-            onFlip={t.choose} />
+          <>
+            <Board owners={ownersFor(names, t.myMark)} game={g} width={width}
+              canFlip={mine && (g.phase === "picking" || g.phase === "asking")}
+              onFlip={t.choose} />
+            <div className="w-full">
+              <RoomSeatRow me={t.myMark} names={names} scores={pairs} active={g.phase === "over" ? null : g.turn}
+                quiet={!!quiet} counting="pairs" />
+            </div>
+            {g.phase !== "over" && <EndMatchLink onQuit={() => void t.quit()} />}
+          </>
         )}
       </PlayBoard>
-
-      <PlayRow className="space-y-3">
-        <p className="text-center text-[15px] font-bold text-soft">
-          {describe(g, names, t.myMark)}
-        </p>
-
-        <Note>{t.error}</Note>
-
-        <AwayNotice players={players} userId={userId} now={now} />
-
-        {g.phase !== "over" && <EndMatchLink onQuit={() => void t.quit()} />}
-      </PlayRow>
-
-      {g.phase === "over" && (
-        <PlayRow>
-        <OverPanel
-          headline={g.winner === "draw" ? "All square"
-            : g.winner === t.myMark ? "You win" : `${names[g.winner as Mark]} wins`}
-          mine={g.winner === t.myMark}
-          draw={g.winner === "draw"}
-          onRematch={() => void t.rematch()}
-          onQuit={() => void t.quit()}
-          onChangeGame={() => void t.changeGame()} />
-        </PlayRow>
-      )}
+      <Note>{t.error}</Note>
+      {g.phase === "over" && <BetweenGames onRematch={() => void t.rematch()} onQuit={() => void t.quit()} onChangeGame={() => void t.changeGame()} />}
     </PlaySurface>
   );
 }

@@ -1,13 +1,21 @@
 import { motion } from "framer-motion";
 import type { Room, RoomPlayer } from "@/shared/types/db";
-import { stagger, riseIn, SPRING } from "@/shared/ui/motion";
-import { Avatar } from "@/shared/ui/Avatar";
+import { stagger, riseIn } from "@/shared/ui/motion";
+import { RoomSeats } from "./RoomScreens";
 
 import { ROOM_GAMES } from "@/features/play/registry";
 import { LEVELS, type Level } from "@/features/play/scope";
 import { CHALLENGES, roomSetup, roomWith, type Challenge } from "@/features/challenge/kinds";
 
 interface Tile { slug: string; name: string; bank: boolean; on: (r: Room) => boolean }
+
+/** .cats span: a white pill, gold when on; 44px to tap. */
+const chip = (label: string, on: boolean, onClick: () => void, disabled = false) => (
+  <button key={label} aria-pressed={on} disabled={disabled} onClick={onClick}
+    className="min-h-[44px] -my-[7px] grid place-items-center disabled:opacity-40">
+    <span className={`card rounded-full px-[11px] py-[5px] text-[13px] font-extrabold ${on ? "bg-petal" : "bg-board"}`}>{label}</span>
+  </button>
+);
 /** The room's games, as tiles (drawing 36b). */
 const TILES: Tile[] = [
   { slug: "tictactoe", name: "Tic Tac Toe", bank: false, on: (r) => r.mode === "tictactoe" || r.mode === "squareoff" },
@@ -45,10 +53,6 @@ export function Lobby({
   const me = players.find((p) => p.user_id === userId);
   const everyoneReady = players.length === room.capacity && players.every((p) => p.ready);
 
-  const inPool = picked.length
-    ? categories.filter((c) => picked.includes(c.name)).reduce((n, c) => n + c.count, 0)
-    : categories.reduce((n, c) => n + c.count, 0);
-
   // Step 1 is the game (drawing 36b): the two board games, then the rest. Tic Tac Toe
   // and Connect 4 are each one tile whatever they're played with; that's step 2.
   const tile = TILES.find((x) => x.on(room)) ?? null;
@@ -78,7 +82,7 @@ export function Lobby({
   const n = () => ++step;
 
   return (
-    <motion.div variants={stagger(0.06)} initial="hidden" animate="show" className="space-y-4">
+    <motion.div variants={stagger(0.06)} initial="hidden" animate="show" className="flex flex-col gap-4 min-h-[calc(100dvh-90px-env(safe-area-inset-top)-env(safe-area-inset-bottom))]">
       <motion.section variants={riseIn}>
         <p className="text-[12px] font-extrabold text-soft mb-2">{n()} · Game</p>
         <div className="grid grid-cols-2 gap-[9px]">
@@ -116,118 +120,50 @@ export function Lobby({
 
       {asks && (
       <motion.section variants={riseIn}>
-        <p className="text-[12px] font-black text-soft mb-2">
-          {n()} · Questions from <span className="text-soft/60">optional</span>
-        </p>
-        <div className="card p-3.5">
-          <div className="flex flex-wrap gap-1.5">
-            {categories.length === 0 && (
-              <p className="text-sm font-bold text-soft">Loading this game's categories…</p>
-            )}
-            {categories.map((c) => {
-              const on = picked.includes(c.name);
-              return (
-                // Counted at the chosen difficulty, so a category can read 0 —
-                // Design has no easy questions in it. Picking it anyway would
-                // start a game with nothing to deal.
-                <button key={c.name} disabled={c.count === 0 && !on}
-                  onClick={() => onSetup(room.mode, room.game,
-                    on ? picked.filter((n) => n !== c.name) : [...picked, c.name], levelsOn, challenge)}
-                  className={` shadow-lift-sm rounded-full px-2.5 py-1 text-[12px] font-bold
-                    disabled:opacity-40
-                    ${on ? "bg-ink text-ground" : "bg-board text-ink"}`}>
-                  {c.name} <span className="opacity-60 tabular-nums">{c.count}</span>
-                </button>
-              );
-            })}
-          </div>
-          <div className="flex items-center gap-2 mt-3">
-            <p className="text-[13px] font-black text-soft flex-1">
-              {picked.length === 0 ? "All categories" : `${picked.length} selected`}
-              <span className="text-soft/60"> · {inPool} to draw from</span>
-            </p>
-            {picked.length > 0 && (
-              <button onClick={() => onSetup(room.mode, room.game, [], levelsOn, challenge)}
-                className=" shadow-lift-sm rounded-full px-2.5 py-1 text-[13px] font-black bg-petal">Clear</button>
-            )}
-          </div>
+        <p className="text-[12px] font-extrabold text-soft mb-2">{n()} · Questions from</p>
+        <div className="flex flex-wrap gap-1.5" role="group" aria-label="Questions from">
+          {categories.length === 0 && <p className="text-[13px] font-bold text-soft">Loading the categories…</p>}
+          {categories.length > 0 && chip("All categories", picked.length === 0,
+            () => onSetup(room.mode, room.game, [], levelsOn, challenge))}
+          {categories.map((c) => {
+            const on = picked.includes(c.name);
+            // Counted at the chosen level, so a category can have nothing in it
+            // (Design has no easy questions); it can't be picked then.
+            return chip(c.name, on,
+              () => onSetup(room.mode, room.game, on ? picked.filter((x) => x !== c.name) : [...picked, c.name], levelsOn, challenge),
+              c.count === 0 && !on);
+          })}
         </div>
       </motion.section>
       )}
 
       {asks && (
       <motion.section variants={riseIn}>
-        <p className="text-[12px] font-black text-soft mb-2">
-          {n()} · How hard? <span className="text-soft/60">optional</span>
-        </p>
-        <div className="card p-3.5">
-          <div className="grid grid-cols-3 gap-2">
-            {LEVELS.map((l) => {
-              const on = levelsOn.includes(l);
-              const n = levels[l] ?? 0;
-              return (
-                <button key={l} disabled={n === 0}
-                  onClick={() => onSetup(room.mode, room.game, picked,
-                    on ? levelsOn.filter((x) => x !== l) : [...levelsOn, l], challenge)}
-                  className={`cut tap py-2.5 disabled:opacity-40
-                    ${on ? "cut-petal text-ink" : "bg-board"}`}>
-                  <span className="block font-display text-base font-semibold capitalize">{l}</span>
-                  <span className="block text-[13px] font-bold tabular-nums opacity-70">{n}</span>
-                </button>
-              );
-            })}
-          </div>
-          <p className="text-[13px] font-black text-soft mt-3">
-            {levelsOn.length === 0
-              ? "Every level — about one question in five is hard"
-              : `${levelsOn.join(" and ")} only`}
-          </p>
+        <p className="text-[12px] font-extrabold text-soft mb-2">{n()} · How hard</p>
+        {/* One chip row, as the solo quiz (Daramola, 26 Sep): any level, or one. */}
+        <div className="flex flex-wrap gap-1.5" role="group" aria-label="How hard">
+          {chip("Any", levelsOn.length === 0, () => onSetup(room.mode, room.game, picked, [], challenge))}
+          {LEVELS.map((l) => chip(l[0].toUpperCase() + l.slice(1), levelsOn.length === 1 && levelsOn[0] === l,
+            () => onSetup(room.mode, room.game, picked, [l], challenge), (levels[l] ?? 0) === 0))}
         </div>
       </motion.section>
       )}
 
-      <motion.section variants={riseIn}>
-        <p className="text-[12px] font-black text-soft mb-2">
-          {n()} · Both of you happy?
-        </p>
-        <div className="grid gap-2">
-          {players.map((p) => (
-            <motion.div key={p.user_id} layout transition={SPRING}
-              className={`card flex items-center gap-3 px-3 py-2.5 ${p.ready ? "bg-leaf text-ink" : ""}`}>
-              <Avatar id={p.user_id} name={p.username} size={34} />
-              <span className="flex-1 font-bold text-[15px] truncate">
-                {p.username}{p.user_id === userId && <span className="opacity-60 text-[13px] font-black ml-1.5">you</span>}
-              </span>
-              <span className="text-[13px] font-black">
-                {p.ready ? "Ready" : "Deciding…"}
-              </span>
-            </motion.div>
-          ))}
-          {alone && (
-            <div className="card px-3 py-2.5 bg-mist text-soft text-[13px] font-bold">
-              Waiting for someone to join — send them the code above.
-            </div>
-          )}
-        </div>
-
-        <button
-          disabled={alone}
-          onClick={() => onReady(!me?.ready)}
-          className={`cut tap w-full mt-3 py-4 font-display text-lg font-semibold
-            ${me?.ready ? "bg-board" : "cut-petal"}`}>
-          {alone ? "Waiting for a second player"
-            : me?.ready ? "Not ready after all" : "I'm ready"}
+      <div className="flex-1" />
+      {/* Ready sits at the bottom, under both seats (36). Changing anything
+          above un-readies you both: "ready" means "I agree to this". */}
+      <motion.section variants={riseIn} className="grid gap-2.5">
+        <RoomSeats room={room} players={players} userId={userId}
+          says={(p) => (p.ready ? "Ready" : "Deciding")} />
+        <button disabled={alone} onClick={() => onReady(!me?.ready)}
+          className={`cut tap w-full min-h-[52px] font-display text-[19px] ${me?.ready ? "cut-board" : "cut-petal"}`}>
+          {alone ? "Waiting for a second player" : me?.ready ? "Not ready after all" : "I'm ready"}
         </button>
-
         {everyoneReady && (
-          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-            className="text-center text-sm font-black text-leaf mt-3">
-            Both ready — starting…
+          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center text-[13px] font-extrabold">
+            Both ready. Here we go…
           </motion.p>
         )}
-        <p className="text-[13px] font-bold text-soft text-center mt-2">
-          Changing anything above un-readies you both.
-        </p>
       </motion.section>
     </motion.div>
   );

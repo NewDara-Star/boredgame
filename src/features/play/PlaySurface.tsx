@@ -178,18 +178,23 @@ function SeatDisc({ mark, name }: { mark: Mark; name: string }) {
 /** .seats: two cards, you and them, with what you're counting; the one whose
     turn it is ringed in gold (.seat.turnon). */
 export function Seats({ seats }: {
-  seats: { mark: Mark; name: string; initial: string; count: string; active: boolean }[];
+  seats: { mark: Mark; name: string; initial: string; count: string; active: boolean;
+    /** a word under the count both players can see: "Easy shots" */
+    tag?: string;
+    /** their phone has gone quiet (.seat.away): faded */
+    away?: boolean }[];
 }) {
   return (
     <div className="shrink-0 grid grid-cols-2 gap-[9px]">
       {seats.map((s) => (
         <div key={s.mark}
           className={`card flex items-center gap-2 bg-board text-ink rounded-2xl px-2.5 py-2
-            ${s.active ? "shadow-[0_0_0_3px_var(--color-petal),var(--shadow-lift-sm)]" : "shadow-lift-sm"}`}>
+            ${s.active ? "shadow-[0_0_0_3px_var(--color-petal),var(--shadow-lift-sm)]" : "shadow-lift-sm"} ${s.away ? "opacity-60" : ""}`}>
           <SeatDisc mark={s.mark} name={s.initial} />
           <div className="min-w-0">
             <b className="block text-[15px] leading-[1.1] font-bold truncate">{s.name}</b>
             <small className="block font-mono text-[13px] font-bold text-soft">{s.count}</small>
+            {s.tag && <span className="inline-block mt-0.5 rounded-full bg-mist px-2 py-px text-[12px] font-extrabold">{s.tag}</span>}
           </div>
         </div>
       ))}

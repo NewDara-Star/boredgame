@@ -8,7 +8,7 @@
 -- reveal_round, sort_walkover, claim_board_win, board_winner, sort_reveal,
 -- sort_finish, sort_solo_start, sort_solo_finish, friend_by_code, remove_friend,
 -- new_friend_code, add_friend, invite_friend, daily_reserve_left, set_room_setup,
--- or the profiles and puzzles grants.
+-- claim_nudge, or the profiles and puzzles grants.
 --
 -- It ALWAYS ends in an error, on purpose: the error rolls every write back, so
 -- it can run against the live database. Read the message:
@@ -513,6 +513,28 @@ begin
   reset role;
   results := array_append(results, 'PW someone outside the room can''t touch the flight'::text);
   if n <> 0 then broken := broken || results[cardinality(results)]; end if;
+
+  -- ---- NG (drawing 39, 26 Sep): a nudge, at most once a minute -------------
+  update public.rooms set status = 'playing' where id = r;
+  delete from public.room_nudges where room_id = r;
+  perform set_config('request.jwt.claims', json_build_object('sub', a, 'role', 'authenticated')::text, true);
+  set local role authenticated;
+  j := to_jsonb(public.claim_nudge(r));
+  j2 := to_jsonb(public.claim_nudge(r));
+  err := null;
+  begin update public.room_nudges set at = now() - interval '2 minutes'; exception when others then err := 'refused'; end;
+  reset role;
+  results := array_append(results, 'NG a nudge goes to the other player, and not again inside a minute'::text);
+  if j #>> '{}' is distinct from b::text or j2 is not null then broken := broken || results[cardinality(results)]; end if;
+  results := array_append(results, 'NG nobody can wind their own nudge clock back'::text);
+  if err is null then broken := broken || results[cardinality(results)]; end if;
+  perform set_config('request.jwt.claims', json_build_object('sub', c, 'role', 'authenticated')::text, true);
+  set local role authenticated;
+  err := null;
+  begin perform public.claim_nudge(r); exception when others then err := sqlerrm; end;
+  reset role;
+  results := array_append(results, 'NG someone outside the room can''t nudge anyone in it'::text);
+  if err is null then broken := broken || results[cardinality(results)]; end if;
 
   -- ---- verdict (always an error, so everything above rolls back) -----------
   if cardinality(broken) = 0 then

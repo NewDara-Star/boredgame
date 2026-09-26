@@ -1,5 +1,5 @@
 import { serverNowIso, syncClock } from "@/shared/lib/serverClock";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { fire } from "@/shared/lib/fire";
 import { supabase } from "@/shared/lib/supabase";
 import { attempt } from "@/shared/lib/write";
@@ -24,6 +24,11 @@ export function useRoom(code: string | undefined, userId: string | undefined) {
   const [error, setError] = useState<string | null>(null);
   // user_ids currently connected to this room over the realtime socket.
   const [present, setPresent] = useState<Set<string>>(new Set());
+  // "typing…" in a Picto race (#40, Daramola 26 Sep): when each player last
+  // typed, sent as a signal on the room's channel. Never what they typed.
+  const [typing, setTyping] = useState<Record<string, number>>({});
+  const chan = useRef<ReturnType<NonNullable<typeof supabase>["channel"]> | null>(null);
+  const lastTyped = useRef(0);
 
   const refresh = useCallback(async (roomId: number) => {
     if (!supabase) return;
@@ -79,6 +84,10 @@ export function useRoom(code: string | undefined, userId: string | undefined) {
           () => void refresh(r.id))
         .on("postgres_changes", { event: "UPDATE", schema: "public", table: "rooms", filter: `id=eq.${r.id}` },
           (payload) => setRoom(payload.new as Room))
+        .on("broadcast", { event: "typing" }, ({ payload }) => {
+          const who = (payload as { user_id?: string } | null)?.user_id;
+          if (who) setTyping((t) => ({ ...t, [who]: Date.now() }));
+        })
         .on("presence", { event: "sync" }, () => {
           const state = ch.presenceState<{ user_id?: string }>();
           const ids = new Set<string>();
@@ -88,10 +97,19 @@ export function useRoom(code: string | undefined, userId: string | undefined) {
         .subscribe((status) => {
           if (status === "SUBSCRIBED" && userId) void ch.track({ user_id: userId });
         });
+      chan.current = ch;
     })();
 
-    return () => { cancelled = true; if (channel) void supabase!.removeChannel(channel); };
+    return () => { cancelled = true; chan.current = null; if (channel) void supabase!.removeChannel(channel); };
   }, [code, refresh, userId]);
+
+  /** Tell the other phone you're typing: at most once a second. */
+  const sendTyping = useCallback(() => {
+    const t = Date.now();
+    if (!userId || t - lastTyped.current < 1000) return;
+    lastTyped.current = t;
+    void chan.current?.send({ type: "broadcast", event: "typing", payload: { user_id: userId } });
+  }, [userId]);
 
   // The bank follows the room's game rather than being read once on arrival.
   // Loading it with the room meant that changing the game in the lobby left the
@@ -221,6 +239,8 @@ export function useRoom(code: string | undefined, userId: string | undefined) {
   return {
     room, players, present, round, currentPuzzle, error, categories, levels,
     join, startNextRound, claimRound, revealRound, setup, setReady, leave,
+    /** when each player last typed (a race), and how to say you are */
+    typing, sendTyping,
     /** the questions didn't load; it keeps trying, and this says so */
     bankTrouble: bank.failed && pool.length === 0 ? BANK_FAILED : null,
     retryBank: bank.retryNow,
@@ -231,16 +251,16 @@ export function useRoom(code: string | undefined, userId: string | undefined) {
     retyped code. rooms' RLS returns only rooms you host or belong to, so an
     unfiltered read already IS "your rooms"; keep it to the ones still live. */
 export function useMyRooms(userId: string | undefined) {
-  const [rooms, setRooms] = useState<Pick<Room, "id" | "code" | "status">[]>([]);
+  const [rooms, setRooms] = useState<Pick<Room, "id" | "code" | "status" | "mode" | "game" | "challenge" | "host_id">[]>([]);
   useEffect(() => {
     if (!supabase || !userId) { setRooms([]); return; }
     let cancelled = false;
     (async () => {
       const { data } = await supabase!.from("rooms")
-        .select("id, code, status")
+        .select("id, code, status, mode, game, challenge, host_id")
         .in("status", ["waiting", "playing"])
         .order("created_at", { ascending: false });
-      if (!cancelled) setRooms((data as Pick<Room, "id" | "code" | "status">[]) ?? []);
+      if (!cancelled) setRooms((data as Pick<Room, "id" | "code" | "status" | "mode" | "game" | "challenge" | "host_id">[]) ?? []);
     })();
     return () => { cancelled = true; };
   }, [userId]);

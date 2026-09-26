@@ -9,6 +9,9 @@ import type { RoomPlayer, RoomStatus } from "@/shared/types/db";
 import { drawCard, type Glyph, type Hero, type MatchCard } from "@/shared/card/frame";
 import { gamePath, matchVoice } from "@/shared/card/voice";
 import { ResultScreen } from "@/features/play/ResultScreen";
+import { useAuth } from "@/app/providers/AuthProvider";
+import { supabase } from "@/shared/lib/supabase";
+import { attempt } from "@/shared/lib/write";
 
 export type Mark = "x" | "o";
 
@@ -237,24 +240,44 @@ export function useMatchChrome(
   return { now, nameOf, scoreOf, sides, names, card, done };
 }
 
-/** The end of a session, as opposed to the end of a game: the tally, the
-    shareable card, and a way out. */
-export function MatchOver({ sides, myMark, card }: {
+/**
+ * The end of a match (#42): the solo result screen, the banner saying it from
+ * your side ("You beat Tobi 3–1"), the card, Share and Story, then Rematch
+ * first because that's what people do next. Rematch reopens the room on the
+ * same game with you ready, so they tap Ready and you're off; New game opens
+ * the lobby to pick something else. Either way the score starts again.
+ */
+export function MatchOver({ sides, myMark, card, roomId }: {
   sides: Side[]; myMark: Mark | null; card: (MatchCard & { sig: string }) | null;
+  roomId?: number;
 }) {
+  const { user } = useAuth();
+  const [busy, setBusy] = useState(false);
   const [a, b] = sides;
-  const winner = a.score === b.score ? null : a.score > b.score ? a : b;
+  const me = sides.find((s) => s.mark === myMark) ?? a, them = sides.find((s) => s.mark !== me.mark) ?? b;
+  const tone = me.score === them.score ? "draw" : me.score > them.score ? "win" : "loss";
+  const again = async (ready: boolean) => {
+    if (!supabase || !roomId || busy) return;
+    setBusy(true);
+    await attempt("Reopening the room", supabase.rpc("reopen_room", { p_room: roomId }));
+    if (ready && user) await attempt("Marking you ready", supabase.from("room_players").update({ ready: true }).eq("room_id", roomId).eq("user_id", user.id));
+    setBusy(false);
+  };
   return (
     <ResultScreen
-      headline={!winner ? "All square" : `${winner.name} takes it`}
-      score={`${a.score}–${b.score}`}
-      tone={!winner ? "draw" : winner.mark === myMark ? "win" : "loss"}
+      headline={tone === "draw" ? `All square with ${them.name}` : tone === "win" ? `You beat ${them.name}` : `${them.name} beat you`}
+      score={`${me.score}–${them.score}`}
+      tone={tone}
       card={card}
       alt={`Result: ${a.name} ${a.score}, ${b.name} ${b.score}`}>
-      <Link to="/rooms"
-        className="card tap py-3.5 text-center font-display text-lg font-semibold bg-board">
-        New room
-      </Link>
+      {roomId ? (
+        <div className="grid grid-cols-2 gap-[9px]">
+          <button onClick={() => void again(true)} disabled={busy} className="cut tap cut-leaf min-h-[44px] font-display text-[17px]">Rematch</button>
+          <button onClick={() => void again(false)} disabled={busy} className="cut tap cut-board min-h-[44px] font-display text-[17px]">New game</button>
+        </div>
+      ) : (
+        <Link to="/rooms" className="cut tap cut-board min-h-[44px] grid place-items-center font-display text-[17px]">New room</Link>
+      )}
     </ResultScreen>
   );
 }

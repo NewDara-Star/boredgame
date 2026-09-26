@@ -3081,3 +3081,45 @@ begin
 end $$;
 revoke all on function public.set_room_setup(bigint, text, text, text[], text[], text) from public, anon;
 grant execute on function public.set_room_setup(bigint, text, text, text[], text[], text) to authenticated;
+
+-- ============================================================================
+-- Nudge (Daramola, 26 Sep 2026; drawing 39)
+--
+-- When the other phone in a room goes quiet on its move, "Nudge" sends a push
+-- to it. At most once a minute from each player, held here: the client can't
+-- reset its own clock because nobody but this function writes the table.
+-- claim_nudge answers whom to push (the other player), or null when it's too
+-- soon or there's nobody to nudge. The push itself is notify-invite's
+-- (kind: "nudge"), which calls this as the caller.
+-- ----------------------------------------------------------------------------
+create table if not exists public.room_nudges (
+  room_id   bigint not null references public.rooms(id) on delete cascade,
+  from_user uuid   not null references auth.users(id) on delete cascade,
+  at        timestamptz not null default now(),
+  primary key (room_id, from_user)
+);
+alter table public.room_nudges enable row level security;
+revoke all on public.room_nudges from public, anon, authenticated;
+create index if not exists room_nudges_from_user_idx on public.room_nudges(from_user);
+
+create or replace function public.claim_nudge(p_room bigint)
+returns uuid language plpgsql security definer set search_path to 'public' as $$
+declare them uuid;
+begin
+  if not exists (select 1 from public.room_players p where p.room_id = p_room and p.user_id = auth.uid()) then
+    raise exception 'not a member of room %', p_room;
+  end if;
+  if not exists (select 1 from public.rooms r where r.id = p_room and r.status = 'playing') then
+    return null;
+  end if;
+  select p.user_id into them from public.room_players p
+   where p.room_id = p_room and p.user_id <> auth.uid() limit 1;
+  if them is null then return null; end if;
+  insert into public.room_nudges as n (room_id, from_user, at) values (p_room, auth.uid(), now())
+  on conflict (room_id, from_user) do update set at = now()
+   where n.at < now() - interval '60 seconds';
+  if not found then return null; end if;          -- nudged under a minute ago
+  return them;
+end $$;
+revoke all on function public.claim_nudge(bigint) from public, anon;
+grant execute on function public.claim_nudge(bigint) to authenticated;

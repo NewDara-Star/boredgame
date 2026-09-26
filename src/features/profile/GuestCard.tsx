@@ -13,8 +13,10 @@ import { errorField } from "@/shared/lib/names";
  * the same account underneath, minus the password, and it can be turned into a
  * real one later without losing anything.
  */
-export function GuestCard({ note, bare = false }: {
+export function GuestCard({ note, bare = false, cta }: {
   note?: string;
+  /** the button's words, where a screen draws its own ("Start playing", 33) */
+  cta?: string;
   /** Just the name and the button, for a screen that says the rest itself
       (Today's round signed out, #15). */
   bare?: boolean;
@@ -47,7 +49,7 @@ export function GuestCard({ note, bare = false }: {
         </Field>
       )}
       <Button type="submit" disabled={busy} className={bare ? "w-full min-h-[52px] py-0 text-[19px]" : "w-full"}>
-        {busy ? "One second…" : bare ? "Play" : "Start playing"}
+        {busy ? "One second…" : cta ?? (bare ? "Play" : "Start playing")}
       </Button>
     </form>
   );

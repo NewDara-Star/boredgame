@@ -1,13 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { AnswerMark } from "@/shared/brand/Pieces";
-import { LOCK_MS, sleep } from "@/features/play/lockIn";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "@/app/providers/AuthProvider";
 import { useRoom, useMyRooms, createRoom } from "./useRoom";
-import { PictoRenderer, PICTURE_ALT } from "@/features/picto/PictoRenderer";
-import { Button } from "@/shared/ui/Button";
 import { Card } from "@/shared/ui/Card";
-import { Field, Input } from "@/shared/ui/Field";
 import { SquareOffRoom } from "@/features/squareoff/SquareOffRoom";
 import { startSquareOff } from "@/features/squareoff/useTttRoom";
 import { TicTacToeRoom } from "@/features/tictactoe/TicTacToeRoom";
@@ -18,34 +13,25 @@ import { startMemory } from "@/features/memory/useMemoryRoom";
 import { SortRaceRoom } from "@/features/sort/SortRaceRoom";
 import { startSortRace } from "@/features/sort/useSortRoom";
 import { Lobby } from "./Lobby";
-import { InviteCard } from "./InviteCard";
 import { BankTrouble } from "./BankTrouble";
 import { PeerNotice } from "./matchUi";
-import { serverToLocal } from "@/shared/lib/serverClock";
-import { VoiceControl } from "@/features/voice/VoiceControl";
 import { AuthCard } from "@/features/profile/AuthCard";
 import { GuestCard, ClaimCard } from "@/features/profile/GuestCard";
 import { Avatar } from "@/shared/ui/Avatar";
 import { Note, Dealing } from "@/shared/ui/Note";
-import { ROOM_GAMES, GAMES } from "@/features/play/registry";
-import { challengeName, parseWith, roomSetup, roomWith } from "@/features/challenge/kinds";
-import { FriendsPanel } from "@/features/friends/Friends";
+import { GAMES } from "@/features/play/registry";
+import { parseWith, roomSetup, roomWith } from "@/features/challenge/kinds";
+import { useFocusMode } from "@/app/layout/focus";
+import { useFriends } from "@/features/friends/useFriends";
+import { RoomTop, CallPill } from "./RoomTop";
+import { Countdown, RoomUnavailable, Waiting } from "./RoomScreens";
+import { RaceRoom } from "./RaceRoom";
+import { RoomsGuest, RoomsHome } from "./RoomsHome";
 
 export function RoomsPage() {
   const { code } = useParams();
   const nav = useNavigate();
   const { user, profile, offline, isGuest, claimedAs } = useAuth();
-  const [joinCode, setJoinCode] = useState("");
-  const [guess, setGuess] = useState("");
-  /** the option you tapped in the race, lit while the server judges it */
-  const [picked, setPicked] = useState<string | null>(null);
-  /** the round you're out of: one pick each in a multiple-choice race (talk item 10) */
-  const [outOf, setOutOf] = useState<number | null>(null);
-  /** a typed guess that wasn't it, shown for a moment */
-  const [notIt, setNotIt] = useState(false);
-  /** ticks, so "Show the answer" appears 20 s into a round */
-  const [tick, setTick] = useState(() => Date.now());
-  useEffect(() => { const id = setInterval(() => setTick(Date.now()), 1000); return () => clearInterval(id); }, []);
   const [startError, setStartError] = useState<string | null>(null);
   /** set by "Play" on a friend when their invite didn't go through */
   const inviteFailed = (useLocation().state as { inviteFailed?: string } | null)?.inviteFailed ?? null;
@@ -53,7 +39,7 @@ export function RoomsPage() {
 
   const {
     room, players, present, round, currentPuzzle, error, categories, levels,
-    join, startNextRound, claimRound, revealRound, setup, setReady, leave, bankTrouble, retryBank,
+    join, startNextRound, claimRound, revealRound, setup, setReady, bankTrouble, retryBank, typing, sendTyping,
   } = useRoom(code, user?.id);
   const myRooms = useMyRooms(user?.id);
 
@@ -126,6 +112,29 @@ export function RoomsPage() {
       .then((msg) => { if (msg) setStartError(msg); });
   }, [room, isHost, everyoneReady, players, startNextRound, board]);
 
+  // In a room with both of you there (the lobby and the games, drawings 36–42),
+  // the room has the whole phone: its own top bar, no app header or tab bar.
+  const iAmInRoom = !!room && !!user && players.some((p) => p.user_id === user.id);
+  const together = iAmInRoom && !!room && !(room.status === "waiting" && players.length < room.capacity);
+  useFocusMode(together && !!code);
+
+  // #37: both ready, the game starting — a three-second count on both phones,
+  // each from when it saw the room turn to playing.
+  const [counting, setCounting] = useState(false);
+  const lastStatus = useRef(room?.status);
+  useEffect(() => {
+    if (lastStatus.current === "waiting" && room?.status === "playing") setCounting(true);
+    lastStatus.current = room?.status;
+  }, [room?.status]);
+
+  const { friends, invite } = useFriends();
+  const [invited, setInvited] = useState<string | null>(null);
+  const newRoom = async () => {
+    if (!user) { nav("/rooms"); return; }
+    const c = await createRoom(user.id, uname);
+    if (c) nav(`/rooms/${c.code}`);
+  };
+
   if (offline) {
     return (
       <Card className="p-6">
@@ -176,287 +185,100 @@ export function RoomsPage() {
         </div>
       );
     }
-    return (
-      <div className="space-y-4">
-        <h1 className="font-display text-[30px] leading-none font-semibold">Head-to-head</h1>
-        <p className="text-sm text-soft font-semibold">
-          A room needs to tell you two apart. A name is enough for that.
-        </p>
-        <GuestCard />
-        <details>
-          <summary className="text-[13px] font-black text-soft
-            underline underline-offset-4 cursor-pointer list-none text-center">
-            I have an account
-          </summary>
-          <div className="mt-3"><AuthCard /></div>
-        </details>
-      </div>
-    );
+    return <RoomsGuest />;
   }
 
-  if (!code) {
-    return (
-      <div className="space-y-5">
-        <h1 className="font-display text-[32px] leading-none font-semibold">Head-to-head</h1>
-        <p className="text-sm text-soft font-semibold">
-          Play someone you've added with one tap, or make a room and send the code.
-        </p>
+  if (!code) return <RoomsHome myRooms={myRooms} />;
 
-        <FriendsPanel />
+  if (!room) return error
+    ? <RoomUnavailable room={null} players={[]} onNew={() => void newRoom()} />
+    : <Dealing what={`room ${code}`} />;
 
-        {myRooms.length > 0 && (
-          <div className="space-y-2">
-            <p className="text-[12px] font-black text-soft">Rooms you're in</p>
-            {myRooms.map((r) => (
-              <button key={r.id} onClick={() => nav(`/rooms/${r.code}`)}
-                className="card tap w-full flex items-center justify-between px-4 py-3.5 bg-board text-left">
-                <span className="font-display text-lg font-semibold tracking-[0.2em]">{r.code}</span>
-                <span className="text-[12px] font-black text-soft">
-                  {r.status === "playing" ? "in progress" : "waiting"} · rejoin →
-                </span>
-              </button>
-            ))}
-          </div>
-        )}
-
-        <Button className="w-full"
-          onClick={async () => { const c = await createRoom(user.id, uname); if (c) nav(`/rooms/${c.code}`); }}>
-          Create a room
-        </Button>
-
-        <form onSubmit={(e) => { e.preventDefault(); if (joinCode.trim()) nav(`/rooms/${joinCode.trim().toUpperCase()}`); }}>
-          <Field label="Or join with a code">
-            <div className="flex gap-2">
-              <Input value={joinCode} onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
-                placeholder="ABC123" maxLength={6} className="tracking-[0.3em] font-bold" />
-              <Button type="submit" variant="ghost">Join</Button>
-            </div>
-          </Field>
-        </form>
-      </div>
-    );
-  }
-
-  if (!room) return (
-    <div className="space-y-3">
-      <Dealing what={`room ${code}`} />
-      <Note>{error}</Note>
-    </div>
-  );
-
-  const iAmIn = players.some((p) => p.user_id === user.id);
+  const iAmIn = iAmInRoom;
   const waiting = room.status === "waiting";
-  const won = round?.winner_id;
-  // Ended with nobody paid: everyone out, or "Show the answer" (talk item 10).
-  const ended = !!round && !won && !!round.ended_at;
-  const out = !!round && outOf === round.id;
-  const canReveal = !!round && !won && !ended && tick - serverToLocal(round.started_at) >= 20_000;
-  const them = players.find((p) => p.user_id !== user.id)?.username ?? "They";
 
-  return (
-    <div className="space-y-5">
-      <div className="flex items-baseline justify-between gap-3">
-        <p className="font-display text-2xl font-semibold">
-          {waiting ? "Your room" : boardName(room.mode, room.challenge) ?? (ROOM_GAMES.find((g) => g.room.mode === room.mode
-            && (g.bank === null || g.bank === room.game))?.name ?? "Race")}
-        </p>
-        <p className="text-xs text-soft font-bold">{room.status}</p>
-      </div>
+  // #43: full, or started without you. (Following a link into a waiting room
+  // with a seat free joins you; that's the effect above.)
+  if (!iAmIn) {
+    if (!waiting || players.length >= room.capacity)
+      return <RoomUnavailable room={room} players={players} onNew={() => void newRoom()} />;
+    return <div className="space-y-3"><Dealing what={`room ${code}`} /><Note>{error}</Note></div>;
+  }
 
-      {/* A board game shows its own; this is the race's (and the lobby's). */}
-      {(room.mode === "race" || waiting) ? <BankTrouble message={bankTrouble} onRetry={retryBank} /> : null}
+  const other = players.find((p) => p.user_id !== user.id) ?? null;
+  const notes = (
+    <>
       <Note>{error !== bankTrouble ? error ?? startError : startError}</Note>
+      <PeerNotice players={players} present={present} userId={user.id} waiting={waiting} />
+    </>
+  );
+  const call = other
+    ? <CallPill roomId={room.id} code={room.code} peerId={other.user_id} peerName={other.username} />
+    : null;
+  const top = <><RoomTop code={room.code} end={call} />{notes}</>;
 
-      {iAmIn && <PeerNotice players={players} present={present} userId={user.id} waiting={waiting} />}
+  // #35: on your own, waiting for someone.
+  if (waiting && players.length < room.capacity) {
+    return (
+      <div className="space-y-3">
+        {notes}
+        <Waiting room={room} me={players.find((p) => p.user_id === user.id) ?? null}
+          friends={friends.map((f) => ({ id: f.id, username: f.username }))}
+          onInvite={(id, name) => void invite(room.id, id).then((ok) => setInvited(ok ? null : name))}
+          inviteFailed={invited ?? inviteFailed} />
+        {(isGuest || claimedAs) && <ClaimCard />}
+      </div>
+    );
+  }
 
-      {iAmIn && (() => {
-        const other = players.find((pl) => pl.user_id !== user.id);
-        return other
-          ? <VoiceControl roomId={room.id} code={room.code} peerId={other.user_id} peerName={other.username} />
-          : null;
-      })()}
-
-      {!iAmIn && (
-        <div className="space-y-2">
-          <Button className="w-full" onClick={() => void join(uname)}>Join this room</Button>
-          {players.length >= room.capacity && (
-            <p className="text-[13px] font-bold text-soft text-center">
-              This one looks full — {players.map((p) => p.username).join(" and ")} are already in it.
-            </p>
-          )}
-        </div>
-      )}
-
-      {iAmIn && waiting && players.length < 2 && inviteFailed && (
-        <Note tone="warn">Couldn't invite {inviteFailed}. Send them the code below.</Note>
-      )}
-      {iAmIn && waiting && players.length < room.capacity && <InviteCard code={room.code} waiting />}
-
-      {iAmIn && waiting && (
+  // #36: both in, choosing together.
+  if (waiting) {
+    return (
+      <div className="space-y-3">
+        {top}
+        <BankTrouble message={bankTrouble} onRetry={retryBank} />
         <Lobby room={room} players={players} categories={categories} levels={levels}
           userId={user.id}
           alone={players.length < room.capacity}
           onSetup={(m, g, c, d, ch) => void setup(m, g, c, d, ch)}
           onReady={(r) => void setReady(r)} />
-      )}
+        {(isGuest || claimedAs) && <ClaimCard />}
+      </div>
+    );
+  }
 
-      {iAmIn && !waiting && room.mode === "squareoff" && (
-        <SquareOffRoom roomId={room.id} code={room.code} status={room.status}
-          categories={room.categories} difficulty={room.difficulty}
-          challenge={roomWith(room.mode, room.challenge)} players={players} userId={user.id} />
-      )}
+  if (counting) return <Countdown room={room} players={players} userId={user.id} onDone={() => setCounting(false)} />;
 
-      {iAmIn && !waiting && room.mode === "tictactoe" && (
-        <TicTacToeRoom roomId={room.id} code={room.code} status={room.status}
-          players={players} userId={user.id} />
-      )}
-
-      {iAmIn && !waiting && board === "sort" && (
-        <SortRaceRoom roomId={room.id} code={room.code} status={room.status}
-          players={players} userId={user.id} />
-      )}
-
-      {iAmIn && !waiting && board === "mem" && (
-        <MemoryRoom roomId={room.id} code={room.code} status={room.status}
-          players={players} userId={user.id} />
-      )}
-
-      {iAmIn && !waiting && board === "c4" && (
-        <Connect4Room roomId={room.id} code={room.code} status={room.status}
-          categories={room.categories} difficulty={room.difficulty}
-          challenge={roomWith(room.mode, room.challenge)} players={players} userId={user.id}
-          plain={room.mode === "connect4"} />
-      )}
-
-      {iAmIn && (isGuest || claimedAs) && (waiting || room.status === "finished") && <ClaimCard />}
-
-      {iAmIn && (
-        <button onClick={async () => { await leave(); nav("/rooms"); }}
-          className="block mx-auto text-[13px] font-black
-            text-soft underline underline-offset-4 pt-2">
-          Leave this room
-        </button>
-      )}
-
-      {!board && room.status === "finished" && (() => {
-        const ranked = [...players].sort((a, b) => b.score - a.score);
-        const drawn = ranked.length > 1 && ranked[0].score === ranked[1].score;
-        return (
-          <div className={`card p-6 text-center ${drawn ? "bg-mist" : "bg-leaf text-ink"}`}>
-            <p className="text-[12px] font-black opacity-70">Match over</p>
-            <p className="font-display text-3xl font-semibold mt-1">
-              {drawn ? "All square" : `${ranked[0]?.username ?? "Nobody"} takes it`}
-            </p>
-            <p className="font-display text-5xl font-semibold tabular-nums mt-3">
-              {ranked.map((p) => p.score).join(" — ")}
-            </p>
-            <button onClick={async () => { await leave(); nav("/rooms"); }}
-              className="card tap w-full mt-5 py-3.5 font-display text-lg font-semibold bg-board text-ink">
-              New room
-            </button>
-          </div>
-        );
-      })()}
-
-      {!board && !waiting && room.status !== "finished" && round && currentPuzzle && (
-        <>
-          <div className="flex gap-2 flex-wrap">
-            {players.map((p) => (
-              <span key={p.user_id} className="card text-sm px-3 py-1.5">
-                {p.username} <b className="text-ember tabular-nums ml-1">{p.score}</b>
-              </span>
-            ))}
-          </div>
-          <p className="text-[12px] text-soft font-black">
-            Round {round.round_no} of {room.best_of}
-          </p>
-          <Card className="aspect-square max-h-[44vh] mx-auto w-full grid place-items-center p-6 text-ink">
-            {currentPuzzle.spec
-              ? <PictoRenderer spec={currentPuzzle.spec} />
-              // An image puzzle drew nothing here before (latent: none are live).
-              : currentPuzzle.render === "image" && currentPuzzle.imageUrl
-              ? <img src={currentPuzzle.imageUrl} alt={PICTURE_ALT} className="max-h-full object-contain rounded-xl" />
-              : <p className="text-xl font-semibold text-center">{currentPuzzle.prompt}</p>}
-          </Card>
-
-          {!won && !ended && currentPuzzle.choices ? (
-            <div className="grid gap-2.5">
-              {out && (
-                <p className="text-sm font-bold text-center text-ember">Out this round. {them} can still take it.</p>
-              )}
-              {currentPuzzle.choices.map((opt, i) => (
-                <button key={opt} disabled={picked !== null || out}
-                  // A race: the claim goes at once, and the pick stays lit at
-                  // least the locked-in moment before anything else shows.
-                  // One pick each: a wrong one puts you out of the round.
-                  onClick={() => {
-                    setPicked(opt);
-                    const id = round.id;
-                    void Promise.all([claimRound(opt), sleep(LOCK_MS)]).then(([v]) => {
-                      setPicked(null);
-                      if (v?.reason === "out") setOutOf(id);
-                    });
-                  }}
-                  className={`card ${picked === null ? "tap" : ""} flex items-center gap-3 text-left px-4 py-4 ${picked === opt ? "bg-petal" : "bg-board"}`}>
-                  <AnswerMark index={i} />
-                  <span className="text-[15px] font-bold">{opt}</span>
-                </button>
-              ))}
-            </div>
-          ) : won || ended ? (
-            <div className="text-center">
-              <p className={`text-sm font-bold ${won === user.id ? "text-leaf" : ended ? "text-soft" : "text-ember"}`}>
-                {ended ? "Nobody got it"
-                  : won === user.id ? "You took it" : `${players.find((p) => p.user_id === won)?.username ?? "They"} took it`}
-              </p>
-              <p className="text-lg font-semibold mt-1">{currentPuzzle.answer}</p>
-              {currentPuzzle.explanation && (
-                <p className="text-sm text-soft font-semibold mt-3 text-left">{currentPuzzle.explanation}</p>
-              )}
-              {isHost && (
-                <Button className="mt-4 w-full" onClick={() => void startNextRound()}>
-                  {round.round_no >= room.best_of ? "See the result" : "Next round"}
-                </Button>
-              )}
-            </div>
-          ) : (
-            <form className="flex gap-2"
-              onSubmit={(e) => {
-                e.preventDefault();
-                // Typed races keep their guesses; a miss says so now (it said nothing).
-                void claimRound(guess).then((v) => {
-                  if (v && !v.won && !v.reason) { setNotIt(true); setTimeout(() => setNotIt(false), 1500); }
-                });
-                setGuess("");
-              }}>
-              <Input value={guess} onChange={(e) => setGuess(e.target.value)}
-                placeholder="Answer first to win the round"
-                // as in solo Picto (talk item 6): no autocorrect, no capital
-                autoComplete="off" autoCapitalize="none" autoCorrect="off" spellCheck={false} enterKeyHint="go" />
-              <Button type="submit">Go</Button>
-            </form>
-          )}
-          {!won && !ended && !currentPuzzle.choices && notIt && (
-            <p className="text-sm font-bold text-center text-ember" role="status">Not it. Keep going.</p>
-          )}
-          {/* A round nobody can get used to have no way on but Leave (talk item 10). */}
-          {canReveal && (
-            <button onClick={() => void revealRound()}
-              className="block mx-auto text-[13px] font-black text-soft underline underline-offset-4 min-h-[44px]">
-              Show the answer (nobody scores)
-            </button>
-          )}
-        </>
-      )}
-    </div>
+  if (room.mode === "squareoff") return (
+    <SquareOffRoom top={top} roomId={room.id} code={room.code} status={room.status}
+      categories={room.categories} difficulty={room.difficulty}
+      challenge={roomWith(room.mode, room.challenge)} players={players} userId={user.id} />
   );
-}
+  if (room.mode === "tictactoe") return (
+    <TicTacToeRoom top={top} roomId={room.id} code={room.code} status={room.status}
+      players={players} userId={user.id} />
+  );
+  if (board === "sort") return (
+    <SortRaceRoom top={top} topWith={(end) => <><RoomTop code={room.code} end={end} />{notes}</>} roomId={room.id} code={room.code} status={room.status}
+      players={players} userId={user.id} />
+  );
+  if (board === "mem") return (
+    <MemoryRoom top={top} roomId={room.id} code={room.code} status={room.status}
+      players={players} userId={user.id} />
+  );
+  if (board === "c4") return (
+    <Connect4Room top={top} roomId={room.id} code={room.code} status={room.status}
+      categories={room.categories} difficulty={room.difficulty}
+      challenge={roomWith(room.mode, room.challenge)} players={players} userId={user.id}
+      plain={room.mode === "connect4"} />
+  );
 
-/** "Tic Tac Toe · Cup toss": the two board games say what they're played with. */
-function boardName(mode: string, challenge: string): string | null {
-  const board = mode === "tictactoe" || mode === "squareoff" ? "Tic Tac Toe"
-    : mode === "connect4" || mode === "connect4trivia" ? "Connect 4" : null;
-  if (!board) return null;
-  const w = roomWith(mode, challenge);
-  return w === "none" ? board : `${board} · ${challengeName(w)}`;
+  // The races (Trivia, Picto): #40.
+  return (
+    <RaceRoom top={(end) => <><RoomTop code={room.code} end={end ?? call} />{notes}<BankTrouble message={bankTrouble} onRetry={retryBank} /></>}
+      room={room} players={players} userId={user.id} isHost={isHost}
+      round={round} puzzle={currentPuzzle}
+      claimRound={claimRound} revealRound={revealRound} startNextRound={startNextRound}
+      typing={typing} sendTyping={sendTyping} />
+  );
 }

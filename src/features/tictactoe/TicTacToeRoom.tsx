@@ -1,14 +1,13 @@
+import type { ReactNode } from "react";
 import { ownersFor } from "@/features/play/board";
 import type { RoomPlayer, RoomStatus } from "@/shared/types/db";
-import { Note, Dealing } from "@/shared/ui/Note";
+import { Dealing } from "@/shared/ui/Note";
 import { Board } from "@/features/squareoff/Board";
-import { describe, type Mark } from "@/features/squareoff/rules";
+import { describe, squareName } from "@/features/squareoff/rules";
 import { gridHero } from "@/features/squareoff/card";
 import { useTttRoom } from "@/features/squareoff/useTttRoom";
-import {
-  Seats, AwayNotice, OverPanel, EndMatchLink, MatchOver, useMatchChrome,
-} from "@/features/rooms/matchUi";
-import { PlayBoard, PlayRow, PlaySurface } from "@/features/play/PlaySurface";
+import { MatchOver, useMatchChrome } from "@/features/rooms/matchUi";
+import { BoardRoomBody } from "@/features/rooms/RoomBoard";
 
 /**
  * Plain Tic Tac Toe. The board, the reducer and the synced-row hook are all
@@ -17,8 +16,10 @@ import { PlayBoard, PlayRow, PlaySurface } from "@/features/play/PlaySurface";
  * leaves their turn hanging, which the away notice already covers.
  */
 export function TicTacToeRoom({
-  roomId, code, status, players, userId,
+  top, roomId, code, status, players, userId,
 }: {
+  /** the room's top bar (code, call) and its notices */
+  top?: ReactNode;
   roomId: number; code: string; status: RoomStatus;
   players: RoomPlayer[]; userId: string;
 }) {
@@ -29,54 +30,28 @@ export function TicTacToeRoom({
 
   const g = t.game;
 
-  if (done) return <MatchOver sides={sides} myMark={t.myMark} card={card} />;
+  if (done) return <MatchOver sides={sides} myMark={t.myMark} card={card} roomId={roomId} />;
 
   if (!g) return <Dealing what="the board" />;
 
 
   return (
-    <PlaySurface>
-      <PlayRow>
-        <Seats
-          names={names}
-          scores={{ x: scoreOf("x"), o: scoreOf("o") }}
-          active={g.phase === "over" ? null : g.turn}
-          glyph={(m) => (m === "x" ? "cross" : "ring")}
-          dimmed={g.phase === "over"} />
-      </PlayRow>
-
-      <PlayBoard min={78}>
-        {(width) => (
-          <Board owners={ownersFor(names, t.myMark)} board={g.board} target={null} line={g.line} width={width}
-            canPick={g.phase === "picking" && g.turn === t.myMark}
-            onPick={t.choose} />
-        )}
-      </PlayBoard>
-
-      <PlayRow className="space-y-3">
-        <p className="text-center text-[15px] font-bold text-soft">
-          {describe(g, names, t.myMark)}
-        </p>
-
-        <Note>{t.error}</Note>
-
-        <AwayNotice players={players} userId={userId} now={now} />
-
-        {g.phase !== "over" && <EndMatchLink onQuit={() => void t.quit()} />}
-      </PlayRow>
-
-      {g.phase === "over" && (
-        <PlayRow>
-        <OverPanel
-          headline={g.winner === "draw" ? "Draw"
-            : g.winner === t.myMark ? "You win" : `${names[g.winner as Mark]} wins`}
-          mine={g.winner === t.myMark}
-          draw={g.winner === "draw"}
-          onRematch={() => void t.rematch()}
-          onQuit={() => void t.quit()}
-          onChangeGame={() => void t.changeGame()} />
-        </PlayRow>
+    <BoardRoomBody top={top} roomId={roomId} userId={userId} players={players} now={now}
+      names={names} scores={{ x: scoreOf("x"), o: scoreOf("o") }}
+      game={{ ...g, target: null }} myMark={t.myMark} answerer={g.turn}
+      plain challenge="none" kind={null} play={null}
+      unit="square" spot={(i) => (i === null ? "" : squareName(i))}
+      said={describe(g, names, t.myMark)} youAre={t.myMark === "o" ? "You're rings" : "You're crosses"}
+      ratio={1}
+      board={(width) => (
+        <Board owners={ownersFor(names, t.myMark)} board={g.board} target={null} line={g.line} width={width}
+          canPick={g.phase === "picking" && g.turn === t.myMark}
+          onPick={t.choose} />
       )}
-    </PlaySurface>
+      item={null} chosen={null} setChosen={() => {}}
+      fraction={0} askedAt={0} askedSeed={0} stall={null} error={t.error} shot={null}
+      onAnswer={() => {}} onShot={() => {}} onFly={() => {}}
+      onAdvanceNow={() => {}} onForceAdvance={() => {}}
+      onRematch={() => void t.rematch()} onQuit={() => void t.quit()} onChangeGame={() => void t.changeGame()} />
   );
 }
