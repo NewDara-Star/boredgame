@@ -7,8 +7,8 @@
 -- save_push_subscription, voice_topic_ok, carry_over, daily_progress,
 -- reveal_round, sort_walkover, claim_board_win, board_winner, sort_reveal,
 -- sort_finish, sort_solo_start, sort_solo_finish, friend_by_code, remove_friend,
--- new_friend_code, add_friend, invite_friend, daily_reserve_left, or the profiles
--- and puzzles grants.
+-- new_friend_code, add_friend, invite_friend, daily_reserve_left, set_room_setup,
+-- or the profiles and puzzles grants.
 --
 -- It ALWAYS ends in an error, on purpose: the error rolls every write back, so
 -- it can run against the live database. Read the message:
@@ -467,6 +467,52 @@ begin
   if array_length(dp_ids, 1) <> 10
   or (select count(*) from public.puzzles where id = any(dp_ids) and difficulty = 'easy' and daily_reserve) <> 2
   then broken := broken || results[cardinality(results)]; end if;
+
+  -- ---- PW (Play it with, 26 Sep): a room plays shots, and the flight is sent -
+  -- A room takes cup toss, hoops, knock-down and Mix; the thrower writes the
+  -- flight (numbers, not a video) and the levels; nobody outside the room can.
+  update public.rooms set status = 'waiting' where id = r;
+  perform set_config('request.jwt.claims', json_build_object('sub', a, 'role', 'authenticated')::text, true);
+  set local role authenticated;
+  err := null;
+  begin
+    perform public.set_room_setup(r, 'squareoff', 'trivia', '{}', null, 'knock');
+    perform public.set_room_setup(r, 'connect4trivia', 'trivia', '{}', null, 'mix');
+  exception when others then err := sqlerrm; end;
+  reset role;
+  results := array_append(results, 'PW a room can be set to a shot or Mix'::text);
+  if err is not null or not exists (select 1 from public.rooms where id = r and challenge = 'mix' and mode = 'connect4trivia')
+  then broken := broken || results[cardinality(results)]; end if;
+  set local role authenticated;
+  err := null;
+  begin perform public.set_room_setup(r, 'squareoff', 'trivia', '{}', null, 'darts');
+  exception when others then err := sqlerrm; end;
+  reset role;
+  results := array_append(results, 'PW a challenge that doesn''t exist is refused'::text);
+  if err is null then broken := broken || results[cardinality(results)]; end if;
+  delete from public.c4_games where room_id = r;
+  insert into public.c4_games(room_id, x_player, o_player) values (r, a, b);
+  set local role authenticated;
+  update public.c4_games set play = '{"kind":"hoops","lvl":{"x":"easy","o":"norm"},"run":{"x":0,"o":0}}'::jsonb,
+         shot = jsonb_build_object('v', 1, 'kind', 'hoops', 'f', (select jsonb_agg(jsonb_build_array(i, i, i, 0, 0)) from generate_series(1, 150) i))
+   where room_id = r;
+  get diagnostics n = row_count;
+  err := null;
+  begin
+    update public.c4_games set shot = jsonb_build_object('f', (select jsonb_agg(md5(i::text) || md5((i * 7)::text)) from generate_series(1, 4000) i))
+     where room_id = r;
+  exception when check_violation then err := 'refused'; end;
+  reset role;
+  results := array_append(results, 'PW a player writes the flight and the levels; something the size of no flight is refused'::text);
+  if n <> 1 or err is null or (select shot->>'kind' from public.c4_games where room_id = r) <> 'hoops'
+  then broken := broken || results[cardinality(results)]; end if;
+  perform set_config('request.jwt.claims', json_build_object('sub', c, 'role', 'authenticated')::text, true);
+  set local role authenticated;
+  update public.c4_games set shot = null where room_id = r;
+  get diagnostics n = row_count;
+  reset role;
+  results := array_append(results, 'PW someone outside the room can''t touch the flight'::text);
+  if n <> 0 then broken := broken || results[cardinality(results)]; end if;
 
   -- ---- verdict (always an error, so everything above rolls back) -----------
   if cardinality(broken) = 0 then

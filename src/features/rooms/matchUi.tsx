@@ -24,7 +24,7 @@ export const AWAY_MS = 50_000;
  * the games added after it do not each grow a third and fourth version.
  */
 export function Seats({
-  names, scores, active, glyph, dimmed,
+  names, scores, active, glyph, dimmed, tags,
 }: {
   names: Record<Mark, string>;
   scores: Record<Mark, number>;
@@ -33,6 +33,8 @@ export function Seats({
   glyph: (m: Mark) => PieceKind;
   /** true once the game is over, so neither seat is highlighted */
   dimmed: boolean;
+  /** a word under a seat both players can see ("Easy shots") */
+  tags?: Partial<Record<Mark, string | null>>;
 }) {
   return (
     <div className="flex justify-center gap-2">
@@ -47,6 +49,9 @@ export function Seats({
             <span className="font-display text-lg font-semibold tabular-nums leading-none">
               {scores[m]}
             </span>
+            {tags?.[m] && (
+              <span className="rounded-full bg-mist px-2 py-0.5 text-[12px] font-extrabold text-ink">{tags[m]}</span>
+            )}
           </motion.div>
         );
       })}
@@ -65,7 +70,7 @@ export function AwayNotice({ players, userId, now }: {
   return (
     <div className="card bg-petal p-3.5 text-center">
       <p className="text-[13px] font-bold">
-        {gone.username} hasn't been seen for {mins < 1 ? "a minute" : `${mins} minutes`}.
+        {gone.username} hasn't been seen for {mins <= 1 ? "a minute" : `${mins} minutes`}.
         Play carries on without them, or end the match and take the score.
       </p>
     </div>

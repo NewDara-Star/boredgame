@@ -5,6 +5,18 @@ import { Avatar } from "@/shared/ui/Avatar";
 
 import { ROOM_GAMES } from "@/features/play/registry";
 import { LEVELS, type Level } from "@/features/play/scope";
+import { CHALLENGES, roomSetup, roomWith, type Challenge } from "@/features/challenge/kinds";
+
+interface Tile { slug: string; name: string; bank: boolean; on: (r: Room) => boolean }
+/** The room's games, as tiles (drawing 36b). */
+const TILES: Tile[] = [
+  { slug: "tictactoe", name: "Tic Tac Toe", bank: false, on: (r) => r.mode === "tictactoe" || r.mode === "squareoff" },
+  { slug: "connect4", name: "Connect 4", bank: false, on: (r) => r.mode === "connect4" || r.mode === "connect4trivia" },
+  { slug: "memory", name: "Memory Match", bank: false, on: (r) => r.mode === "memory" },
+  { slug: "trivia", name: "Trivia race", bank: true, on: (r) => r.mode === "race" && r.game === "trivia" },
+  { slug: "picto", name: "Picto race", bank: true, on: (r) => r.mode === "race" && r.game === "picto" },
+  { slug: "ballsort", name: "Ball Sort race", bank: false, on: (r) => r.mode === "ballsort" },
+];
 
 /**
  * The settings used to be chosen by the host before the room existed, which
@@ -37,64 +49,75 @@ export function Lobby({
     ? categories.filter((c) => picked.includes(c.name)).reduce((n, c) => n + c.count, 0)
     : categories.reduce((n, c) => n + c.count, 0);
 
-  // Plain Tic Tac Toe and plain Connect 4 draw on nothing, so the category step
-  // is not "optional" for them, it is meaningless. Hide it rather than offer a
-  // choice that changes nothing.
-  const hasBank = ROOM_GAMES.some((g) => g.room.mode === room.mode && g.bank !== null);
-  // Only two modes can be played either way. Offering "a question or a shot"
-  // for a Picto race asks about something that does not exist there, and a
-  // catapult game has no questions to filter or grade.
-  const hasChallenge = ROOM_GAMES.some((g) => g.room.mode === room.mode && g.room.challenge);
-  const asks = hasBank && (!hasChallenge || challenge === "trivia");
+  // Step 1 is the game (drawing 36b): the two board games, then the rest. Tic Tac Toe
+  // and Connect 4 are each one tile whatever they're played with; that's step 2.
+  const tile = TILES.find((x) => x.on(room)) ?? null;
+  const board = tile?.slug === "tictactoe" || tile?.slug === "connect4" ? tile.slug : null;
+  const w: Challenge = board ? roomWith(room.mode, challenge) : "none";
+  const pickTile = (t: Tile) => {
+    if (t.slug === "tictactoe" || t.slug === "connect4") {
+      // a board keeps what it was played with when you swap boards
+      const r = roomSetup(t.slug, board ? w : "none");
+      onSetup(r.mode, "trivia", room.game === "trivia" ? picked : [], levelsOn, r.challenge);
+      return;
+    }
+    const g = ROOM_GAMES.find((x) => x.slug === t.slug);
+    if (!g) return;
+    onSetup(g.room.mode, g.bank ?? room.game, g.bank === room.game ? picked : [], levelsOn, "trivia");
+  };
+  const pickWith = (c: Challenge) => {
+    if (!board) return;
+    const r = roomSetup(board, c);
+    // a board's questions come from the trivia bank
+    onSetup(r.mode, "trivia", room.game === "trivia" ? picked : [], levelsOn, r.challenge);
+  };
+  // Questions only where something asks one: a race, or a board with Trivia or Mix.
+  const asks = board ? w === "trivia" || w === "mix" : !!tile && tile.bank;
+  const shots = w === "cup" || w === "hoops" || w === "knock" || w === "mix";
+  let step = 0;
+  const n = () => ++step;
 
   return (
     <motion.div variants={stagger(0.06)} initial="hidden" animate="show" className="space-y-4">
       <motion.section variants={riseIn}>
-        <p className="text-[12px] font-black text-soft mb-2">
-          1 · What are you playing?
-        </p>
-        <div className="grid gap-2">
-          {ROOM_GAMES.map((g) => {
-            const c = { mode: g.room.mode, game: g.bank, label: g.name,
-                        blurb: g.room.blurb, challenge: g.room.challenge };
-            // A bankless game is identified by its mode alone. rooms.game is NOT
-            // NULL, so it keeps whatever key was already there and ignores it.
-            //
-            // The challenge is part of the identity where a mode has two games
-            // in it. Without it a fresh room — squareoff, trivia — lit up BOTH
-            // Square Off and Catapult Squares, because Catapult Squares draws
-            // on no bank and so passed the game test on any row.
-            const on = room.mode === c.mode
-              && (c.game === null || room.game === c.game)
-              && (c.challenge === undefined || challenge === c.challenge);
+        <p className="text-[12px] font-extrabold text-soft mb-2">{n()} · Game</p>
+        <div className="grid grid-cols-2 gap-[9px]">
+          {TILES.map((t) => {
+            const on = tile?.slug === t.slug;
+            const Art = ROOM_GAMES.find((x) => x.slug === t.slug)?.Art;
             return (
-              // Categories belong to a bank. Square Off and Trivia race share
-                // one so a selection survives; switching to Picto race does not,
-                // and five of the categories have no trivia in them at all.
-                <button key={g.slug}
-                  onClick={() => onSetup(c.mode, c.game ?? room.game,
-                    c.game === room.game ? picked : [], levelsOn, c.challenge ?? challenge)}
-                className={`cut tap text-left p-3.5 ${on ? "cut-petal text-ink" : "bg-board"}`}>
-                <span className="flex items-center gap-2">
-                  <span className={`grid place-items-center h-5 w-5 rounded-full shadow-lift-sm shrink-0
-                    ${on ? "bg-board" : "bg-mist"}`}>
-                    {on && <span className="h-2 w-2 rounded-full bg-ink" />}
-                  </span>
-                  <span className="font-display text-lg font-semibold">{c.label}</span>
-                </span>
-                <span className={`block text-[13px] font-semibold mt-1 ${on ? "opacity-90" : "text-soft"}`}>
-                  {c.blurb}
-                </span>
+              <button key={t.slug} aria-pressed={on} onClick={() => pickTile(t)}
+                className={`card tap flex items-center gap-[9px] rounded-[18px] p-2.5 min-h-[62px] text-left ${on ? "bg-petal" : "bg-board"}`}>
+                {Art && <span className="shrink-0 w-11 h-11 grid place-items-center"><Art size={44} /></span>}
+                <b className="text-[14px] font-bold leading-[1.2]">{t.name}</b>
               </button>
             );
           })}
         </div>
       </motion.section>
 
+      {board && (
+      <motion.section variants={riseIn}>
+        <p className="text-[12px] font-extrabold text-soft mb-2">{n()} · Play it with</p>
+        <div className="flex flex-wrap gap-1.5" role="group" aria-label="Play it with">
+          {CHALLENGES.map((c) => (
+            <button key={c.key} aria-pressed={w === c.key} onClick={() => pickWith(c.key)}
+              className="min-h-[44px] -my-[7px] grid place-items-center">
+              <span className={`card rounded-full px-[11px] py-[5px] text-[13px] font-extrabold ${w === c.key ? "bg-petal" : "bg-board"}`}>{c.name}</span>
+            </button>
+          ))}
+        </div>
+        <p className="text-[13px] font-semibold text-soft mt-2">
+          {CHALLENGES.find((c) => c.key === w)?.says}
+          {shots && " Shots start on Normal; miss two in a row and yours get easier."}
+        </p>
+      </motion.section>
+      )}
+
       {asks && (
       <motion.section variants={riseIn}>
         <p className="text-[12px] font-black text-soft mb-2">
-          2 · Which categories? <span className="text-soft/60">optional</span>
+          {n()} · Questions from <span className="text-soft/60">optional</span>
         </p>
         <div className="card p-3.5">
           <div className="flex flex-wrap gap-1.5">
@@ -132,32 +155,10 @@ export function Lobby({
       </motion.section>
       )}
 
-      {hasChallenge && (
-      <motion.section variants={riseIn}>
-        <p className="text-[12px] font-black text-soft mb-2">
-          3 · What does a move cost?
-        </p>
-        <div className="grid grid-cols-2 gap-2">
-          {([
-            ["trivia", "A question", "Four options. Rewards knowing things."],
-            ["catapult", "A shot", "Aim a catapult at a target. Rewards aim, not age."],
-          ] as const).map(([key, label, blurb]) => (
-            <button key={key}
-              onClick={() => onSetup(room.mode, room.game, picked, levelsOn, key)}
-              className={`cut tap p-3 text-left ${
-                challenge === key ? "cut-petal text-ink" : "bg-board"}`}>
-              <span className="block font-display text-base font-semibold">{label}</span>
-              <span className="block text-[12px] font-bold opacity-75 mt-0.5">{blurb}</span>
-            </button>
-          ))}
-        </div>
-      </motion.section>
-      )}
-
       {asks && (
       <motion.section variants={riseIn}>
         <p className="text-[12px] font-black text-soft mb-2">
-          4 · How hard? <span className="text-soft/60">optional</span>
+          {n()} · How hard? <span className="text-soft/60">optional</span>
         </p>
         <div className="card p-3.5">
           <div className="grid grid-cols-3 gap-2">
@@ -187,7 +188,7 @@ export function Lobby({
 
       <motion.section variants={riseIn}>
         <p className="text-[12px] font-black text-soft mb-2">
-          {hasBank ? "5" : "2"} · Both of you happy?
+          {n()} · Both of you happy?
         </p>
         <div className="grid gap-2">
           {players.map((p) => (

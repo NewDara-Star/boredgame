@@ -3016,3 +3016,68 @@ begin
      where p.id = r.id;
   end if;
 end $$;
+
+-- ============================================================================
+-- Play it with, in rooms (Daramola, 26 Sep 2026)
+--
+-- A room's Tic Tac Toe or Connect 4 can cost a cup toss, hoops, knock-down, or
+-- Mix (a different one each turn), as the solo boards do. 'catapult' stays
+-- accepted for rooms that already hold it; the app plays those as a cup toss.
+--
+-- Two columns on each board:
+--   shot  the last shot's flight as numbers (about 30 points a second, every
+--         block for knock-down), written by the thrower with the result, so
+--         the other phone replays the same throw. Maths, not a video: a few KB.
+--   play  what this turn costs under Mix, and each player's shot level: both
+--         start on Normal; two misses in a row move you to Easy, two hits in a
+--         row move you back (Daramola: "the game picks").
+-- ----------------------------------------------------------------------------
+alter table public.rooms drop constraint if exists rooms_challenge_check;
+alter table public.rooms add constraint rooms_challenge_check
+  check (challenge in ('trivia','catapult','cup','hoops','knock','mix'));
+
+alter table public.ttt_games add column if not exists play jsonb;
+alter table public.ttt_games add column if not exists shot jsonb;
+alter table public.c4_games  add column if not exists play jsonb;
+alter table public.c4_games  add column if not exists shot jsonb;
+-- A flight is a few KB. Anything near this is not a flight.
+alter table public.ttt_games drop constraint if exists ttt_games_shot_size;
+alter table public.ttt_games add constraint ttt_games_shot_size
+  check (shot is null or pg_column_size(shot) < 65536);
+alter table public.c4_games drop constraint if exists c4_games_shot_size;
+alter table public.c4_games add constraint c4_games_shot_size
+  check (shot is null or pg_column_size(shot) < 65536);
+
+create or replace function public.set_room_setup(
+  p_room bigint, p_mode text, p_game text, p_categories text[],
+  p_difficulty text[] default null, p_challenge text default 'trivia')
+returns void language plpgsql security definer set search_path to 'public' as $$
+begin
+  if not exists (select 1 from public.room_players p
+                 where p.room_id = p_room and p.user_id = auth.uid()) then
+    raise exception 'not a member of room %', p_room;
+  end if;
+  if p_difficulty is not null and exists (
+       select 1 from unnest(p_difficulty) d where d not in ('easy','medium','hard')) then
+    raise exception 'unknown difficulty in %', p_difficulty;
+  end if;
+  -- the same list as rooms_challenge_check
+  if coalesce(p_challenge, 'trivia') not in ('trivia','catapult','cup','hoops','knock','mix') then
+    raise exception 'unknown challenge %', p_challenge;
+  end if;
+
+  begin
+    update public.rooms r set
+      mode = p_mode, game = p_game::game_key,
+      categories = nullif(p_categories, '{}'),
+      difficulty = nullif(p_difficulty, '{}'),
+      challenge = coalesce(p_challenge, 'trivia')
+    where r.id = p_room and r.status = 'waiting';
+  exception when check_violation then
+    raise exception 'unknown mode %', p_mode;
+  end;
+
+  update public.room_players p set ready = false where p.room_id = p_room;
+end $$;
+revoke all on function public.set_room_setup(bigint, text, text, text[], text[], text) from public, anon;
+grant execute on function public.set_room_setup(bigint, text, text, text[], text[], text) to authenticated;

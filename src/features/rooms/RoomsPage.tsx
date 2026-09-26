@@ -28,6 +28,7 @@ import { GuestCard, ClaimCard } from "@/features/profile/GuestCard";
 import { Avatar } from "@/shared/ui/Avatar";
 import { Note, Dealing } from "@/shared/ui/Note";
 import { ROOM_GAMES, GAMES } from "@/features/play/registry";
+import { challengeName, parseWith, roomSetup, roomWith } from "@/features/challenge/kinds";
 import { FriendsPanel } from "@/features/friends/Friends";
 
 export function RoomsPage() {
@@ -58,15 +59,22 @@ export function RoomsPage() {
 
   // "Play a friend" on the Games sheet (#14) opens a room already set to that
   // game. Once, and only by the host, while the room is still waiting.
-  const preset = (useLocation().state as { preset?: string } | null)?.preset ?? null;
+  // With Tic Tac Toe and Connect 4 it's set to the "Play it with" chosen there.
+  const sent = useLocation().state as { preset?: string; with?: string } | null;
+  const preset = sent?.preset ?? null, presetWith = parseWith(sent?.with);
   const presetDone = useRef(false);
   useEffect(() => {
     if (presetDone.current || !preset || !room || !user || room.status !== "waiting" || room.host_id !== user.id) return;
     const g = GAMES.find((x) => x.slug === preset);
     if (!g?.room) return;
     presetDone.current = true;
+    if ((preset === "tictactoe" || preset === "connect4") && presetWith) {
+      const r = roomSetup(preset, presetWith);
+      void setup(r.mode, room.game, [], room.difficulty ?? [], r.challenge);
+      return;
+    }
     void setup(g.room.mode, g.bank ?? room.game, [], room.difficulty ?? [], g.room.challenge ?? room.challenge ?? "trivia");
-  }, [preset, room, user, setup]);
+  }, [preset, presetWith, room, user, setup]);
 
   // Race deals a puzzle a round and scores in room_players. The board games own
   // their own row and their own writer, so everything the race UI does below is
@@ -249,7 +257,7 @@ export function RoomsPage() {
     <div className="space-y-5">
       <div className="flex items-baseline justify-between gap-3">
         <p className="font-display text-2xl font-semibold">
-          {waiting ? "Your room" : (ROOM_GAMES.find((g) => g.room.mode === room.mode
+          {waiting ? "Your room" : boardName(room.mode, room.challenge) ?? (ROOM_GAMES.find((g) => g.room.mode === room.mode
             && (g.bank === null || g.bank === room.game))?.name ?? "Race")}
         </p>
         <p className="text-xs text-soft font-bold">{room.status}</p>
@@ -295,7 +303,7 @@ export function RoomsPage() {
       {iAmIn && !waiting && room.mode === "squareoff" && (
         <SquareOffRoom roomId={room.id} code={room.code} status={room.status}
           categories={room.categories} difficulty={room.difficulty}
-          challenge={room.challenge} players={players} userId={user.id} />
+          challenge={roomWith(room.mode, room.challenge)} players={players} userId={user.id} />
       )}
 
       {iAmIn && !waiting && room.mode === "tictactoe" && (
@@ -316,7 +324,7 @@ export function RoomsPage() {
       {iAmIn && !waiting && board === "c4" && (
         <Connect4Room roomId={room.id} code={room.code} status={room.status}
           categories={room.categories} difficulty={room.difficulty}
-          challenge={room.challenge} players={players} userId={user.id}
+          challenge={roomWith(room.mode, room.challenge)} players={players} userId={user.id}
           plain={room.mode === "connect4"} />
       )}
 
@@ -442,4 +450,13 @@ export function RoomsPage() {
       )}
     </div>
   );
+}
+
+/** "Tic Tac Toe · Cup toss": the two board games say what they're played with. */
+function boardName(mode: string, challenge: string): string | null {
+  const board = mode === "tictactoe" || mode === "squareoff" ? "Tic Tac Toe"
+    : mode === "connect4" || mode === "connect4trivia" ? "Connect 4" : null;
+  if (!board) return null;
+  const w = roomWith(mode, challenge);
+  return w === "none" ? board : `${board} · ${challengeName(w)}`;
 }

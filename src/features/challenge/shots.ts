@@ -21,14 +21,51 @@ export const SHOT_HOW: Record<ShotKind, string> = {
   cup: "Toss it in the cup", hoops: "Swish it. The hoop slides.", knock: "Knock the gold off",
 };
 
-export interface ShotResult { hit: boolean; big: string; small: string }
+/**
+ * A shot's flight, as numbers (Daramola, 26 Sep: "send maths instead of a
+ * video"). The thrower's phone writes where everything was about 30 times a
+ * second, and the sounds on the frame they happened; the other phone in a room
+ * draws the same frames. Toss frames are the ball in metres (and the hoop's
+ * slide); knock-down's are the seed, the gold and every block, in the fixed
+ * 390x540 world both phones share. A few KB.
+ */
+export interface ShotRec {
+  v: 1; kind: ShotKind;
+  f: number[][];
+  ev: [number, string][];
+  hit: boolean; big: string; small: string;
+}
+export interface ShotResult { hit: boolean; big: string; small: string; rec?: ShotRec }
 export interface ShotOpts {
   level: ShotLevel;
   onResult: (r: ShotResult) => void;
   /** the wind for cup toss, so the sheet can show it */
   onWind?: (w: number) => void;
   sound?: boolean;
+  /** Sets the scene (where the cup is, the wind, the stack) from a number both
+      phones in a room share, so the one watching sees the same cup. */
+  seed?: number;
+  /** the thrower's colour: petal for crosses, sky for rings */
+  tint?: "petal" | "sky";
+  /** The other phone: no hands on it. It shows the scene and, given a flight,
+      plays it back. */
+  watch?: boolean;
+  /** the moment the ball leaves the hand */
+  onFly?: () => void;
 }
+export interface ShotControl { stop(): void; replay(r: ShotRec): void }
+
+/** A seeded dice (mulberry32): the same number gives the same scene. */
+export function seeded(seed: number): () => number {
+  let a = (seed >>> 0) || 1;
+  return () => {
+    a = (a + 0x6D2B79F5) >>> 0; let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+const r3 = (v: number) => Math.round(v * 1000) / 1000;
+const r1 = (v: number) => Math.round(v * 10) / 10;
 
 /* ---------------------------------------------------------------- juice */
 let AC: AudioContext | null = null;
@@ -84,11 +121,21 @@ function ball(ctx: CanvasRenderingContext2D, x: number, y: number, r: number, co
 export interface Game {
   resize(): void; turn(): void; update(dt: number): void; draw(): void;
   down(x: number, y: number): void; move(x: number, y: number): void; up(): void;
+  /** this instant, as a frame of the flight */
+  snap(): number[];
+  /** put everything where a frame says (the replay) */
+  show(f: number[]): void;
+  /** where the result happened on screen, for the confetti */
+  at(): { x: number; y: number } | undefined;
 }
 export interface Env {
   ctx: CanvasRenderingContext2D; W: () => number; H: () => number; level: ShotLevel;
   s: ReturnType<typeof sfx>; done: (hit: boolean, big: string, small: string, at?: { x: number; y: number }) => void;
   hint: (text: string) => void; shake: (n: number) => void; font: string; clock: () => number;
+  /** the scene's dice (seeded in a room); Math.random when missing */
+  rand?: () => number;
+  tint?: "petal" | "sky";
+  watch?: boolean;
 }
 
 /* ============================================================ the tosses
@@ -107,16 +154,19 @@ export function toss(kind: "cup" | "hoops", E: Env, onWind?: (w: number) => void
   let state: "aim" | "fly" | "incup" | "swish" | "done" = "aim";
   let drag: { x: number; y: number } | null = null, from: { x: number; y: number } | null = null;
   let wind = 0, rattled = 0, rimHits = 0, cupWobble = 0, acc = 0, flown = 0;
-  const W = E.W, H = E.H;
-  const hoopX = () => t.amp * Math.sin(E.clock() * t.w + t.ph);
+  const W = E.W, H = E.H, rand = E.rand ?? Math.random;
+  // in a replay the hoop is where the thrower saw it, not where this clock says
+  let hx: number | null = null;
+  const hoopX = () => hx ?? t.amp * Math.sin(E.clock() * t.w + t.ph);
+  const tint = RAMPS[E.tint ?? "petal"];
   function resize() { F = W() * (hoop ? 1.0 : 1.18); horizon = H() * (hoop ? .26 : .24); }
   function P(x: number, y: number, z: number) { const d = Math.max(.05, z - cam.z); return { x: W() / 2 + x * F / d, y: horizon + (cam.y - y) * F / d, s: F / d }; }
   function turn() {
     const easy = E.level === "easy";
     t = hoop
-      ? { x: 0, y: .95, z: 1.25, r: easy ? .16 : .12, amp: easy ? .12 : .24, w: easy ? .9 : 1.5, ph: Math.random() * 6 }
-      : { x: (Math.random() * 2 - 1) * (easy ? .12 : .2), y: .13, z: easy ? .95 + Math.random() * .2 : 1.0 + Math.random() * .35, r: easy ? .11 : .08, amp: 0, w: 0, ph: 0 };
-    wind = hoop ? 0 : Math.round(((Math.random() * 2 - 1) * (easy ? 1.2 : 2.6)) * 10) / 10;
+      ? { x: 0, y: .95, z: 1.25, r: easy ? .16 : .12, amp: easy ? .12 : .24, w: easy ? .9 : 1.5, ph: rand() * 6 }
+      : { x: (rand() * 2 - 1) * (easy ? .12 : .2), y: .13, z: easy ? .95 + rand() * .2 : 1.0 + rand() * .35, r: easy ? .11 : .08, amp: 0, w: 0, ph: 0 };
+    wind = hoop ? 0 : Math.round(((rand() * 2 - 1) * (easy ? 1.2 : 2.6)) * 10) / 10;
     onWind?.(wind);
     b = { x: 0, y: hoop ? .14 : .12, z: .12, vx: 0, vy: 0, vz: 0, in: false, cx: 0, apex: -9, xAt: 0 };
     trail = []; state = "aim"; rattled = 0; rimHits = 0; flown = 0;
@@ -214,13 +264,14 @@ export function toss(kind: "cup" | "hoops", E: Env, onWind?: (w: number) => void
   function path(pts: { x: number; y: number }[]) { ctx.beginPath(); pts.forEach((p, i) => (i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y))); }
   function drawBall(front: boolean) {
     if (b.y < -.5) return;
-    if (state === "fly") trail.forEach((q, i) => { const r = P(q.x, q.y, q.z); ctx.beginPath(); ctx.arc(r.x, r.y, BR * r.s * (i / trail.length) * .8, 0, 7); ctx.fillStyle = `rgba(255,200,26,${i / trail.length * .35})`; ctx.fill(); });
+    // the trail in the thrower's colour (26i: a blue ball leaves blue dots)
+    if (state === "fly") trail.forEach((q, i) => { const r = P(q.x, q.y, q.z); ctx.beginPath(); ctx.arc(r.x, r.y, BR * r.s * (i / trail.length) * .8, 0, 7); ctx.globalAlpha = i / trail.length * .35; ctx.fillStyle = tint.base; ctx.fill(); ctx.globalAlpha = 1; });
     const p = P(b.x, b.y, b.z);
     if (b.in && !hoop && front) {             // inside the cup: clipped to its mouth
       const c = P(t.x, t.y, t.z); ctx.save(); ctx.beginPath(); ctx.ellipse(c.x, c.y, t.r * c.s, t.r * c.s * .38, 0, 0, 7); ctx.clip();
-      ball(ctx, p.x, p.y, BR * p.s); ctx.restore(); return;
+      ball(ctx, p.x, p.y, BR * p.s, tint.base, tint.hi); ctx.restore(); return;
     }
-    ball(ctx, p.x, p.y, BR * p.s);
+    ball(ctx, p.x, p.y, BR * p.s, tint.base, tint.hi);
   }
   function drawCup(cx: number) {
     const wob = Math.sin(E.clock() * 30) * cupWobble * .01;
@@ -279,7 +330,7 @@ export function toss(kind: "cup" | "hoops", E: Env, onWind?: (w: number) => void
       ctx.fillStyle = "rgba(255,255,255,.92)"; ctx.strokeStyle = INK; ctx.lineWidth = 2; ctx.beginPath(); ctx.roundRect(12, h - 22, w - 24, 10, 5); ctx.fill(); ctx.stroke();
       ctx.fillStyle = pw > .92 ? RAMPS.ember.base : RAMPS.petal.base; ctx.beginPath(); ctx.roundRect(13, h - 21, (w - 26) * pw, 8, 4); ctx.fill();
     }
-    if (state === "aim" && !drag) {
+    if (state === "aim" && !drag && !E.watch) {
       const s = P(b.x, b.y, b.z), k = (Math.sin(E.clock() * 4) + 1) / 2;
       ctx.fillStyle = `rgba(35,26,61,${.25 + k * .35})`; ctx.font = `800 13px ${E.font}`; ctx.textAlign = "center";
       ctx.fillText("swipe up", s.x, s.y - BR * s.s - 18 - k * 6);
@@ -295,7 +346,14 @@ export function toss(kind: "cup" | "hoops", E: Env, onWind?: (w: number) => void
     if (!drag || !from) return; const a = from, z = drag; drag = null; from = null;
     if (!throwIt(z.x - a.x, a.y - z.y)) E.hint("Swipe up: longer goes further");
   }
-  return { resize, turn, update, draw, down, move, up };
+  const snap = () => [r3(b.x), r3(b.y), r3(b.z), b.in ? 1 : 0, hoop ? r3(hoopX()) : 0];
+  function show(f: number[]) {
+    b.x = f[0]; b.y = f[1]; b.z = f[2]; b.in = f[3] === 1;
+    if (hoop) hx = f[4];
+    state = "fly"; trail.push({ x: b.x, y: b.y, z: b.z }); if (trail.length > 14) trail.shift();
+  }
+  const at = () => { const p = P(b.x, b.y, b.z); return { x: p.x, y: p.y }; };
+  return { resize, turn, update, draw, down, move, up, snap, show, at };
 }
 
 /* ========================================================= the knock-down
@@ -324,17 +382,19 @@ function knock(M: MatterNS, E: Env): Game {
   let sling = { x: 0, y: 0 }, state: "aim" | "fly" | "done" = "aim", drag: { x: number; y: number } | null = null;
   let preview: { x: number; y: number }[] = [], t0 = 0, lastHit = 0, crate = 30;
   const R = 13, MAXPULL = 115, K = .205;
-  const W = E.W, H = E.H;
-  function resize() { if (eng) turn(); }
+  // A fixed world, scaled to the canvas, so the stack stands in the same place
+  // on every phone: a replay's frames only mean something if it does.
+  const W = () => KNOCK_W, H = () => KNOCK_H, rand = E.rand ?? Math.random;
+  function resize() { /* the world doesn't change size; startShot scales it */ }
   function turn() {
     const easy = E.level === "easy", S = Math.min(W(), 520) / 390;
     eng = Engine.create({ positionIterations: 10, velocityIterations: 8 }); eng.gravity.y = 1;
     sling = { x: Math.max(125, W() * .3), y: H() * .6 };
     const ground = Bodies.rectangle(W() / 2, H() + 30, W() * 3, 80, { isStatic: true, friction: .9 });
-    const px = W() * (.7 + Math.random() * .12), pw = 96 * S, py = H() * (.56 + Math.random() * .14);
+    const px = W() * (.7 + rand() * .12), pw = 96 * S, py = H() * (.56 + rand() * .14);
     plat = Bodies.rectangle(px, py + 10, pw, 20, { isStatic: true, friction: .8 }); plat.w = pw;
     crate = 30 * S;
-    const rows = easy ? 1 : 2 + (Math.random() < .5 ? 1 : 0);
+    const rows = easy ? 1 : 2 + (rand() < .5 ? 1 : 0);
     blocks = [];
     for (let r = 0; r < rows; r++) {
       const n = r < 2 ? 2 : 1;
@@ -416,66 +476,125 @@ function knock(M: MatterNS, E: Env): Game {
     ctx.fillStyle = RAMPS.petal.base; ctx.strokeStyle = INK; ctx.lineWidth = 3; ctx.beginPath(); ctx.roundRect(-ts / 2, -ts * .4, ts, ts * .8, 7); ctx.fill(); ctx.stroke();
     ctx.fillStyle = RAMPS.petal.hi; ctx.fillRect(-ts / 2 + 5, -ts * .4 + 4, ts - 10, 4);
     ctx.fillStyle = INK; ctx.beginPath(); ctx.arc(-ts * .15, 0, ts * .06, 0, 7); ctx.arc(ts * .15, 0, ts * .06, 0, 7); ctx.fill(); ctx.restore();
-    ball(ctx, seed.position.x, seed.position.y, R, RAMPS.seed.base, RAMPS.seed.hi);
+    ball(ctx, seed.position.x, seed.position.y, R, RAMPS[E.tint ?? "seed"].base, RAMPS[E.tint ?? "seed"].hi);
     if (state === "aim") { ctx.strokeStyle = INK; ctx.lineWidth = 12; ctx.beginPath(); ctx.moveTo(s.x, s.y + 30); ctx.lineTo(s.x + 16, s.y - 6); ctx.stroke(); ctx.strokeStyle = SCENE.woodLo; ctx.lineWidth = 7; ctx.stroke(); }
-    if (state === "aim" && !drag) {
+    if (state === "aim" && !drag && !E.watch) {
       const k = (Math.sin(E.clock() * 4) + 1) / 2; ctx.fillStyle = `rgba(35,26,61,${.3 + k * .35})`;
       ctx.font = `800 13px ${E.font}`; ctx.textAlign = "center"; ctx.fillText("pull back", s.x + 10, s.y + 62 + k * 4);
     }
   }
-  return { resize, turn, update, draw, down, move, up };
+  const snap = () => [r1(seed.position.x), r1(seed.position.y), r1(token.position.x), r1(token.position.y), r3(token.angle),
+    ...blocks.flatMap((bl) => [r1(bl.position.x), r1(bl.position.y), r3(bl.angle)])];
+  function show(f: number[]) {
+    Body.setPosition(seed, { x: f[0], y: f[1] });
+    Body.setPosition(token, { x: f[2], y: f[3] }); Body.setAngle(token, f[4]);
+    blocks.forEach((bl, i) => { Body.setPosition(bl, { x: f[5 + i * 3], y: f[6 + i * 3] }); Body.setAngle(bl, f[7 + i * 3]); });
+    state = "fly";
+  }
+  const at = () => ({ x: Math.min(W() - 10, Math.max(10, token.position.x)), y: Math.min(H() - 10, token.position.y) });
+  return { resize, turn, update, draw, down, move, up, snap, show, at };
 }
 /* eslint-enable @typescript-eslint/no-explicit-any */
+/** knock-down's world, in its own units; the canvas shows it scaled to fit */
+const KNOCK_W = 390, KNOCK_H = 540;
 
 /* ============================================================== running */
 /**
- * Runs one shot on `canvas` until it settles. Returns a stop function; call it
- * when the sheet closes. `onResult` fires once.
+ * Runs one shot on `canvas` until it settles. `onResult` fires once, with the
+ * flight when there was one. Call `stop` when the sheet closes. On the phone
+ * that's watching (`watch`), nothing takes a hand; `replay` plays a flight.
  */
 export function startShot(kind: ShotKind, canvas: HTMLCanvasElement, o: ShotOpts,
-  hint: (text: string) => void, matter?: MatterNS): () => void {
+  hint: (text: string) => void, matter?: MatterNS): ShotControl {
   const ctx = canvas.getContext("2d");
-  if (!ctx) return () => {};
+  if (!ctx) return { stop: () => {}, replay: () => {} };
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  let W = 0, H = 0, shake = 0, parts: Part[] = [], clock = 0, over = false, raf = 0;
-  const s = sfx(o.sound !== false);
+  let W = 0, H = 0, dpr = 1, shake = 0, parts: Part[] = [], clock = 0, over = false, raf = 0;
+  // knock-down's fixed world, scaled into the canvas (k) and centred (ox, oy)
+  let k = 1, ox = 0, oy = 0;
+  const loud = sfx(o.sound !== false);
+  // The flight being written: from the throw to the result.
+  let rec: { f: number[][]; ev: [number, string][] } | null = null, recT = 0, done: ShotRec | undefined;
+  // The flight being played back.
+  let play: { r: ShotRec; t: number; ei: number } | null = null;
+  // Knock-down's result is known the moment the gold leaves the stack, but the
+  // stack is still coming down: write on a little longer, so the other phone
+  // sees it fall, then give the result.
+  let ending: { hit: boolean; big: string; small: string; at?: { x: number; y: number }; until: number } | null = null;
+  const s = Object.fromEntries(Object.entries(loud).map(([name, fn]) => [name, () => {
+    if (name === "throw" && !o.watch && !rec && !play) { rec = { f: [], ev: [] }; recT = 0; o.onFly?.(); }
+    if (rec && !over) rec.ev.push([rec.f.length, name]);
+    fn();
+  }])) as typeof loud;
   const font = getComputedStyle(canvas).fontFamily || "system-ui";
   const E: Env = {
     ctx, W: () => W, H: () => H, level: o.level, s, font, clock: () => clock, hint,
+    rand: o.seed != null ? seeded(o.seed) : Math.random, tint: o.tint, watch: o.watch,
     shake: (n) => { if (!reduce) shake = Math.max(shake, n); },
     done: (hit, big, small, at) => {
-      if (over) return; over = true;
-      if (hit) {
-        (kind === "hoops" ? s.swish : s.in)(); buzz([30, 40, 60]); if (!reduce) shake = 10;
-        if (at) for (let i = 0; i < 34; i++) {
-          const a = Math.random() * Math.PI * 2, v = 2 + Math.random() * 5;
-          parts.push({ x: at.x, y: at.y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 3, r: 3 + Math.random() * 3, c: CONFETTI[i % CONFETTI.length], life: 1, rot: Math.random() * 6 });
-        }
-      } else { s.miss(); buzz(25); }
-      o.onResult({ hit, big, small });
+      if (over || ending) return;
+      if (kind === "knock" && rec && !play) { ending = { hit, big, small, at, until: rec.f.length + 24 }; return; }
+      finish(hit, big, small, at);
     },
   };
+  function finish(hit: boolean, big: string, small: string, at?: { x: number; y: number }) {
+    if (rec) { rec.f.push(game.snap()); done = { v: 1, kind, f: rec.f, ev: rec.ev, hit, big, small }; }
+    over = true;
+    if (hit) {
+      (kind === "hoops" ? loud.swish : loud.in)(); buzz([30, 40, 60]); if (!reduce) shake = 10;
+      if (at) for (let i = 0; i < 34; i++) {
+        const a = Math.random() * Math.PI * 2, v = 2 + Math.random() * 5;
+        parts.push({ x: at.x, y: at.y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 3, r: 3 + Math.random() * 3, c: CONFETTI[i % CONFETTI.length], life: 1, rot: Math.random() * 6 });
+      }
+    } else { loud.miss(); buzz(25); }
+    o.onResult({ hit, big, small, rec: done });
+  }
   const game: Game = kind === "knock" ? knock(matter, E) : toss(kind, E, o.onWind);
   function fit() {
-    const r = canvas.getBoundingClientRect(), dpr = Math.min(2, window.devicePixelRatio || 1);
-    W = r.width; H = r.height; canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
-    ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const r = canvas.getBoundingClientRect(); dpr = Math.min(2, window.devicePixelRatio || 1);
+    canvas.width = Math.round(r.width * dpr); canvas.height = Math.round(r.height * dpr);
+    if (kind === "knock") {
+      k = Math.min(r.width / KNOCK_W, r.height / KNOCK_H);
+      ox = (r.width - KNOCK_W * k) / 2; oy = (r.height - KNOCK_H * k) / 2;
+      W = KNOCK_W; H = KNOCK_H;
+    } else { k = 1; ox = 0; oy = 0; W = r.width; H = r.height; }
     game.resize();
   }
-  const at = (e: PointerEvent) => { const r = canvas.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
+  const at = (e: PointerEvent) => { const r = canvas.getBoundingClientRect(); return { x: (e.clientX - r.left - ox) / k, y: (e.clientY - r.top - oy) / k }; };
   const onDown = (e: PointerEvent) => { audio(); canvas.setPointerCapture(e.pointerId); const p = at(e); game.down(p.x, p.y); e.preventDefault(); };
   const onMove = (e: PointerEvent) => { const p = at(e); game.move(p.x, p.y); };
   const onUp = () => game.up();
-  canvas.addEventListener("pointerdown", onDown); canvas.addEventListener("pointermove", onMove);
-  canvas.addEventListener("pointerup", onUp); canvas.addEventListener("pointercancel", onUp);
+  if (!o.watch) {
+    canvas.addEventListener("pointerdown", onDown); canvas.addEventListener("pointermove", onMove);
+    canvas.addEventListener("pointerup", onUp); canvas.addEventListener("pointercancel", onUp);
+  }
   const ro = new ResizeObserver(() => fit());
   ro.observe(canvas);
   fit(); game.turn();
   let last = performance.now();
   const frame = (now: number) => {
     const dt = Math.min(.05, (now - last) / 1000); last = now; clock += dt;
-    game.update(dt);
+    if (play) {
+      // 30 frames a second, whatever this phone's refresh rate
+      play.t += dt;
+      const { r } = play, i = Math.min(r.f.length - 1, Math.floor(play.t * 30));
+      game.show(r.f[i]);
+      while (play.ei < r.ev.length && r.ev[play.ei][0] <= i) { const fn = loud[r.ev[play.ei][1] as keyof typeof loud]; fn?.(); play.ei++; }
+      if (i >= r.f.length - 1 && !over) E.done(r.hit, r.big, r.small, game.at());
+    } else {
+      game.update(dt);
+      if (rec && !over) { recT += dt; while (recT >= 1 / 30) { rec.f.push(game.snap()); recT -= 1 / 30; } }
+      if (ending && rec && rec.f.length >= ending.until) { const e = ending; ending = null; finish(e.hit, e.big, e.small, e.at); }
+    }
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    if (kind === "knock" && (ox > 0 || oy > 0)) {
+      // the bands either side of the world: sky above, the hill below
+      const cw = canvas.width / dpr, ch = canvas.height / dpr;
+      ctx.fillStyle = SCENE.dawn; ctx.fillRect(0, 0, cw, ch);
+      ctx.fillStyle = RAMPS.leaf.base; ctx.fillRect(0, oy + KNOCK_H * k - 2, cw, ch);
+    }
     ctx.save();
+    ctx.translate(ox, oy); ctx.scale(k, k);
     if (shake > .3) { ctx.translate((Math.random() - .5) * shake, (Math.random() - .5) * shake); shake *= .86; } else shake = 0;
     game.draw();
     parts = parts.filter((p) => p.life > 0);
@@ -488,10 +607,16 @@ export function startShot(kind: ShotKind, canvas: HTMLCanvasElement, o: ShotOpts
     raf = requestAnimationFrame(frame);
   };
   raf = requestAnimationFrame(frame);
-  return () => {
-    cancelAnimationFrame(raf); ro.disconnect();
-    canvas.removeEventListener("pointerdown", onDown); canvas.removeEventListener("pointermove", onMove);
-    canvas.removeEventListener("pointerup", onUp); canvas.removeEventListener("pointercancel", onUp);
+  return {
+    stop() {
+      cancelAnimationFrame(raf); ro.disconnect();
+      canvas.removeEventListener("pointerdown", onDown); canvas.removeEventListener("pointermove", onMove);
+      canvas.removeEventListener("pointerup", onUp); canvas.removeEventListener("pointercancel", onUp);
+    },
+    replay(r: ShotRec) {
+      if (play || over || !r.f.length) return;
+      play = { r, t: 0, ei: 0 };
+    },
   };
 }
 

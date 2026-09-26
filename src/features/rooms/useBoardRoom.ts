@@ -8,6 +8,8 @@ import { scopePool, emptyReason, type Scope } from "@/features/play/scope";
 export type { Scope };
 import { attempt } from "@/shared/lib/write";
 import { useMarkPlayed, fileRoomAnswer } from "@/features/play/played";
+import { isShot, nextMix, stepLevel, turnKindOf, type Challenge, type Play, type TurnKind } from "@/features/challenge/kinds";
+import type { ShotRec } from "@/features/challenge/shots";
 
 export type Mark = "x" | "o";
 export type Phase = "picking" | "asking" | "revealed" | "over";
@@ -34,7 +36,13 @@ export interface BoardRow {
   updated_at: string;
   /** the server's time of the last write (a trigger stamps it) */
   stamped_at?: string | null;
+  /** Play it with: this turn's challenge under Mix, and each player's shot level */
+  play?: Play | null;
+  /** the last shot's flight, for the other phone to play back */
+  shot?: RoomShotRec | null;
 }
+/** A flight as a room stores it: which turn it belongs to (the asked seed) and whose. */
+export type RoomShotRec = ShotRec & { seed: number; by: Mark };
 
 /**
  * The differences between two board games, and nothing else. Square Off and
@@ -89,9 +97,9 @@ export function useBoardRoom<G extends BoardState, R extends BoardRow>(
   scope: Scope | null = null,
   /** No questions at all: taking the square is the whole move. */
   plain = false,
-  /** What the asking phase asks for. A catapult turn deals no puzzle — the
-      target comes from the seed both clients already share. */
-  challenge: "trivia" | "catapult" | "none" = "trivia",
+  /** What taking a spot costs (Play it with). A shot deals no puzzle: the
+      scene comes from the seed both clients already share. */
+  challenge: Challenge = "trivia",
 ) {
   const [row, setRow] = useState<R | null>(null);
   // Mirrors `row` so `write` can revert a failed move without taking `row` as a
@@ -101,7 +109,8 @@ export function useBoardRoom<G extends BoardState, R extends BoardRow>(
   const remember = useCallback((next: R | null) => { rowRef.current = next; setRow(next); }, []);
   // Trivia boards only: nothing to ask, nothing to fetch. Keeps retrying a
   // failed load (useRoomBank) instead of dealing for ever.
-  const bank = useRoomBank("trivia", !plain && challenge === "trivia");
+  const asksQuestions = challenge === "trivia" || challenge === "mix";
+  const bank = useRoomBank("trivia", !plain && asksQuestions);
   const pool = useMemo(() => shuffle(bank.pool.filter((i) => i.choices && i.choices.length >= 2)), [bank.pool]);
   const seen = useRef<Set<string>>(new Set());
   const lastServed = useRef<string | null>(null);
@@ -129,7 +138,16 @@ export function useBoardRoom<G extends BoardState, R extends BoardRow>(
             if (p.eventType === "DELETE" || !(p.new as R)?.room_id) return;
             remember(p.new as R);
           })
-        .subscribe();
+        .subscribe(async (status) => {
+          // The board is dealt a moment after the room turns to "playing", which
+          // is what mounts this. A deal that lands between the read above and
+          // this subscription taking hold was heard by nobody, and the phone sat
+          // on "Dealing the board…" for good (found 26 Sep, two phones in a
+          // test room). Once listening, read again if there's still no board.
+          if (status !== "SUBSCRIBED" || cancelled || rowRef.current) return;
+          const { data: again } = await supabase!.from(engine.table).select("*").eq("room_id", roomId).maybeSingle();
+          if (!cancelled && again && !rowRef.current) remember(again as R);
+        });
     })();
     return () => { cancelled = true; if (channel) void supabase!.removeChannel(channel); };
   }, [roomId, remember, engine.table, engine.channel]);
@@ -169,23 +187,36 @@ export function useBoardRoom<G extends BoardState, R extends BoardRow>(
    * to be a boolean each caller passed, and Connect 4 passed it wrongly at three
    * call sites, dealing a question for a phase that never asks one.
    */
-  const write = useCallback(async (next: G) => {
+  const write = useCallback(async (next: G, extra?: Record<string, unknown>) => {
     if (!supabase || !roomId) return;
     const patch: Record<string, unknown> = {
-      // updated_at is this phone's (it is also the catapult's shared seed);
+      // updated_at is this phone's (it is also the shots' shared seed);
       // stamped_at is the server's, set on arrival: this is only its stand-in
       // until then, on the server's clock so the bar doesn't jump.
       ...engine.encode(next), updated_at: new Date().toISOString(), stamped_at: serverNowIso(),
     };
+    const before = rowRef.current;
+    const was = before ? engine.decode(before) : null;
+    const kindNow: TurnKind = turnKindOf(challenge, before?.play, roomId);
     if (next.phase === "asking") {
-      patch.puzzle_id = challenge === "trivia" ? nextPuzzleId() : null;
+      patch.puzzle_id = kindNow === "trivia" && !plain ? nextPuzzleId() : null;
     }
+    // A shot taken (or timed out) moves the thrower's level: two misses running
+    // and the game makes theirs easier, two hits and it's back to Normal.
+    if (!plain && isShot(kindNow) && was?.phase === "asking" && next.phase !== "asking" && next.last) {
+      patch.play = stepLevel(before?.play, next.last.by, next.last.correct);
+    }
+    // Mix: a new turn deals its challenge, never the same one twice running, and
+    // writes it so both phones name the same one before the pick.
+    if (challenge === "mix" && !plain && next.phase === "picking" && was && was.phase !== "picking") {
+      patch.play = { ...((patch.play as Play | undefined) ?? before?.play), kind: nextMix(kindNow) };
+    }
+    if (extra) Object.assign(patch, extra);
 
     // Apply it here first. Waiting for the write AND the realtime echo before
     // showing your own move meant every tap cost a round trip plus a push before
     // anything on your screen moved — and if realtime hiccupped, nothing moved
     // at all. Realtime is the confirmation now, not the trigger.
-    const before = rowRef.current;
     if (before) remember({ ...before, ...patch } as R);
 
     const msg = await attempt("That move",
@@ -194,7 +225,7 @@ export function useBoardRoom<G extends BoardState, R extends BoardRow>(
     // A refused move must not leave a board on screen that no one else can see.
     if (msg && before) remember(before);
     return msg;
-  }, [roomId, nextPuzzleId, remember, engine, challenge]);
+  }, [roomId, nextPuzzleId, remember, engine, challenge, plain]);
 
   /** Book the win. Incremented in the database rather than read-modify-written
       from this client's copy of the players list, which can lag realtime
@@ -209,12 +240,12 @@ export function useBoardRoom<G extends BoardState, R extends BoardRow>(
       supabase.rpc("claim_board_win", { p_room: roomId })));
   }, [roomId]);
 
-  const apply = useCallback(async (next: G) => {
+  const apply = useCallback(async (next: G, extra?: Record<string, unknown>) => {
     // Only book the win if the winning board actually landed. `write` reverts its
     // optimistic row and returns the error when the update is refused; on that
     // path the opponent never sees the win, so crediting the score would leave
     // the tally ahead of a game that, to everyone else, is still going.
-    const msg = await write(next);
+    const msg = await write(next, extra);
     if (!msg) await bookWin(next);
   }, [write, bookWin]);
 
@@ -252,6 +283,15 @@ export function useBoardRoom<G extends BoardState, R extends BoardRow>(
       const asked = row.stamped_at ? serverToLocal(row.stamped_at) : Date.parse(row.updated_at);
       void fileRoomAnswer(row.puzzle_id, given, Date.now() - asked);
     }
+    void markPlayed();
+  }, [game, myMark, apply, engine, row, markPlayed]);
+
+  /** A shot's result, with its flight for the other phone. Written the moment
+      the shot settles, so their replay starts while your result is still up. */
+  const submitShot = useCallback((hit: boolean, rec?: ShotRec) => {
+    if (!game || game.phase !== "asking" || !myMark || engine.answerer(game) !== myMark || !row) return;
+    const seed = Date.parse(row.updated_at);
+    void apply(engine.answer(game, hit), { shot: rec ? { ...rec, seed, by: myMark } : null });
     void markPlayed();
   }, [game, myMark, apply, engine, row, markPlayed]);
 
@@ -299,16 +339,22 @@ export function useBoardRoom<G extends BoardState, R extends BoardRow>(
       supabase.rpc("reopen_room", { p_room: roomId })));
   }, [roomId]);
 
+  // What this turn costs, and how long the last shot's flight runs: the other
+  // phone plays it back, so the board waits for it.
+  const kind: TurnKind | null = plain ? null : turnKindOf(challenge, row?.play, roomId ?? 0);
+  const flightMs = row?.shot && game?.last && row.shot.by === game.last.by ? Math.round(row.shot.f.length / 30 * 1000) : 0;
+
   // The player who just answered owns the move on, so exactly one client writes it.
   useEffect(() => {
     if (plain || !game || game.phase !== "revealed" || !game.last || game.last.by !== myMark) return;
     // A correct answer has nothing to read; a miss has the right answer and
-    // sometimes an explanation. One fixed pause served neither.
-    const pause = engine.revealMs ?? (challenge !== "trivia" ? 1200
+    // sometimes an explanation. One fixed pause served neither. A shot waits
+    // while the other phone replays it, then for its result to be read.
+    const pause = engine.revealMs ?? (kind && isShot(kind) ? 2600 + flightMs
       : game.last.correct ? 1300 : item?.explanation ? 2900 : 2200);
     const t = setTimeout(() => void write(engine.advance(game)), pause);
     return () => clearTimeout(t);
-  }, [plain, game, myMark, write, engine, item?.explanation, challenge]);
+  }, [plain, game, myMark, write, engine, item?.explanation, kind, flightMs]);
 
   const rematch = useCallback(async () => {
     if (!supabase || !roomId || !row) return;
@@ -317,18 +363,29 @@ export function useBoardRoom<G extends BoardState, R extends BoardRow>(
     const first: Mark = row.winner === "x" ? "o"
       : row.winner === "o" ? "x"
       : row.turn === "x" ? "o" : "x";
+    // Under Mix the next game's first turn is dealt now, so it isn't the last
+    // game's again. Levels carry on: it's the same match.
+    const play = challenge === "mix" ? { play: { ...row.play, kind: nextMix(turnKindOf(challenge, row.play, roomId)) } } : {};
     setWriteError(await attempt("Starting the rematch",
       supabase.from(engine.table)
-        .update({ ...engine.encode(engine.newGame(first)), puzzle_id: null, scored: false })
+        .update({ ...engine.encode(engine.newGame(first)), puzzle_id: null, scored: false, ...play })
         .eq("room_id", roomId)));
-  }, [roomId, row, engine]);
+  }, [roomId, row, engine, challenge]);
 
   return {
-    game, myMark, item, choose, submit, rematch, quit, changeGame,
+    game, myMark, item, choose, submit, submitShot, rematch, quit, changeGame,
+    /** what this turn costs (null on a plain board) */
+    kind,
+    /** each player's shot level and, under Mix, the turn's challenge */
+    play: row?.play ?? null,
+    /** the last flight, for the phone that's watching */
+    shot: row?.shot ?? null,
+    /** how long that flight takes to play back */
+    flightMs,
     forceTimeout, forceAdvance, advanceNow,
     error: poolError ?? writeError,
-    /** A plain or catapult game is never waiting for content — it has none. */
-    ready: plain || challenge !== "trivia" || pool.length > 0,
+    /** A plain or shots-only game is never waiting for content — it has none. */
+    ready: plain || !asksQuestions || pool.length > 0,
     /** the questions didn't load; it keeps trying, and this says so */
     bankTrouble: bank.failed && pool.length === 0 ? BANK_FAILED : null,
     retryBank: bank.retryNow,
@@ -359,5 +416,7 @@ export async function startBoard<G extends BoardState, R extends BoardRow>(
   return await attempt("Dealing the board", supabase.from(engine.table).upsert({
     room_id: roomId, ...engine.encode(engine.newGame("x")),
     puzzle_id: null, x_player: xId, o_player: oId, scored: false,
+    // a new match: everyone back on Normal, and no flight from the last one
+    play: null, shot: null,
   }));
 }

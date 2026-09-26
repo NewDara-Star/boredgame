@@ -75,7 +75,8 @@ export interface Profile {
 
 export type RoomStatus = "waiting" | "playing" | "finished" | "abandoned";
 
-export type Challenge = "trivia" | "catapult";
+/** "catapult" is kept for rooms made before Play it with; they play as a cup toss. */
+export type Challenge = "trivia" | "catapult" | "cup" | "hoops" | "knock" | "mix";
 
 export interface Room {
   id: number;
@@ -85,7 +86,7 @@ export interface Room {
   /** 'race' is the original first-correct-answer-wins; the rest are boards.
       Kept in step by hand with the rooms_mode_check constraint and with
       RoomMode in features/play/registry. */
-  mode: "race" | "squareoff" | "tictactoe" | "connect4" | "connect4trivia" | "memory";
+  mode: "race" | "squareoff" | "tictactoe" | "connect4" | "connect4trivia" | "memory" | "ballsort";
   /** null means every category; stored on the room so both players share a pool */
   categories: string[] | null;
   /** null means every level. Rooms drew from the whole bank before this existed,

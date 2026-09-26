@@ -6,7 +6,7 @@
  * Connect 4 Trivia and Connect 4 Catapult stop being games of their own.
  */
 import { readFileSync, existsSync } from "node:fs";
-import { nextMix, parseWith, isShot, CHALLENGES, roomPreset } from "../src/features/challenge/kinds.ts";
+import { nextMix, parseWith, isShot, CHALLENGES, roomSetup, roomWith, stepLevel, levelOf, mixStart, turnKindOf, type Play } from "../src/features/challenge/kinds.ts";
 import { newGame, pick, answer, advance } from "../src/features/squareoff/rules.ts";
 
 let n = 0;
@@ -19,8 +19,28 @@ for (let i = 0; i < 2000; i++) { const k = nextMix(prev); if (k === prev) repeat
 ok(repeats === 0 && seen.size === 4 && !seen.has("none"), "Mix deals trivia, cup toss, hoops or knock-down, never the same twice running");
 ok(parseWith("hoops") === "hoops" && parseWith("catapult") === null && parseWith(null) === null, "?with= takes only a real choice");
 ok(isShot("cup") && isShot("knock") && !isShot("trivia"), "the shots are the shots");
-ok(roomPreset("tictactoe", "trivia") === "squareoff" && roomPreset("connect4", "none") === "connect4" && roomPreset("connect4", "cup") === null,
-   "a room is set to None or Trivia for now; shots in rooms come next");
+ok(roomSetup("tictactoe", "none").mode === "tictactoe" && roomSetup("tictactoe", "knock").mode === "squareoff"
+   && roomSetup("connect4", "mix").mode === "connect4trivia" && roomSetup("connect4", "hoops").challenge === "hoops",
+   "a room plays every choice: None is the plain board, anything else the board where a spot costs something");
+ok(roomWith("connect4trivia", "hoops") === "hoops" && roomWith("tictactoe", "trivia") === "none" && roomWith("squareoff", "catapult") === "cup",
+   "and reads back as what it was set to (an old catapult room plays cup toss)");
+
+// The game picks each player's shot level (Daramola, 26 Sep): Normal to start,
+// two misses running to Easy, two hits running back to Normal. One player's
+// streak never moves the other's.
+{
+  let p: Play | null = null;
+  p = stepLevel(p, "x", false); ok(levelOf(p, "x") === "norm", "one miss: still Normal");
+  p = stepLevel(p, "o", true);  p = stepLevel(p, "x", false);
+  ok(levelOf(p, "x") === "easy" && levelOf(p, "o") === "norm", "two misses running: Easy, for that player only");
+  p = stepLevel(p, "x", true); ok(levelOf(p, "x") === "easy", "one hit on Easy: still Easy");
+  p = stepLevel(p, "x", false); p = stepLevel(p, "x", true); ok(levelOf(p, "x") === "easy", "a miss breaks the run of hits");
+  p = stepLevel(p, "x", true); ok(levelOf(p, "x") === "norm", "two hits running: back to Normal");
+  p = stepLevel(p, "x", true); p = stepLevel(p, "x", true); ok(levelOf(p, "x") === "norm", "Normal is the top: hits don't go past it");
+}
+// Mix in a room: both phones agree on the turn's challenge before anyone writes one.
+ok(mixStart(41) === mixStart(41) && turnKindOf("mix", null, 41) === mixStart(41) && turnKindOf("mix", { kind: "hoops" }, 41) === "hoops"
+   && turnKindOf("cup", { kind: "hoops" }, 41) === "cup", "Mix's first turn comes from the room, then from what's written");
 
 // A miss leaves the square open and passes the turn: no steal.
 {
@@ -76,5 +96,46 @@ ok(/Back to the board/.test(sheet) && /"bloom" : "bored"/.test(sheet), "the resu
     ok(worstRims <= 5, `a ${kind} throw (${level}) rings the rim at most five times (worst ${worstRims})`);
   }
 }
+
+// A room's two phones see the same scene, and the watching one can draw the
+// thrower's flight: the same seed deals the same cup and wind, and the frames
+// written on one phone put the ball in the same place on the other.
+{
+  const { toss, seeded } = await import("../src/features/challenge/shots.ts");
+  const env = (seed: number, w: number[], watch = false) => {
+    let res: string | null = null; const quiet = () => {};
+    const E = { ctx: {} as CanvasRenderingContext2D, W: () => 390, H: () => 440, level: "norm" as const, font: "", clock: () => 0,
+      s: new Proxy({}, { get: () => quiet }) as never, rand: seeded(seed), watch,
+      done: (_hit: boolean, big: string) => { res = big; }, hint: quiet, shake: quiet };
+    return { E, res: () => res, w };
+  };
+  let same = 0, matched = 0;
+  for (let seed = 1; seed <= 200; seed++) {
+    const a = env(seed, []), b = env(seed, [], true);
+    const ga = toss("cup", a.E, (x) => a.w.push(x)), gb = toss("cup", b.E, (x) => b.w.push(x));
+    ga.resize(); gb.resize(); ga.turn(); gb.turn();
+    if (a.w[0] === b.w[0]) same++;
+    // throw on a, writing a frame every 1/30 s as startShot does
+    for (const y of [396, 352, 308, 418, 440]) ga.down(195, y);
+    ga.move(195 + (seed % 7) * 6 - 18, 396 - (60 + seed % 180)); ga.up();
+    const f: number[][] = []; let t = 0, acc = 0;
+    while (a.res() === null && t < 6) { ga.update(1 / 60); t += 1 / 60; acc += 1 / 60; if (acc >= 1 / 30) { f.push(ga.snap()); acc -= 1 / 30; } }
+    f.push(ga.snap());
+    gb.show(f[f.length - 1]);
+    const pa = ga.at(), pb = gb.at();
+    if (pa && pb && Math.hypot(pa.x - pb.x, pa.y - pb.y) < 1) matched++;
+  }
+  ok(same === 200, `the same seed deals the same wind on both phones (${same}/200)`);
+  ok(matched === 200, `a flight's last frame puts the ball in the same place on the other phone (${matched}/200)`);
+}
+
+const room = read("src/features/rooms/useBoardRoom.ts"), roomShot = read("src/features/challenge/RoomShot.tsx");
+ok(/shot: rec \? \{ \.\.\.rec, seed, by: myMark \} : null/.test(room), "the thrower writes the flight with the turn it belongs to");
+ok(/patch\.play = stepLevel\(before\?\.play, next\.last\.by, next\.last\.correct\)/.test(room), "every shot taken or timed out moves that player's level");
+ok(/challenge === "mix" && !plain && next\.phase === "picking"[\s\S]{0,160}kind: nextMix\(kindNow\)/.test(room), "Mix deals each new turn's challenge and writes it");
+ok(/2600 \+ flightMs/.test(room), "the board waits while the other phone plays the flight back");
+ok(/flight\.seed === turn\.seed && !turn\.mine/.test(roomShot), "the watching phone plays only this turn's flight");
+ok(/watch=\{!turn\.mine\}/.test(roomShot) && /tint=\{turn\.by === "x" \? "petal" : "sky"\}/.test(roomShot), "it can't touch the shot, and the ball is the thrower's colour");
+ok(/Out of time/.test(roomShot), "a shot nobody took says so on both phones");
 
 console.log(`${n} challenge assertions hold`);

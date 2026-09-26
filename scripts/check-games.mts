@@ -27,7 +27,7 @@ const hows = [...reg.matchAll(/howTo: "[^"]{20,}"/g)].length;
 const akas = [...reg.matchAll(/alsoKnown: \[[^\]]+\], like: \[[^\]]+\]/g)].length;
 ok(slugs.length >= 10 && solos === slugs.length && hows === slugs.length && akas === slugs.length, `every game (${slugs.length}) has bot-or-alone, a how-to and other names`);
 ok(/"Play the bot" : "Play"/.test(page) && /Play a friend/.test(page) && /How to play/.test(page), "the sheet: play the bot (or just play), play a friend, how to play (#14, H6)");
-ok(/state: \{ preset \}/.test(page) && /room\.host_id !== user\.id/.test(rooms) && /presetDone\.current = true/.test(rooms),
+ok(/state: \{ preset, with: g\.withs \? w : undefined \}/.test(page) && /room\.host_id !== user\.id/.test(rooms) && /presetDone\.current = true/.test(rooms),
    "Play a friend opens a room already set to that game, once, by the host only");
 
 ok(/grid grid-cols-1 gap-2\.5/.test(page) && /w-full min-w-0/.test(page) && !/truncate/.test(page), "tiles fit a phone: a long tagline wraps instead of widening the page");

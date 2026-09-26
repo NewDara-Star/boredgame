@@ -1,10 +1,12 @@
 import { BankTrouble } from "@/features/rooms/BankTrouble";
 import { ownersFor } from "@/features/play/board";
 import { useEffect, useState } from "react";
-import type { Challenge, RoomPlayer, RoomStatus } from "@/shared/types/db";
+import type { RoomPlayer, RoomStatus } from "@/shared/types/db";
+import { challengeName, isShot, levelOf, SHOT_MS, type Challenge } from "@/features/challenge/kinds";
+import { RoomShot } from "@/features/challenge/RoomShot";
 import { TurnPanel } from "@/features/rooms/TurnPanel";
 import { Note, Dealing } from "@/shared/ui/Note";
-import { askMs, AWAY_MS } from "@/features/play/clock";
+import { askMs } from "@/features/play/clock";
 import {
   Seats, AwayNotice, OverPanel, EndMatchLink,
   MatchOver, useMatchChrome, useStallRescue,
@@ -13,7 +15,7 @@ import { Board } from "./Board";
 import { BOARD_RATIO } from "@/features/play/BoardSoloPage";
 import { PlayBoard, PlayRow, PlaySurface } from "@/features/play/PlaySurface";
 import { c4Hero } from "./card";
-import { describe, stallWriter, type Mark } from "./rules";
+import { describe, stallWriter, columnName, type Mark } from "./rules";
 import { useC4Room } from "./useC4Room";
 
 /** How long after a deadline passes before the other player may take over. */
@@ -27,7 +29,7 @@ export function Connect4Room({
 }: {
   roomId: number; code: string; status: RoomStatus;
   categories: string[] | null; difficulty: string[] | null;
-  /** what a move costs: a question, or a shot */
+  /** what a move costs (Play it with): a question, a shot, or Mix */
   challenge: Challenge;
   players: RoomPlayer[]; userId: string;
   /** Plain Connect 4 drops on tap. Otherwise a column costs a right answer. */
@@ -39,7 +41,7 @@ export function Connect4Room({
   const g = t.game;
   const asking = g?.phase === "asking";
   const mine = asking && g.turn === t.myMark;
-  const title = plain ? "CONNECT 4" : "CONNECT 4 TRIVIA";
+  const title = plain || challenge !== "trivia" ? "CONNECT 4" : "CONNECT 4 TRIVIA";
 
   // One clock, derived from when the question was written, so both screens
   // agree. It runs outside a question too, or the "they have gone" notice never
@@ -56,19 +58,19 @@ export function Connect4Room({
   // names exactly one mark at any instant — unit-checked.
   // Both clients derive the deadline from the same puzzle, so they agree
   // without another column to keep in step.
-  // A shot has no clock at all — no bar, and no deadline anyone could play
-  // against. A timer ticking down while an eight-year-old lines up a catapult
-  // is the pressure this mode exists to remove, and the 30s it used to get was
-  // a reading-a-question number that a careful child can spend, with nothing on
-  // screen to warn them. What is left is only the away deadline, which is not a
-  // rule: it is how long before a silent client is assumed to be gone.
-  const ask = challenge === "catapult" ? AWAY_MS : askMs(t.item?.difficulty);
+  // A shot has 30 seconds (Daramola, 26 Sep), the bar on its sheet; a
+  // question keeps its own clock.
+  const shotTurn = !!t.kind && isShot(t.kind);
+  const ask = shotTurn ? SHOT_MS : askMs(t.item?.difficulty);
   const elapsed = now - t.askedAt;
   const left = ask - elapsed;
   const stall = g && !plain
-    ? stallWriter(g, elapsed, { ask, reveal: REVEAL_MS, grace: GRACE_MS })
+    ? stallWriter(g, elapsed, { ask, reveal: REVEAL_MS + (shotTurn ? t.flightMs : 0), grace: GRACE_MS })
     : null;
-  useStallRescue(stall, t.myMark, t.askedAt, challenge === "catapult" || !!t.item, t);
+  // A ball in the air at the buzzer still lands: this phone doesn't time
+  // itself out mid-flight (the other one waits out the grace first).
+  const [flying, setFlying] = useState(false);
+  useStallRescue(flying && stall?.mark === t.myMark ? null : stall, t.myMark, t.askedAt, shotTurn || !!t.item, t);
 
   if (done) return <MatchOver sides={sides} myMark={t.myMark} card={card} />;
 
@@ -79,6 +81,10 @@ export function Connect4Room({
 
   const other: Mark = g.turn === "x" ? "o" : "x";
   const revealed = g.phase === "revealed" || g.phase === "over";
+  // who owes the shot, and each seat's shot level where shots are in play
+  const shooter: Mark = g.turn;
+  const shots = challenge !== "trivia" && challenge !== "none";
+  const tags = shots ? { x: levelOf(t.play, "x") === "easy" ? "Easy shots" : null, o: levelOf(t.play, "o") === "easy" ? "Easy shots" : null } : undefined;
 
   return (
     <PlaySurface>
@@ -86,6 +92,7 @@ export function Connect4Room({
         <Seats
           names={names}
           scores={{ x: scoreOf("x"), o: scoreOf("o") }}
+          tags={tags}
           active={g.phase === "over" ? null : g.turn}
           glyph={() => "disc"}
           dimmed={g.phase === "over"} />
@@ -103,6 +110,8 @@ export function Connect4Room({
       <PlayRow className="space-y-3">
         <p className="text-center text-[15px] font-bold text-soft">
           {describe(g, names, t.myMark)}
+          {/* Mix names the turn's challenge before the pick, so it's never a surprise. */}
+          {challenge === "mix" && g.phase === "picking" && t.kind && ` This one's ${challengeName(t.kind).toLowerCase()}.`}
         </p>
 
         <Note>{t.error}</Note>
@@ -123,10 +132,10 @@ export function Connect4Room({
           onQuit={() => void t.quit()}
           onChangeGame={() => void t.changeGame()} />
         </PlayRow>
-      ) : !plain && (g.phase === "asking" || g.phase === "revealed") ? (
+      ) : !plain && !shotTurn && (g.phase === "asking" || g.phase === "revealed") ? (
         <PlayRow>
         <TurnPanel
-          challenge={challenge === "catapult" ? "catapult" : "trivia"}
+          challenge="trivia"
           item={t.item} options={t.item?.choices ?? []}
           chosen={chosen} setChosen={setChosen}
           onAnswer={(correct: boolean, given?: string) => t.submit(correct, given)}
@@ -139,6 +148,16 @@ export function Connect4Room({
           nextLabel="Next" />
         </PlayRow>
       ) : null}
+
+      {/* A shot takes the whole phone on both screens: the thrower's sheet, and
+          the same scene on the other phone, which plays the throw back. */}
+      {shotTurn && t.kind && isShot(t.kind) && (
+        <RoomShot active={g.phase === "asking"} kind={t.kind} seed={t.askedSeed}
+          level={levelOf(t.play, shooter)} by={shooter} myMark={t.myMark} names={names}
+          board={g.board} target={g.target} spot={(i) => (i === null ? "" : columnName(i))}
+          askedAt={t.askedAt} now={now} flight={t.shot}
+          onSettle={(hit, rec) => t.submitShot(hit, rec)} onFly={setFlying} />
+      )}
     </PlaySurface>
   );
 }

@@ -1,3 +1,4 @@
+import type { Challenge } from "@/features/challenge/kinds";
 import {
   newGame, pick, place, answer, advance, botSquare, describe, type Game,
 } from "./rules";
@@ -26,7 +27,7 @@ export const TTT: BoardEngine<Game, TttRow> = {
 export function useTttRoom(
   roomId: number | null, userId: string | undefined,
   scope: Scope | null = null, plain = false,
-  challenge: "trivia" | "catapult" | "none" = "trivia",
+  challenge: Challenge = "trivia",
 ) {
   return useBoardRoom(TTT, roomId, userId, scope, plain, challenge);
 }

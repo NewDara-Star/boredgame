@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { motion } from "framer-motion";
 import { Sunflower } from "@/shared/brand/Sunflower";
 import { SPRING } from "@/shared/ui/motion";
-import { startShot, loadMatter, SHOT_HOW, type ShotKind, type ShotLevel, type ShotResult } from "./shots";
+import { startShot, loadMatter, SHOT_HOW, type ShotControl, type ShotKind, type ShotLevel, type ShotRec, type ShotResult } from "./shots";
 
 /**
  * The challenge sheet (drawings 26a–26f, "Play It With" drawings): tap a spot and this
@@ -65,29 +65,54 @@ export function MiniBoard({ board, target, won = false }: {
  * A shot on the sheet. The canvas takes the space; when the throw settles the
  * result shows over it with the flower (26e blooms, 26f is bored) and the sheet
  * reports back after a beat, or at once from the button.
+ *
+ * In a room the other phone uses the same panel to watch (26h, 26i): the same
+ * scene from the shared `seed`, no hands on it, and the thrower's `flight`
+ * played back when it arrives.
  */
-export function ShotPanel({ kind, level, onDone, onWind }: {
+export function ShotPanel({ kind, level, onDone, onWind, seed, tint, watch = false, flight = null, onSettle, onFly, locked = false, outcome = null }: {
   kind: ShotKind; level: ShotLevel;
   onDone: (hit: boolean) => void;
   onWind?: (w: number) => void;
+  seed?: number;
+  tint?: "petal" | "sky";
+  watch?: boolean;
+  /** the thrower's flight, for the phone that's watching */
+  flight?: ShotRec | null;
+  /** the moment the shot settles, before the result's beat (a room writes it then) */
+  onSettle?: (r: ShotResult) => void;
+  /** the moment the ball leaves the hand */
+  onFly?: () => void;
+  /** out of time: no new throw, though one in the air still lands */
+  locked?: boolean;
+  /** a result from outside the throw (the clock ran out): shown, not written */
+  outcome?: ShotResult | null;
 }) {
   const canvas = useRef<HTMLCanvasElement>(null);
+  const ctl = useRef<ShotControl | null>(null);
   const [result, setResult] = useState<ShotResult | null>(null);
   const [hint, setHint] = useState("");
   const [ready, setReady] = useState(kind !== "knock");
-  const [ran, setRan] = useState<ShotKind>(kind);
+  const [ran, setRan] = useState<ShotKind | null>(kind === "knock" ? null : kind);
   const told = useRef(false);
-  const finish = (hit: boolean) => { if (told.current) return; told.current = true; onDone(hit); };
+  // The game calls back long after this render: always reach the latest props.
+  const cb = useRef({ onDone, onSettle, onFly, onWind });
+  cb.current = { onDone, onSettle, onFly, onWind };
+  const finish = (hit: boolean) => { if (told.current) return; told.current = true; cb.current.onDone(hit); };
+  const settle = (r: ShotResult) => {
+    setResult(r); cb.current.onSettle?.(r);
+    setTimeout(() => finish(r.hit), r.hit ? 1700 : 1900);
+  };
 
   useEffect(() => {
-    let stop = () => {};
     let gone = false;
     const run = (k: ShotKind, matter?: unknown) => {
       if (gone || !canvas.current) return;
       setRan(k); setReady(true);
-      stop = startShot(k, canvas.current, {
-        level, onWind,
-        onResult: (r) => { setResult(r); setTimeout(() => finish(r.hit), r.hit ? 1700 : 1900); },
+      ctl.current = startShot(k, canvas.current, {
+        level, seed, tint, watch,
+        onWind: (w) => cb.current.onWind?.(w), onFly: () => cb.current.onFly?.(),
+        onResult: settle,
       }, (h) => { setHint(h); setTimeout(() => setHint(""), 1400); }, matter);
     };
     if (kind === "knock") {
@@ -95,14 +120,31 @@ export function ShotPanel({ kind, level, onDone, onWind }: {
       // toss rather than a spot nobody can play for.
       loadMatter().then((M) => run("knock", M)).catch(() => run("cup"));
     } else run(kind);
-    return () => { gone = true; stop(); };
+    return () => { gone = true; ctl.current?.stop(); ctl.current = null; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [kind, level]);
+  }, [kind, level, seed, watch]);
+
+  useEffect(() => {
+    if (!outcome || result) return;
+    setResult(outcome); setTimeout(() => finish(outcome.hit), 1900);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [outcome]);
+
+  // The watcher plays the flight once it's here and the scene is up. A flight
+  // of another game (this phone fell back to cup toss) can't be drawn: its
+  // result still lands.
+  useEffect(() => {
+    if (!watch || !flight || !ran || result) return;
+    if (flight.kind !== ran) { settle({ hit: flight.hit, big: flight.big, small: flight.small }); return; }
+    ctl.current?.replay(flight);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [watch, flight, ran]);
 
   return (
     <div className="relative min-h-0 rounded-[18px] overflow-hidden bg-mist">
-      <canvas ref={canvas} className="block w-full h-full touch-none" aria-label={SHOT_HOW[ran]} />
+      <canvas ref={canvas} className="block w-full h-full touch-none" aria-label={SHOT_HOW[ran ?? kind]} />
       {!ready && <p className="absolute inset-0 grid place-items-center text-[14px] font-bold text-soft">Setting up…</p>}
+      {locked && !result && <div className="absolute inset-0" aria-hidden />}
       {hint && !result && (
         <p className="absolute left-0 right-0 top-4 text-center font-display text-[22px] pointer-events-none">{hint}</p>
       )}

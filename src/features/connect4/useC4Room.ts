@@ -1,3 +1,4 @@
+import type { Challenge } from "@/features/challenge/kinds";
 import {
   newGame, pick, drop, answer, advance, botColumn, describe, type Game,
 } from "./rules";
@@ -23,7 +24,7 @@ export const C4: BoardEngine<Game, C4Row> = {
 export function useC4Room(
   roomId: number | null, userId: string | undefined,
   scope: Scope | null = null, plain = false,
-  challenge: "trivia" | "catapult" | "none" = "trivia",
+  challenge: Challenge = "trivia",
 ) {
   return useBoardRoom(C4, roomId, userId, scope, plain, challenge);
 }
