@@ -162,6 +162,10 @@ html[data-sky="night"] :where(.card, .cut, .chip, header, nav, [role="dialog"] >
   --color-ink: var(--color-ink-day); --color-soft: var(--color-soft-day);
   color: var(--color-ink-day);
 }
+/* Except the ink and grape buttons: their faces are dark, so their words are white. Without this the
+   rule above (unlayered, so it beats .cut-ink and text-ground) made them ink on
+   ink at night: every Next in a round was a blank dark bar. */
+html[data-sky="night"] :is(.cut-ink, .cut-grape) { color: var(--color-board); }
 
 :focus-visible { outline: 3px solid var(--color-sky); outline-offset: 3px; }
 

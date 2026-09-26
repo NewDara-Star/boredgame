@@ -152,4 +152,14 @@ for (const f of ["src/features/trivia/TriviaGame.tsx", "src/features/rooms/TurnP
      "rooms and solo both use it");
 }
 
+// Night (the sky clock): the rule that puts ink back on cards and buttons is
+// unlayered, so it beats every class. The dark-faced buttons need their white back,
+// or they read ink on ink: every Next in a round was a blank bar at night.
+{
+  const css = readFileSync(new URL("../src/index.css", import.meta.url), "utf8");
+  const light = [...css.matchAll(/\.cut-([a-z]+)\s*\{[^}]*color: var\(--color-board\)/g)].map((m) => m[1]);
+  const back = /html\[data-sky="night"\] :is\(([^)]*)\) \{ color: var\(--color-board\); \}/.exec(css)?.[1] ?? "";
+  ok(light.length > 0 && light.every((c) => back.includes(`.cut-${c}`)), `every dark-faced button keeps white words at night (${light.join(", ")})`);
+}
+
 console.log(`${n} layout assertions hold`);
