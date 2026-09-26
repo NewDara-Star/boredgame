@@ -11,7 +11,7 @@
  * Fair for a child against an adult (Daramola): in the toss games the LENGTH of
  * the swipe sets the power, not its speed, and Easy widens every target.
  */
-import { RAMPS, INK, SCENE } from "@/shared/brand/tokens";
+import { RAMPS, INK, SCENE } from "../../shared/brand/tokens.ts";
 
 export type ShotKind = "cup" | "hoops" | "knock";
 export type ShotLevel = "easy" | "norm";
@@ -81,11 +81,11 @@ function ball(ctx: CanvasRenderingContext2D, x: number, y: number, r: number, co
   ctx.beginPath(); ctx.ellipse(x - r * .3, y - r * .35, r * .22, r * .13, -.6, 0, 7); ctx.fillStyle = "rgba(255,255,255,.85)"; ctx.fill();
 }
 
-interface Game {
+export interface Game {
   resize(): void; turn(): void; update(dt: number): void; draw(): void;
   down(x: number, y: number): void; move(x: number, y: number): void; up(): void;
 }
-interface Env {
+export interface Env {
   ctx: CanvasRenderingContext2D; W: () => number; H: () => number; level: ShotLevel;
   s: ReturnType<typeof sfx>; done: (hit: boolean, big: string, small: string, at?: { x: number; y: number }) => void;
   hint: (text: string) => void; shake: (n: number) => void; font: string; clock: () => number;
@@ -94,7 +94,7 @@ interface Env {
 /* ============================================================ the tosses
    A real 3D throw drawn in perspective. World in metres: x across, y up,
    z away from you. g = 9.8. */
-function toss(kind: "cup" | "hoops", E: Env, onWind?: (w: number) => void): Game {
+export function toss(kind: "cup" | "hoops", E: Env, onWind?: (w: number) => void): Game {
   const hoop = kind === "hoops";
   const { ctx } = E;
   const cam = { y: hoop ? .8 : .62, z: -.55 };
@@ -106,7 +106,7 @@ function toss(kind: "cup" | "hoops", E: Env, onWind?: (w: number) => void): Game
   let trail: { x: number; y: number; z: number }[] = [];
   let state: "aim" | "fly" | "incup" | "swish" | "done" = "aim";
   let drag: { x: number; y: number } | null = null, from: { x: number; y: number } | null = null;
-  let wind = 0, rattled = 0, rimHits = 0, cupWobble = 0, acc = 0;
+  let wind = 0, rattled = 0, rimHits = 0, cupWobble = 0, acc = 0, flown = 0;
   const W = E.W, H = E.H;
   const hoopX = () => t.amp * Math.sin(E.clock() * t.w + t.ph);
   function resize() { F = W() * (hoop ? 1.0 : 1.18); horizon = H() * (hoop ? .26 : .24); }
@@ -119,7 +119,7 @@ function toss(kind: "cup" | "hoops", E: Env, onWind?: (w: number) => void): Game
     wind = hoop ? 0 : Math.round(((Math.random() * 2 - 1) * (easy ? 1.2 : 2.6)) * 10) / 10;
     onWind?.(wind);
     b = { x: 0, y: hoop ? .14 : .12, z: .12, vx: 0, vy: 0, vz: 0, in: false, cx: 0, apex: -9, xAt: 0 };
-    trail = []; state = "aim"; rattled = 0; rimHits = 0;
+    trail = []; state = "aim"; rattled = 0; rimHits = 0; flown = 0;
   }
   // Swipe LENGTH sets the power (the same on every phone, and a child can
   // control it); the swipe's slant sets the line.
@@ -140,7 +140,18 @@ function toss(kind: "cup" | "hoops", E: Env, onWind?: (w: number) => void): Game
     if (b.vy < 0 && prevY >= t.y && b.y < t.y) {                     // through the mouth, falling
       if (d <= t.r - BR * .6) { b.in = true; state = hoop ? "swish" : "incup"; b.vx *= .2; b.vz *= .2; b.cx = tx; return; }
       if (d <= t.r + BR) {                                              // on the rim
-        rimHits++; E.s.rim(); buzz(8);
+        rimHits++;
+        // A ball can come to rest ON the rim: every bounce smaller than the
+        // last, none of them ever ending (Daramola's phone, 26 Sep: it sat on
+        // the cup's edge for good). A slow ball or a sixth touch settles it:
+        // over the mouth it drops in, otherwise it rolls off the outside.
+        if (rimHits > 5 || Math.abs(b.vy) < .6) {
+          if (d < t.r) { b.in = true; rattled++; state = hoop ? "swish" : "incup"; b.vx = 0; b.vz = 0; b.vy = -.3; b.cx = tx; return; }
+          const nx = dx / (d || 1), nz = dz / (d || 1);
+          b.x = tx + nx * (t.r + BR * 1.3); b.z = t.z + nz * (t.r + BR * 1.3); b.y = t.y - .002;
+          b.vx = nx * .5; b.vz = nz * .5; b.vy = -.2; return;
+        }
+        E.s.rim(); buzz(8);
         const nx = dx / (d || 1), nz = dz / (d || 1), inward = d < t.r, vn = b.vx * nx + b.vz * nz;
         if (inward) { b.vx -= 1.6 * vn * nx; b.vz -= 1.6 * vn * nz; }
         else { b.vx -= 1.8 * vn * nx; b.vz -= 1.8 * vn * nz; b.vx += nx * .35; b.vz += nz * .35; }
@@ -164,6 +175,10 @@ function toss(kind: "cup" | "hoops", E: Env, onWind?: (w: number) => void): Game
       if (onTable && b.y < BR) { b.y = BR; if (b.vy < -.6) { b.vy = -b.vy * .45; E.s.thud(); } else b.vy = 0; b.vx *= .82; b.vz *= .82; }
     }
     const still = Math.hypot(b.vx, b.vy, b.vz) < .05 && b.y <= BR + .001;
+    // Five seconds is longer than any real throw: whatever the ball is doing
+    // by then, the turn is over. Nothing may leave a shot running for ever.
+    flown += DT;
+    if (flown > 5) { const dd = Math.hypot(b.x - (hoop ? hoopX() : t.x), b.z - t.z); if (dd < t.r && b.y <= t.y + BR) { b.in = true; b.cx = hoop ? hoopX() : t.x; state = hoop ? "swish" : "incup"; } else miss(); return; }
     if (still || b.y < -1 || b.z > 3 || Math.abs(b.x) > 2) miss();
   }
   function miss() {

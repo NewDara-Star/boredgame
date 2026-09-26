@@ -52,4 +52,29 @@ ok(/catch\(\(\) => run\("cup"\)\)/.test(sheet), "if it can't load, the turn is a
 ok(/top-\[calc\(34px\+env\(safe-area-inset-top\)\)\]/.test(sheet) && /rounded-t-\[26px\]/.test(sheet), "the sheet is full height, 26px corners on top");
 ok(/Back to the board/.test(sheet) && /"bloom" : "bored"/.test(sheet), "the result lands on the sheet with the flower, then goes");
 
+// A throw always ends (Daramola, 26 Sep: the ball sat on the cup's rim for
+// good, the rim sound going over and over). Play the real physics, no screen:
+// every throw settles within five seconds, with at most five rim sounds.
+{
+  const { toss } = await import("../src/features/challenge/shots.ts");
+  for (const kind of ["cup", "hoops"] as const) for (const level of ["norm", "easy"] as const) {
+    let clock = 0, res: string | null = null, rims = 0, worstRims = 0, worstT = 0, unended = 0;
+    const quiet = () => {};
+    const E = { ctx: {} as CanvasRenderingContext2D, W: () => 390, H: () => 440, level, font: "", clock: () => clock,
+      s: new Proxy({}, { get: (_, k) => (k === "rim" ? () => { rims++; } : quiet) }) as never,
+      done: (_hit: boolean, big: string) => { res = big; }, hint: quiet, shake: quiet };
+    const g = toss(kind, E); g.resize();
+    for (let i = 0; i < 4000; i++) {
+      g.turn(); res = null; rims = 0;
+      const len = 30 + Math.random() * 260, slant = (Math.random() - .5) * len * .5;
+      for (const y of [396, 352, 308, 418, 440]) g.down(195, y);
+      g.move(195 + slant, 396 - len); g.up();
+      let t = 0; while (res === null && t < 30) { g.update(1 / 60); t += 1 / 60; clock += 1 / 60; }
+      if (res === null) unended++; worstT = Math.max(worstT, t); worstRims = Math.max(worstRims, rims);
+    }
+    ok(unended === 0 && worstT <= 5.1, `every ${kind} throw (${level}) ends: none left running, longest ${worstT.toFixed(1)}s`);
+    ok(worstRims <= 5, `a ${kind} throw (${level}) rings the rim at most five times (worst ${worstRims})`);
+  }
+}
+
 console.log(`${n} challenge assertions hold`);
