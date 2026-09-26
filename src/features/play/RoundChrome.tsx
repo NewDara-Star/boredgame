@@ -99,36 +99,36 @@ export function Burst({ show }: { show: boolean }) {
   );
 }
 
-export function Reveal({ correct, near, answer, gained, parts, onNext, isLast, explanation }:
+export function Reveal({ correct, near, answer, gained, parts, onNext, isLast, explanation, answerShown = false }:
   { correct: boolean; near: boolean; answer: string; gained: number; onNext: () => void;
     isLast: boolean; explanation?: string;
     /** what the points were for; the clock is never shown while you answer (talk item 4) */
-    parts?: ScoreParts | null }) {
+    parts?: ScoreParts | null;
+    /** the options already show the right one in green, so the card doesn't repeat it */
+    answerShown?: boolean }) {
+  // One white card, no shouting (#17, #18): the verdict, what the points were
+  // for (kept, small: Daramola 26 Sep), and the reason. It used to be a green or
+  // red slab saying Correct or Missed, and the reason in a second card.
   return (
     <motion.div
       initial={{ opacity: 0, y: 26 }} animate={{ opacity: 1, y: 0 }} transition={SPRING}
       className="mt-5">
-      <div className={`card p-4 ${correct ? "bg-leaf" : near ? "bg-petal" : "bg-ember"}`}>
-        <p className={`font-display text-lg font-semibold ${near && !correct ? "text-ink" : "text-board"}`}>
-          {correct ? `Correct  +${gained}` : near ? "So close" : "Missed"}
+      <div className="card p-4" role="status">
+        <p className={`font-display text-[22px] leading-tight font-semibold ${correct ? "text-leaf-deep" : near ? "text-ink" : "text-ember-deep"}`}>
+          {correct ? `Yes! +${gained}` : near ? "So close" : "Not this time"}
         </p>
         {correct && parts && (
-          <p className="text-[13px] font-bold text-board opacity-90 mt-0.5 tabular-nums">{sayParts(parts)}</p>
+          <p className="text-[12px] font-bold text-soft mt-0.5 tabular-nums">{sayParts(parts)}</p>
         )}
-        {!correct && (
-          <p className={`text-[15px] font-bold mt-0.5 ${near ? "text-ink" : "text-board"}`}>
-            {answer}
-          </p>
+        {!correct && !answerShown && (
+          <p className="text-[15px] font-bold mt-0.5">The answer: {answer}</p>
+        )}
+        {explanation && (
+          <p className="text-[15px] font-semibold mt-1.5 leading-snug">{explanation}</p>
         )}
       </div>
-      {explanation && (
-        <div className="card p-4 mt-2.5">
-          <p className="text-[12px] font-black text-soft">Why</p>
-          <p className="text-[15px] font-semibold mt-1 leading-snug">{explanation}</p>
-        </div>
-      )}
       <button onClick={onNext} autoFocus
-        className="cut tap w-full mt-3 py-4 font-display text-lg font-semibold cut-ink text-ground">
+        className="cut tap w-full mt-3 py-4 font-display text-lg font-semibold cut-petal">
         {isLast ? "See the round" : "Next"}
       </button>
     </motion.div>

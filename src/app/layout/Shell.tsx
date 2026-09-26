@@ -10,6 +10,7 @@ import { IconHome, IconPlay, IconRooms, IconRanks, IconFlame } from "./Icons";
 import { Wordmark } from "@/shared/ui/Wordmark";
 import { ErrorBoundary } from "@/app/ErrorBoundary";
 import { ScreenLoading } from "./ScreenLoading";
+import { useFocused } from "./focus";
 import { PushOnboarding } from "@/features/push/PushOnboarding";
 import { CarryAcross } from "@/features/play/CarryAcross";
 import { Sky } from "@/shared/brand/Sky";
@@ -37,11 +38,13 @@ export function Shell() {
   }, [pathname, nav]);
   const p = useProgress();
   const rank = rankFor(p.answered).current;
+  // A round in play hides the header and the tab bar (#16); its own X leads out.
+  const focused = useFocused();
 
   return (
     <div className="min-h-full flex flex-col">
       <Sky />
-      <header className="sticky top-0 z-30 bg-board/90 backdrop-blur shadow-lift">
+      {!focused && <header className="sticky top-0 z-30 bg-board/90 backdrop-blur shadow-lift">
         <nav className="max-w-3xl mx-auto flex items-center gap-1 px-3 h-[62px]">
           <NavLink to="/" className="mr-1 sm:mr-3 shrink-0 grid place-items-center" aria-label="BoredGame home">
             <Wordmark height={26} />
@@ -94,7 +97,7 @@ export function Shell() {
             </NavLink>
           )}
         </nav>
-      </header>
+      </header>}
 
       {offline && (
         <div className="bg-leaf-hi text-ink text-xs font-bold px-4 py-2 text-center">
@@ -106,7 +109,9 @@ export function Shell() {
           is fixed and extends into env(safe-area-inset-bottom), so 5rem alone
           left the last ~30px of content under it on a notched iPhone. --chrome
           in index.css carries the same term, and .play-surface subtracts it. */}
-      <main className="flex-1 max-w-3xl w-full mx-auto px-4 pt-4 pb-[calc(5rem+env(safe-area-inset-bottom))] sm:py-6">
+      <main className={`flex-1 max-w-3xl w-full mx-auto px-4 sm:py-6 ${focused
+        ? "pt-[calc(1rem+env(safe-area-inset-top))] pb-[calc(1.5rem+env(safe-area-inset-bottom))]"
+        : "pt-4 pb-[calc(5rem+env(safe-area-inset-bottom))]"}`}>
         {/* Keyed on the path so navigating away from a broken screen clears it. */}
         <ErrorBoundary key={pathname}>
           <CarryAcross />
@@ -118,7 +123,7 @@ export function Shell() {
         </ErrorBoundary>
       </main>
 
-      <nav className="sm:hidden fixed inset-x-0 bottom-0 z-30 bg-board shadow-lift
+      {!focused && <nav className="sm:hidden fixed inset-x-0 bottom-0 z-30 bg-board shadow-lift
         pb-[env(safe-area-inset-bottom)]">
         <div className="max-w-3xl mx-auto grid grid-cols-4">
           {TABS.map((t) => {
@@ -138,9 +143,9 @@ export function Shell() {
             );
           })}
         </div>
-      </nav>
+      </nav>}
 
-      <PushOnboarding />
+      {!focused && <PushOnboarding />}
     </div>
   );
 }

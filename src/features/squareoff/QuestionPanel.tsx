@@ -52,11 +52,14 @@ export function QuestionPanel({
         {options.map((opt, i) => {
           const isAnswer = opt === correctAnswer;
           const isMine = chosen === opt;
+          // The rest step back (#17). Not with opacity: the rise-in animation
+          // sets it inline, so an opacity class never showed (they stayed white).
           const bg = !revealed
             ? (isMine ? "bg-petal" : "bg-board")
             : isAnswer ? "bg-leaf text-ink"
             : isMine ? "bg-ember text-ink"
-            : "bg-board opacity-40";
+            : "bg-board/50 text-soft [&_svg]:opacity-50";
+          const tag = revealed && isAnswer ? "Right" : revealed && isMine ? "You" : null;
           return (
             <motion.button key={opt} variants={riseIn}
               disabled={locked}
@@ -68,7 +71,8 @@ export function QuestionPanel({
               </span>
               {revealed && isAnswer && <span className="sr-only">Correct answer: </span>}
               {revealed && isMine && !isAnswer && <span className="sr-only">Your incorrect answer: </span>}
-              <span className="text-[15px] font-bold">{opt}</span>
+              <span className="text-[15px] font-bold flex-1">{opt}</span>
+              {tag && <span aria-hidden className="shrink-0 text-[12px] font-black bg-board/80 text-ink rounded-full px-2 py-0.5">{tag}</span>}
             </motion.button>
           );
         })}

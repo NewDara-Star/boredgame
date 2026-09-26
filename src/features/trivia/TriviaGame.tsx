@@ -131,7 +131,7 @@ export function TriviaGame() {
           </button>
         )
       ) : (
-        <Reveal correct={r.last!.correct} near={false} answer={item.answer}
+        <Reveal correct={r.last!.correct} near={false} answer={item.answer} answerShown
           gained={r.last!.gained} parts={r.last!.parts} onNext={r.next} isLast={r.index + 1 >= r.items.length}
           explanation={item.explanation} />
       )}

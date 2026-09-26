@@ -5,8 +5,9 @@
  *
  *   PieceMark  a seat's mark in a score chip: cross, ring, disc or tile, in the
  *              seat's colour with the ink outline subjects carry
- *   AnswerMark an answer option's marker: plain ink disc / ring / cross / tile,
- *              becoming a tick (right) or a cross (wrong) on reveal
+ *   AnswerMark an answer option's marker: a bubblegum disc, sky ring, petal
+ *              cross or leaf tile, outlined like every piece (drawing #16),
+ *              becoming an ink tick (right) or cross (wrong) on reveal
  */
 export type PieceKind = "cross" | "ring" | "disc" | "tile";
 
@@ -48,11 +49,14 @@ export function XMark({ size = 18 }: { size?: number }) {
   );
 }
 
-/** Four answers, four ink pieces. Colour arrives only with a pick (BRAND.md). */
+/** Four answers, four pieces, four colours (drawing #16): a shape tells them
+    apart without the colour, the colour without the shape. They used to be
+    plain ink until a pick. */
 const ORDER: PieceKind[] = ["disc", "ring", "cross", "tile"];
+const TINT = ["var(--color-gum)", "var(--color-sky)", "var(--color-petal)", "var(--color-leaf)"];
 export function AnswerMark({ index, state = "idle", size = 18 }:
   { index: number; state?: "idle" | "right" | "wrong"; size?: number }) {
   if (state === "right") return <Tick size={size} />;
   if (state === "wrong") return <XMark size={size} />;
-  return <PieceMark kind={ORDER[index % 4]} colour="currentColor" size={size} outlined={false} />;
+  return <PieceMark kind={ORDER[index % 4]} colour={TINT[index % 4]} size={size} />;
 }

@@ -13,11 +13,36 @@ import { errorField } from "@/shared/lib/names";
  * the same account underneath, minus the password, and it can be turned into a
  * real one later without losing anything.
  */
-export function GuestCard({ note }: { note?: string }) {
+export function GuestCard({ note, bare = false }: {
+  note?: string;
+  /** Just the name and the button, for a screen that says the rest itself
+      (Today's round signed out, #15). */
+  bare?: boolean;
+}) {
   const { signInAsGuest } = useAuth();
   const [name, setName] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const form = (
+    <form className={`space-y-3 ${bare ? "" : "mt-4"}`} noValidate
+      onSubmit={async (e) => {
+        e.preventDefault();
+        setError(null); setBusy(true);
+        const { error } = await signInAsGuest(name);
+        setBusy(false);
+        if (error) setError(error);
+      }}>
+      <Field label={bare ? "Your name" : "What should we call you?"} error={error}>
+        <Input value={name} placeholder="Tayo" autoCapitalize="words"
+          maxLength={20} onChange={(e) => setName(e.target.value)} />
+      </Field>
+      <Button type="submit" disabled={busy} className="w-full">
+        {busy ? "One second…" : bare ? "Play" : "Start playing"}
+      </Button>
+    </form>
+  );
+  if (bare) return form;
 
   return (
     <div className="card bg-petal p-5">
@@ -25,22 +50,7 @@ export function GuestCard({ note }: { note?: string }) {
       <p className="text-sm font-semibold mt-1 opacity-80">
         {note ?? "Type a name and you're in. No password, nothing to remember."}
       </p>
-      <form className="space-y-3 mt-4" noValidate
-        onSubmit={async (e) => {
-          e.preventDefault();
-          setError(null); setBusy(true);
-          const { error } = await signInAsGuest(name);
-          setBusy(false);
-          if (error) setError(error);
-        }}>
-        <Field label="What should we call you?" error={error}>
-          <Input value={name} placeholder="Tayo" autoCapitalize="words"
-            maxLength={20} onChange={(e) => setName(e.target.value)} />
-        </Field>
-        <Button type="submit" disabled={busy} className="w-full">
-          {busy ? "One second…" : "Start playing"}
-        </Button>
-      </form>
+      {form}
       <p className="text-[13px] font-bold opacity-70 mt-3">
         You can turn this into a proper account later and keep your games. Guest games are kept
         for 30 days after you last play.
