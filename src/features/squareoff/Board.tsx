@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { SPRING } from "@/shared/ui/motion";
-import type { Cell, Mark } from "./rules";
+import { SQUARE_NAMES, type Cell, type Mark } from "./rules";
 import { SEAT_CSS } from "@/shared/brand/seats";
 import { SOLO_OWNERS, whose, type Owners } from "@/features/play/board";
 
@@ -12,7 +12,7 @@ function Glyph({ mark }: { mark: Mark }) {
     ? <g transform={`translate(0 ${dy})`}><path d="M24 24 L76 76" stroke={stroke} strokeWidth={w} {...line} /><path d="M76 24 L24 76" stroke={stroke} strokeWidth={w} {...line} /></g>
     : <circle cx="50" cy={50 + dy} r="27" stroke={stroke} strokeWidth={w} {...line} />;
   return (
-    <motion.svg viewBox="0 0 100 100" className="w-[64%] h-[64%] overflow-visible"
+    <motion.svg viewBox="0 0 100 100" className="w-[66%] h-[66%] overflow-visible"
       initial={{ scale: 0.3, rotate: mark === "x" ? -30 : 30, opacity: 0 }}
       animate={{ scale: 1, rotate: 0, opacity: 1 }}
       transition={{ type: "spring", stiffness: 300, damping: 15 }}>
@@ -27,7 +27,7 @@ function Glyph({ mark }: { mark: Mark }) {
 }
 
 export function Board({
-  board, target, line, canPick, compact = false, width, onPick, owners = SOLO_OWNERS,
+  board, target, line, canPick, compact = false, width, onPick, owners = SOLO_OWNERS, tint = false,
 }: {
   board: Cell[]; target: number | null; line: number[] | null;
   canPick: boolean; compact?: boolean;
@@ -37,45 +37,44 @@ export function Board({
       falls back to the old width-driven sizing, which is what the room
       screens and the result cards still want. */
   width?: number;
+  /** a claimed square takes its owner's pale colour (Square Off, #26's .sq);
+      plain Tic Tac Toe keeps every square mist (#25's .g3) */
+  tint?: boolean;
   onPick: (i: number) => void;
 }) {
+  // From the drawings' code: .board (white, 24px corners, 10px in) holding .g3
+  // (7px apart, 14px corners, mist squares, pieces at 66%). No numbers: the
+  // words name squares by where they are. While a question is up the board
+  // drops to 62% and the square in play is white with an ink ring (.sq i.pick).
+  const size = width ? (compact ? Math.round(width * 0.62) : width) : undefined;
   return (
-    // The board shrinks while a question is up. At full size the options sit
-    // below the fold, and you cannot judge whether a square is worth fighting
-    // for without seeing the board it belongs to.
     <motion.div
-      className={`card grid grid-cols-3 mx-auto p-[3%] ${width ? "" : "w-full"}`}
-      style={width ? { width } : undefined}
-      animate={{ maxWidth: width ?? (compact ? 188 : 336), gap: width ? Math.max(4, width * 0.03) : compact ? 6 : 10 }}
+      className={`bg-board rounded-[24px] shadow-lift-sm grid grid-cols-3 mx-auto p-2.5 ${width ? "" : "w-full"}`}
+      style={size ? { width: size } : undefined}
+      animate={{ maxWidth: size ?? (compact ? 188 : 336), gap: compact ? 6 : 7 }}
       transition={SPRING}>
       {board.map((cell, i) => {
-        const contested = target === i;
+        const contested = target === i && !cell;
         const won = line?.includes(i);
         const open = cell === null;
         const pickable = canPick && open;
+        const name = `${SQUARE_NAMES[i].charAt(0).toUpperCase()}${SQUARE_NAMES[i].slice(1)} square`;
+        const bg = won ? "bg-petal-hi"
+          : contested ? "bg-board shadow-[inset_0_0_0_3px_var(--color-ink-day)]"
+          : tint && cell === "x" ? "bg-petal-hi" : tint && cell === "o" ? "bg-sky-hi" : "bg-mist";
         return (
           <motion.button
             key={i}
             disabled={!pickable}
             onClick={() => pickable && onPick(i)}
             aria-label={cell
-              ? `Square ${i + 1}, ${whose(owners, cell)}${won ? ", in the winning line" : ""}`
-              : `Square ${i + 1}, open${contested ? ", being played for" : ""}`}
-            className={`${pickable ? "tap" : ""} aspect-square grid place-items-center rounded-[14px]
-              ${won ? "bg-leaf-hi" : contested ? "bg-petal-hi" : open ? "bg-mist" : "bg-board"}
-              ${pickable ? "cursor-pointer hover:bg-sky-hi/40" : "cursor-default"}`}
-            animate={won ? { scale: [1, 1.1, 1] } : contested ? { scale: [1, 1.04, 1] } : { scale: 1 }}
-            transition={won ? { ...SPRING, delay: (line?.indexOf(i) ?? 0) * 0.09 }
-              : contested ? { duration: 1.1, repeat: Infinity, ease: "easeInOut" } : SPRING}>
-            {cell
-              ? <Glyph mark={cell} />
-              : pickable
-                // A number, not a dot: "square 5" in the running commentary has
-                // to point at something you can actually see.
-                ? <span className={`font-display font-semibold text-soft/35 tabular-nums
-                    ${compact ? "text-base" : "text-2xl"}`}>{i + 1}</span>
-                : <span className={`font-display font-semibold text-soft/15 tabular-nums
-                    ${compact ? "text-base" : "text-2xl"}`}>{i + 1}</span>}
+              ? `${name}, ${whose(owners, cell)}${won ? ", in the winning line" : ""}`
+              : `${name}, open${contested ? ", being played for" : ""}`}
+            className={`${pickable ? "tap cursor-pointer" : "cursor-default"} aspect-square grid place-items-center
+              ${compact ? "rounded-[12px]" : "rounded-[14px]"} ${bg}`}
+            animate={won ? { scale: [1, 1.1, 1] } : { scale: 1 }}
+            transition={won ? { ...SPRING, delay: (line?.indexOf(i) ?? 0) * 0.09 } : SPRING}>
+            {cell && <Glyph mark={cell} />}
           </motion.button>
         );
       })}

@@ -51,6 +51,9 @@ export function useSoloBoard<G extends BoardState, R extends BoardRow>(
   // times and having each result vanish is what made solo feel like a lesser
   // mode than a room.
   const [wins, setWins] = useState({ x: 0, o: 0 });
+  /** games finished this session, draws included: the X ends a session that
+      has one (Daramola 26 Sep), and leaves one that hasn't */
+  const [played, setPlayed] = useState(0);
   const [ended, setEnded] = useState(false);
   const counted = useRef(false);
   const seen = useRef<Set<string>>(new Set());
@@ -243,6 +246,7 @@ export function useSoloBoard<G extends BoardState, R extends BoardRow>(
   useEffect(() => {
     if (game.phase !== "over" || counted.current) return;
     counted.current = true;
+    setPlayed((n) => n + 1);
     if (game.winner === "x" || game.winner === "o") {
       const won = game.winner;
       setWins((w) => ({ ...w, [won]: w[won] + 1 }));
@@ -282,7 +286,7 @@ export function useSoloBoard<G extends BoardState, R extends BoardRow>(
     saved.current = false;
     counted.current = false;
     setResults([]); setOutcome(null); setItem(null); setChosen(null);
-    setWins({ x: 0, o: 0 }); setEnded(false);
+    setWins({ x: 0, o: 0 }); setPlayed(0); setEnded(false);
     setBotFires(null); botAimed.current = -1;
     botSeen.current = new Map();
     setGame(engine.newGame("x"));
@@ -291,7 +295,7 @@ export function useSoloBoard<G extends BoardState, R extends BoardRow>(
   const names: Record<Mark, string> = { x: "You", o: "The bot" };
 
   return {
-    game, item, options, chosen, results, outcome, names, wins, ended,
+    game, item, options, chosen, results, outcome, names, wins, played, ended,
     endSession, newSession,
     loading: !plain && challenge === "trivia" && pool.length === 0,
     fraction: left / ask,

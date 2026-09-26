@@ -40,7 +40,7 @@ const PLAY_SCREENS = [
 
 for (const p of PLAY_SCREENS) {
   const src = read(p);
-  ok(src.includes("<PlaySurface>"), `${p}: is a play surface, not a document that flows`);
+  ok(/<PlaySurface[\s>]/.test(src), `${p}: is a play surface, not a document that flows`);
   ok(src.includes("<PlayBoard"), `${p}: gives its board the space that is left`);
   // A board inside a play surface must be told how wide it may be. Without it
   // the board sizes itself off the width of the phone and pushes the control
@@ -69,14 +69,14 @@ for (const p of PLAY_SCREENS) {
   const src = read("src/features/play/PlaySurface.tsx");
   ok(src.includes("flex-1 min-h-0"), "the board's box may shrink below its content");
   ok(src.includes("ResizeObserver"), "and is measured rather than guessed at");
-  ok(/Math\.min\(r\.width, r\.height \* ratio\)/.test(src), "fitting a board is a min of both dimensions");
+  ok(/Math\.min\(r\.width, Math\.max\(0, r\.height - reserve\) \* ratio\)/.test(src), "fitting a board is a min of both dimensions (less what sits under it)");
 }
 
 // The result screens show the card, not a description of the card.
 {
   const src = read("src/features/play/ResultScreen.tsx");
   ok(src.includes("play-surface"), "the result is one screen too");
-  ok(src.includes("max-h-full"), "and the card is bounded by it");
+  ok(src.includes("max-h-[calc(100dvh-330px)]"), "and the card is bounded so the buttons stay on screen");
   for (const p of ["src/features/play/BoardSoloPage.tsx", "src/features/rooms/matchUi.tsx"]) {
     ok(read(p).includes("<ResultScreen"), `${p}: uses the one result screen`);
   }

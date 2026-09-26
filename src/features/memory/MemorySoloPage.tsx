@@ -1,6 +1,6 @@
 import { BoardSoloPage } from "@/features/play/BoardSoloPage";
 import { Board } from "./Board";
-import { scoreOf } from "./rules";
+import { scoreOf, faceUp, FACES } from "./rules";
 import { MEMORY } from "./useMemoryRoom";
 import { memoryHero } from "./card";
 
@@ -20,6 +20,16 @@ export function MemorySoloPage() {
       engine={MEMORY}
       title="Memory Match"
       challenge="none"
+      youAre="Turn a tile over"
+      counting="pairs"
+      // #29: one tile up and yours to match: "Pick one more / Is there another heart?"
+      banner={(g, mine) => {
+        if (g.phase !== "asking") return null;
+        const up = faceUp(g)[0];
+        const face = up === undefined ? null : FACES[g.deck[up]];
+        return mine ? { title: "Pick one more", sub: face ? `Is there another ${face}?` : undefined }
+          : { title: "The bot's looking", sub: face ? `For another ${face}` : undefined };
+      }}
       glyphs={{ x: "tile", o: "disc" }}
       art={{ hero: (g) => memoryHero(g.board) }}
       // Pairs, not games won: it is the number you are playing for.

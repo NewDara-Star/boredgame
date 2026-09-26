@@ -154,9 +154,15 @@ export function advance(g: Game): Game {
  * writes "You miss" for one player and "Dara misses" for the other watching the
  * same room — one sentence, conjugated, rather than two copies of the logic.
  */
+/** A square by where it is, not a number (#25–#26): the board no longer
+    prints 1–9 in its squares, so "square 5" would point at nothing. */
+export const SQUARE_NAMES = ["top-left", "top-middle", "top-right", "middle-left", "middle",
+  "middle-right", "bottom-left", "bottom-middle", "bottom-right"] as const;
+export const squareName = (n: number) => `the ${SQUARE_NAMES[n] ?? "middle"} square`;
+
 export function describe(g: Game, names: Record<Mark, string>, you: Mark | null = null): string {
   const { mine: second, who, verb: s } = speaker(names, you);
-  const sq = (n: number) => `square ${n + 1}`;
+  const sq = squareName;
 
   if (g.phase === "over") {
     if (g.winner === "draw") return "Board full — it's a draw.";
@@ -166,14 +172,14 @@ export function describe(g: Game, names: Record<Mark, string>, you: Mark | null 
   if (g.phase === "revealed" && g.last) {
     const { by, square, correct } = g.last;
     if (correct) return `${who(by)} ${s(by, "take")} ${sq(square)}.`;
-    return `${who(by)} ${s(by, "miss")} — ${sq(square)} stays open.`;
+    return `${who(by)} ${s(by, "miss")}. ${sq(square).replace(/^the/, "The")} stays open.`;
   }
   if (g.phase === "asking" && g.answerer) {
     const m = g.answerer;
     const target = sq(g.target ?? 0);
     return second(m) ? `You're going for ${target}.` : `${names[m]} is going for ${target}.`;
   }
-  return second(g.turn) ? "Your pick — take a square." : `${names[g.turn]} is picking.`;
+  return second(g.turn) ? "Your move. Take a square." : `${names[g.turn]} is picking.`;
 }
 
 /* ------------------------------------------------------- abandonment */

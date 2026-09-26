@@ -1,9 +1,12 @@
 import { useEffect, useState } from "react";
 import type { PieceKind } from "@/shared/brand/Pieces";
 import { Dealing } from "@/shared/ui/Note";
-import { motion } from "framer-motion";
-import { popIn } from "@/shared/ui/motion";
-import { PlayBoard, PlayHead, PlayRow, PlaySurface } from "@/features/play/PlaySurface";
+import { useNavigate } from "react-router-dom";
+import { PlayBoard, PlayRow, PlaySurface, TurnBanner, Seats, GameChip } from "@/features/play/PlaySurface";
+import { LeaveX } from "@/features/play/RoundChrome";
+import { useFocusMode } from "@/app/layout/focus";
+import { useAuth } from "@/app/providers/AuthProvider";
+import type { FlowerState } from "@/shared/brand/Sunflower";
 import { UnlockGate } from "@/features/play/Unlock";
 import { drawCard, type Glyph, type Hero, type MatchCard } from "@/shared/card/frame";
 import { botVoice, gamePath } from "@/shared/card/voice";
@@ -47,8 +50,16 @@ export const BOARD_RATIO = { square: 1, connect4: 1.09 };
 export function BoardSoloPage<G extends BoardState & { target: number | null; line: number[] | null },
                               R extends BoardRow>({
   engine, title, board, glyphs, ratio = BOARD_RATIO.square,
-  plain = false, challenge = "trivia", score, art,
+  plain = false, challenge = "trivia", score, art, youAre, banner, counting = "wins",
 }: {
+  /** under "Your move": "You're crosses" (#25), "You're gold" (#27) */
+  youAre?: string;
+  /** a game's own banner for a moment the shared one can't word, e.g. Memory's
+      "Pick one more / Is there another heart?" (#29) */
+  banner?: (g: G, mine: boolean) => { title: string; sub?: string } | null;
+  /** what the seats count: games won, or (Memory) pairs */
+  counting?: "wins" | "pairs";
+
   engine: BoardEngine<G, R>;
   title: string;
   board: DrawBoard<G>;
@@ -63,8 +74,11 @@ export function BoardSoloPage<G extends BoardState & { target: number | null; li
       Memory counts pairs, because that is the number you are playing for. */
   score?: (g: G) => Record<Mark, number>;
 }) {
+  useFocusMode(true);
   const s = useSoloBoard(engine, plain, challenge);
   const g = s.game;
+  const nav = useNavigate();
+  const { profile } = useAuth();
   const [card, setCard] = useState<MatchCard | null>(null);
 
   const sides = [
@@ -90,17 +104,21 @@ export function BoardSoloPage<G extends BoardState & { target: number | null; li
   }, [s.ended, sig]);
 
   if (s.ended) {
+    const tone = s.wins.x === s.wins.o ? "draw" : s.wins.x > s.wins.o ? "win" : "loss";
     return (
       <ResultScreen
-        headline={s.wins.x === s.wins.o ? "All square"
-          : s.wins.x > s.wins.o ? "You take it" : "The bot takes it"}
-        score={`${s.wins.x} — ${s.wins.o}`}
-        tone={s.wins.x === s.wins.o ? "draw" : s.wins.x > s.wins.o ? "win" : "loss"}
+        headline={tone === "draw" ? "All square with the bot" : tone === "win" ? "You beat the bot" : "The bot beat you"}
+        score={`${s.wins.x}–${s.wins.o}`}
+        tone={tone}
         card={card}
         alt={`${title} session: you ${s.wins.x}, the bot ${s.wins.o}`}>
         <button onClick={s.newSession}
-          className="card tap py-3.5 font-display text-lg font-semibold bg-board">
+          className="cut tap cut-board min-h-[52px] font-display text-[19px]">
           New session
+        </button>
+        <button onClick={() => nav("/play")}
+          className="justify-self-center text-[13px] font-extrabold text-soft underline underline-offset-4 min-h-[44px]">
+          Back to the games
         </button>
       </ResultScreen>
     );
@@ -112,31 +130,65 @@ export function BoardSoloPage<G extends BoardState & { target: number | null; li
   const answerer = engine.answerer(g);
   const active: Mark = g.phase === "asking" && answerer ? answerer : g.turn;
   const revealed = g.phase === "revealed" || g.phase === "over";
-
   const over = g.phase === "over";
-  return (
-    <PlaySurface>
-      <PlayHead title={title} seats={[
-        { mark: "x", name: "You", glyph: glyphs.x, score: live.x, active: active === "x" && !over },
-        { mark: "o", name: "Bot", glyph: glyphs.o, score: live.o, active: active === "o" && !over },
-      ]} />
+  const mine = active === "x";
+  const question = !plain && challenge === "trivia" && (g.phase === "asking" || g.phase === "revealed");
+  const shot = challenge === "catapult" && (g.phase === "asking" || g.phase === "revealed");
+  const last = (g as unknown as { last: { by: Mark; correct: boolean } | null }).last;
+  const said = engine.describe(g, s.names, "x");
+  const you = youAre ?? (glyphs.x === "cross" ? "You're crosses" : glyphs.x === "disc" ? "You're gold" : undefined);
 
-      {/* The board takes what is left after the fixed parts, and shrinks
-          rather than pushing them off the bottom. When a question is up on a
-          short phone that can be 100px — small, but the board is reference
-          then, and the four answers are the screen. */}
+  // The banner (.turn), from the drawings: gold when it's yours to do something,
+  // white while you wait; the flower turns to whoever is on.
+  const own = !over ? banner?.(g, mine) ?? null : null;
+  const b: { title: string; sub?: string; tone: "petal" | "white"; flower: FlowerState; end?: string } | null =
+    over ? (g.winner === "x" ? { title: "You win this one", tone: "petal", flower: "bloom", end: `${s.wins.x}–${s.wins.o}` }
+      : g.winner === "o" ? { title: "The bot wins this one", tone: "white", flower: "bored", end: `${s.wins.x}–${s.wins.o}` }
+      : { title: "A draw", sub: said, tone: "white", flower: "awake", end: `${s.wins.x}–${s.wins.o}` })
+    : own ? { ...own, tone: mine ? "petal" : "white", flower: mine ? "awake" : "look-right" }
+    : g.phase === "revealed" && last ? {
+        title: last.by === "x" ? (last.correct ? "Got it" : "Not this time") : (last.correct ? "The bot got it" : "The bot missed"),
+        sub: said, tone: "white", flower: last.correct === (last.by === "x") ? "bloom" : "bored" }
+    : g.phase === "asking" && shot ? (mine
+        ? { title: "Land it in the ring", sub: `For ${said.replace(/^You're going for /, "").replace(/\.$/, "")}`, tone: "petal", flower: "awake" }
+        : { title: "The bot's shot", sub: said, tone: "white", flower: "look-right" })
+    : g.phase === "asking" && question ? null     // the question sheet says it (#26)
+    : g.phase === "asking" ? (mine ? { title: "Your move", sub: said, tone: "petal", flower: "awake" }
+        : { title: "The bot's thinking", sub: said, tone: "white", flower: "look-right" })
+    : mine ? { title: "Your move", sub: you ?? said, tone: "petal", flower: "awake" }
+    : { title: "The bot's thinking", sub: you, tone: "white", flower: "look-right" };
+
+  const count = (n: number) => counting === "pairs" ? `${n} pair${n === 1 ? "" : "s"}` : `${n} win${n === 1 ? "" : "s"}`;
+  const me = profile?.username ?? "You";
+
+  // The X (Daramola 26 Sep): with a game finished, it ends the session so the
+  // score and its card aren't lost; with none, it's straight back to the games.
+  const leave = () => (s.played > 0 ? s.endSession() : nav("/play"));
+
+  return (
+    <PlaySurface focus>
+      <PlayRow className="flex items-center justify-between gap-2.5 min-h-10">
+        <LeaveX onClick={leave} label={s.played > 0 ? "End the session" : "Back to the games"} />
+        <GameChip title={title} />
+      </PlayRow>
+
+      {b && (
+        <TurnBanner title={b.title} sub={b.sub} tone={b.tone} flower={b.flower}
+          end={b.end && <b className="font-mono font-bold text-[24px] shrink-0">{b.end}</b>} />
+      )}
+
       {/* How hard (talk item 9): before the first question of each game, so
           it never takes board space mid-game. The phone remembers the pick. */}
       {!plain && challenge === "trivia" && g.phase === "picking" && s.results.length === 0 && (
         <PlayRow>
-          <div className="flex items-center justify-center gap-2" role="group" aria-label="How hard are the questions?">
-            <span className="text-[13px] font-black text-soft">Questions</span>
+          <div className="flex items-center gap-1.5" role="group" aria-label="How hard are the questions?">
+            <span className="text-[13px] font-extrabold text-soft mr-1">Questions</span>
             {LEVELS.map((l) => {
               const on = s.levels.includes(l);
               return (
                 <button key={l} aria-pressed={on} onClick={() => s.setLevels(toggle(s.levels, l))}
-                  className={`cut tap px-3 min-h-[44px] text-[13px] font-black capitalize ${on ? "cut-petal text-ink" : "bg-board text-soft"}`}>
-                  {l}
+                  className="min-h-[44px] -my-[7px] grid place-items-center">
+                  <span className={`chip rounded-full px-[11px] py-[5px] text-[13px] font-extrabold text-ink capitalize ${on ? "bg-petal" : "bg-board"}`}>{l}</span>
                 </button>
               );
             })}
@@ -144,58 +196,62 @@ export function BoardSoloPage<G extends BoardState & { target: number | null; li
         </PlayRow>
       )}
 
-      <PlayBoard ratio={ratio} min={78}>
-        {(width) => board({ game: g, myTurn: s.myTurn, width, onPick: s.choose })}
-      </PlayBoard>
-
-      {/* The board cannot say "you missed, so the bot gets one shot at it". */}
-      <PlayRow>
-        <p className="text-center text-[15px] font-bold text-soft">
-          {engine.describe(g, s.names, "x")}
-        </p>
-      </PlayRow>
+      {shot ? (
+        // #28: the shot takes the middle of the screen in place of the board.
+        <div className="flex-1 min-h-0 grid content-center">
+          <TurnPanel
+            challenge="catapult" item={s.item} options={s.options}
+            chosen={s.chosen} setChosen={() => {}}
+            onAnswer={(correct) => s.fire(correct)}
+            asking={g.phase === "asking"} revealed={revealed} mine={s.iAnswer}
+            fraction={s.fraction} askedAt={0} target={s.target}
+            waitingOn="The bot" botShot={s.botFires}
+            advanceOwner={null} stall={null} myMark="x"
+            onAdvanceNow={() => {}} onForceAdvance={() => {}} nextLabel="Next" />
+        </div>
+      ) : (
+        // The drawings' column (.scr): the board straight under the banner and
+        // the seats straight under the board, the space left over below them.
+        <PlayBoard ratio={ratio} min={78} top reserve={question || over ? 0 : 69}>
+          {(width) => (
+            <>
+              {board({ game: g, myTurn: s.myTurn, width, onPick: s.choose })}
+              {!question && !over && (
+                <div className="w-full">
+                  <Seats seats={[
+                    { mark: "x", name: "You", initial: me, count: count(live.x), active: active === "x" },
+                    { mark: "o", name: "Bot", initial: "Bot", count: count(live.o), active: active === "o" },
+                  ]} />
+                </div>
+              )}
+            </>
+          )}
+        </PlayBoard>
+      )}
 
       {over ? (
-        <PlayRow>
-        <motion.div variants={popIn} initial="hidden" animate="show" className={`card p-4 text-center
-          ${g.winner === "x" ? "bg-leaf text-ink"
-            : g.winner === "o" ? "bg-ember text-ink" : "bg-mist"}`}>
-          <p className="font-display text-2xl font-semibold">
-            {g.winner === "x" ? "You win" : g.winner === "o" ? "The bot wins" : "Draw"}
-            {s.results.length > 0 && (
-              <span className="text-sm font-bold opacity-80">
-                {" · "}{s.results.filter((r) => r.correct).length} of {s.results.length} right
-              </span>
-            )}
-          </p>
-          <div className="grid grid-cols-2 gap-2.5 mt-3">
-            <button onClick={s.restart}
-              className="card tap py-3 font-display text-lg font-semibold bg-board text-ink">
-              Play again
-            </button>
-            <button onClick={s.endSession}
-              className="card tap py-3 font-display text-lg font-semibold bg-board text-ink">
-              End session
-            </button>
-          </div>
-        </motion.div>
+        // Between games (Daramola 26 Sep): the banner says who won; the finished
+        // board stays up, and the next step is under it.
+        <PlayRow className="grid grid-cols-[1.35fr_1fr] gap-[9px]">
+          <button onClick={s.restart} className="cut tap cut-petal min-h-[52px] font-display text-[19px]">Next game</button>
+          <button onClick={s.endSession} className="cut tap cut-board min-h-[52px] font-display text-[19px]">End session</button>
         </PlayRow>
-      ) : (g.phase === "asking" || g.phase === "revealed") ? (
-        <PlayRow>
+      ) : question ? (
+        // #26: the question comes up as a sheet from the foot of the screen.
+        <PlayRow className="card -mx-4 -mb-[calc(14px+env(safe-area-inset-bottom))] bg-board text-ink rounded-t-[26px] rounded-b-none
+          px-4 pt-3.5 pb-[calc(18px+env(safe-area-inset-bottom))] shadow-[0_-10px_30px_rgba(14,74,176,.25)]">
           {/* The same panel the rooms draw. It only reached three copies
               because solo advances on a timer and a room can be stuck, so they
               looked different — but the difference is one nullable prop. */}
-          <TurnPanel
-            challenge={challenge === "catapult" ? "catapult" : "trivia"}
+          <TurnPanel sheet
+            challenge="trivia"
             item={s.item} options={s.options}
             chosen={s.chosen} setChosen={() => {}}
             // The option you tapped, as tapped: it is what the reveal marks as
             // yours and what the server judges. (It used to be a null character
             // for any wrong pick, which Postgres refuses, so a game with a miss
             // filed nothing.)
-            onAnswer={(correct, given) => (challenge === "catapult"
-              ? s.fire(correct)
-              : s.submit(given ?? null))}
+            onAnswer={(_correct, given) => s.submit(given ?? null)}
             asking={g.phase === "asking"} revealed={revealed} mine={s.iAnswer}
             fraction={s.fraction} askedAt={0} target={s.target}
             waitingOn="The bot"

@@ -47,17 +47,20 @@ export function Seeds({ total, index, results, big = false }:
   );
 }
 
-/** The drawing's .x: a 38px white disc with an ink cross, 44px to tap. */
-export function LeaveX({ to, label }: { to: string; label: string }) {
-  return (
-    <Link to={to} aria-label={label} className="shrink-0 grid place-items-center w-11 h-11 -m-[3px]">
-      <span className="grid place-items-center w-[38px] h-[38px] rounded-full bg-board shadow-lift-sm">
-        <svg viewBox="0 0 16 16" width={16} height={16} aria-hidden>
-          <path d="M3 3l10 10M13 3L3 13" stroke="var(--color-ink-day)" strokeWidth="2.6" strokeLinecap="round" />
-        </svg>
-      </span>
-    </Link>
+/** The drawing's .x: a 38px white disc with an ink cross, 44px to tap. A link,
+    or a button when leaving has something to do first. */
+export function LeaveX({ to, label, onClick }: { to?: string; label: string; onClick?: () => void }) {
+  const disc = (
+    <span className="grid place-items-center w-[38px] h-[38px] rounded-full bg-board shadow-lift-sm">
+      <svg viewBox="0 0 16 16" width={16} height={16} aria-hidden>
+        <path d="M3 3l10 10M13 3L3 13" stroke="var(--color-ink-day)" strokeWidth="2.6" strokeLinecap="round" />
+      </svg>
+    </span>
   );
+  const look = "shrink-0 grid place-items-center w-11 h-11 -m-[3px]";
+  return onClick
+    ? <button onClick={onClick} aria-label={label} className={look}>{disc}</button>
+    : <Link to={to ?? "/"} aria-label={label} className={look}>{disc}</Link>;
 }
 
 /** The top of a round in play (.hud): the X, the seeds, the score in mono at

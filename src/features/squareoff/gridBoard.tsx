@@ -10,9 +10,11 @@ import type { DrawBoard } from "@/features/play/BoardSoloPage";
 export const gridBoard =
   <G extends { board: (("x" | "o") | null)[]; target: number | null; line: number[] | null; phase: string }>(
     Grid: typeof Board,
+    /** colour claimed squares by owner (Square Off, the catapult twist) */
+    tint = false,
   ): DrawBoard<G> =>
     ({ game, myTurn, width, onPick }) => (
-      <Grid board={game.board} target={game.target} line={game.line}
+      <Grid board={game.board} target={game.target} line={game.line} tint={tint}
         canPick={myTurn && game.phase === "picking"}
         compact={game.phase === "asking" || game.phase === "revealed"}
         width={width}

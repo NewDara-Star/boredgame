@@ -139,6 +139,9 @@ h1, h2, h3, .display { font-family: var(--font-display); font-weight: 400; lette
   @media (min-width: 640px) {
     .play-surface { height: min(calc(100dvh - 8rem), 40rem); overflow: visible; }
   }
+  /* A board game in play has the whole phone (#25–#30): no header, no tab bar,
+     only main's own 6px + 14px and the safe areas to take off. */
+  .play-surface.play-focus { height: calc(100dvh - 20px - env(safe-area-inset-top) - env(safe-area-inset-bottom)); gap: 11px; }
 
   /* Carousels are swiped, not scrolled with a bar. */
   .no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }

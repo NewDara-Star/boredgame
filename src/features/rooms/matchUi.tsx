@@ -242,7 +242,7 @@ export function MatchOver({ sides, myMark, card }: {
   return (
     <ResultScreen
       headline={!winner ? "All square" : `${winner.name} takes it`}
-      score={`${a.score} — ${b.score}`}
+      score={`${a.score}–${b.score}`}
       tone={!winner ? "draw" : winner.mark === myMark ? "win" : "loss"}
       card={card}
       alt={`Result: ${a.name} ${a.score}, ${b.name} ${b.score}`}>

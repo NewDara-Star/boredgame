@@ -4,6 +4,9 @@ import { PieceMark, type PieceKind } from "@/shared/brand/Pieces";
 import { motion } from "framer-motion";
 import { SPRING } from "@/shared/ui/motion";
 import type { Mark } from "@/features/rooms/useBoardRoom";
+import { Sunflower, type FlowerState } from "@/shared/brand/Sunflower";
+import { SEAT_RAMP } from "@/shared/brand/seats";
+import { GAMES } from "./registry";
 
 /**
  * The shape every game screen has.
@@ -20,8 +23,10 @@ import type { Mark } from "@/features/rooms/useBoardRoom";
  * Connect 4 Trivia put all four of them 274px below it. The board was always
  * visible and the thing you had to tap never was.
  */
-export function PlaySurface({ children }: { children: ReactNode }) {
-  return <div className="play-surface">{children}</div>;
+export function PlaySurface({ children, focus = false }: { children: ReactNode;
+  /** the screen has the whole phone (no header or tab bar), so it is taller */
+  focus?: boolean }) {
+  return <div className={`play-surface ${focus ? "play-focus" : ""}`}>{children}</div>;
 }
 
 /**
@@ -38,9 +43,14 @@ export function PlaySurface({ children }: { children: ReactNode }) {
  * One ResizeObserver and a `min()` is exact, and the board is drawn at a size
  * it was actually given.
  */
-export function PlayBoard({ ratio = 1, min = 0, children }: {
+export function PlayBoard({ ratio = 1, min = 0, children, top = false, reserve = 0 }: {
   /** the board's width divided by its height */
   ratio?: number;
+  /** sit at the top of its space, as the drawings' boards do (#25–#29),
+      rather than in the middle of it */
+  top?: boolean;
+  /** px under the board kept for what follows it in the same box (the seats) */
+  reserve?: number;
   /** below this the board is not worth drawing; children get 0 and can hide */
   min?: number;
   children: (width: number) => ReactNode;
@@ -58,7 +68,7 @@ export function PlayBoard({ ratio = 1, min = 0, children }: {
       // width alone breaks that deadlock, and a board slightly too large is
       // in every way better than no board, which is what shipped.
       const w = r.height > 0
-        ? Math.floor(Math.min(r.width, r.height * ratio))
+        ? Math.floor(Math.min(r.width, Math.max(0, r.height - reserve) * ratio))
         : Math.floor(r.width);
       setWidth(w < min ? 0 : w);
     };
@@ -66,9 +76,9 @@ export function PlayBoard({ ratio = 1, min = 0, children }: {
     const ro = new ResizeObserver(measure);
     ro.observe(el);
     return () => ro.disconnect();
-  }, [ratio, min]);
+  }, [ratio, min, reserve]);
   return (
-    <div ref={box} className="play-board flex-1 min-h-0 grid place-items-center overflow-hidden">
+    <div ref={box} className={`play-board flex-1 min-h-0 grid overflow-hidden ${top ? "content-start justify-items-center gap-[11px]" : "place-items-center"}`}>
       {width > 0 && children(width)}
     </div>
   );
@@ -106,5 +116,81 @@ export function PlayHead({ title, seats }: {
         </motion.div>
       ))}
     </PlayRow>
+  );
+}
+
+
+/* ----------------------------------------------------------------------------
+ * The board screens' own pieces (#25–#30), from the drawings' code: .tb with
+ * the game's chip, .turn (the banner that says whose move it is), .seats.
+ * ------------------------------------------------------------------------- */
+
+const CHIP: Record<string, string> = {
+  quiz: "bg-sky-hi text-ink", board: "bg-leaf-hi text-ink", puzzle: "bg-grape text-board",
+  skill: "bg-ember-hi text-ink", party: "bg-gum-hi text-ink",
+};
+
+/** .chip.leaf / .ember / .grape: the game's name in its family's colour. */
+export function GameChip({ title }: { title: string }) {
+  const fam = GAMES.find((g) => g.name === title)?.family ?? "board";
+  return <span className={`chip rounded-full px-[9px] py-0.5 text-[12px] font-extrabold whitespace-nowrap ${CHIP[fam]}`}>{title}</span>;
+}
+
+/**
+ * .turn: whose move it is, in words, with the flower looking at the board.
+ * Gold when it's yours to do something, white when you're waiting.
+ */
+export function TurnBanner({ title, sub, tone, flower = "awake", end }: {
+  title: string; sub?: string; tone: "petal" | "white";
+  flower?: FlowerState;
+  /** something at the right-hand end: the score on a result */
+  end?: ReactNode;
+}) {
+  return (
+    <motion.div layout transition={SPRING} role="status"
+      // .card, so the night sky's white ink doesn't reach it: ink on gold or white.
+      className={`card shrink-0 flex items-center gap-2.5 rounded-[20px] pl-2 pr-3.5 py-2 shadow-lift-sm text-ink
+        ${tone === "petal" ? "bg-linear-to-b from-petal-hi to-petal" : "bg-board"}`}>
+      <Sunflower state={flower} stem={false} size={48} className="shrink-0" />
+      <div className="min-w-0 flex-1">
+        <b className="block font-display font-normal text-[22px] leading-[1.05]">{title}</b>
+        {sub && <span className="block text-[14px] font-bold">{sub}</span>}
+      </div>
+      {end}
+    </motion.div>
+  );
+}
+
+/** .av in a seat's colour: a disc with the first letter, lit from the top left. */
+function SeatDisc({ mark, name }: { mark: Mark; name: string }) {
+  const r = SEAT_RAMP[mark];
+  return (
+    <span aria-hidden className="shrink-0 grid place-items-center w-[34px] h-[34px] rounded-full font-display text-[15px] text-ink"
+      style={{ background: `radial-gradient(circle at 35% 30%, ${r.hi}, ${r.base} 60%)`,
+               border: "2.5px solid var(--color-ink-day)", boxShadow: "0 3px 0 var(--color-ink-day)" }}>
+      {(name.trim()[0] ?? "?").toUpperCase()}
+    </span>
+  );
+}
+
+/** .seats: two cards, you and them, with what you're counting; the one whose
+    turn it is ringed in gold (.seat.turnon). */
+export function Seats({ seats }: {
+  seats: { mark: Mark; name: string; initial: string; count: string; active: boolean }[];
+}) {
+  return (
+    <div className="shrink-0 grid grid-cols-2 gap-[9px]">
+      {seats.map((s) => (
+        <div key={s.mark}
+          className={`card flex items-center gap-2 bg-board text-ink rounded-2xl px-2.5 py-2
+            ${s.active ? "shadow-[0_0_0_3px_var(--color-petal),var(--shadow-lift-sm)]" : "shadow-lift-sm"}`}>
+          <SeatDisc mark={s.mark} name={s.initial} />
+          <div className="min-w-0">
+            <b className="block text-[15px] leading-[1.1] font-bold truncate">{s.name}</b>
+            <small className="block font-mono text-[13px] font-bold text-soft">{s.count}</small>
+          </div>
+        </div>
+      ))}
+    </div>
   );
 }

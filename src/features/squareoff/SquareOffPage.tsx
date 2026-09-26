@@ -13,6 +13,6 @@ const art = { hero: (g: { board: NonNullable<Parameters<typeof gridHero>[0]>; li
  * page. Nothing here but which engine it plays and what the marks look like.
  */
 export function SquareOffPage() {
-  return <BoardSoloPage engine={TTT} title="Square Off" board={gridBoard(Board)}
+  return <BoardSoloPage engine={TTT} title="Square Off" board={gridBoard(Board, true)}
     glyphs={{ x: "cross", o: "ring" }} art={art} />;
 }

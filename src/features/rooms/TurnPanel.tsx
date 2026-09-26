@@ -18,8 +18,10 @@ import type { Shot, Target } from "@/features/challenge/rules";
 export function TurnPanel({
   challenge, item, options, chosen, setChosen, onAnswer,
   asking, revealed, mine, fraction, askedAt, waitingOn, botShot, target,
-  advanceOwner, stall, myMark, onAdvanceNow, onForceAdvance, nextLabel,
+  advanceOwner, stall, myMark, onAdvanceNow, onForceAdvance, nextLabel, sheet = false,
 }: {
+  /** drawn inside the question sheet (#26) */
+  sheet?: boolean;
   challenge: "trivia" | "catapult";
   item: PlayItem | null;
   options: string[];
@@ -62,7 +64,7 @@ export function TurnPanel({
   const moveOn = advanceOwner !== null && (
     advanceOwner === myMark ? (
       <button onClick={onAdvanceNow}
-        className="cut tap w-full py-3.5 font-display text-lg font-semibold cut-ink text-ground">
+        className="cut tap w-full min-h-[52px] font-display text-[19px] cut-petal">
         {nextLabel}
       </button>
     ) : stall?.action === "advance" && stall.mark === myMark ? (
@@ -95,9 +97,9 @@ export function TurnPanel({
 
   if (!item) return null;
   return (
-    <div className="space-y-3">
+    <div className="space-y-2.5">
       {asking && <Timer fraction={fraction} />}
-      <QuestionPanel
+      <QuestionPanel sheet={sheet}
         // Already permuted by loadContent, seeded on the puzzle id — do NOT
         // shuffle again here, or the two players see different orders.
         item={item} options={options} chosen={lock.picked ?? chosen}

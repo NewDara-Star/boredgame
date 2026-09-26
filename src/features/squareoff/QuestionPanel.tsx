@@ -4,9 +4,10 @@ import { stagger, riseIn } from "@/shared/ui/motion";
 import type { PlayItem } from "@/features/play/types";
 
 
+/** The drawing's .timer: 8px, petal running down, ember near the end. */
 export function Timer({ fraction }: { fraction: number }) {
   return (
-    <div className="h-3 bg-mist rounded-full overflow-hidden shadow-lift-sm">
+    <div className="h-2 bg-mist rounded-full overflow-hidden">
       <motion.div
         className="h-full"
         style={{ background: fraction < 0.3 ? "var(--color-ember)" : "var(--color-petal)" }}
@@ -22,8 +23,11 @@ export function Timer({ fraction }: { fraction: number }) {
  * answering, and the moment after an answer lands.
  */
 export function QuestionPanel({
-  item, options, chosen, revealed, locked, onAnswer, answer, out, chip = true,
+  item, options, chosen, revealed, locked, onAnswer, answer, out, chip = true, sheet = false,
 }: {
+  /** inside the question sheet (#26): the question is bold text on the sheet's
+      white, not a white card of its own */
+  sheet?: boolean;
   /** the category chip; off while the what-to-play chips sit above (#20 has no chip then) */
   chip?: boolean;
   /** options a hint has taken away (#20): they step back and can't be picked */
@@ -52,10 +56,12 @@ export function QuestionPanel({
       {/* The question on its own white card, in the reading face (.q: 700
           19px/1.3). A heading for screen readers, but not an <h2>: index.css
           sets every h2 in the display face at 400. */}
-      <p role="heading" aria-level={2}
-        className="card shadow-lift-sm rounded-[20px] px-4 py-3.5 text-[19px] leading-[1.3] font-bold text-pretty">
-        {item.prompt}
-      </p>
+      {sheet
+        ? <p role="heading" aria-level={2} className="text-[17px] leading-[1.3] font-bold text-pretty">{item.prompt}</p>
+        : <p role="heading" aria-level={2}
+            className="card shadow-lift-sm rounded-[20px] px-4 py-3.5 text-[19px] leading-[1.3] font-bold text-pretty">
+            {item.prompt}
+          </p>}
 
       <motion.div variants={stagger(0.05)} initial="hidden" animate="show" className="grid gap-2">
         {options.map((opt, i) => {

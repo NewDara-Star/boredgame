@@ -11,6 +11,6 @@ const art = { hero: (g: { board: NonNullable<Parameters<typeof gridHero>[0]>; li
     square. Miss and the square stays open — they can go for it next turn, but
     they have to spend their own turn on it. */
 export function SquareOffCatapultPage() {
-  return <BoardSoloPage engine={TTT} title="Catapult Squares" board={gridBoard(Board)}
+  return <BoardSoloPage engine={TTT} title="Catapult Squares" board={gridBoard(Board, true)}
     glyphs={{ x: "cross", o: "ring" }} challenge="catapult" art={art} />;
 }

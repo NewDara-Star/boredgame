@@ -174,9 +174,13 @@ export function botColumn(board: Cell[], me: Mark, rand = Math.random): number {
 
 /* ------------------------------------------------------------ narration */
 
+/** A column by where it is (#27): the board no longer prints 1–7 under them. */
+export const COLUMN_NAMES = ["far-left", "second", "third", "middle", "fifth", "sixth", "far-right"] as const;
+export const columnName = (n: number) => `the ${COLUMN_NAMES[n] ?? "middle"} column`;
+
 export function describe(g: Game, names: Record<Mark, string>, you: Mark | null = null): string {
   const { mine, who, verb: s } = speaker(names, you);
-  const col = (n: number) => `column ${n + 1}`;
+  const col = columnName;
 
   if (g.phase === "over") {
     if (g.winner === "draw") return "Board full — it's a draw.";
@@ -187,12 +191,12 @@ export function describe(g: Game, names: Record<Mark, string>, you: Mark | null 
     const { by, col: c, correct } = g.last;
     return correct
       ? `${who(by)} ${s(by, "drop")} into ${col(c)}.`
-      : `${who(by)} ${s(by, "miss")} — nothing lands in ${col(c)}.`;
+      : `${who(by)} ${s(by, "miss")}. Nothing lands in ${col(c)}.`;
   }
   if (g.phase === "asking" && g.target !== null) {
     return mine(g.turn) ? `You're going for ${col(g.target)}.` : `${names[g.turn]} is going for ${col(g.target)}.`;
   }
-  return mine(g.turn) ? "Your move — pick a column." : `${names[g.turn]} is choosing.`;
+  return mine(g.turn) ? "Your move. Pick a column." : `${names[g.turn]} is choosing.`;
 }
 
 /* ---------------------------------------------------------- abandonment */

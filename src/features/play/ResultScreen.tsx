@@ -3,6 +3,8 @@ import { motion } from "framer-motion";
 import { popIn } from "@/shared/ui/motion";
 import type { MatchCard } from "@/shared/card/frame";
 import { ShareButtons } from "@/shared/card/ShareButtons";
+import { TurnBanner } from "./PlaySurface";
+import { useFocusMode } from "@/app/layout/focus";
 
 /**
  * The end of a session, on one screen.
@@ -16,7 +18,7 @@ import { ShareButtons } from "@/shared/card/ShareButtons";
  */
 export function ResultScreen({ headline, score, tone, card, alt, children }: {
   headline: string;
-  /** the tally as it should read — "3 — 1" */
+  /** the tally as it should read: "3–1" */
   score: string;
   tone: "win" | "loss" | "draw";
   card: MatchCard | null;
@@ -24,7 +26,10 @@ export function ResultScreen({ headline, score, tone, card, alt, children }: {
   /** what to do next, under Share and Story */
   children?: ReactNode;
 }) {
-  const bg = tone === "draw" ? "bg-mist" : tone === "win" ? "bg-leaf text-ink" : "bg-ember text-ink";
+  // #30, from the drawing's code: one .turn banner with the flower and the
+  // score (gold for a win, white otherwise; it used to be a red slab for a
+  // loss), the card as big as the phone allows, Share and Story, then what's next.
+  useFocusMode(true);
   // `card` is null while the canvas draws -- but drawCard can fail and swallow
   // the error, leaving this null for good. Rather than sit on "Drawing..." forever,
   // fall back to a plain note after a few seconds (the score is shown above anyway).
@@ -35,17 +40,19 @@ export function ResultScreen({ headline, score, tone, card, alt, children }: {
     return () => clearTimeout(t);
   }, [card]);
   return (
-    <motion.div variants={popIn} initial="hidden" animate="show" className="play-surface">
-      <div className={`card shrink-0 px-4 py-3 flex items-baseline justify-between gap-3 ${bg}`}>
-        <p className="font-display text-xl font-semibold truncate">{headline}</p>
-        <p className="font-display text-2xl font-semibold tabular-nums shrink-0">{score}</p>
-      </div>
+    <motion.div variants={popIn} initial="hidden" animate="show" className="play-surface play-focus">
+      <TurnBanner title={headline} tone={tone === "win" ? "petal" : "white"}
+        flower={tone === "win" ? "bloom" : tone === "loss" ? "bored" : "awake"}
+        end={<b className="font-mono font-bold text-[24px] shrink-0 tabular-nums">{score}</b>} />
 
       {/* the card, as big as the screen will allow and no bigger */}
-      <div className="flex-1 min-h-0 grid place-items-center">
+      {/* #30's column: the card straight under the banner, the buttons straight
+          under the card. The card shrinks on a short phone rather than pushing
+          them off: the screen less the banner, the buttons and the gaps. */}
+      <div className="min-h-0 grid place-items-center">
         {card ? (
           <img src={card.url} alt={alt}
-            className="max-h-full w-auto max-w-full rounded-2xl shadow-lift-sm" />
+            className="max-h-[calc(100dvh-330px)] w-auto max-w-full rounded-[18px] shadow-lift" />
         ) : (
           <div className="card grid place-items-center h-full aspect-square bg-board p-6 text-center">
             <p className="text-sm font-bold text-soft">
@@ -55,9 +62,9 @@ export function ResultScreen({ headline, score, tone, card, alt, children }: {
         )}
       </div>
 
-      <div className="shrink-0 grid gap-2.5">
-        <ShareButtons card={card} />
-        {children && <div className="grid grid-cols-1 gap-2.5">{children}</div>}
+      <div className="shrink-0 grid gap-[9px]">
+        <ShareButtons card={card} className="gap-[9px]! grid-cols-[1.35fr_1fr]!" />
+        {children && <div className="grid grid-cols-1 gap-[9px]">{children}</div>}
       </div>
     </motion.div>
   );

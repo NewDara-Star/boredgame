@@ -25,7 +25,9 @@ export function Board({
     // The frame is the one Connect 4 has always had: a deep blue board with holes,
     // and the discs (subjects) sit in it outlined, lit from the top left.
     <motion.div
-      className={`grid grid-cols-7 mx-auto p-[2.5%] rounded-[22px] bg-sky-deep shadow-lift ${width ? "" : "w-full"}`}
+      // The drawing's .c4: sky to sky-lo, 22px corners, 8px in, holes of ink at
+      // .45, discs lit from the top left with an ink ring. No column numbers.
+      className={`grid grid-cols-7 mx-auto p-2 rounded-[22px] bg-linear-to-b from-sky to-sky-lo shadow-lift-sm ${width ? "" : "w-full"}`}
       style={width ? { width } : undefined}
       animate={{ maxWidth: width ?? (compact ? 260 : 360), gap: width ? Math.max(2, width * 0.014) : compact ? 3 : 5 }}
       transition={SPRING}>
@@ -50,7 +52,7 @@ export function Board({
               return (
                 <span key={r}
                   className={`aspect-square rounded-full grid place-items-center
-                    ${won ? "bg-leaf-hi" : "bg-ink/45"}`}
+                    ${won ? "bg-petal-hi" : "bg-ink-day/45"}`}
                   style={{ boxShadow: "inset 0 3px 0 rgba(0,0,0,.25)" }}>
                   {cell && (
                     // Dropped, not faded in: the disc arrives from above so you
@@ -59,7 +61,7 @@ export function Board({
                       className="block rounded-full"
                       style={{ width: "84%", height: "84%",
                         background: `radial-gradient(circle at 34% 30%, ${SEAT_RAMP[cell].hi}, ${SEAT_RAMP[cell].base} 58%, ${SEAT_RAMP[cell].lo})`,
-                        boxShadow: "0 0 0 2.5px var(--color-ink-day), 0 3px 0 2.5px var(--color-ink-day)" }}
+                        boxShadow: "0 0 0 2px var(--color-ink-day)" }}
                       initial={{ y: -140, opacity: 0 }}
                       animate={won
                         ? { y: 0, opacity: 1, scale: [1, 1.18, 1] }
@@ -71,10 +73,6 @@ export function Board({
                 </span>
               );
             })}
-            <span className={`font-display font-semibold tabular-nums text-center leading-none pt-[3px]
-              ${compact ? "text-[12px]" : "text-xs"} ${pickable ? "text-sky-hi" : "text-sky/50"}`}>
-              {c + 1}
-            </span>
           </button>
         );
       })}
