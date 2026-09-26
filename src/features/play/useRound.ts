@@ -16,6 +16,9 @@ export function useRound(
   game: GameKey, size: number, categories: string[] = [],
   /** an exact list to play, in order — the daily round. Bypasses the pool. */
   fixed?: PlayItem[] | null,
+  /** the levels to deal from (#20). Nothing at those levels is an empty round,
+      which says so (#24), not a quiet fall back to every level. */
+  levels?: string[],
 ) {
   const { user, applyProfile } = useAuth();
   const userId = user?.id;
@@ -69,9 +72,8 @@ export function useRound(
     setAvailable([...tally].map(([name, count]) => ({ name, count }))
       .sort((a, b) => b.count - a.count));
 
-    const all = categories.length
-      ? everything.filter((i) => categories.includes(i.category))
-      : everything;
+    const all = (categories.length ? everything.filter((i) => categories.includes(i.category)) : everything)
+      .filter((i) => !levels || levels.includes(i.difficulty));
     if (all.length === 0) { setPhase("empty"); return; }
     // Scoped to the account, not the browser: an unscoped seen-list meant one
     // account's history quietly suppressed questions for another on the same machine.
@@ -80,7 +82,7 @@ export function useRound(
     setResults([]); setLast(null); setHintsUsed(0); setOutcome(null);
     startedAt.current = Date.now(); skipped.current = new Map();
     setPhase("playing");
-  }, [game, size, userId, categories.join("|"), fixed?.map((i) => i.id).join(",")]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [game, size, userId, categories.join("|"), levels?.join("|"), fixed?.map((i) => i.id).join(",")]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => { void build(); }, [build]);
 

@@ -3,7 +3,7 @@ import { partsOf } from "@/features/play/scoring";
 import { Dealing } from "@/shared/ui/Note";
 import { motion } from "framer-motion";
 import { useAuth } from "@/app/providers/AuthProvider";
-import { Reveal } from "@/features/play/RoundChrome";
+import { Reveal, RoundHud } from "@/features/play/RoundChrome";
 import { QuestionPanel } from "@/features/squareoff/QuestionPanel";
 import { Avatar } from "@/shared/ui/Avatar";
 import { stagger, riseIn, popIn } from "@/shared/ui/motion";
@@ -17,7 +17,6 @@ import { linkTo } from "@/shared/card/voice";
 import { roundHero } from "@/features/play/roundCard";
 import { GuestCard } from "@/features/profile/GuestCard";
 import { Sunflower } from "@/shared/brand/Sunflower";
-import { Counter } from "@/shared/ui/Counter";
 import { useFocusMode } from "@/app/layout/focus";
 
 const secs = (ms: number) => `${Math.round(ms / 1000)}s`;
@@ -65,44 +64,6 @@ function Board({ rows, meId, error, onRetry }:
 /** The top of a round in play (#16): an X out, a seed for each question (green
     right, red wrong, gold for this one), and the points. No clock: you're never
     timed on screen while you answer (talk item 4, kept 26 Sep). */
-function DailyHud({ index, total, grid, score }:
-  { index: number; total: number; grid: boolean[]; score: number }) {
-  const right = grid.filter(Boolean).length;
-  // From the drawing's code (.hud, .x, .seeds, .score): a 38px white X, ten
-  // 12px seeds 4px apart, the score in mono at 16px pushed to the right.
-  return (
-    <div className="flex items-center gap-2.5">
-      {/* Nothing is lost by leaving: every answer is already filed, and the round
-          carries on from the next question when you come back. 44px to tap, 38 to see. */}
-      <Link to="/" aria-label="Leave. Your answers count and the round waits for you."
-        className="shrink-0 grid place-items-center w-11 h-11 -m-[3px]">
-        <span className="grid place-items-center w-[38px] h-[38px] rounded-full bg-board shadow-lift-sm">
-          <svg viewBox="0 0 16 16" width={16} height={16} aria-hidden>
-            <path d="M3 3l10 10M13 3L3 13" stroke="var(--color-ink-day)" strokeWidth="2.6" strokeLinecap="round" />
-          </svg>
-        </span>
-      </Link>
-      <div className="flex items-center gap-1" role="img"
-        aria-label={`Question ${index + 1} of ${total}. ${right} right so far.`}>
-        {Array.from({ length: total }, (_, i) => {
-          const was = grid[i];
-          const ramp = was === true ? "leaf" : was === false ? "ember" : i === index ? "petal" : null;
-          // An answered seed is a subject: lit from the top left, with the ink ring
-          // (BRAND.md rule 1). One still to come is pale, with a faint ring.
-          return (
-            <i key={i} className="block w-3 h-3 rounded-full shrink-0" style={ramp ? {
-              background: `radial-gradient(circle at 35% 30%, var(--color-${ramp}-hi), var(--color-${ramp}) 65%)`,
-              boxShadow: "0 0 0 2px var(--color-ink-day)",
-              transform: was === undefined ? "scale(1.2)" : undefined,
-            } : { background: "rgba(255,255,255,.55)", boxShadow: "inset 0 0 0 2px rgba(35,26,61,.25)" }} />
-          );
-        })}
-      </div>
-      <Counter value={score} className="ml-auto font-mono text-[16px] font-bold shrink-0" />
-    </div>
-  );
-}
-
 const RIGHT = "\u{1F7E9}", WRONG = "\u{1F7E5}"; // green and red squares, for the text grid only
 
 /** The day, spoiler-free: the text grid (Wordle's trick) and the card. The grid
@@ -247,8 +208,11 @@ export function DailyPage() {
     // The drawing's screen is a column that fills the phone (.scr), so Next
     // lands at the foot of it rather than straight under the card.
     <div className="flex flex-col min-h-[calc(100dvh-20px-env(safe-area-inset-top)-env(safe-area-inset-bottom))]">
-      <DailyHud index={r.index} total={r.total} score={r.score}
-        grid={r.grid.length ? r.grid : readGrid(d.day) ?? []} />
+      {/* Nothing is lost by leaving: every answer is already filed, and the round
+          carries on from the next question when you come back. */}
+      <RoundHud index={r.index} total={r.total} score={r.score}
+        results={r.grid.length ? r.grid : readGrid(d.day) ?? []}
+        leaveTo="/" leaveLabel="Leave. Your answers count and the round waits for you." />
       <div className="mt-[11px]">
         <QuestionPanel
           item={item} options={item.choices ?? []} chosen={r.chosen ?? null}

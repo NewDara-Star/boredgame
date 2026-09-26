@@ -3,9 +3,13 @@ import { useEffect, useRef, useState } from "react";
 /** Scores tick up. A number that just changes has no reward in it.
     A new score that lands mid-count carries on from the number on screen,
     never from where the last count started (K3): a score doesn't go backwards. */
-export function Counter({ value, className = "" }: { value: number; className?: string }) {
-  const [shown, setShown] = useState(value);
-  const onScreen = useRef(value);
+export function Counter({ value, className = "", from }: {
+  value: number; className?: string;
+  /** count up from here on first show (the round summary's score, #23) */
+  from?: number;
+}) {
+  const [shown, setShown] = useState(from ?? value);
+  const onScreen = useRef(from ?? value);
 
   useEffect(() => {
     const start = performance.now();

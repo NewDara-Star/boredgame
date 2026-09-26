@@ -11,17 +11,20 @@ export const LEVELS: Level[] = ["easy", "medium", "hard"];
 export const START: Level[] = ["easy", "medium"];
 
 const KEY = "boredgame-board-levels-v1";
+/** Solo quiz rounds keep their own, per game (#20): Hard in trivia doesn't make
+    the board games hard. */
+export const quizKey = (game: string) => `boredgame-quiz-levels-v1:${game}`;
 
-export function readLevels(): Level[] {
+export function readLevels(key = KEY): Level[] {
   try {
-    const raw = JSON.parse(localStorage.getItem(KEY) ?? "null");
+    const raw = JSON.parse(localStorage.getItem(key) ?? "null");
     const ok = Array.isArray(raw) ? LEVELS.filter((l) => raw.includes(l)) : [];
     return ok.length ? ok : START;
   } catch { return START; }
 }
 
-export function writeLevels(levels: Level[]) {
-  try { localStorage.setItem(KEY, JSON.stringify(levels)); } catch { /* private mode */ }
+export function writeLevels(levels: Level[], key = KEY) {
+  try { localStorage.setItem(key, JSON.stringify(levels)); } catch { /* private mode */ }
 }
 
 /** Tapping a level: on or off, but never none at all. */

@@ -19,8 +19,8 @@ ok(/One go a day/.test(daily) && /<GuestCard bare \/>/.test(daily) && /I have an
 ok(/bare \? "Play" : "Start playing"/.test(guest), "the bare name form's button says Play");
 ok(!/Timer|ROUND_MS|clock/i.test(daily.replace(/No clock[^\n]*\n[^\n]*/g, "")), "no clock while you answer (talk item 4, kept 26 Sep)");
 ok(/useFocusMode\(/.test(daily) && /\{!focused && <header/.test(shell) && /\{!focused && <nav/.test(shell), "no header or tab bar while a round is in play (#16)");
-ok(/<Link to="\/" aria-label="Leave\. Your answers count/.test(daily), "an X leads out, and says nothing is lost");
-ok(/was === true \? "leaf" : was === false \? "ember" : i === index \? "petal"/.test(daily), "seeds: green right, red wrong, gold for this question");
+ok(/leaveTo="\/" leaveLabel="Leave\. Your answers count/.test(daily), "an X leads out, and says nothing is lost");
+ok(/was === true \? "leaf" : was === false \? "ember" : i === index \? "petal"/.test(chrome) && /<RoundHud/.test(daily), "seeds: green right, red wrong, gold for this question");
 ok(/Yes! \+\$\{gained\}/.test(chrome) && /Not this time/.test(chrome) && /sayParts\(parts\)/.test(chrome), "the verdict: Yes! +points with what they were for, or Not this time (#17, #18)");
 ok(!/"Missed"|Correct {2}\+/.test(chrome), "no green or red slab shouting Correct or Missed");
 ok(/answerShown/.test(daily) && /!correct && !answerShown/.test(chrome), "the right answer isn't repeated when the options already show it green");
@@ -36,7 +36,7 @@ ok(/text-\[19px\] leading-\[1\.3\] font-bold/.test(panel), ".q: 700 19px/1.3");
 ok(/px-3 py-\[11px\]/.test(panel) && /text-\[15px\] font-bold/.test(panel) && /size=\{22\}/.test(panel), ".opt: 11px 12px, 700 15px, 22px marks");
 ok(/from-leaf-hi to-leaf/.test(panel) && /from-ember-hi to-ember/.test(panel), ".opt.right / .opt.wrong: top-lit gradients");
 ok(/text-\[21px\]/.test(chrome) && /text-ember-lo/.test(chrome) && /min-h-\[52px\] font-display text-\[19px\] cut-petal/.test(chrome), ".gain b 21px (miss in ember-lo); Next .cut 52px, 19px");
-ok(/font-mono text-\[16px\] font-bold/.test(daily) && /w-\[38px\] h-\[38px\]/.test(daily) && /w-3 h-3/.test(daily), ".hud: mono 16px score, 38px X, 12px seeds");
+ok(/font-mono text-\[16px\] font-bold/.test(chrome) && /w-\[38px\] h-\[38px\]/.test(chrome) && /w-3 h-3/.test(chrome), ".hud: mono 16px score, 38px X, 12px seeds");
 ok((daily.match(/text-\[29px\]/g) ?? []).length >= 2, ".ttl: 29px titles");
 
 console.log(`${n} Daily assertions hold`);

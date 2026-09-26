@@ -1,22 +1,29 @@
 import { useEffect, useRef, useState } from "react";
 import { useSeenHeight } from "@/shared/lib/useSeenHeight";
-import { RAMPS } from "@/shared/brand/tokens";
 import { Dealing } from "@/shared/ui/Note";
 import { AnimatePresence, motion } from "framer-motion";
 import { useRound } from "@/features/play/useRound";
-import { CategoryBar } from "@/features/play/CategoryBar";
+import { QuizChips, NothingMatches } from "@/features/play/QuizChips";
+import { readLevels, writeLevels, quizKey, LEVELS, type Level } from "@/features/play/levels";
+import { useFocusMode } from "@/app/layout/focus";
 import { readFilter, writeFilter } from "@/features/play/filters";
-import { Hud, HintBar, Reveal, Summary, Burst } from "@/features/play/RoundChrome";
+import { RoundHud, HintPill, LeaveX, Reveal, Summary, Burst } from "@/features/play/RoundChrome";
 import { PictoRenderer, PICTURE_ALT } from "./PictoRenderer";
 import { SPRING, shake } from "@/shared/ui/motion";
 
 export function PictoGame() {
+  // The whole round has the phone (#21–#23): no header or tab bar.
+  useFocusMode(true);
   const [cats, setCats] = useState<string[]>(() => readFilter("picto"));
-  const r = useRound("picto", 8, cats);
+  const [levels, setLevels] = useState<Level[]>(() => readLevels(quizKey("picto")));
+  const r = useRound("picto", 8, cats, null, levels);
   const chooseCats = (next: string[]) => { setCats(next); writeFilter("picto", next); };
-  const filterBar = (
-    <CategoryBar categories={r.categories} selected={cats} onChange={chooseCats} />
+  const chooseLevels = (next: Level[]) => { setLevels(next); writeLevels(next, quizKey("picto")); };
+  const chips = (
+    <QuizChips levels={levels} onLevels={chooseLevels}
+      categories={r.categories.map((c) => c.name)} selected={cats} onCategories={chooseCats} />
   );
+  const back = <div className="min-h-10 flex items-center"><LeaveX to="/play" label="Back to the games" /></div>;
   const [guess, setGuess] = useState("");
   const pictureRef = useRef<HTMLDivElement>(null);
   const seen = useSeenHeight();
@@ -28,18 +35,19 @@ export function PictoGame() {
     if (r.phase === "playing") setGuess("");
   }, [r.phase, r.index, r.current?.id]);   // a skip keeps the index, not the picture
 
-  if (r.phase === "loading") return <>{filterBar}<Dealing what="the puzzles" /></>;
+  if (r.phase === "loading") return <>{back}<Dealing what="the puzzles" /></>;
   if (r.phase === "empty") return (
-    <>{filterBar}<p className="text-soft font-bold">
-      {cats.length ? "Nothing live in those categories yet — widen the filter." : "No picto puzzles are live yet."}
-    </p></>
+    <div className="grid gap-[11px]">
+      {back}
+      {chips}
+      <NothingMatches levels={levels} selected={cats}
+        onClear={() => { chooseCats([]); chooseLevels([...LEVELS]); }} />
+    </div>
   );
 
   if (r.phase === "done") {
     return (
-      <>
-      {filterBar}
-      <Summary score={r.score} results={r.results} outcome={r.outcome} onAgain={r.restart} title="PICTO PHRASE">
+      <Summary name="Picto Phrase" score={r.score} results={r.results} outcome={r.outcome} onAgain={r.restart} title="PICTO PHRASE">
         <div className="grid gap-2.5">
           {r.results.map((res, i) => (
             <motion.div key={i}
@@ -60,20 +68,27 @@ export function PictoGame() {
           ))}
         </div>
       </Summary>
-      </>
     );
   }
 
   const item = r.current;
   if (!item) return null;
   const wrong = r.phase === "revealed" && !r.last?.correct;
+  const revealed = r.phase === "revealed";
+  const clues = [item.altHint, item.charHint].filter((h): h is string => !!h);
+  const first = r.index === 0 && r.phase === "playing" && r.hintsUsed === 0 && !guess;
 
+  // #21–#22 from the drawings' code: the hud, the picture as the hero (.rebus:
+  // white, 22px corners, the full width), the hint pills, then the answer box
+  // with Go beside it, sitting on the keyboard.
   return (
-    <div>
-      <Hud index={r.index} total={r.items.length} score={r.score} streak={r.streak} accent={RAMPS.sky.base} />
+    <div className="flex flex-col min-h-[calc(100dvh-20px-env(safe-area-inset-top)-env(safe-area-inset-bottom))]">
+      <RoundHud index={r.index} total={r.items.length} score={r.score}
+        results={r.results.map((x) => x.correct)} leaveTo="/play" leaveLabel="Back to the games. This round won't count." />
+      {first && <div className="mt-[4px]">{chips}</div>}
 
-      <div className="relative mt-4">
-        <Burst show={r.phase === "revealed" && !!r.last?.correct} />
+      <div className="relative mt-[11px]">
+        <Burst show={revealed && !!r.last?.correct} />
         <AnimatePresence mode="wait">
           <motion.div
             key={item.id}
@@ -83,9 +98,9 @@ export function PictoGame() {
             transition={SPRING}
             ref={pictureRef}
             // With the keyboard up, the picture shrinks to share what's left of
-            // the screen with the box, instead of being pushed off the top.
+            // the screen with the box, instead of being pushed off the top (Q11).
             style={{ maxHeight: `min(46vh, ${Math.round(seen * 0.42)}px)` }}
-            className="card aspect-square mx-auto w-full grid place-items-center p-7 text-ember scroll-mt-20"
+            className="card shadow-lift-sm rounded-[22px] aspect-square mx-auto w-full grid place-items-center p-6 text-ink scroll-mt-20"
           >
             {item.render === "image" && item.imageUrl
               ? <img src={item.imageUrl} alt={PICTURE_ALT} className="max-h-full object-contain rounded-xl" />
@@ -94,37 +109,40 @@ export function PictoGame() {
         </AnimatePresence>
       </div>
 
-      <p className="mt-3 text-[12px] font-black text-soft text-center">
-        {item.difficulty}{item.category ? ` · ${item.category}` : ""}
-      </p>
-
       {r.phase === "playing" ? (
         <>
+          {/* The hints as pills (#21): what it is, each clue bought, and the
+              button for the next one (−100 each, as before). */}
+          <div className="mt-[11px] flex flex-wrap items-center gap-1.5">
+            {item.category && <HintPill>{item.category}</HintPill>}
+            {clues.slice(0, r.hintsUsed).map((h, i) => <HintPill key={i}>{h}</HintPill>)}
+            {r.hintsUsed < clues.length && (
+              <HintPill onClick={r.useHint}>Hint · {clues.length - r.hintsUsed} left</HintPill>
+            )}
+          </div>
           <form onSubmit={(e) => { e.preventDefault(); if (guess.trim()) r.submit(guess); }}
-            className="mt-4 flex gap-2.5">
+            className="mt-[11px] flex items-center gap-2.5">
             <input value={guess} onChange={(e) => setGuess(e.target.value)}
               aria-label="Your guess" placeholder="What phrase is this?" autoComplete="off" autoCapitalize="none"
               // Autocorrect "fixed" right answers into wrong ones (Nollywood ->
               // Hollywood); the judge already forgives a slip or two.
               autoCorrect="off" spellCheck={false} enterKeyHint="go"
               onFocus={() => setTimeout(() => pictureRef.current?.scrollIntoView({ block: "start", behavior: "smooth" }), 350)}
-              className="flex-1 bg-board shadow-lift-sm rounded-2xl px-4 py-3.5
-                font-bold text-ink placeholder:text-soft/60 outline-none
-                focus:shadow-[0_5px_0_var(--color-ink)] transition-shadow" />
+              className="flex-1 min-w-0 bg-board rounded-[14px] px-3.5 py-3 font-semibold text-ink placeholder:text-soft
+                outline-none shadow-[inset_0_0_0_2px_var(--color-hair)] focus:shadow-[inset_0_0_0_2.5px_var(--color-sky)] transition-shadow" />
             <button type="submit" disabled={!guess.trim()}
-              className="cut tap cut-ember text-ink font-display text-lg font-semibold px-6">
+              className="cut tap cut-petal shrink-0 min-h-[42px] px-3 font-display text-[16px]">
               Go
             </button>
           </form>
-          <HintBar item={item} used={r.hintsUsed} onUse={r.useHint} />
-          {/* Stuck (talk item 5): skip once, then Show me, which counts as a miss. */}
+          {/* Stuck (talk item 5, kept): skip once, then Show me, which counts as a miss. */}
           <button onClick={r.canSkip ? r.skip : r.giveUp}
-            className="mt-2 text-[13px] font-bold text-soft underline underline-offset-4 min-h-[44px]">
+            className="mt-1 self-center text-[13px] font-extrabold text-soft underline underline-offset-4 min-h-[44px]">
             {r.canSkip ? "Skip for now: it comes back at the end" : "Show me the answer (counts as a miss)"}
           </button>
         </>
       ) : (
-        <Reveal correct={r.last!.correct} near={r.last!.near} answer={item.answer}
+        <Reveal correct={r.last!.correct} near={r.last!.near} answer={item.answer} given={r.last!.given}
           gained={r.last!.gained} parts={r.last!.parts} onNext={r.next} isLast={r.index + 1 >= r.items.length}
           explanation={item.explanation} />
       )}
