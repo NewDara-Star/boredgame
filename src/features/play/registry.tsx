@@ -37,6 +37,13 @@ export interface GameDef {
   alsoKnown: string[];
   /** Games it's close to but isn't. A search for one finds nothing, then names this as the nearest thing (#13). */
   like: string[];
+  /** Not listed on Games any more ("Play it with…", Daramola 26 Sep): Square
+      Off and the catapult and trivia versions are Tic Tac Toe and Connect 4
+      with a challenge. Kept so rooms can still be set to them until rooms
+      carry the new challenges. */
+  hidden?: true;
+  /** played with a challenge per spot, chosen on the game's sheet */
+  withs?: true;
 }
 
 /**
@@ -70,7 +77,7 @@ export const GAMES: GameDef[] = [
     room: { mode: "squareoff", challenge: "trivia", blurb: "Tic-tac-toe. A square costs a right answer, and missing gives your opponent one shot at it." },
     family: "board",
     solo: "bot", howTo: "Tic Tac Toe where a square costs a right answer. Miss, and the other side gets a shot at it.",
-    alsoKnown: ["quiz board", "squares"], like: ["noughts", "crosses", "tic tac toe"],
+    hidden: true, alsoKnown: ["quiz board", "squares"], like: ["noughts", "crosses", "tic tac toe"],
     Art: ({ size }) => <GameTile slug="squareoff" size={size} label="Square Off" />,
   },
   {
@@ -79,7 +86,7 @@ export const GAMES: GameDef[] = [
     room: { mode: "tictactoe", blurb: "The plain game. Take a square, first to three in a row." },
     family: "board",
     solo: "bot", howTo: "Take turns placing your mark. Three in a row, across, down or diagonal, wins.",
-    alsoKnown: ["noughts", "crosses", "noughts and crosses", "x and o"], like: ["chess", "checkers", "draughts", "board game"],
+    withs: true, alsoKnown: ["noughts", "crosses", "noughts and crosses", "x and o", "square off", "catapult squares", "cup toss", "hoops", "knock-down"], like: ["chess", "checkers", "draughts", "board game"],
     Art: ({ size }) => <GameTile slug="tictactoe" size={size} label="Tic Tac Toe" />,
   },
   {
@@ -88,7 +95,7 @@ export const GAMES: GameDef[] = [
     room: { mode: "connect4", blurb: "The plain game. Tap a column, the disc falls, four in a row wins." },
     family: "board",
     solo: "bot", howTo: "Drop discs into the columns. Four in a row, any direction, wins.",
-    alsoKnown: ["four in a row", "connect four", "discs"], like: ["checkers", "draughts", "chess"],
+    withs: true, alsoKnown: ["four in a row", "connect four", "discs", "connect 4 trivia", "connect 4 catapult"], like: ["checkers", "draughts", "chess"],
     Art: ({ size }) => <GameTile slug="connect4" size={size} label="Connect 4" />,
   },
   {
@@ -119,7 +126,7 @@ export const GAMES: GameDef[] = [
     room: { mode: "squareoff", challenge: "catapult", blurb: "Tic-tac-toe, but a square costs a shot rather than a right answer." },
     family: "skill",
     solo: "bot", howTo: "Pull back, aim, let go. Land in a square to claim it; three in a row wins.",
-    alsoKnown: ["catapult", "throw", "aim"], like: ["angry birds", "physics", "launch"],
+    hidden: true, alsoKnown: ["catapult", "throw", "aim"], like: ["angry birds", "physics", "launch"],
     Art: ({ size }) => <GameTile slug="catapultsquares" size={size} label="Catapult Squares" />,
   },
   {
@@ -129,7 +136,7 @@ export const GAMES: GameDef[] = [
     room: { mode: "connect4trivia", challenge: "catapult", blurb: "Name a column, then land a shot to earn it." },
     family: "skill",
     solo: "bot", howTo: "Connect 4, but every disc is a shot: hit the target and it drops.",
-    alsoKnown: ["catapult", "four in a row", "throw"], like: ["angry birds", "physics", "launch", "aim"],
+    hidden: true, alsoKnown: ["catapult", "four in a row", "throw"], like: ["angry birds", "physics", "launch", "aim"],
     Art: ({ size }) => <GameTile slug="connect4catapult" size={size} label="Connect 4 Catapult" />,
   },
   {
@@ -138,7 +145,7 @@ export const GAMES: GameDef[] = [
     room: { mode: "connect4trivia", challenge: "trivia", blurb: "Name a column, answer a question. Get it wrong and you lose the turn — no second chances." },
     family: "board",
     solo: "bot", howTo: "Connect 4, but every disc costs a right answer.",
-    alsoKnown: ["four in a row", "connect four", "quiz"], like: ["questions"],
+    hidden: true, alsoKnown: ["four in a row", "connect four", "quiz"], like: ["questions"],
     Art: ({ size }) => <GameTile slug="connect4trivia" size={size} label="Connect 4 Trivia" />,
   },
 ];

@@ -19,16 +19,12 @@ const PictoGame = lazy(() => import("@/features/picto/PictoGame").then((m) => ({
 const TriviaGame = lazy(() => import("@/features/trivia/TriviaGame").then((m) => ({ default: m.TriviaGame })));
 const CataloguePage = lazy(() => import("@/features/play/CataloguePage").then((m) => ({ default: m.CataloguePage })));
 const DailyPage = lazy(() => import("@/features/daily/DailyPage").then((m) => ({ default: m.DailyPage })));
-const SquareOffPage = lazy(() => import("@/features/squareoff/SquareOffPage").then((m) => ({ default: m.SquareOffPage })));
 const LeaderboardPage = lazy(() => import("@/features/leaderboard/LeaderboardPage").then((m) => ({ default: m.LeaderboardPage })));
 const RoadPage = lazy(() => import("@/features/leaderboard/RoadPage").then((m) => ({ default: m.RoadPage })));
 const ProfilePage = lazy(() => import("@/features/profile/ProfilePage").then((m) => ({ default: m.ProfilePage })));
 const AdminPage = lazy(() => import("@/features/admin/AdminPage").then((m) => ({ default: m.AdminPage })));
 const TicTacToeSoloPage = lazy(() => import("@/features/tictactoe/TicTacToeSoloPage").then((m) => ({ default: m.TicTacToeSoloPage })));
 const Connect4SoloPage = lazy(() => import("@/features/connect4/Connect4SoloPage").then((m) => ({ default: m.Connect4SoloPage })));
-const Connect4TriviaSoloPage = lazy(() => import("@/features/connect4/Connect4SoloPage").then((m) => ({ default: m.Connect4TriviaSoloPage })));
-const Connect4CatapultSoloPage = lazy(() => import("@/features/connect4/Connect4SoloPage").then((m) => ({ default: m.Connect4CatapultSoloPage })));
-const SquareOffCatapultPage = lazy(() => import("@/features/squareoff/SquareOffCatapultPage").then((m) => ({ default: m.SquareOffCatapultPage })));
 const MemorySoloPage = lazy(() => import("@/features/memory/MemorySoloPage").then((m) => ({ default: m.MemorySoloPage })));
 const SortSoloPage = lazy(() => import("@/features/sort/SortSoloPage").then((m) => ({ default: m.SortSoloPage })));
 const RoomsPage = lazy(() => import("@/features/rooms/RoomsPage").then((m) => ({ default: m.RoomsPage })));
@@ -47,12 +43,12 @@ export function App() {
               <Route path="/trivia" element={<TriviaGame />} />
               <Route path="/play" element={<CataloguePage />} />
               <Route path="/daily" element={<DailyPage />} />
-              <Route path="/squareoff" element={<SquareOffPage />} />
+              <Route path="/squareoff" element={<Navigate to="/tictactoe?with=trivia" replace />} />
               <Route path="/tictactoe" element={<TicTacToeSoloPage />} />
               <Route path="/connect4" element={<Connect4SoloPage />} />
-              <Route path="/connect4trivia" element={<Connect4TriviaSoloPage />} />
-              <Route path="/connect4catapult" element={<Connect4CatapultSoloPage />} />
-              <Route path="/catapultsquares" element={<SquareOffCatapultPage />} />
+              <Route path="/connect4trivia" element={<Navigate to="/connect4?with=trivia" replace />} />
+              <Route path="/connect4catapult" element={<Navigate to="/connect4?with=cup" replace />} />
+              <Route path="/catapultsquares" element={<Navigate to="/tictactoe?with=cup" replace />} />
               <Route path="/memory" element={<MemorySoloPage />} />
               <Route path="/ballsort" element={<SortSoloPage />} />
               {/* You (#46–#51): your profile, the road and everyone. The old

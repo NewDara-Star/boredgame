@@ -31,13 +31,13 @@ ok(/rounded-\[24px\]/.test(ttt) && /bg-mist/.test(ttt) && /w-\[66%\] h-\[66%\]/.
 ok(/width \* 0\.62/.test(ttt) && /shadow-\[inset_0_0_0_3px_var\(--color-ink-day\)\]/.test(ttt), "#26: the board drops to 62%, the square in play ringed in ink");
 ok(/from-sky to-sky-lo/.test(c4) && /rounded-\[22px\]/.test(c4), ".c4: sky to sky-lo, 22px corners");
 ok(/the \$\{SQUARE_NAMES\[n\]/.test(sqRules) && /the \$\{COLUMN_NAMES\[n\]/.test(c4Rules), "squares and columns named by where they are");
-ok(/<TurnPanel sheet/.test(page) && /rounded-t-\[26px\]/.test(page) && /text-\[17px\] leading-\[1\.3\] font-bold/.test(panel), "#26: the question as a sheet, 17px bold");
+ok(/<TurnPanel sheet/.test(page) && /rounded-t-\[26px\]/.test(read("features/challenge/ChallengeSheet.tsx")) && /text-\[17px\] leading-\[1\.3\] font-bold/.test(panel), "#26: the question on the challenge sheet, 17px bold");
 ok(/Is there another \$\{face\}\?/.test(memory), "#29: Pick one more / Is there another heart?");
 ok(/<TurnBanner title=\{headline\}/.test(result) && /tone === "win" \? "petal" : "white"/.test(result) && !/bg-ember/.test(result), "#30: the result as a banner, no red slab");
 ok(/"You beat the bot"/.test(page) && /New session/.test(page), "#30: in your words, then New session");
 
 // At night the page's ink is white; every new surface is a .card so it gets
 // ink back (index.css). The first build left the banner, seats and sheet blank.
-ok(/className=\{`card shrink-0 flex items-center gap-2\.5 rounded-\[20px\]/.test(surface) && /className=\{`card flex items-center gap-2 bg-board/.test(surface) && /PlayRow className="card -mx-4/.test(page), "banner, seats and sheet read at night (.card)");
+ok(/className=\{`card shrink-0 flex items-center gap-2\.5 rounded-\[20px\]/.test(surface) && /className=\{`card flex items-center gap-2 bg-board/.test(surface) && /className="card fixed inset-x-0 bottom-0/.test(read("features/challenge/ChallengeSheet.tsx")), "banner, seats and sheet read at night (.card)");
 
 console.log(`${n} board assertions hold`);

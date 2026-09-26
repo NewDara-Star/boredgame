@@ -7,7 +7,12 @@ import { Sunflower } from "@/shared/brand/Sunflower";
 import { stagger, riseIn } from "@/shared/ui/motion";
 import type { Family } from "@/shared/brand/tokens";
 import { useLiveBanks } from "./counts";
-import { GAMES, type GameDef } from "./registry";
+import { GAMES as ALL, type GameDef } from "./registry";
+import { CHALLENGES, readWith, writeWith, roomPreset, type Challenge } from "@/features/challenge/kinds";
+
+/** The games on the list: Square Off and the catapult and trivia versions are
+    Tic Tac Toe and Connect 4 played with a challenge now (Daramola 26 Sep). */
+const GAMES = ALL.filter((g) => !g.hidden);
 
 /**
  * Games (#12–#14): grouped by family, one line each, no bank counts. Tapping a
@@ -38,13 +43,19 @@ function Sheet({ g, onClose }: { g: GameDef; onClose: () => void }) {
   const [how, setHow] = useState(false);
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState(false);
+  // "Play it with…" (#14): what a spot costs, remembered per game.
+  const [w, setW] = useState<Challenge>(() => (g.withs ? readWith(g.slug) : "none"));
+  const choose = (c: Challenge) => { setW(c); writeWith(g.slug, c); };
+  // Rooms carry None and Trivia today; the shots come to rooms next.
+  const preset = g.withs ? roomPreset(g.slug as "tictactoe" | "connect4", w) : g.slug;
   const friend = async () => {
+    if (!preset) return;
     if (!user) { nav("/rooms"); return; }                 // signed out: Rooms asks for a name first
     setBusy(true); setFailed(false);
     const r = await createRoom(user.id, profile?.username ?? "player");
     setBusy(false);
     if (!r) { setFailed(true); return; }
-    nav(`/rooms/${r.code}`, { state: { preset: g.slug } });
+    nav(`/rooms/${r.code}`, { state: { preset } });
   };
   return (
     <div className="fixed inset-0 z-50 grid items-end" role="dialog" aria-modal="true" aria-label={g.name}>
@@ -59,18 +70,33 @@ function Sheet({ g, onClose }: { g: GameDef; onClose: () => void }) {
             <p className="text-[14px] font-semibold text-soft">{g.tagline}</p>
           </div>
         </div>
+        {g.withs && (
+          <div className="grid gap-1.5">
+            <span className="text-[12px] font-extrabold text-soft">Play it with</span>
+            <div className="flex flex-wrap gap-1.5" role="group" aria-label="Play it with">
+              {CHALLENGES.map((c) => (
+                <button key={c.key} aria-pressed={w === c.key} onClick={() => choose(c.key)}
+                  className="min-h-[44px] -my-[7px] grid place-items-center">
+                  <span className={`chip rounded-full px-[11px] py-[5px] text-[13px] font-extrabold text-ink ${w === c.key ? "bg-petal" : "bg-board"}`}>{c.name}</span>
+                </button>
+              ))}
+            </div>
+            <p className="text-[13px] font-semibold text-soft">{CHALLENGES.find((c) => c.key === w)?.says}</p>
+          </div>
+        )}
         <div className={`grid gap-2 ${g.room ? "grid-cols-2" : ""}`}>
-          <Link to={g.path} className="cut tap cut-petal min-h-[52px] grid place-items-center font-display text-[17px]">
+          <Link to={g.withs ? `${g.path}?with=${w}` : g.path} className="cut tap cut-petal min-h-[52px] grid place-items-center font-display text-[17px]">
             {g.solo === "bot" ? "Play the bot" : "Play"}
           </Link>
           {g.room && (
-            <button onClick={() => void friend()} disabled={busy}
+            <button onClick={() => void friend()} disabled={busy || !preset}
               className="cut tap cut-leaf min-h-[52px] grid place-items-center font-display text-[17px]">
               {busy ? "Opening a room…" : "Play a friend"}
             </button>
           )}
         </div>
         {failed && <p className="text-[13px] font-bold text-ember">Couldn't open a room. Try again.</p>}
+        {!preset && <p className="text-[13px] font-bold text-soft">With a friend, it's None or Trivia for now. Shots in rooms come next.</p>}
         {how ? <p className="text-[14px] font-semibold">{g.howTo}</p> : (
           <button onClick={() => setHow(true)} className="block mx-auto text-[13px] font-black underline underline-offset-4 min-h-[44px]">
             How to play

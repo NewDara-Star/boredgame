@@ -119,7 +119,7 @@ console.log("how hard the solo board questions are (talk item 9)");
   }
   const rd = (f: string) => { try { return readFileSync(new URL(`../src/${f}`, import.meta.url), "utf8"); } catch { return ""; } };
   ok("the solo board deals from the chosen levels", /atLevels\(everyRef\.current, readLevels\(\)\)/.test(rd("features/play/useSoloBoard.ts")));
-  ok("the choice shows before a game's first question", /g\.phase === "picking" && s\.results\.length === 0/.test(rd("features/play/BoardSoloPage.tsx")));
+  ok("the choice shows before a session's first move", /g\.phase === "picking" && !started/.test(rd("features/play/BoardSoloPage.tsx")));
 }
 
 console.log(failed === 0 ? "\ndealing is sound" : `\n${failed} FAILED`);

@@ -37,7 +37,7 @@ function Section({ title, to, cta, children }: { title: string; to?: string; cta
 function GamesRow() {
   const games = FEATURED.map((s) => GAMES.find((g) => g.slug === s)).filter((g): g is (typeof GAMES)[number] => !!g);
   return (
-    <Section title="Games" to="/play" cta={`All ${GAMES.length}`}>
+    <Section title="Games" to="/play" cta={`All ${GAMES.filter((g) => !g.hidden).length}`}>
       <div className="grid grid-cols-2 gap-2.5">
         {games.map((g) => (
           <Link key={g.slug} to={g.path} className="card tap flex items-center gap-2.5 p-2.5 min-h-[62px]">

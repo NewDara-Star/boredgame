@@ -131,9 +131,11 @@ const CHIP: Record<string, string> = {
 };
 
 /** .chip.leaf / .ember / .grape: the game's name in its family's colour. */
-export function GameChip({ title }: { title: string }) {
+export function GameChip({ title, label }: { title: string;
+  /** what it says, when that's more than the name: "Connect 4 · Mix" */
+  label?: string }) {
   const fam = GAMES.find((g) => g.name === title)?.family ?? "board";
-  return <span className={`chip rounded-full px-[9px] py-0.5 text-[12px] font-extrabold whitespace-nowrap ${CHIP[fam]}`}>{title}</span>;
+  return <span className={`chip rounded-full px-[9px] py-0.5 text-[12px] font-extrabold whitespace-nowrap ${CHIP[fam]}`}>{label ?? title}</span>;
 }
 
 /**

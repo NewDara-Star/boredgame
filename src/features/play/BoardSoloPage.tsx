@@ -14,6 +14,12 @@ import { ResultScreen } from "@/features/play/ResultScreen";
 import { useSoloBoard } from "@/features/play/useSoloBoard";
 import { LEVELS, toggle } from "@/features/play/levels";
 import { TurnPanel } from "@/features/rooms/TurnPanel";
+import { AnimatePresence } from "framer-motion";
+import { ChallengeSheet, MiniBoard, ShotPanel } from "@/features/challenge/ChallengeSheet";
+import { challengeName, isShot, type Challenge } from "@/features/challenge/kinds";
+import { SHOT_HOW, SHOT_NAMES } from "@/features/challenge/shots";
+import { squareName } from "@/features/squareoff/rules";
+import { columnName } from "@/features/connect4/rules";
 
 import type { BoardEngine, BoardRow, BoardState, Mark } from "@/features/rooms/useBoardRoom";
 
@@ -69,13 +75,18 @@ export function BoardSoloPage<G extends BoardState & { target: number | null; li
   /** the result card's picture: the game draws its final board on it */
   art?: { hero: (g: G) => Hero; glyph?: Glyph; caption?: (g: G) => string | undefined };
   plain?: boolean;
-  challenge?: "trivia" | "catapult" | "none";
+  /** what a spot costs ("Play it with…"); Mix changes it every turn */
+  challenge?: Challenge | "catapult";
   /** What the two chips count during play. Defaults to games won this session;
       Memory counts pairs, because that is the number you are playing for. */
   score?: (g: G) => Record<Mark, number>;
 }) {
   useFocusMode(true);
   const s = useSoloBoard(engine, plain, challenge);
+  // The level rows are for before the first move of a session, not after it:
+  // a shot session files no answers, so "no results yet" never ended them.
+  const [started, setStarted] = useState(false);
+  useEffect(() => { if (s.game.phase !== "picking") setStarted(true); }, [s.game.phase]);
   const g = s.game;
   const nav = useNavigate();
   const { profile } = useAuth();
@@ -112,7 +123,7 @@ export function BoardSoloPage<G extends BoardState & { target: number | null; li
         tone={tone}
         card={card}
         alt={`${title} session: you ${s.wins.x}, the bot ${s.wins.o}`}>
-        <button onClick={s.newSession}
+        <button onClick={() => { setStarted(false); s.newSession(); }}
           className="cut tap cut-board min-h-[52px] font-display text-[19px]">
           New session
         </button>
@@ -132,8 +143,15 @@ export function BoardSoloPage<G extends BoardState & { target: number | null; li
   const revealed = g.phase === "revealed" || g.phase === "over";
   const over = g.phase === "over";
   const mine = active === "x";
-  const question = !plain && challenge === "trivia" && (g.phase === "asking" || g.phase === "revealed");
-  const shot = challenge === "catapult" && (g.phase === "asking" || g.phase === "revealed");
+  const kind = s.kind;
+  const question = !plain && kind === "trivia" && (g.phase === "asking" || g.phase === "revealed");
+  const shot = kind === "catapult" && (g.phase === "asking" || g.phase === "revealed");
+  // A toss, a basket or a slingshot: yours on the sheet, the bot's in words.
+  const myShot = isShot(kind) && g.phase === "asking" && answerer === "x";
+  const botsShot = isShot(kind) && g.phase === "asking" && answerer === "o";
+  const board9 = (g as unknown as { board: unknown[] }).board.length === 9;
+  const spot = (i: number | null) => (i === null ? "" : board9 ? squareName(i) : columnName(i));
+  const unit = board9 ? "square" : "column";
   const last = (g as unknown as { last: { by: Mark; correct: boolean } | null }).last;
   const said = engine.describe(g, s.names, "x");
   const you = youAre ?? (glyphs.x === "cross" ? "You're crosses" : glyphs.x === "disc" ? "You're gold" : undefined);
@@ -149,14 +167,15 @@ export function BoardSoloPage<G extends BoardState & { target: number | null; li
     : g.phase === "revealed" && last ? {
         title: last.by === "x" ? (last.correct ? "Got it" : "Not this time") : (last.correct ? "The bot got it" : "The bot missed"),
         sub: said, tone: "white", flower: last.correct === (last.by === "x") ? "bloom" : "bored" }
+    : botsShot ? { title: "The bot's shot", sub: `${SHOT_NAMES[kind as keyof typeof SHOT_NAMES]} for ${spot(g.target)}`, tone: "white", flower: "look-right" }
     : g.phase === "asking" && shot ? (mine
         ? { title: "Land it in the ring", sub: `For ${said.replace(/^You're going for /, "").replace(/\.$/, "")}`, tone: "petal", flower: "awake" }
         : { title: "The bot's shot", sub: said, tone: "white", flower: "look-right" })
     : g.phase === "asking" && question ? null     // the question sheet says it (#26)
     : g.phase === "asking" ? (mine ? { title: "Your move", sub: said, tone: "petal", flower: "awake" }
         : { title: "The bot's thinking", sub: said, tone: "white", flower: "look-right" })
-    : mine ? { title: "Your move", sub: you ?? said, tone: "petal", flower: "awake" }
-    : { title: "The bot's thinking", sub: you, tone: "white", flower: "look-right" };
+    : mine ? { title: "Your move", sub: challenge === "mix" ? `Pick a ${unit}. This one's ${challengeName(kind as Challenge).toLowerCase()}.` : you ?? said, tone: "petal", flower: "awake" }
+    : { title: "The bot's thinking", sub: challenge === "mix" ? `Its turn is ${challengeName(kind as Challenge).toLowerCase()}` : you, tone: "white", flower: "look-right" };
 
   const count = (n: number) => counting === "pairs" ? `${n} pair${n === 1 ? "" : "s"}` : `${n} win${n === 1 ? "" : "s"}`;
   const me = profile?.username ?? "You";
@@ -169,7 +188,7 @@ export function BoardSoloPage<G extends BoardState & { target: number | null; li
     <PlaySurface focus>
       <PlayRow className="flex items-center justify-between gap-2.5 min-h-10">
         <LeaveX onClick={leave} label={s.played > 0 ? "End the session" : "Back to the games"} />
-        <GameChip title={title} />
+        <GameChip title={title} label={!plain && challenge !== "catapult" ? `${title} · ${challengeName(challenge as Challenge)}` : title} />
       </PlayRow>
 
       {b && (
@@ -179,7 +198,7 @@ export function BoardSoloPage<G extends BoardState & { target: number | null; li
 
       {/* How hard (talk item 9): before the first question of each game, so
           it never takes board space mid-game. The phone remembers the pick. */}
-      {!plain && challenge === "trivia" && g.phase === "picking" && s.results.length === 0 && (
+      {!plain && (challenge === "trivia" || challenge === "mix") && g.phase === "picking" && !started && (
         <PlayRow>
           <div className="flex items-center gap-1.5" role="group" aria-label="How hard are the questions?">
             <span className="text-[13px] font-extrabold text-soft mr-1">Questions</span>
@@ -192,6 +211,21 @@ export function BoardSoloPage<G extends BoardState & { target: number | null; li
                 </button>
               );
             })}
+          </div>
+        </PlayRow>
+      )}
+
+      {/* How steady the shots are: Easy widens every target and calms the wind. */}
+      {(isShot(challenge) || challenge === "mix") && g.phase === "picking" && !started && (
+        <PlayRow>
+          <div className="flex items-center gap-1.5" role="group" aria-label="How hard are the shots?">
+            <span className="text-[13px] font-extrabold text-soft mr-1">Shots</span>
+            {(["easy", "norm"] as const).map((l) => (
+              <button key={l} aria-pressed={s.shotLevel === l} onClick={() => s.setShotLevel(l)}
+                className="min-h-[44px] -my-[7px] grid place-items-center">
+                <span className={`chip rounded-full px-[11px] py-[5px] text-[13px] font-extrabold text-ink ${s.shotLevel === l ? "bg-petal" : "bg-board"}`}>{l === "easy" ? "Easy" : "Normal"}</span>
+              </button>
+            ))}
           </div>
         </PlayRow>
       )}
@@ -236,30 +270,40 @@ export function BoardSoloPage<G extends BoardState & { target: number | null; li
           <button onClick={s.restart} className="cut tap cut-petal min-h-[52px] font-display text-[19px]">Next game</button>
           <button onClick={s.endSession} className="cut tap cut-board min-h-[52px] font-display text-[19px]">End session</button>
         </PlayRow>
-      ) : question ? (
-        // #26: the question comes up as a sheet from the foot of the screen.
-        <PlayRow className="card -mx-4 -mb-[calc(14px+env(safe-area-inset-bottom))] bg-board text-ink rounded-t-[26px] rounded-b-none
-          px-4 pt-3.5 pb-[calc(18px+env(safe-area-inset-bottom))] shadow-[0_-10px_30px_rgba(14,74,176,.25)]">
-          {/* The same panel the rooms draw. It only reached three copies
-              because solo advances on a timer and a room can be stuck, so they
-              looked different — but the difference is one nullable prop. */}
-          <TurnPanel sheet
-            challenge="trivia"
-            item={s.item} options={s.options}
-            chosen={s.chosen} setChosen={() => {}}
-            // The option you tapped, as tapped: it is what the reveal marks as
-            // yours and what the server judges. (It used to be a null character
-            // for any wrong pick, which Postgres refuses, so a game with a miss
-            // filed nothing.)
-            onAnswer={(_correct, given) => s.submit(given ?? null)}
-            asking={g.phase === "asking"} revealed={revealed} mine={s.iAnswer}
-            fraction={s.fraction} askedAt={0} target={s.target}
-            waitingOn="The bot"
-            botShot={s.botFires}
-            advanceOwner={null} stall={null} myMark="x"
-            onAdvanceNow={() => {}} onForceAdvance={() => {}} nextLabel="Next" />
-        </PlayRow>
       ) : null}
+
+      {/* The challenge sheet (drawings 26a–26f): full height over the board, the spot
+          you're playing for at the top. */}
+      <AnimatePresence>
+        {myShot && (
+          <ChallengeSheet key={`shot-${g.target}-${s.played}-${s.results.length}`}
+            title={`For ${spot(g.target)}`} sub={SHOT_HOW[kind as keyof typeof SHOT_HOW]}
+            mini={<MiniBoard board={(g as unknown as { board: ("x" | "o" | null)[] }).board} target={g.target} />}>
+            <ShotPanel kind={kind as keyof typeof SHOT_HOW} level={s.shotLevel} onDone={(hit) => s.fire(hit)} />
+          </ChallengeSheet>
+        )}
+        {question && (
+          <ChallengeSheet key="question" title={g.target !== null ? `For ${spot(g.target)}` : last?.by === "x" ? (last.correct ? "Yours" : "Stays open") : "The bot's question"}
+            sub={answerer === "o" || last?.by === "o" ? "The bot is answering" : "Answer it"}
+            mini={<MiniBoard board={(g as unknown as { board: ("x" | "o" | null)[] }).board} target={g.target} />}>
+            <div className="min-h-0 overflow-y-auto">
+              {/* The same panel the rooms draw. The option you tapped, as
+                  tapped: it is what the reveal marks as yours. */}
+              <TurnPanel sheet
+                challenge="trivia"
+                item={s.item} options={s.options}
+                chosen={s.chosen} setChosen={() => {}}
+                onAnswer={(_correct, given) => s.submit(given ?? null)}
+                asking={g.phase === "asking"} revealed={revealed} mine={s.iAnswer}
+                fraction={s.fraction} askedAt={0} target={s.target}
+                waitingOn="The bot"
+                botShot={s.botFires}
+                advanceOwner={null} stall={null} myMark="x"
+                onAdvanceNow={() => {}} onForceAdvance={() => {}} nextLabel="Next" />
+            </div>
+          </ChallengeSheet>
+        )}
+      </AnimatePresence>
 
       <UnlockGate outcome={s.outcome} />
     </PlaySurface>

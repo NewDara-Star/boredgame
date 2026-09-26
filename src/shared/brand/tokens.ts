@@ -27,6 +27,13 @@ export const BOARD = "#FFFFFF";
 export const MIST = "#E6EEF9";
 export const HAIR = "#D3DCEF";
 
+/** The challenge scenes' own materials (cup toss's table, the hoops court, the
+    knock-down field): the one place a game world needs colours the ramps don't have. */
+export const SCENE = {
+  air: "#DFF2FF", wood: "#E9A86A", woodHi: "#F6C891", woodLo: "#C98347", grain: "rgba(160,95,40,.25)",
+  courtHi: "#F3E3C4", court: "#E3C08E", cupMouth: "#7A1E12", dawn: "#FFF4D6",
+} as const;
+
 /** Letters on colour are ink, except on grape (4.4:1 white). */
 export const onColour = (h: Hue) => (h === "grape" ? BOARD : INK);
 

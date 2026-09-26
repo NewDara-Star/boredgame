@@ -12,6 +12,11 @@ import type { BoardEngine, BoardRow, BoardState, Mark } from "@/features/rooms/u
 // lives in the Square Off rules because that is where it was written and a
 // rules module may not import another one.
 import { botIsRight } from "@/features/squareoff/rules";
+import { nextMix, isShot, type Challenge, type TurnKind } from "@/features/challenge/kinds";
+import { BOT_ODDS, type ShotLevel } from "@/features/challenge/shots";
+
+const SHOT_LEVEL = "boredgame-shot-level-v1";
+function readShotLevel(): ShotLevel { try { return localStorage.getItem(SHOT_LEVEL) === "easy" ? "easy" : "norm"; } catch { return "norm"; } }
 
 const BOT_PICK_MS = 850;
 const BOT_THINK_MS = 1500;
@@ -34,9 +39,20 @@ export function useSoloBoard<G extends BoardState, R extends BoardRow>(
   engine: BoardEngine<G, R>,
   /** No questions: taking the square is the whole move. */
   plain = false,
-  /** What the asking phase asks for. */
-  challenge: "trivia" | "catapult" | "none" = "trivia",
+  /** What the asking phase asks for: the session's choice ("Play it with…").
+      Mix resolves to a different one each turn; `kind` below is this turn's. */
+  challenge: Challenge | "catapult" = "trivia",
 ) {
+  const mixing = challenge === "mix";
+  const [turnKind, setTurnKind] = useState<TurnKind | "catapult">(() => (mixing ? nextMix(null) : challenge as TurnKind | "catapult"));
+  /** what THIS turn costs */
+  const kind = mixing ? turnKind : challenge as TurnKind | "catapult";
+  const asksQuestions = challenge === "trivia" || mixing;
+  const [shotLevel, setShotLevelState] = useState<ShotLevel>(readShotLevel);
+  const setShotLevel = useCallback((l: ShotLevel) => {
+    try { localStorage.setItem(SHOT_LEVEL, l); } catch { /* private mode */ }
+    setShotLevelState(l);
+  }, []);
   const { user } = useAuth();
   const [pool, setPool] = useState<PlayItem[]>([]);
   const [game, setGame] = useState<G>(() => engine.newGame("x"));
@@ -70,14 +86,14 @@ export function useSoloBoard<G extends BoardState, R extends BoardRow>(
   const everyRef = useRef<PlayItem[]>([]);
   const [levels, setLevelsState] = useState<Level[]>(readLevels);
   useEffect(() => {
-    if (plain || challenge !== "trivia") return;
+    if (plain || !asksQuestions) return;
     void loadContent("trivia").then((all) => {
       everyRef.current = shuffle(all.filter((i) => i.choices && i.choices.length >= 2));
       const usable = atLevels(everyRef.current, readLevels());
       poolRef.current = usable;
       setPool(usable);
     });
-  }, [plain, challenge]);
+  }, [plain, asksQuestions]);
   /** The next question comes from the new levels; the phone remembers them. */
   const setLevels = useCallback((next: Level[]) => {
     writeLevels(next);
@@ -127,10 +143,12 @@ export function useSoloBoard<G extends BoardState, R extends BoardRow>(
   /** The one door every state change goes through. */
   const commit = useCallback((next: G) => {
     if (next.phase === "asking" && game.phase !== "asking") {
-      if (challenge === "trivia") dealQuestion(); else newTarget();
+      if (kind === "trivia") dealQuestion(); else newTarget();
     }
+    // Mix: a new turn, a new challenge, known before the pick (the banner says it).
+    if (mixing && next.phase === "picking" && game.phase !== "picking") setTurnKind((k) => nextMix(k as TurnKind));
     setGame(next);
-  }, [game.phase, dealQuestion, challenge, newTarget]);
+  }, [game.phase, dealQuestion, kind, mixing, newTarget]);
 
   const choose = useCallback((cell: number) => {
     // No phase check here on purpose. Memory's second tap lands during
@@ -138,11 +156,11 @@ export function useSoloBoard<G extends BoardState, R extends BoardRow>(
     // back the state it was given — so the reducer is the authority and the
     // hook does not keep a second, staler copy of the rules.
     if (game.turn !== "x") return;
-    if (!plain && challenge === "trivia" && pool.length === 0) return;
+    if (!plain && kind === "trivia" && pool.length === 0) return;
     const next = plain ? engine.place(game, cell) : engine.pick(game, cell);
     if (next === game) return;                 // full column, taken square
     commit(next);
-  }, [game, plain, pool.length, commit, engine, challenge]);
+  }, [game, plain, pool.length, commit, engine, kind]);
 
   const submit = useCallback((opt: string | null) => {
     if (game.phase !== "asking" || engine.answerer(game) !== "x" || !item) return;
@@ -168,13 +186,26 @@ export function useSoloBoard<G extends BoardState, R extends BoardRow>(
     const owed = game.phase === "picking"
       || (challenge === "none" && game.phase === "asking");
     if (!owed || game.turn !== "o") return;
-    if (!plain && challenge === "trivia" && pool.length === 0) return;
+    if (!plain && kind === "trivia" && pool.length === 0) return;
     const cell = engine.botCell(game, "o", Math.random, botSeen.current);
     const t = setTimeout(
       () => commit(plain ? engine.place(game, cell) : engine.pick(game, cell)),
       plain ? PLAIN_BOT_MS : BOT_PICK_MS);
     return () => clearTimeout(t);
-  }, [game, commit, engine, plain, pool.length, challenge]);
+  }, [game, commit, engine, plain, pool.length, challenge, kind]);
+
+  /**
+   * The bot's cup toss, basket or slingshot: it lands BOT_ODDS of them, so it
+   * misses often enough to be beaten. Its throw isn't drawn; the banner says
+   * what it's going for, then whether it got it.
+   */
+  useEffect(() => {
+    if (!isShot(kind)) return;
+    if (game.phase !== "asking" || engine.answerer(game) !== "o") return;
+    const hit = Math.random() < BOT_ODDS[kind][shotLevel];
+    const t = setTimeout(() => commit(engine.answer(game, hit)), 1500);
+    return () => clearTimeout(t);
+  }, [kind, shotLevel, game, engine, commit]);
 
   /**
    * Scheduled once per target, tracked in a ref rather than guarded on state.
@@ -186,7 +217,7 @@ export function useSoloBoard<G extends BoardState, R extends BoardRow>(
    */
   const botAimed = useRef(-1);
   useEffect(() => {
-    if (challenge !== "catapult") return;
+    if (kind !== "catapult") return;
     if (game.phase !== "asking" || engine.answerer(game) !== "o") return;
     if (botAimed.current === seed) return;
     botAimed.current = seed;
@@ -198,10 +229,10 @@ export function useSoloBoard<G extends BoardState, R extends BoardRow>(
     const t2 = setTimeout(() => commit(engine.answer(game, isHit(shot, target))),
                           420 + flightMs(shot, target) + 260);
     return () => { clearTimeout(t); clearTimeout(t2); };
-  }, [challenge, game, engine, target, seed, commit]);
+  }, [kind, game, engine, target, seed, commit]);
 
   useEffect(() => {
-    if (challenge !== "trivia") return;
+    if (kind !== "trivia") return;
     if (game.phase !== "asking" || engine.answerer(game) !== "o" || !item) return;
     // Decided up front so the option it highlights is the one it commits to —
     // watching it get one wrong is the point, not a hidden dice roll.
@@ -214,13 +245,13 @@ export function useSoloBoard<G extends BoardState, R extends BoardRow>(
     const t2 = setTimeout(() => commit(engine.answer(game, choice === item.answer)),
       BOT_THINK_MS + BOT_COMMIT_MS);
     return () => { clearTimeout(t1); clearTimeout(t2); };
-  }, [challenge, game, item, options, commit, engine]);
+  }, [kind, game, item, options, commit, engine]);
 
   // --- the clock, and moving on ----------------------------------------------
   useEffect(() => {
     // No clock on a shot: a countdown on an eight-year-old lining up a catapult
     // is the pressure this mode exists to remove.
-    if (challenge !== "trivia") return;
+    if (kind !== "trivia") return;
     if (game.phase !== "asking" || engine.answerer(game) !== "x") return;
     const id = setInterval(() => {
       const remaining = ask - (Date.now() - askedAt.current);
@@ -228,16 +259,16 @@ export function useSoloBoard<G extends BoardState, R extends BoardRow>(
       if (remaining <= 0) { clearInterval(id); submit(null); }
     }, 100);
     return () => clearInterval(id);
-  }, [game, submit, ask, engine, challenge]);
+  }, [game, submit, ask, engine, kind]);
 
   useEffect(() => {
     if (game.phase !== "revealed") return;
     // A shot has "Just long." to read and nothing else; a question can have an
     // explanation. Neither wants the other's pause.
     const t = setTimeout(() => commit(engine.advance(game)),
-      engine.revealMs ?? (challenge === "catapult" ? 1900 : REVEAL_MS));
+      engine.revealMs ?? (kind === "trivia" ? REVEAL_MS : 1900));
     return () => clearTimeout(t);
-  }, [game, commit, engine, challenge]);
+  }, [game, commit, engine, kind]);
 
   // Everything the bot could have learned from, including the tiles the player
   // turned over — watching is how you get good at this game.
@@ -276,7 +307,8 @@ export function useSoloBoard<G extends BoardState, R extends BoardRow>(
     // Loser starts the next one, the same rule a room uses. `seen` deliberately
     // survives, so a rematch does not re-ask the questions you just had.
     setGame((g) => engine.newGame(g.winner === "x" ? "o" : "x"));
-  }, [engine]);
+    if (mixing) setTurnKind((k) => nextMix(k as TurnKind));
+  }, [engine, mixing]);
 
   /** Ends the run of games and produces a result, exactly as Quit match does. */
   const endSession = useCallback(() => setEnded(true), []);
@@ -290,14 +322,16 @@ export function useSoloBoard<G extends BoardState, R extends BoardRow>(
     setBotFires(null); botAimed.current = -1;
     botSeen.current = new Map();
     setGame(engine.newGame("x"));
-  }, [engine]);
+    if (mixing) setTurnKind((k) => nextMix(k as TurnKind));
+  }, [engine, mixing]);
 
   const names: Record<Mark, string> = { x: "You", o: "The bot" };
 
   return {
     game, item, options, chosen, results, outcome, names, wins, played, ended,
     endSession, newSession,
-    loading: !plain && challenge === "trivia" && pool.length === 0,
+    loading: !plain && asksQuestions && pool.length === 0,
+    kind, shotLevel, setShotLevel,
     fraction: left / ask,
     myTurnToPick: game.phase === "picking" && game.turn === "x",
     /** Whose turn it is, without a view on which phases accept a tap — that
