@@ -110,7 +110,7 @@ export function Shell() {
           left the last ~30px of content under it on a notched iPhone. --chrome
           in index.css carries the same term, and .play-surface subtracts it. */}
       <main className={`flex-1 max-w-3xl w-full mx-auto px-4 sm:py-6 ${focused
-        ? "pt-[calc(1rem+env(safe-area-inset-top))] pb-[calc(1.5rem+env(safe-area-inset-bottom))]"
+        ? "pt-[calc(6px+env(safe-area-inset-top))] pb-[calc(14px+env(safe-area-inset-bottom))]"
         : "pt-4 pb-[calc(5rem+env(safe-area-inset-bottom))]"}`}>
         {/* Keyed on the path so navigating away from a broken screen clears it. */}
         <ErrorBoundary key={pathname}>

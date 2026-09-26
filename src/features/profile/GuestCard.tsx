@@ -25,7 +25,7 @@ export function GuestCard({ note, bare = false }: {
   const [error, setError] = useState<string | null>(null);
 
   const form = (
-    <form className={`space-y-3 ${bare ? "" : "mt-4"}`} noValidate
+    <form className={bare ? "grid gap-2" : "space-y-3 mt-4"} noValidate
       onSubmit={async (e) => {
         e.preventDefault();
         setError(null); setBusy(true);
@@ -33,11 +33,20 @@ export function GuestCard({ note, bare = false }: {
         setBusy(false);
         if (error) setError(error);
       }}>
-      <Field label={bare ? "Your name" : "What should we call you?"} error={error}>
-        <Input value={name} placeholder="Tayo" autoCapitalize="words"
-          maxLength={20} onChange={(e) => setName(e.target.value)} />
-      </Field>
-      <Button type="submit" disabled={busy} className="w-full">
+      {bare ? (
+        // The drawing's .field: the box says what it wants, with no label over it.
+        <div>
+          <Input value={name} placeholder="Your name" aria-label="Your name" autoCapitalize="words"
+            maxLength={20} onChange={(e) => setName(e.target.value)} className="rounded-[14px] px-3.5" />
+          {error && <span className="mt-1.5 inline-block text-xs font-bold text-ink bg-ember rounded-lg px-2 py-1">{error}</span>}
+        </div>
+      ) : (
+        <Field label="What should we call you?" error={error}>
+          <Input value={name} placeholder="Tayo" autoCapitalize="words"
+            maxLength={20} onChange={(e) => setName(e.target.value)} />
+        </Field>
+      )}
+      <Button type="submit" disabled={busy} className={bare ? "w-full min-h-[52px] py-0 text-[19px]" : "w-full"}>
         {busy ? "One second…" : bare ? "Play" : "Start playing"}
       </Button>
     </form>

@@ -49,14 +49,34 @@ export function XMark({ size = 18 }: { size?: number }) {
   );
 }
 
-/** Four answers, four pieces, four colours (drawing #16): a shape tells them
-    apart without the colour, the colour without the shape. They used to be
-    plain ink until a pick. */
-const ORDER: PieceKind[] = ["disc", "ring", "cross", "tile"];
-const TINT = ["var(--color-gum)", "var(--color-sky)", "var(--color-petal)", "var(--color-leaf)"];
-export function AnswerMark({ index, state = "idle", size = 18 }:
+/** Four answers, four pieces, four colours, drawn exactly as the screens have
+    them (drawing #16): the piece in its colour on an ink body that drops 3
+    units, with a glint. A shape tells them apart without the colour. They used
+    to be plain ink until a pick. */
+const INK = "var(--color-ink-day)";
+const MARKS = [
+  <><circle cx="32" cy="35" r="19" fill={INK} /><circle cx="32" cy="32" r="19" fill={INK} />
+    <circle cx="32" cy="32" r="14" fill="var(--color-gum)" />
+    <ellipse cx="26" cy="25" rx="5" ry="3" fill="var(--color-board)" opacity=".8" transform="rotate(-35 26 25)" /></>,
+  <><circle cx="32" cy="35" r="20" fill="none" stroke={INK} strokeWidth="17" />
+    <circle cx="32" cy="32" r="20" fill="none" stroke={INK} strokeWidth="17" />
+    <circle cx="32" cy="32" r="20" fill="none" stroke="var(--color-sky)" strokeWidth="10.5" />
+    <path d="M19 22 A18 18 0 0 1 30 14" stroke="var(--color-sky-hi)" strokeWidth="4" fill="none" strokeLinecap="round" /></>,
+  <><path d="M16 19 L48 51 M48 19 L16 51" stroke={INK} strokeWidth="17" strokeLinecap="round" />
+    <path d="M16 16 L48 48 M48 16 L16 48" stroke={INK} strokeWidth="17" strokeLinecap="round" />
+    <path d="M16 16 L48 48 M48 16 L16 48" stroke="var(--color-petal)" strokeWidth="10.5" strokeLinecap="round" />
+    <path d="M17 17 L27 27" stroke="var(--color-petal-hi)" strokeWidth="3.5" strokeLinecap="round" /></>,
+  <><rect x="13" y="16" width="38" height="38" rx="9" fill={INK} /><rect x="13" y="13" width="38" height="38" rx="9" fill={INK} />
+    <rect x="18" y="18" width="28" height="28" rx="6" fill="var(--color-leaf)" />
+    <rect x="21" y="21" width="9" height="4" rx="2" fill="var(--color-board)" opacity=".8" /></>,
+];
+export function AnswerMark({ index, state = "idle", size = 22 }:
   { index: number; state?: "idle" | "right" | "wrong"; size?: number }) {
   if (state === "right") return <Tick size={size} />;
   if (state === "wrong") return <XMark size={size} />;
-  return <PieceMark kind={ORDER[index % 4]} colour={TINT[index % 4]} size={size} />;
+  return (
+    <svg viewBox="0 0 64 64" width={size} height={size} aria-hidden className="shrink-0 overflow-visible">
+      {MARKS[index % 4]}
+    </svg>
+  );
 }

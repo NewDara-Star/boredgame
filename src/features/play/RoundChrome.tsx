@@ -109,26 +109,30 @@ export function Reveal({ correct, near, answer, gained, parts, onNext, isLast, e
   // One white card, no shouting (#17, #18): the verdict, what the points were
   // for (kept, small: Daramola 26 Sep), and the reason. It used to be a green or
   // red slab saying Correct or Missed, and the reason in a second card.
+  // From the drawing's code (.gain, .spacer, .cut): a white card, then the
+  // screen's leftover space, then Next at the bottom. In a column that fills
+  // the screen (the daily), Next sits at the foot; elsewhere 12px below.
   return (
     <motion.div
       initial={{ opacity: 0, y: 26 }} animate={{ opacity: 1, y: 0 }} transition={SPRING}
-      className="mt-5">
-      <div className="card p-4" role="status">
-        <p className={`font-display text-[22px] leading-tight font-semibold ${correct ? "text-leaf-deep" : near ? "text-ink" : "text-ember-deep"}`}>
+      className="mt-[11px] flex-1 flex flex-col">
+      <div className="card shadow-lift-sm rounded-[20px] px-3.5 py-3 grid gap-[3px]" role="status">
+        <p className={`font-display text-[21px] leading-tight ${correct ? "text-leaf-deep" : near ? "text-ink" : "text-ember-lo"}`}>
           {correct ? `Yes! +${gained}` : near ? "So close" : "Not this time"}
         </p>
         {correct && parts && (
-          <p className="text-[12px] font-bold text-soft mt-0.5 tabular-nums">{sayParts(parts)}</p>
+          <p className="text-[12px] font-bold text-soft tabular-nums">{sayParts(parts)}</p>
         )}
         {!correct && !answerShown && (
-          <p className="text-[15px] font-bold mt-0.5">The answer: {answer}</p>
+          <p className="text-[14px] leading-[1.4] font-bold">The answer: {answer}</p>
         )}
         {explanation && (
-          <p className="text-[15px] font-semibold mt-1.5 leading-snug">{explanation}</p>
+          <p className="text-[14px] leading-[1.4] font-medium">{explanation}</p>
         )}
       </div>
+      <div className="flex-1 min-h-3" />
       <button onClick={onNext} autoFocus
-        className="cut tap w-full mt-3 py-4 font-display text-lg font-semibold cut-petal">
+        className="cut tap w-full min-h-[52px] font-display text-[19px] cut-petal">
         {isLast ? "See the round" : "Next"}
       </button>
     </motion.div>

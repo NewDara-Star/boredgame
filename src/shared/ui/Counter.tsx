@@ -26,5 +26,6 @@ export function Counter({ value, className = "" }: { value: number; className?: 
     return () => cancelAnimationFrame(raf);
   }, [value]);
 
-  return <span className={`tabular-nums ${className}`}>{shown}</span>;
+  // "2,140", as every score in the drawings is written.
+  return <span className={`tabular-nums ${className}`}>{shown.toLocaleString("en-GB")}</span>;
 }

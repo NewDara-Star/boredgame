@@ -38,44 +38,46 @@ export function QuestionPanel({
   answer?: string;
 }) {
   const correctAnswer = answer ?? item.answer;
+  // Built from the drawing's own code (#16–#18: .chip, .q, .opts, .opt), not
+  // from a screenshot of it: 11px between the parts, as the drawing's screen has.
   return (
-    <div>
-      {/* #16: the question sits on its own white card, in the reading face, so
-          it holds on any sky, day or night. It was bare display type on the sky. */}
-      <span className="chip inline-block text-[12px] font-black bg-sky-hi text-ink rounded-full px-2.5 py-1">
+    <div className="grid gap-[11px]">
+      <span className="chip justify-self-start text-[12px] font-extrabold bg-sky-hi text-ink rounded-full px-[9px] py-0.5">
         {item.category} · {item.difficulty.charAt(0).toUpperCase() + item.difficulty.slice(1)}
       </span>
-      {/* A heading for screen readers, but not an <h2>: index.css sets every h2
-          in the display face at 400, and a question reads in the reading face. */}
-      <p role="heading" aria-level={2} className="card mt-2 px-4 py-3.5 text-[19px] leading-snug font-extrabold text-balance">
+      {/* The question on its own white card, in the reading face (.q: 700
+          19px/1.3). A heading for screen readers, but not an <h2>: index.css
+          sets every h2 in the display face at 400. */}
+      <p role="heading" aria-level={2}
+        className="card shadow-lift-sm rounded-[20px] px-4 py-3.5 text-[19px] leading-[1.3] font-bold text-pretty">
         {item.prompt}
       </p>
 
-      <motion.div variants={stagger(0.05)} initial="hidden" animate="show" className="mt-4 grid gap-2">
+      <motion.div variants={stagger(0.05)} initial="hidden" animate="show" className="grid gap-2">
         {options.map((opt, i) => {
           const isAnswer = opt === correctAnswer;
           const isMine = chosen === opt;
-          // The rest step back (#17). Not with opacity: the rise-in animation
-          // sets it inline, so an opacity class never showed (they stayed white).
+          // .opt.right / .opt.wrong are a top-lit gradient; the rest step back
+          // (.opt.dim, opacity .55). Not with an opacity class on the button:
+          // the rise-in animation sets opacity inline, so it never showed.
+          const dim = revealed && !isAnswer && !isMine;
           const bg = !revealed
             ? (isMine ? "bg-petal" : "bg-board")
-            : isAnswer ? "bg-leaf text-ink"
-            : isMine ? "bg-ember text-ink"
-            : "bg-board/50 text-soft [&_svg]:opacity-50";
+            : isAnswer ? "bg-linear-to-b from-leaf-hi to-leaf text-ink"
+            : isMine ? "bg-linear-to-b from-ember-hi to-ember text-ink"
+            : "bg-board/55 [&>*]:opacity-55";
           const tag = revealed && isAnswer ? "Right" : revealed && isMine ? "You" : null;
           return (
             <motion.button key={opt} variants={riseIn}
               disabled={locked}
               onClick={() => onAnswer(opt)}
-              className={`card ${locked ? "" : "tap"} flex items-center gap-3 text-left px-4 py-3 ${bg}`}>
-              <span aria-hidden={!(revealed && (isAnswer || isMine))} className="text-base shrink-0"
-                >
-                  <AnswerMark index={i} state={revealed && isAnswer ? "right" : revealed && isMine ? "wrong" : "idle"} />
-              </span>
+              data-dim={dim || undefined}
+              className={`card shadow-lift-sm ${locked ? "" : "tap"} flex items-center gap-2.5 text-left rounded-2xl px-3 py-[11px] ${bg}`}>
+              <AnswerMark index={i} size={22} state={revealed && isAnswer ? "right" : revealed && isMine ? "wrong" : "idle"} />
               {revealed && isAnswer && <span className="sr-only">Correct answer: </span>}
               {revealed && isMine && !isAnswer && <span className="sr-only">Your incorrect answer: </span>}
-              <span className="text-[16px] font-extrabold flex-1">{opt}</span>
-              {tag && <span aria-hidden className="shrink-0 text-[12px] font-black bg-board/80 text-ink rounded-full px-2 py-0.5">{tag}</span>}
+              <span className="text-[15px] font-bold flex-1">{opt}</span>
+              {tag && <span aria-hidden className="shrink-0 text-[12px] font-extrabold bg-board/60 text-ink rounded-full px-[9px] py-[3px] leading-none">{tag}</span>}
             </motion.button>
           );
         })}
@@ -83,7 +85,7 @@ export function QuestionPanel({
 
       {revealed && item.explanation && (
         <motion.p initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-          className="card p-3.5 mt-2.5 text-[14px] font-semibold leading-snug">
+          className="card p-3.5 text-[14px] font-semibold leading-snug">
           {item.explanation}
         </motion.p>
       )}
