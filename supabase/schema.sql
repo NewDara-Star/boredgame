@@ -3123,3 +3123,17 @@ begin
 end $$;
 revoke all on function public.claim_nudge(bigint) from public, anon;
 grant execute on function public.claim_nudge(bigint) to authenticated;
+
+-- A friend link says whose it is before you've signed up (drawing 44,
+-- Daramola 26 Sep): only the name, for a valid code, to anyone. Codes stay
+-- unreadable (DB1); a code can't be guessed (8 of 32 characters), and names are
+-- already public on the leaderboard. friend_by_code stays sign-in only (it
+-- also says whether it's you and whether you're friends already).
+create or replace function public.friend_name(p_code text)
+returns text language sql stable security definer set search_path to 'public' as $$
+  select username from public.profiles
+   where friend_code = upper(btrim(coalesce(p_code, ''))) and coalesce(p_code, '') <> ''
+   limit 1
+$$;
+revoke all on function public.friend_name(text) from public;
+grant execute on function public.friend_name(text) to anon, authenticated;

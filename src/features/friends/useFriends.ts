@@ -9,6 +9,15 @@ export const codeOf = (raw: string) => raw.trim().replace(/^.*\/add\//, "").toUp
 /** Whose code it is, before you add them (talk item 16). null: no one has it
     (an old link, or a typo); "unknown": the lookup itself failed. */
 export type CodeOwner = { name: string; self: boolean; already: boolean };
+
+/** Whose link it is, for someone not signed in yet (#44): the name only, or
+    null for a dead link; "unknown" when the lookup itself failed. */
+export async function friendName(raw: string): Promise<string | null | "unknown"> {
+  if (!supabase) return "unknown";
+  const { data, error } = await supabase.rpc("friend_name", { p_code: codeOf(raw) });
+  if (error) return "unknown";
+  return (data as string | null) ?? null;
+}
 export async function whoseCode(raw: string): Promise<CodeOwner | null | "unknown"> {
   if (!supabase) return "unknown";
   const { data, error } = await supabase.rpc("friend_by_code", { p_code: codeOf(raw) });
@@ -92,13 +101,16 @@ export function useFriends() {
   }, [user?.id, loadFriends, loadInvites]);
 
   /** Accepts a bare code or a full /add/<code> link. */
+  /** The friend's name, or null (the reason is in `error`). Their id is in
+      `lastAdded`, for "Play Tobi now" (#45). */
+  const lastAdded = useRef<string | null>(null);
   const addFriend = useCallback(async (raw: string): Promise<string | null> => {
     if (!supabase) return null;
     const codeStr = codeOf(raw);
     if (!codeStr) { setError("Paste a friend code or link."); return null; }
     const { data, error: e } = await supabase.rpc("add_friend", { p_code: codeStr });
     if (e) { setError("Couldn't add that friend — try again."); return null; }
-    const res = data as { ok: boolean; name?: string; reason?: string };
+    const res = data as { ok: boolean; name?: string; reason?: string; friend_id?: string };
     if (!res.ok) {
       setError(res.reason === "no such code" ? "No friend with that code."
         : res.reason === "that is your own code" ? "That's your own code."
@@ -106,6 +118,7 @@ export function useFriends() {
       return null;
     }
     setError(null); void loadFriends();
+    lastAdded.current = res.friend_id ?? null;
     return res.name ?? "your friend";
   }, [loadFriends]);
 
@@ -149,5 +162,5 @@ export function useFriends() {
     return true;
   }, []);
 
-  return { code, friends, invites, error, setError, addFriend, invite, respond, removeFriend, newCode };
+  return { code, friends, invites, error, setError, addFriend, lastAdded, invite, respond, removeFriend, newCode };
 }

@@ -273,7 +273,7 @@ ok(filings >= 1, `found ${filings} record_round calls — the scan is broken`);
   ok(/supabase\.rpc\("remove_friend"/.test(hook) && /removeFriend\(f\.id\)/.test(panel), "each friend has a Remove that reaches the server");
   ok(/Remove \{f\.username\}\?/.test(panel), "Remove asks once, by name, before it goes");
   ok(/supabase\.rpc\("new_friend_code"/.test(hook) && /newCode\(\)/.test(panel), "you can replace your link");
-  ok(/supabase\.rpc\("friend_by_code"/.test(hook) && /whoseCode\(code\)/.test(add) && /`Add \$\{name\}\?`/.test(add),
+  ok(/supabase\.rpc\("friend_by_code"/.test(hook) && /whoseCode\(code\)/.test(add) && /`\$\{name\} wants to play you`/.test(add) && /`Add \$\{name\}`/.test(add),
      "the add screen names who you're adding before you add them");
   ok(/That link doesn't work any more/.test(add), "an old link says so instead of failing on the tap");
 }

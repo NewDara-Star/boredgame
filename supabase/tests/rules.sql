@@ -8,7 +8,7 @@
 -- reveal_round, sort_walkover, claim_board_win, board_winner, sort_reveal,
 -- sort_finish, sort_solo_start, sort_solo_finish, friend_by_code, remove_friend,
 -- new_friend_code, add_friend, invite_friend, daily_reserve_left, set_room_setup,
--- claim_nudge, or the profiles and puzzles grants.
+-- claim_nudge, friend_name, or the profiles and puzzles grants.
 --
 -- It ALWAYS ends in an error, on purpose: the error rolls every write back, so
 -- it can run against the live database. Read the message:
@@ -419,6 +419,20 @@ begin
   or has_function_privilege('anon', 'public.remove_friend(uuid)', 'execute')
   or has_function_privilege('anon', 'public.new_friend_code()', 'execute')
   then broken := broken || results[cardinality(results)]; end if;
+
+  -- ---- FN (drawing 44, 26 Sep): a friend link names its owner, signed out --
+  perform set_config('request.jwt.claims', json_build_object('role', 'anon')::text, true);
+  set local role anon;
+  j := to_jsonb(public.friend_name(lower(' ' || newc || ' ')));
+  j2 := to_jsonb(public.friend_name(oldc));
+  err := null;
+  begin perform friend_code from public.profiles limit 1; exception when others then err := 'refused'; end;
+  reset role;
+  results := array_append(results, 'FN signed out, a live link gives its owner''s name; a dead one gives nothing'::text);
+  if j #>> '{}' is distinct from (select username from public.profiles where id = a) or j2 is not null
+  then broken := broken || results[cardinality(results)]; end if;
+  results := array_append(results, 'FN and still nobody can read a code'::text);
+  if err is null then broken := broken || results[cardinality(results)]; end if;
 
   -- ---- DP (talk item 19): the daily draws from a reserve nobody downloads --
   select user_id into dp_adm from public.admins limit 1;
