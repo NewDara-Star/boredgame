@@ -33,4 +33,8 @@ ok(/SubTitle back="\/you"/.test(lb) && /BackDisc to="\/you"/.test(road), "Everyo
 ok(!/cut tap flex items-center/.test(lb) && /rounded-\[16px\] px-3 py-\[9px\]/.test(lb), "Everyone's rows are plain rows, not buttons (R8, .li)");
 ok(/useFocusMode\(true\)/.test(road), "the road has the whole phone (#48)");
 
+const links = src("../src/features/profile/LinkStates.tsx"), auth = src("../src/features/profile/AuthCard.tsx");
+ok(/Check your email/.test(links) && /Open it on this phone/.test(links) && /<LinkSent /.test(auth) && /rememberLinkEmail\(id\)/.test(auth), "#52 waiting on a link: what to do, send it again, or the password");
+ok(/That link didn't work/.test(links) && /Send a new link/.test(links) && /<LinkFailed reason=\{authError\}/.test(page), "#52 a failed link says so and sends a new one in one tap");
+
 console.log(`${n} You assertions hold`);

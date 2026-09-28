@@ -4,13 +4,13 @@ import { motion } from "framer-motion";
 import { useAuth, isSynthetic } from "@/app/providers/AuthProvider";
 import { useProgress } from "@/features/play/useProgress";
 import { rankFor, RANKS } from "@/features/play/rank";
-import { Note } from "@/shared/ui/Note";
 import { RankBadge } from "@/features/play/RankBadge";
 import { Avatar } from "@/shared/ui/Avatar";
 import { Button } from "@/shared/ui/Button";
 import { Field, Input } from "@/shared/ui/Field";
 import { stagger, riseIn, popIn } from "@/shared/ui/motion";
 import { AuthCard } from "./AuthCard";
+import { LinkFailed, LinkSent } from "./LinkStates";
 import { ClaimCard, useNameCheck } from "./GuestCard";
 import { NotificationsRow } from "@/features/push/Notifications";
 import { ScreenTitle } from "@/app/layout/ScreenTitle";
@@ -39,6 +39,9 @@ function GuestView({ authError }: { authError: string | null }) {
   const { current } = rankFor(p.answered);
   const played = p.answered > 0;
   const kept = readCarry().rows.length;   // what an account made now takes with it (F17)
+  // #52: a new link sent from the failed-link card; the card goes once it's used.
+  const [resent, setResent] = useState<string | null>(null);
+  const [dismissed, setDismissed] = useState(false);
 
   return (
     <motion.div variants={stagger(0.07)} initial="hidden" animate="show" className="grid gap-[11px]">
@@ -49,15 +52,17 @@ function GuestView({ authError }: { authError: string | null }) {
         </p>
       </motion.div>
 
-      {authError && (
-        <Note animate title="Sign-in didn't complete">{authError}</Note>
-      )}
+      {resent ? (
+        <motion.div variants={riseIn}><LinkSent email={resent} onBack={() => setResent(null)} /></motion.div>
+      ) : authError && !dismissed ? (
+        <motion.div variants={riseIn}><LinkFailed reason={authError} onSent={(e) => { setResent(e); setDismissed(true); }} /></motion.div>
+      ) : null}
 
-      <motion.div variants={riseIn}>
+      {!resent && <motion.div variants={riseIn}>
         <AuthCard kept={kept > 0
           ? `${kept} answer${kept === 1 ? "" : "s"} from this phone come with you when you make an account, with up to 7 days of streak.`
           : undefined} />
-      </motion.div>
+      </motion.div>}
 
       {/* Shown as a small aside, not as a dashboard — it is what you stand to keep,
           not a profile you already have. */}

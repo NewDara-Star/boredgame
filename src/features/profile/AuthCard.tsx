@@ -3,6 +3,7 @@ import { useAuth } from "@/app/providers/AuthProvider";
 import { Button } from "@/shared/ui/Button";
 import { Field, Input } from "@/shared/ui/Field";
 import { errorField } from "@/shared/lib/names";
+import { LinkSent, rememberLinkEmail } from "./LinkStates";
 
 /**
  * Signing up is the default, not signing in. Someone who already has an account
@@ -24,14 +25,7 @@ export function AuthCard({ kept, start = "signup", note }: {
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  if (sent) {
-    return (
-      <div className="card bg-leaf text-ink p-5">
-        <p className="font-display text-lg font-semibold">Check your email</p>
-        <p className="text-sm font-semibold mt-1">There's a sign-in link waiting for you.</p>
-      </div>
-    );
-  }
+  if (sent) return <LinkSent email={id.trim()} onBack={() => setSent(false)} />;
 
   return (
     <div className="card p-5">
@@ -96,7 +90,7 @@ export function AuthCard({ kept, start = "signup", note }: {
             setBusy(true);
             const { error } = await signInWithLink(id);
             setBusy(false);
-            if (error) setError(error); else setSent(true);
+            if (error) setError(error); else { rememberLinkEmail(id); setSent(true); }
           }}
           className="w-full text-xs font-bold text-soft underline underline-offset-4 pt-3">
           Email me a link instead
