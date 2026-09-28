@@ -3137,3 +3137,29 @@ returns text language sql stable security definer set search_path to 'public' as
 $$;
 revoke all on function public.friend_name(text) from public;
 grant execute on function public.friend_name(text) to anon, authenticated;
+
+-- An invite shouldn't leave the person waiting wondering (drawing 2, Daramola
+-- 28 Sep): the invitee's phone says when it has shown the invite ('seen'),
+-- and they can answer Hold on or Not now; the inviter's waiting screen reads
+-- it (they can already read invites they sent). Not now declines the invite.
+alter table public.game_invites add column if not exists seen_at timestamptz;
+alter table public.game_invites add column if not exists reply text check (reply in ('hold', 'no'));
+alter table public.game_invites add column if not exists replied_at timestamptz;
+create or replace function public.answer_invite(p_invite bigint, p_answer text)
+returns void language plpgsql security definer set search_path to 'public' as $$
+declare uid uuid := auth.uid();
+begin
+  if uid is null then raise exception 'sign in first'; end if;
+  if p_answer is null or p_answer not in ('seen', 'hold', 'no') then raise exception 'unknown answer'; end if;
+  if p_answer = 'seen' then
+    update public.game_invites set seen_at = coalesce(seen_at, now())
+     where id = p_invite and to_user = uid and status = 'pending';
+  else
+    update public.game_invites
+       set reply = p_answer, replied_at = now(), seen_at = coalesce(seen_at, now()),
+           status = case when p_answer = 'no' then 'declined' else status end
+     where id = p_invite and to_user = uid and status = 'pending';
+  end if;
+end $$;
+revoke all on function public.answer_invite(bigint, text) from public, anon;
+grant execute on function public.answer_invite(bigint, text) to authenticated;

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { RAMPS } from "@/shared/brand/tokens";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Link } from "react-router-dom";
+import { Art } from "@/shared/brand/Art";
 import { SPRING } from "@/shared/ui/motion";
 import { RankBadge } from "./RankBadge";
 import { rankFor, RANKS, type Rank } from "./rank";
@@ -61,6 +62,32 @@ function Confetti() {
   );
 }
 
+/** The brand's burst: a seed spiral out from behind the card (each seed 137.5°
+    round from the last), turning slowly. The drawings (#6, #7) sketch sun
+    rays here; the brand swapped rays for seeds (Daramola). */
+function SeedBurst() {
+  const still = useReducedMotion();
+  const dots = [];
+  for (let k = 1; k <= 320; k++) {
+    const a = k * 2.39996, r = 11 * Math.sqrt(k), d = 1 + (4.2 * k) / 320;
+    dots.push(<circle key={k} cx={(r * Math.cos(a)).toFixed(1)} cy={(r * Math.sin(a)).toFixed(1)} r={d.toFixed(1)} />);
+  }
+  return (
+    <motion.svg aria-hidden viewBox="-210 -210 420 420" className="absolute left-1/2 top-1/2 w-[150vmax] h-[150vmax] -translate-x-1/2 -translate-y-1/2"
+      fill="white" opacity={0.35}
+      initial={{ scale: 0.2, rotate: 0 }} animate={{ scale: 1, rotate: still ? 0 : 40 }}
+      transition={{ scale: { type: "spring", stiffness: 120, damping: 18 }, rotate: { duration: 30, ease: "linear" } }}>
+      {dots}
+    </motion.svg>
+  );
+}
+
+/**
+ * #6 rank up and #7 streak milestone, from the drawings' code: the whole
+ * screen goes gold (a rank) or ember (a streak), the seeds burst behind one
+ * white card (.card.center): the label, the badge or the flame, the name, one
+ * line, then Share it (gold) and Nice (white); a rank also offers the road.
+ */
 export function UnlockOverlay({ unlock, onClose }: { unlock: Unlock; onClose: () => void }) {
   // Escape closes it. A celebration you cannot dismiss stops being one.
   useEffect(() => {
@@ -79,66 +106,52 @@ export function UnlockOverlay({ unlock, onClose }: { unlock: Unlock; onClose: ()
       .catch(() => { /* no canvas: the overlay still says it */ });
     return () => { cancelled = true; };
   }, [unlock]);
+  const ramp = isRank ? "petal" : "ember";
+  const bloom = isRank && unlock.rank.key === "accomplished";
   return (
     <motion.div
-      className="fixed inset-0 z-50 grid place-items-center p-5 bg-ink/60"
+      className="fixed inset-0 z-50 grid place-items-center px-[18px] overflow-hidden"
+      style={{ background: `linear-gradient(var(--color-${ramp}-hi), var(--color-${ramp}-lo))` }}
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      onClick={onClose} role="dialog" aria-modal="true">
+      onClick={onClose} role="dialog" aria-modal="true" aria-label={isRank ? "New rank" : "Streak"}>
+      <SeedBurst />
+      <Confetti />
       <motion.div
         onClick={(e) => e.stopPropagation()}
-        className="card relative overflow-hidden w-full max-w-[320px] p-7 text-center"
-        initial={{ scale: 0.7, y: 30, rotate: -3, opacity: 0 }}
-        animate={{ scale: 1, y: 0, rotate: 0, opacity: 1 }}
+        className="card relative w-full max-w-[360px] rounded-[20px] shadow-lift px-[18px] py-[22px] grid gap-2 justify-items-center text-center text-ink"
+        initial={{ scale: 0.7, y: 30, opacity: 0 }}
+        animate={{ scale: 1, y: 0, opacity: 1 }}
         exit={{ scale: 0.85, y: 20, opacity: 0 }}
         transition={{ ...SPRING, stiffness: 300, damping: 20 }}>
-        <Confetti />
-
-        <p className="relative z-10 text-[12px] font-black text-soft">
-          {isRank ? "New rank" : "Streak milestone"}
-        </p>
-
-        <div className="relative z-10 grid place-items-center h-[104px] my-1">
-          {isRank ? (
-            <RankBadge rank={unlock.rank.key} size={96} animate />
-          ) : (
-            <motion.div
-              className="card bg-petal w-[96px] h-[96px] grid place-items-center"
-              style={{ borderRadius: 999 }}
-              initial={{ scale: 0.3, rotate: -25 }} animate={{ scale: 1, rotate: 0 }}
-              transition={{ type: "spring", stiffness: 260, damping: 14 }}>
-              <span className="font-display text-4xl font-semibold tabular-nums leading-none">
-                {unlock.days}
-              </span>
-            </motion.div>
-          )}
-        </div>
-
-        <motion.h2 className="relative z-10 font-display text-[28px] leading-tight font-semibold"
-          initial={{ y: 12, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
-          transition={{ ...SPRING, delay: 0.18 }}>
+        <span className="text-[12px] font-extrabold text-soft">{isRank ? "New rank" : "Streak"}</span>
+        {isRank ? (
+          <RankBadge rank={unlock.rank.key} size={120} animate />
+        ) : (
+          <>
+            <motion.span initial={{ scale: 0.3 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 260, damping: 14 }}>
+              <Art name="streak" style={{ width: 96 }} />
+            </motion.span>
+            <b className="font-display font-normal text-[52px] leading-none tabular-nums">{unlock.days}</b>
+          </>
+        )}
+        <h2 className={`font-display leading-[1.1] ${isRank ? "text-[30px]" : "text-[22px]"}`}>
           {isRank ? unlock.rank.name : unlock.name}
-        </motion.h2>
-        <motion.p className="relative z-10 text-sm text-soft font-semibold mt-1"
-          initial={{ y: 12, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
-          transition={{ ...SPRING, delay: 0.24 }}>
+        </h2>
+        <p className="text-[14px] font-semibold text-soft">
           {isRank
-            ? `${unlock.rank.min} questions answered`
+            ? `${unlock.rank.min.toLocaleString()} questions answered.${bloom ? " Your flower's in bloom." : ""}`
             : `${unlock.days} days in a row. Come back tomorrow to keep it.`}
-        </motion.p>
-
-        <motion.div className="relative z-10 mt-6 space-y-2"
-          initial={{ y: 14, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
-          transition={{ ...SPRING, delay: 0.3 }}>
-          <ShareButtons card={card} story={false} />
-          <button onClick={onClose}
-            className="cut tap w-full py-3 font-display text-lg cut-board">
-            Nice
-          </button>
-          <Link to="/you" onClick={onClose}
-            className="block text-xs font-bold text-soft underline underline-offset-4 py-1">
-            See everything you've unlocked
+        </p>
+        <div className="grid gap-[9px] w-full">
+          <ShareButtons card={card} story={false} label="Share it" />
+          <button onClick={onClose} className="cut tap cut-board w-full min-h-[52px] font-display text-[19px]">Nice</button>
+        </div>
+        {isRank && (
+          <Link to="/you/road" onClick={onClose}
+            className="text-[13px] font-extrabold text-soft underline underline-offset-4 min-h-[44px] grid place-items-center -mb-2">
+            See every rank
           </Link>
-        </motion.div>
+        )}
       </motion.div>
     </motion.div>
   );

@@ -142,6 +142,14 @@ export function useFriends() {
     void loadInvites();
   }, [loadInvites]);
 
+  /** Tell the person waiting (drawing 2, Daramola 28 Sep): the invite has
+      been seen, or Hold on, or Not now (which declines it). */
+  const answer = useCallback(async (inviteId: number, a: "seen" | "hold" | "no") => {
+    if (!supabase) return;
+    const { error: e } = await supabase.rpc("answer_invite", { p_invite: inviteId, p_answer: a });
+    if (!e && a === "no") setInvites((is) => is.filter((i) => i.id !== inviteId));
+  }, []);
+
   /** Remove a friend, on both sides; anything they'd invited you to goes too
       (talk item 16). true when it went through. */
   const removeFriend = useCallback(async (friendId: string): Promise<boolean> => {
@@ -162,5 +170,32 @@ export function useFriends() {
     return true;
   }, []);
 
-  return { code, friends, invites, error, setError, addFriend, lastAdded, invite, respond, removeFriend, newCode };
+  return { code, friends, invites, error, setError, addFriend, lastAdded, invite, respond, answer, removeFriend, newCode };
+}
+
+/** What happened to the invites you sent from this room (drawing 35 with 2):
+    asked, seen, "hold on", "can't play right now". Live, so the waiting
+    screen changes as they answer. */
+export interface SentInvite { id: number; to_user: string; status: string; seen_at: string | null; reply: "hold" | "no" | null }
+export function useSentInvites(roomId: number | null): SentInvite[] {
+  const { user } = useAuth();
+  const [rows, setRows] = useState<SentInvite[]>([]);
+  useEffect(() => {
+    if (!supabase || !user || !roomId) { setRows([]); return; }
+    let gone = false;
+    const load = async () => {
+      const { data } = await supabase!.from("game_invites").select("id, to_user, status, seen_at, reply")
+        .eq("room_id", roomId).eq("from_user", user.id).order("created_at", { ascending: false });
+      if (gone) return;
+      // The latest invite to each person is the one that speaks for them.
+      const seen = new Set<string>();
+      setRows(((data ?? []) as SentInvite[]).filter((r) => (seen.has(r.to_user) ? false : (seen.add(r.to_user), true))));
+    };
+    void load();
+    const ch = supabase.channel(`sent:${roomId}:${Math.random().toString(36).slice(2, 8)}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "game_invites", filter: `from_user=eq.${user.id}` }, () => void load())
+      .subscribe();
+    return () => { gone = true; void supabase!.removeChannel(ch); };
+  }, [user?.id, roomId]);
+  return rows;
 }

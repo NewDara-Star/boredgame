@@ -240,34 +240,40 @@ export function VoiceProvider({ children }: { children: React.ReactNode }) {
       {children}
       <audio ref={audioRef} autoPlay playsInline hidden />
       {showBar && (
-        <div className="fixed inset-x-0 z-40 flex justify-center px-3
-          bottom-[calc(62px+env(safe-area-inset-bottom)+8px)] sm:bottom-4">
-          <div className="card bg-ink text-ground w-full max-w-md p-2 flex items-center gap-2">
-            {state === "error" ? (
-              <p className="min-w-0 flex-1 px-2 py-1 text-[13px] font-bold leading-snug">
-                {troubleText(trouble, target!.peerName)}
-              </p>
-            ) : state === "live" && blocked ? (
-              <button onClick={hear} className="min-w-0 flex-1 text-left px-2 py-1">
-                <span className="block text-[12px] font-black text-ground/70">On call</span>
-                <span className="block text-[14px] font-bold truncate">Tap to hear {target!.peerName}</span>
-              </button>
-            ) : (
-              <button onClick={() => nav(`/rooms/${target!.code}`)}
-                className="min-w-0 flex-1 text-left px-2 py-1">
-                <span className="block text-[12px] font-black text-ground/70">
-                  {state === "live" ? "On call — tap to return" : "Connecting…"}
+        // #3, from the drawing's code: the .toast in leaf, ink words, a white
+        // disc with the mic (tap it to mute; it's crossed out when muted),
+        // "On call with Tobi", and the tap goes back to the room. Leave stays
+        // one tap away at the end.
+        <div className="fixed inset-x-0 z-40 flex justify-center px-[14px]
+          bottom-[calc(62px+env(safe-area-inset-bottom)+10px)] sm:bottom-4">
+          <div className={`w-full max-w-md rounded-[18px] shadow-lift px-3 py-2.5 flex items-center gap-2.5 text-ink-day ${state === "error" ? "bg-petal-hi" : "bg-leaf"}`}>
+            {state !== "error" && (
+              <button onClick={toggleMute} aria-label={muted ? "Unmute" : "Mute"} aria-pressed={muted}
+                className="shrink-0 grid place-items-center w-11 h-11 -m-[5px]">
+                <span className="grid place-items-center w-[34px] h-[34px] rounded-full bg-board shadow-lift-sm">
+                  <svg viewBox="0 0 24 24" width={16} height={16} aria-hidden>
+                    <rect x="8.5" y="3" width="7" height="12" rx="3.5" fill="var(--color-ink-day)" />
+                    <path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3" fill="none" stroke="var(--color-ink-day)" strokeWidth="2.2" strokeLinecap="round" />
+                    {muted && <path d="M4 4l16 16" stroke="var(--color-ember-lo)" strokeWidth="2.6" strokeLinecap="round" />}
+                  </svg>
                 </span>
-                <span className="block text-[14px] font-bold truncate">{target!.peerName}</span>
               </button>
             )}
-            {state !== "error" && <button onClick={toggleMute}
-              className={`cut tap px-3 min-h-[38px] inline-flex items-center font-display font-semibold text-[13px] ${
-                muted ? "cut-ember text-ink" : "bg-leaf-hi text-ink"}`}>
-              {muted ? "Unmute" : "Mute"}
-            </button>}
+            {state === "error" ? (
+              <p className="min-w-0 flex-1 text-[13px] font-bold leading-snug">{troubleText(trouble, target!.peerName)}</p>
+            ) : state === "live" && blocked ? (
+              <button onClick={hear} className="min-w-0 flex-1 text-left">
+                <b className="block text-[14px] truncate">Tap to hear {target!.peerName}</b>
+                <small className="block text-[12px] font-bold">On call</small>
+              </button>
+            ) : (
+              <button onClick={() => nav(`/rooms/${target!.code}`)} className="min-w-0 flex-1 text-left">
+                <b className="block text-[14px] truncate">{state === "live" ? `On call with ${target!.peerName}` : `Calling ${target!.peerName}…`}</b>
+                <small className="block text-[12px] font-bold">{muted ? "You're muted. " : ""}Tap to go back to the room</small>
+              </button>
+            )}
             <button onClick={hangup}
-              className="cut tap px-3 min-h-[38px] inline-flex items-center cut-petal text-ink font-display font-semibold text-[13px]">
+              className="shrink-0 min-h-[44px] -my-2 text-[13px] font-extrabold underline underline-offset-4">
               {state === "error" ? "Close" : "Leave"}
             </button>
           </div>

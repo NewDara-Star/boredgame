@@ -9,6 +9,7 @@ import { Seats } from "@/features/play/PlaySurface";
 import { ROOM_GAMES } from "@/features/play/registry";
 import { challengeName, roomWith } from "@/features/challenge/kinds";
 import { RoomTop, spaced } from "./RoomTop";
+import { useSentInvites } from "@/features/friends/useFriends";
 
 type Mark = "x" | "o";
 
@@ -66,6 +67,7 @@ export function Waiting({ room, me, friends, onInvite, inviteFailed }: {
 }) {
   const [said, setSaid] = useState<string | null>(null);
   const [picking, setPicking] = useState(false);
+  const sent = useSentInvites(room.id);
   const game = roomGame(room);
   const Art = ROOM_GAMES.find((g) => g.slug === game.slug)?.Art;
   const url = typeof window !== "undefined" ? window.location.href : "";
@@ -89,6 +91,16 @@ export function Waiting({ room, me, friends, onInvite, inviteFailed }: {
             style={{ border: "2.5px dashed var(--color-ink-day)" }}>?</span>
         </div>
         <p className="text-[14px] font-semibold text-soft">Waiting for a second player</p>
+        {/* What the people you asked have said (drawing 2, Daramola 28 Sep):
+            nobody waits wondering whether they were ignored. */}
+        {sent.slice(0, 2).map((r) => {
+          const who = friends.find((f) => f.id === r.to_user)?.username ?? "They";
+          const said = r.reply === "no" || r.status === "declined" ? `${who} can't play right now.`
+            : r.reply === "hold" ? `${who} says hold on.`
+            : r.status === "accepted" ? `${who}'s on the way.`
+            : r.seen_at ? `${who} has seen it.` : `Asked ${who}.`;
+          return <p key={r.id} role="status" className={`text-[14px] font-bold ${r.reply === "hold" || r.status === "accepted" ? "text-leaf-deep" : ""}`}>{said}</p>;
+        })}
         <button onClick={share} className="cut tap cut-petal w-full min-h-[52px] font-display text-[19px]">
           {said ?? "Send the invite"}
         </button>

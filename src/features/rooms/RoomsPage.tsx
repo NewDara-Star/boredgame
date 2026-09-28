@@ -22,6 +22,7 @@ import { Note, Dealing } from "@/shared/ui/Note";
 import { GAMES } from "@/features/play/registry";
 import { parseWith, roomSetup, roomWith } from "@/features/challenge/kinds";
 import { useFocusMode } from "@/app/layout/focus";
+import { markRoomPlayed } from "@/features/push/PushOnboarding";
 import { useFriends } from "@/features/friends/useFriends";
 import { RoomTop, CallPill } from "./RoomTop";
 import { Countdown, RoomUnavailable, Waiting } from "./RoomScreens";
@@ -124,6 +125,8 @@ export function RoomsPage() {
   const lastStatus = useRef(room?.status);
   useEffect(() => {
     if (lastStatus.current === "waiting" && room?.status === "playing") setCounting(true);
+    // Your first room game: from now on a ping means something (#5).
+    if (room?.status === "playing") markRoomPlayed();
     lastStatus.current = room?.status;
   }, [room?.status]);
 

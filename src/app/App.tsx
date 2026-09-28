@@ -2,6 +2,7 @@ import { lazy } from "react";
 import { MotionConfig } from "framer-motion";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/app/providers/AuthProvider";
+import { NeedsSignal } from "@/app/layout/NeedsSignal";
 import { Shell } from "@/app/layout/Shell";
 import { VoiceProvider } from "@/features/voice/VoiceProvider";
 import { HomePage } from "@/features/home/HomePage";
@@ -42,7 +43,7 @@ export function App() {
               <Route path="/picto" element={<PictoGame />} />
               <Route path="/trivia" element={<TriviaGame />} />
               <Route path="/play" element={<CataloguePage />} />
-              <Route path="/daily" element={<DailyPage />} />
+              <Route path="/daily" element={<NeedsSignal><DailyPage /></NeedsSignal>} />
               <Route path="/squareoff" element={<Navigate to="/tictactoe?with=trivia" replace />} />
               <Route path="/tictactoe" element={<TicTacToeSoloPage />} />
               <Route path="/connect4" element={<Connect4SoloPage />} />
@@ -55,11 +56,11 @@ export function App() {
                   addresses still work, for links already shared. */}
               <Route path="/you" element={<ProfilePage />} />
               <Route path="/you/road" element={<RoadPage />} />
-              <Route path="/you/everyone" element={<LeaderboardPage />} />
+              <Route path="/you/everyone" element={<NeedsSignal><LeaderboardPage /></NeedsSignal>} />
               <Route path="/profile" element={<Navigate to="/you" replace />} />
               <Route path="/ranks" element={<Navigate to="/you/everyone" replace />} />
               <Route path="/admin" element={<AdminPage />} />
-              <Route path="/rooms" element={<RoomsPage />} />
+              <Route path="/rooms" element={<NeedsSignal><RoomsPage /></NeedsSignal>} />
               <Route path="/rooms/:code" element={<RoomsPage />} />
               <Route path="/add/:code" element={<AddFriendPage />} />
               <Route path="*" element={<Navigate to="/" replace />} />

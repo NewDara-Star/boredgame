@@ -8,7 +8,7 @@
 -- reveal_round, sort_walkover, claim_board_win, board_winner, sort_reveal,
 -- sort_finish, sort_solo_start, sort_solo_finish, friend_by_code, remove_friend,
 -- new_friend_code, add_friend, invite_friend, daily_reserve_left, set_room_setup,
--- claim_nudge, friend_name, or the profiles and puzzles grants.
+-- claim_nudge, friend_name, answer_invite, or the profiles and puzzles grants.
 --
 -- It ALWAYS ends in an error, on purpose: the error rolls every write back, so
 -- it can run against the live database. Read the message:
@@ -29,7 +29,7 @@ declare
   mc2 bigint; mc2_answer text; mc2_choices text[];
   cb uuid := gen_random_uuid(); d7 int; rid bigint; sa2 int;
   ts1 timestamptz; ts2 timestamptz; sid bigint; sid2 bigint;
-  n5inv bigint; oldc text; newc text; j2 jsonb;
+  n5inv bigint; oldc text; newc text; j2 jsonb; ir1 bigint; ir2 bigint;
   dp_adm uuid; dp_ids bigint[]; dp_ids2 bigint[]; dp_closed bigint[];
 begin
   -- ---- borrowed rows -------------------------------------------------------
@@ -549,6 +549,34 @@ begin
   reset role;
   results := array_append(results, 'NG someone outside the room can''t nudge anyone in it'::text);
   if err is null then broken := broken || results[cardinality(results)]; end if;
+
+  -- ---- IR (drawing 2, 28 Sep): an invite is seen, and answered -----------
+  insert into public.game_invites(room_id, room_code, from_user, to_user) values (r, 'IRTEST', a, b) returning id into ir1;
+  insert into public.game_invites(room_id, room_code, from_user, to_user) values (r, 'IRTEST', a, b) returning id into ir2;
+  perform set_config('request.jwt.claims', json_build_object('sub', c, 'role', 'authenticated')::text, true);
+  set local role authenticated;
+  perform public.answer_invite(ir1, 'hold');
+  reset role;
+  results := array_append(results, 'IR only the person invited can answer an invite'::text);
+  if (select seen_at is not null or reply is not null from public.game_invites where id = ir1)
+  then broken := broken || results[cardinality(results)]; end if;
+  perform set_config('request.jwt.claims', json_build_object('sub', b, 'role', 'authenticated')::text, true);
+  set local role authenticated;
+  perform public.answer_invite(ir1, 'seen');
+  perform public.answer_invite(ir1, 'hold');
+  perform public.answer_invite(ir2, 'no');
+  reset role;
+  results := array_append(results, 'IR seen and Hold on keep the invite open; Not now declines it'::text);
+  if (select seen_at is null or reply is distinct from 'hold' or status <> 'pending' from public.game_invites where id = ir1)
+  or (select reply is distinct from 'no' or status <> 'declined' from public.game_invites where id = ir2)
+  then broken := broken || results[cardinality(results)]; end if;
+  perform set_config('request.jwt.claims', json_build_object('sub', a, 'role', 'authenticated')::text, true);
+  set local role authenticated;
+  select reply into err from public.game_invites where id = ir1;
+  reset role;
+  results := array_append(results, 'IR the person waiting can read the answer; nobody signed out can give one'::text);
+  if err is distinct from 'hold' or has_function_privilege('anon', 'public.answer_invite(bigint,text)', 'execute')
+  then broken := broken || results[cardinality(results)]; end if;
 
   -- ---- verdict (always an error, so everything above rolls back) -----------
   if cardinality(broken) = 0 then

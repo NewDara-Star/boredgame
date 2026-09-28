@@ -1,91 +1,71 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
+import { motion } from "framer-motion";
+import { Sunflower } from "@/shared/brand/Sunflower";
 import { usePush } from "./usePush";
 
 const KEY = "bg_push_primed"; // per-device: "1" once they've dismissed the primer
+const PLAYED = "bg_room_played"; // per-device: "1" once they've played a room
 
-const readDismissed = () => {
-  try { return localStorage.getItem(KEY) === "1"; } catch { return false; }
-};
-const markDismissed = () => { try { localStorage.setItem(KEY, "1"); } catch { /* private mode */ } };
+const read = (k: string) => { try { return localStorage.getItem(k) === "1"; } catch { return false; } };
+const mark = (k: string) => { try { localStorage.setItem(k, "1"); } catch { /* private mode */ } };
 
-/** iOS Safari's Share glyph, so the instruction points at the real button. */
-function ShareGlyph() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"
-      className="inline-block align-[-3px]">
-      <path d="M12 15V3m0 0L8 7m4-4 4 4" stroke="currentColor" strokeWidth="2"
-        strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M6 12H5a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-5a2 2 0 0 0-2-2h-1"
-        stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
+/** A room game has started on this phone: the primer may ask now (#5). */
+export const markRoomPlayed = () => { if (!read(PLAYED)) mark(PLAYED); };
 
 /**
- * First-load primer for notifications. It is our OWN sheet, not the OS prompt:
- * the native permission dialog fires only when they tap Turn on, so a "Not now"
- * never spends the one-shot iOS permission. Shows at most until they act once
- * (enable -> subscribed, gone for good; dismiss -> gone on this device); the
- * Friends-panel card stays as the way back in.
+ * #5, turning on notifications, from the drawing's code: a sheet, asked once,
+ * after your first room (a ping means something once you've played someone),
+ * on a quiet screen: Home, Rooms or You, never over a game. It is our own
+ * sheet, not the phone's prompt: that fires only on Turn on, so Not now never
+ * spends iOS's one-time ask. On an iPhone that isn't installed yet, the three
+ * add-to-home steps come first. The Notifications row on You is the way back.
  */
 export function PushOnboarding() {
   const { ready, state, needsInstall, signedIn, enable, busy } = usePush();
   const { pathname } = useLocation();
   const [dismissed, setDismissed] = useState(true); // assume dismissed until we read storage
+  const [played, setPlayed] = useState(false);
 
-  useEffect(() => { setDismissed(readDismissed()); }, []);
+  useEffect(() => { setDismissed(read(KEY)); setPlayed(read(PLAYED)); }, [pathname]);
 
-  const close = () => { markDismissed(); setDismissed(true); };
+  const close = () => { mark(KEY); setDismissed(true); };
 
-  // Don't cover an active game; only offer where there's nothing to interrupt.
-  const onQuietScreen = pathname === "/" || pathname.startsWith("/rooms") || pathname.startsWith("/you");
-
+  const onQuietScreen = pathname === "/" || pathname === "/rooms" || pathname === "/you";
   const canOfferNow = state === "default" || state === "granted";
-  const show =
-    signedIn && ready && !dismissed && onQuietScreen && (canOfferNow || needsInstall);
+  const show = signedIn && ready && played && !dismissed && onQuietScreen && (canOfferNow || needsInstall);
   if (!show) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
-      <button aria-label="Close" onClick={close}
-        className="absolute inset-0 bg-ink/40" />
-      <div className="relative w-full sm:max-w-md card bg-ground p-5 m-0 sm:m-4
-        rounded-t-3xl sm:rounded-3xl space-y-3">
-        <p className="font-display text-[22px] font-semibold leading-tight">
-          Never miss a game
-        </p>
-        <p className="text-[14px] text-ink/80 font-semibold">
-          Turn on notifications and you'll get a ping the moment a friend invites
-          you — even when BoredGame is closed.
-        </p>
-
-        {needsInstall ? (
-          <div className="space-y-2">
-            <p className="text-[13px] font-bold">On iPhone, add it to your home screen first:</p>
-            <ol className="text-[13px] text-ink/80 font-semibold space-y-1 list-decimal ml-4">
-              <li>Tap the Share button <ShareGlyph /> in Safari's toolbar.</li>
-              <li>Choose <b>Add to Home Screen</b>.</li>
-              <li>Open BoredGame from the new icon, then come back here to turn it on.</li>
-            </ol>
-            <button onClick={close}
-              className="cut tap w-full cut-ink text-ground px-4 py-3 font-display font-semibold mt-1">
-              Got it
-            </button>
+    <div className="fixed inset-0 z-50 grid items-end" role="dialog" aria-modal="true" aria-label="Know when it's your move">
+      <button aria-label="Close" onClick={close} className="absolute inset-0 bg-ink-day/55" />
+      <motion.div initial={{ y: 40, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
+        className="relative bg-board text-ink rounded-t-[26px] px-4 pt-[14px] pb-[calc(18px+env(safe-area-inset-bottom))] max-w-3xl w-full mx-auto grid gap-[10px] shadow-[0_-10px_30px_rgba(14,74,176,.25)]">
+        <div className="w-10 h-[5px] rounded-full bg-hair mx-auto" />
+        <div className="flex items-center gap-2.5">
+          <Sunflower state="look-right" stem={false} size={52} className="shrink-0" />
+          <div className="min-w-0">
+            <b className="block font-display font-normal text-[21px] leading-tight">Know when it's your move</b>
+            <p className="text-[14px] font-semibold text-soft">A ping when a friend invites you or plays their turn.</p>
           </div>
-        ) : (
-          <div className="space-y-2">
-            <button onClick={() => void enable()} disabled={busy}
-              className="cut tap w-full cut-petal text-ink px-4 py-3 font-display font-semibold">
-              {busy ? "Turning on…" : "Turn on notifications"}
-            </button>
-            <button onClick={close}
-              className="w-full py-2 text-[13px] font-black text-ink/50">
-              Not now
-            </button>
+        </div>
+        {needsInstall && (
+          <div className="rounded-[20px] bg-mist px-3 py-2.5 grid gap-1">
+            <span className="text-[12px] font-extrabold text-soft">On iPhone, first</span>
+            <p className="text-[14px] font-semibold">1. Tap Share in Safari · 2. Add to Home Screen · 3. Open BoredGame from the icon</p>
           </div>
         )}
-      </div>
+        <div className="grid grid-cols-[1.35fr_1fr] gap-[9px]">
+          {needsInstall ? (
+            <button onClick={close} className="cut tap cut-petal min-h-[52px] font-display text-[19px]">Got it</button>
+          ) : (
+            <button onClick={() => void enable().then(close)} disabled={busy} className="cut tap cut-petal min-h-[52px] font-display text-[19px]">
+              {busy ? "Turning on…" : "Turn on"}
+            </button>
+          )}
+          <button onClick={close} className="cut tap cut-board min-h-[52px] font-display text-[19px]">Not now</button>
+        </div>
+      </motion.div>
     </div>
   );
 }

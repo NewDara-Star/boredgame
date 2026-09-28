@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useAuth } from "@/app/providers/AuthProvider";
@@ -230,11 +230,13 @@ export function HomePage() {
   const { user, offline, isGuest } = useAuth();
   const p = useProgress();
   const nav = useNavigate();
-  const { friends, invites, respond } = useFriends();
+  const { friends, invites, respond, answer } = useFriends();
   // What an account made now would take with it (F17), not the phone's lifetime tally.
   const kept = user ? 0 : readCarry().rows.length;
   const { next } = rankFor(p.answered);
   const waiting = invites[0];
+  // On screen = seen: whoever asked stops wondering (drawing 2, Daramola 28 Sep).
+  useEffect(() => { if (waiting) void answer(waiting.id, "seen"); }, [waiting?.id, answer]);
   const fresh = p.answered === 0;
   const days = (k: number) => `${k} day${k === 1 ? "" : "s"}`;
 
@@ -245,7 +247,7 @@ export function HomePage() {
       {waiting && (
         <InviteHero i={waiting}
           onJoin={() => { void respond(waiting.id, true).then(() => nav(`/rooms/${waiting.room_code}`)); }}
-          onLater={() => void respond(waiting.id, false)} />
+          onLater={() => void answer(waiting.id, "no")} />
       )}
 
       {!waiting && (fresh ? (

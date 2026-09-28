@@ -11,8 +11,8 @@ const SAID = { shared: "Sent", saved: "Saved", copied: "Link copied", cancelled:
  * The click handlers call shareResult() straight away; see share.ts for why
  * nothing may be awaited first.
  */
-export function ShareButtons({ card, story = true, className = "", tone = "petal" }:
-  { card: MatchCard | null; story?: boolean; className?: string; tone?: "petal" | "sky" }) {
+export function ShareButtons({ card, story = true, className = "", tone = "petal", label = "Share" }:
+  { card: MatchCard | null; story?: boolean; className?: string; tone?: "petal" | "sky"; label?: string }) {
   const [said, setSaid] = useState("");
   const go = (file: File | undefined) => {
     if (!card || !file) return;
@@ -24,7 +24,7 @@ export function ShareButtons({ card, story = true, className = "", tone = "petal
     <div className={`grid gap-2.5 ${tall ? "grid-cols-[1.4fr_1fr]" : "grid-cols-1"} ${className}`}>
       <button onClick={() => go(card?.file)} disabled={!card}
         className={`cut tap min-h-[52px] font-display text-[19px] cut-${tone} disabled:opacity-50`}>
-        {said || "Share"}
+        {said || label}
       </button>
       {tall && (
         <button onClick={() => go(card?.story)} disabled={!card}

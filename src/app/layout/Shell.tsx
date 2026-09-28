@@ -9,6 +9,7 @@ import { ErrorBoundary } from "@/app/ErrorBoundary";
 import { ScreenLoading } from "./ScreenLoading";
 import { useFocused } from "./focus";
 import { PushOnboarding } from "@/features/push/PushOnboarding";
+import { InviteToast } from "@/features/friends/InviteToast";
 import { CarryAcross } from "@/features/play/CarryAcross";
 import { Sky } from "@/shared/brand/Sky";
 
@@ -25,7 +26,7 @@ const isActive = (pathname: string, to: string, exact?: boolean) =>
   exact ? pathname === to : pathname.startsWith(to);
 
 export function Shell() {
-  const { offline } = useAuth();
+  const { offline, user } = useAuth();
   const { pathname } = useLocation();
   const nav = useNavigate();
   // A failed email link lands wherever it was sent (usually Home); its reason
@@ -111,6 +112,7 @@ export function Shell() {
       </nav>}
 
       {!focused && <PushOnboarding />}
+      {user && <InviteToast />}
     </div>
   );
 }

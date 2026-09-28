@@ -10,7 +10,7 @@ const src = (p: string) => readFileSync(new URL(p, import.meta.url), "utf8");
 const app = src("../src/app/App.tsx"), shell = src("../src/app/layout/Shell.tsx"), page = src("../src/features/profile/ProfilePage.tsx");
 
 ok(/\{ to: "\/you", label: "You"/.test(shell) && !/label: "Ranks"/.test(shell), "the fourth tab is You");
-for (const r of ['path="/you" element={<ProfilePage />}', 'path="/you/road" element={<RoadPage />}', 'path="/you/everyone" element={<LeaderboardPage />}'])
+for (const r of ['path="/you" element={<ProfilePage />}', 'path="/you/road" element={<RoadPage />}', 'path="/you/everyone" element={<NeedsSignal><LeaderboardPage /></NeedsSignal>}'])
   ok(app.includes(r), `route ${r.split('"')[1]}`);
 ok(/path="\/profile" element=\{<Navigate to="\/you" replace \/>\}/.test(app) && /path="\/ranks" element=\{<Navigate to="\/you\/everyone" replace \/>\}/.test(app),
    "old links (/profile, /ranks) still land in the right place");
