@@ -107,12 +107,13 @@ const REQUIRES = [
     ["share-round", "src/features/play/RoundChrome.tsx"], ["share-sort", "src/features/sort/SortSoloPage.tsx"],
     ["share-daily", "src/features/daily/DailyPage.tsx"], ["share-rankup", "src/features/play/Unlock.tsx"],
     ["share-ranks", "src/features/leaderboard/RoadPage.tsx"], ["share-invite", "src/features/rooms/InviteCard.tsx"],
-  ].map(([id, f]) => ({ id, why: `${f} shares through the new share API (shareResult, or ShareButtons / ResultScreen which call it)`,
-    ok: () => /\bshareResult\b|<ShareButtons\b|<ResultScreen\b/.test(read(f) ?? "") })),
-  { id: "share-buttons", why: "ShareButtons calls shareResult and ResultScreen uses ShareButtons, so the share points above really share",
+  ].map(([id, f]) => ({ id, why: `${f} shares through the new share API (shareResult, or ShareButtons / ResultScreen / ReplayPlayer which call it)`,
+    ok: () => /\bshareResult\b|<ShareButtons\b|<ResultScreen\b|<ReplayPlayer\b[^>]*\bpremake\b/.test(read(f) ?? "") })),
+  { id: "share-buttons", why: "ShareButtons and ReplayPlayer call shareResult and ResultScreen uses ShareButtons, so the share points above really share",
     ok: () => /\bshareResult\(/.test(read("src/shared/card/ShareButtons.tsx") ?? "")
       && /<ShareButtons\b/.test(read("src/features/play/ResultScreen.tsx") ?? "")
-      && !/\bsaveCard\(/.test(read("src/features/play/ResultScreen.tsx") ?? "") },
+      && !/\bsaveCard\(/.test(read("src/features/play/ResultScreen.tsx") ?? "")
+      && /\bshareResult\(/.test(read("src/features/sort/ReplayPlayer.tsx") ?? "") },
   { id: "link-previews", why: "a Vercel function serves og:image for /r/:code, /d/:date, /f/:user", ok: () => !!(read("api/og.ts") || read("api/og.tsx")) },
 ];
 

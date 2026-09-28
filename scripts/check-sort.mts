@@ -388,6 +388,27 @@ function shortest(start: Tube[], claimed: number): number {
   ok((src("../src/features/sort/card.ts").match(/markPath\(/g) ?? []).length >= 2, "the result card and replay draw the marks too");
 }
 
+// --- the solo screens are the drawings (#31 sorting, #32 solved) --------------------
+{
+  const src = (p: string) => readFileSync(new URL(p, import.meta.url), "utf8");
+  const page = src("../src/features/sort/SortSoloPage.tsx");
+  ok(/useFocusMode\(true\)/.test(page) && /<LeaveX /.test(page), "#31 has the whole phone: the X, no tab bar");
+  ok(/label="Time"/.test(page) && /label="Moves"/.test(page) && /label="Par"/.test(page) && !/To beat/.test(page), "#31's three numbers: time, moves, par");
+  ok(/<TubesCard>/.test(page) && /<TubesCard>/.test(src("../src/features/sort/SortRaceRoom.tsx")), "the tubes sit in the white card that takes the rest (#31, #41)");
+  ok(/r\.startOver/.test(page) && /while \(x\.history\.length\) x = undo\(x, now - startedAt\)/.test(src("../src/features/sort/useSortSolo.ts")),
+    "Start over puts every ball back with the clock still running, each one a take-back");
+  ok(/<ReplayPlayer replay=\{film\} premake>/.test(page) && /Go again/.test(page), "#32: the film, Share the film made ahead, Go again beside it");
+  ok(/if \(premake && ended && !gif\) void save\(\)/.test(src("../src/features/sort/ReplayPlayer.tsx")), "the GIF is made once the film has played, so one tap shares it");
+  // A take-back is always a legal pour (the tube it came from has just lost a
+  // ball), so a log with take-backs and a start over still replays and is kept.
+  const p = dailyPuzzle("2026-09-28", "medium");
+  let g = newGame(p);
+  const [a, b] = p.line[0];
+  g = pour(g, a, b, 100); g = undo(g, 200);
+  let t = 300; for (const [f, to] of p.line) g = pour(g, f, to, t += 100);
+  ok(isSolved(g.tubes, g.cap) && logSolves(p, g.log), "a solve with a take-back in it still replays");
+}
+
 // --- the referee is the same files the players run --------------------------------
 // supabase/functions/sort-finish/ carries copies of rules.ts and bank.ts,
 // because a deployed function needs its dependencies beside it. A copy that

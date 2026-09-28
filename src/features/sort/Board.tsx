@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { BOARD, INK, RAMPS } from "@/shared/brand/tokens";
 import { motion } from "framer-motion";
 import type { Tube } from "./rules";
@@ -198,5 +198,15 @@ export function Board({
         );
       })}
     </svg>
+  );
+}
+
+/** The drawings' .board (#31, #41): a white card that takes the rest of the
+    screen, the tubes in the middle of it. The Start gate sits in it too. */
+export function TubesCard({ children }: { children: ReactNode }) {
+  return (
+    <div className="card bg-board rounded-[24px] shadow-lift-sm p-[10px] flex-1 min-h-0 flex flex-col text-ink">
+      {children}
+    </div>
   );
 }

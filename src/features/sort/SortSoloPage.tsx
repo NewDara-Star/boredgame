@@ -2,37 +2,42 @@ import { Link } from "react-router-dom";
 import { useEffect, useState, type ReactNode } from "react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/app/providers/AuthProvider";
+import { useFocusMode } from "@/app/layout/focus";
 import { ReplayPlayer } from "./ReplayPlayer";
 import type { Replay } from "./replay";
 import { clock, decodeLog, type Level } from "./rules";
 import { Avatar } from "@/shared/ui/Avatar";
-import { stagger, riseIn, popIn } from "@/shared/ui/motion";
-import { drawCard, shareResult, type MatchCard } from "@/shared/card/frame";
-import { Board, TUBES_RATIO } from "./Board";
-import { PlayBoard, PlayRow, PlaySurface } from "@/features/play/PlaySurface";
+import { Note } from "@/shared/ui/Note";
+import { popIn } from "@/shared/ui/motion";
+import { Board, TUBES_RATIO, TubesCard } from "./Board";
+import { PlayBoard, PlayRow, PlaySurface, GameChip, TurnBanner } from "@/features/play/PlaySurface";
+import { LeaveX } from "@/features/play/RoundChrome";
 import { StartGate } from "./StartGate";
-import { sortHero } from "./card";
 import { useSortSolo, type Standing } from "./useSortSolo";
-
 
 const LEVELS: Level[] = ["easy", "medium", "hard"];
 
 /**
- * Today's tubes, against the clock.
+ * Today's tubes, against the clock, from the drawings' code (#31 sorting,
+ * #32 solved).
  *
  * No bot. In a sort puzzle the opponent is time, and the people who did the
  * same board today: one board per level per day, everyone on it, ranked by
- * the server's stopwatch. The clock starts when the first ball is lifted, not
- * when the page opens, so looking at the board costs nothing.
+ * the server's stopwatch. The tubes stay hidden until Start (talk item 13).
+ *
+ * #31 has the whole phone: the X and the game's chip, three small numbers
+ * (time, moves, par), the tubes in a white card taking the rest, and Take back
+ * and Start over. What to play (level, today's or practice) isn't drawn: it
+ * sits in the card where the tubes will be, before Start, so it never takes
+ * room from a board in play.
  */
 export function SortSoloPage() {
+  useFocusMode(true);
   const { user, profile } = useAuth();
   const [level, setLevel] = useState<Level>("medium");
   const [practice, setPractice] = useState(false);
   const r = useSortSolo(level, user?.id, practice);
-  // The clock stops at the solve (r.solvedMs), not when the referee replies --
-  // otherwise it kept ticking through the verify round-trip.
-  const running = r.startedAt !== null && !r.result && r.solvedMs === null;
+  // The clock stops at the solve (r.solvedMs), not when the referee replies.
   const [now, setNow] = useState(Date.now());
   useEffect(() => {
     if (r.startedAt === null || r.result || r.solvedMs !== null) return;
@@ -43,187 +48,141 @@ export function SortSoloPage() {
     : r.solvedMs !== null ? r.solvedMs
     : r.startedAt === null ? 0 : now - r.startedAt;
 
-  // the result card: the tubes as they finished, and where the time landed
-  const [card, setCard] = useState<MatchCard | null>(null);
   const rank = r.mine?.position ?? null;
-  useEffect(() => {
-    if (!r.result) { setCard(null); return; }
-    let cancelled = false;
-    const overPar = r.result.moves - r.puzzle.par;
-    void drawCard({
-      title: "BALL SORT", code: null, path: "/ballsort",
-      headline: `Sorted in ${clock(r.result.ms)}`,
-      dare: `Par is ${r.puzzle.par}. Beat it?`,
-      flower: overPar <= 0 ? "bloom" : "awake",
-      text: `I sorted today's tubes in ${clock(r.result.ms)}, ${r.result.moves} moves (par ${r.puzzle.par}). Beat it:`,
-      hero: sortHero(r.me.tubes, r.me.cap),
-      caption: `${rank ? `#${rank} today · ` : practice ? "practice · " : ""}${r.result.moves} moves${overPar <= 0 ? ", par" : `, par ${r.puzzle.par}`} · ${level}`,
-    }).then((made) => { if (!cancelled) setCard(made); })
-      .catch(() => { /* canvas unavailable; the time is still on screen */ });
-    return () => { cancelled = true; };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [r.result, rank]);
-
-  const leader = r.board[0] ?? null;
-  const overPar = r.me.moves - r.puzzle.par;
   const where = practice ? "PRACTICE" : "TODAY'S TUBES";
   const film: Replay | null = r.result ? {
     tubes: r.puzzle.tubes, cap: r.puzzle.cap, log: r.me.log, ms: r.result.ms, moves: r.result.moves,
     par: r.puzzle.par, name: profile?.username ?? "You", level, where, rank,
   } : null;
 
+  if (r.result && film) {
+    const atPar = r.result.moves <= r.puzzle.par;
+    const tail = practice ? " · practice"
+      : !r.counts ? " · for fun"
+      : rank ? ` · #${rank} today` : r.result.server ? "" : " · timed here";
+    const next = LEVELS[(LEVELS.indexOf(level) + 1) % 3];
+    return (
+      <motion.div variants={popIn} initial="hidden" animate="show" className="grid gap-[11px] pb-2">
+        <TurnBanner title={`Sorted in ${clock(r.result.ms)}`} tone="petal" flower={atPar ? "bloom" : "awake"}
+          sub={`${r.result.moves} moves · par ${r.puzzle.par}${tail}`} />
+        <Note>{r.error}</Note>
+        <ReplayPlayer replay={film} premake>
+          <button onClick={r.again} className="cut tap cut-board min-h-[52px] font-display text-[19px]">Go again</button>
+        </ReplayPlayer>
+        {practice ? (
+          <div className="flex justify-center gap-5">
+            <button onClick={r.shuffle} className={LINK}>New board</button>
+            <button onClick={() => setPractice(false)} className={LINK}>Today's tubes</button>
+          </div>
+        ) : (
+          <>
+            <Ladder rows={r.board} mine={r.mine} meId={user?.id}
+              failed={r.boardFailed} onRetry={() => void r.refreshBoard()}
+              film={(s) => ({
+                tubes: r.puzzle.tubes, cap: r.puzzle.cap, log: decodeLog(s.log ?? ""), ms: s.ms, moves: s.moves,
+                par: r.puzzle.par, name: s.username, level, where: "TODAY'S TUBES", rank: s.position,
+              })} />
+            <button onClick={() => setLevel(next)} className={`${LINK} justify-self-center`}>Try today's {next} tubes</button>
+          </>
+        )}
+      </motion.div>
+    );
+  }
+
+  const running = r.startedAt !== null;
+  const leader = r.board[0] ?? null;
+  const note = practice ? "A random board, off the record. Tap a tube to lift its top ball, then tap where it goes."
+    : r.mine ? `You're #${r.mine.position} today in ${clock(r.mine.ms)}. Only your first finish counts, so this one's for fun.`
+    : leader ? `Everyone gets this board today. Best so far: ${leader.username}, ${clock(leader.ms)}. Your first finish is the one that counts.`
+    : "Everyone gets this board today. Your first finish is the one that counts.";
+
   return (
-    <motion.div variants={stagger(0.07)} initial="hidden" animate="show" className="space-y-4">
-      {/* The game fills the screen; the ladder starts under it on purpose —
-          a list is the one thing worth scrolling to. */}
-      <PlaySurface>
-      <PlayRow className="flex items-center justify-between gap-3 flex-wrap">
-        <div>
-          <h1 className="font-display text-[26px] leading-none font-semibold whitespace-nowrap">
-            {practice ? "Practice" : "Today's tubes"}
-          </h1>
-          <p className="text-[12px] font-black text-soft mt-1">
-            {practice ? "A random board, off the record" : "Everyone gets this board today"}
-          </p>
-        </div>
-        <div className="flex gap-1.5 shrink-0">
-          {LEVELS.map((l) => (
-            <button key={l} onClick={() => setLevel(l)} aria-pressed={level === l}
-              disabled={running}
-              className={`text-[12px] font-black px-2.5 py-1.5 rounded-full shadow-lift-sm
-                disabled:opacity-40 ${level === l ? "bg-ink text-ground" : "bg-board text-ink"}`}>
-              {l}
-            </button>
-          ))}
-        </div>
+    <PlaySurface focus>
+      <PlayRow className="flex items-center justify-between gap-2.5 min-h-10">
+        <LeaveX to="/play" label="Back to the games" />
+        <GameChip title="Ball Sort" label={`Ball Sort · ${level}${practice ? " · practice" : ""}`} />
       </PlayRow>
 
-      {!r.result && (
-        <>
-          <PlayRow className="grid grid-cols-3 gap-2 text-center">
-            <Stat label="Time" value={clock(elapsed)}
-              sub={r.startedAt === null ? "starts when the tubes appear" : practice ? "practice" : "server-timed"} />
-            <Stat label="Moves" value={String(r.me.moves)} sub={`par ${r.puzzle.par}`} />
-            {practice
-              ? <Stat label="Board" value="random" sub="not ranked" />
-              : <Stat label="To beat" value={leader ? clock(leader.ms) : "—"} sub={leader ? leader.username : "nobody yet today"} />}
-          </PlayRow>
+      <PlayRow className="grid grid-cols-3 gap-2">
+        <Stat label="Time" value={clock(elapsed)} />
+        <Stat label="Moves" value={String(r.me.moves)} />
+        <Stat label="Par" value={String(r.puzzle.par)} />
+      </PlayRow>
 
-          {/* The board, while it is yours to play. Once it is sorted the film
-              takes its place — it has the tubes and the clock in it, and a
-              sorted board above a film of the sorted board was the same
-              picture twice on a phone that had to be scrolled past it. */}
-          <PlayBoard ratio={TUBES_RATIO} min={120}>
-            {(width) => r.startedAt !== null ? (
-              <div className="card bg-board p-3 pt-1" style={{ width }}>
+      <TubesCard>
+        {running ? (
+          <>
+            <PlayBoard ratio={TUBES_RATIO} min={120}>
+              {(width) => (
                 <Board tubes={r.me.tubes} cap={r.me.cap} selected={r.selected} refused={r.refused}
-                  width={width - 26} onPick={r.pick} disabled={r.finishing} />
-              </div>
-            ) : (
-              <StartGate width={width} onGo={r.go}
-                note={practice ? "The tubes stay hidden until you start."
-                  : r.mine ? "You've a time on today's board. Only your first finish counts: this one is for fun."
-                  : "The tubes stay hidden until you start. Your first finish today is the one that counts."} />
-            )}
-          </PlayBoard>
+                  width={width} onPick={r.pick} disabled={r.finishing} />
+              )}
+            </PlayBoard>
+            {r.finishing && <p role="status" className="shrink-0 text-center text-[13px] font-extrabold text-soft">Checking with the referee…</p>}
+          </>
+        ) : (
+          <StartGate onGo={r.go} note={note}>
+            <Choice label="Board" options={[["today", "Today's"], ["practice", "Practice"]]}
+              value={practice ? "practice" : "today"} onPick={(v) => setPractice(v === "practice")} />
+            <Choice label="Level" options={LEVELS.map((l) => [l, l[0].toUpperCase() + l.slice(1)] as [string, string])}
+              value={level} onPick={(v) => setLevel(v as Level)} />
+          </StartGate>
+        )}
+      </TubesCard>
 
-          <PlayRow>
-            <p className="text-center text-[15px] font-bold text-soft">
-              {r.finishing ? "Checking with the referee…"
-                : r.startedAt === null ? "Tap Start when you're ready."
-                : r.selected === null ? "Tap a tube to lift its top ball."
-                : "Now tap where it goes."}
-            </p>
-          </PlayRow>
-        </>
-      )}
+      <Note>{r.error}</Note>
 
-      {r.error && (
-        <PlayRow>
-          <p className="card bg-petal p-3 text-[13px] font-bold text-center">{r.error}</p>
-        </PlayRow>
-      )}
-
-      {r.result ? (
-        <motion.div variants={popIn} className="space-y-3 shrink-0">
-          {/* one line, not a panel: the film above it already says the time big */}
-          <div className="card px-4 py-3 bg-leaf text-ink flex items-baseline justify-between gap-3">
-            <p className="font-display text-2xl font-semibold tabular-nums">{clock(r.result.ms)}</p>
-            <p className="text-[13px] font-bold opacity-90 text-right">
-              {r.result.moves} moves, {overPar <= 0 ? "par" : `par ${r.puzzle.par}`}
-              {practice ? " · practice"
-                : !r.counts ? " · for fun: your first finish stands"
-                : rank ? ` · #${rank} today` : r.result.server ? " · on the board" : " · timed here"}
-            </p>
-          </div>
-          {film && (
-            <ReplayPlayer replay={film}>
-              <button onClick={r.again}
-                className="card tap py-4 font-display text-lg font-semibold bg-board">
-                Go again
-              </button>
-            </ReplayPlayer>
-          )}
-          <div className="flex justify-center gap-5">
-            <button onClick={() => (practice ? r.shuffle() : setLevel(LEVELS[(LEVELS.indexOf(level) + 1) % 3]))}
-              className="text-[13px] font-black text-soft underline underline-offset-4">
-              {practice ? "New board" : "Next level"}
-            </button>
-            {card && (
-              <button onClick={() => void shareResult({ file: card.file, text: card.text ?? "", url: card.link })}
-                className="text-[13px] font-black text-soft underline underline-offset-4">
-                Still image
-              </button>
-            )}
-          </div>
-        </motion.div>
-      ) : (
-        <PlayRow className="grid grid-cols-2 gap-2.5">
-          <button onClick={r.takeBack} disabled={r.me.history.length === 0 || r.finishing}
-            className="card tap py-3 font-display font-semibold bg-board disabled:opacity-50">
-            Take it back
-          </button>
-          {practice ? (
-            <button onClick={r.shuffle} disabled={running}
-              className="card tap py-3 font-display font-semibold bg-board disabled:opacity-50">
-              New board
-            </button>
-          ) : (
-            <button onClick={() => setPractice(true)} disabled={running}
-              className="card tap py-3 font-display font-semibold bg-board disabled:opacity-50">
-              Practice instead
-            </button>
-          )}
-        </PlayRow>
-      )}
-      </PlaySurface>
-
-      {practice ? (
-        <motion.div variants={riseIn} className="text-center">
-          <button onClick={() => setPractice(false)} disabled={running}
-            className="text-[13px] font-black text-soft underline underline-offset-4 disabled:opacity-40">
-            Back to today's tubes
-          </button>
-        </motion.div>
-      ) : (
-        <Ladder rows={r.board} mine={r.mine} meId={user?.id} level={level}
-          failed={r.boardFailed} onRetry={() => void r.refreshBoard()}
-          film={(s) => ({
-            tubes: r.puzzle.tubes, cap: r.puzzle.cap, log: decodeLog(s.log ?? ""), ms: s.ms, moves: s.moves,
-            par: r.puzzle.par, name: s.username, level, where: "TODAY'S TUBES", rank: s.position,
-          })} />
-      )}
-    </motion.div>
+      <PlayRow className="grid grid-cols-2 gap-[9px]">
+        <button onClick={r.takeBack} disabled={!running || r.me.history.length === 0 || r.finishing}
+          className={SM}>Take back</button>
+        <button onClick={r.startOver} disabled={!running || r.me.history.length === 0 || r.finishing}
+          className={SM}>Start over</button>
+      </PlayRow>
+    </PlaySurface>
   );
 }
 
-/** Today's board for this level: the top twenty, and you if you are below
-    them. A row with a replay opens on a tap, and the film plays. */
-function Ladder({ rows, mine, meId, level, film, failed, onRetry }:
-  { rows: Standing[]; mine: Standing | null; meId?: string; level: Level; film: (s: Standing) => Replay;
+const LINK = "min-h-[44px] text-[13px] font-extrabold text-soft underline underline-offset-4";
+/** .cut.board.sm */
+const SM = "cut tap cut-board min-h-[42px] px-3 font-display text-[16px] disabled:opacity-50";
+
+/** .stats .stat: a small white card, the label over the number in mono (#31). */
+function Stat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="card rounded-2xl shadow-lift-sm bg-board text-ink px-[10px] py-[9px]">
+      <small className="block text-[12px] font-extrabold text-soft">{label}</small>
+      <b className="block font-mono font-normal text-[20px] leading-none mt-1 tabular-nums">{value}</b>
+    </div>
+  );
+}
+
+/** A row of chips, one of them on: before Start only. */
+function Choice({ label, options, value, onPick }:
+  { label: string; options: [string, string][]; value: string; onPick: (v: string) => void }) {
+  return (
+    <div className="flex items-center justify-center gap-1.5" role="group" aria-label={label}>
+      {options.map(([v, text]) => (
+        <button key={v} aria-pressed={value === v} onClick={() => onPick(v)}
+          className="min-h-[44px] -my-[7px] grid place-items-center">
+          <span className={`chip rounded-full px-[11px] py-[5px] text-[13px] font-extrabold text-ink ${value === v ? "bg-petal" : "bg-mist"}`}>{text}</span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/** Today's board for this level (#32's .list): the top twenty, and you if
+    you're below them, in gold. A row with a replay opens its film on a tap. */
+function Ladder({ rows, mine, meId, film, failed, onRetry }:
+  { rows: Standing[]; mine: Standing | null; meId?: string; film: (s: Standing) => Replay;
     failed?: boolean; onRetry?: () => void }) {
   const offPage = mine && !rows.some((r) => r.user_id === meId);
   const [open, setOpen] = useState<string | null>(null);
+  // Today's times are for members only, so a signed-out ladder is empty
+  // whether or not anyone has played: say why, not "you're first".
+  if (!meId) return <Line><Link to="/you" className="underline underline-offset-4">Sign in</Link> to see today's times.</Line>;
+  if (failed) return <Line>Couldn't load today's times. {onRetry && <button onClick={onRetry} className="underline underline-offset-4 min-h-[44px]">Try again</button>}</Line>;
+  if (rows.length === 0) return <Line>Your time goes up on today's board when the referee has it.</Line>;
   const row = (s: Standing) => (
     <Row key={s.user_id} s={s} me={s.user_id === meId} open={open === s.user_id}
       onOpen={s.log ? () => setOpen(open === s.user_id ? null : s.user_id) : undefined}>
@@ -231,58 +190,32 @@ function Ladder({ rows, mine, meId, level, film, failed, onRetry }:
     </Row>
   );
   return (
-    <motion.div variants={riseIn} className="card bg-board p-3">
-      <p className="text-[12px] font-black text-soft mb-2">
-        Today · {level}{!meId || failed ? "" : ` · ${rows.length === 0 ? "no times yet" : `${rows.length}${rows.length === 20 ? "+" : ""} sorted it`}`}
-      </p>
-      {/* Today's times are for members only, so a signed-out ladder is empty
-          whether or not anyone has played: say why, not "you're first". */}
-      {!meId ? (
-        <p className="text-sm font-bold text-soft">
-          <Link to="/you" className="underline underline-offset-4">Sign in</Link> to see today's times.
-        </p>
-      ) : failed ? (
-        <p className="text-sm font-bold text-soft">
-          Couldn't load today's times.{" "}
-          {onRetry && <button onClick={onRetry} className="underline underline-offset-4 font-black">Try again</button>}
-        </p>
-      ) : rows.length === 0 ? (
-        <p className="text-sm font-bold text-soft">Be the first on the board.</p>
-      ) : (
-        <ol className="grid gap-1.5">
-          {rows.map(row)}
-          {offPage && <li className="text-center text-[12px] font-black text-soft">···</li>}
-          {offPage && row(mine!)}
-        </ol>
-      )}
-    </motion.div>
+    <ol className="grid gap-2" aria-label="Today's times">
+      {rows.map(row)}
+      {offPage && <li className="text-center text-[12px] font-extrabold text-soft" aria-hidden>···</li>}
+      {offPage && row(mine!)}
+    </ol>
   );
 }
 
+const Line = ({ children }: { children: ReactNode }) =>
+  <p className="card rounded-2xl shadow-lift-sm bg-board px-3 py-2.5 text-[13px] font-bold text-soft">{children}</p>;
+
+/** .li: the disc, "1  Tobi" over "0:48 · 21 moves". Yours is gold (.li.me). */
 function Row({ s, me, open, onOpen, children }:
   { s: Standing; me: boolean; open: boolean; onOpen?: () => void; children?: ReactNode }) {
   return (
-    <li className={`rounded-xl ${me ? "bg-petal" : ""}`}>
-      <button onClick={onOpen} disabled={!onOpen} aria-expanded={open}
-        className="flex w-full items-center gap-2.5 px-2 py-1.5 text-left disabled:cursor-default">
-        <span className="w-6 text-[13px] font-black tabular-nums text-soft">{s.position}</span>
-        <Avatar id={s.user_id} name={s.username} size={26} />
-        <span className="flex-1 truncate text-sm font-bold">{s.username}</span>
-        {onOpen && <span className="text-[12px] font-black text-soft">{open ? "close" : "watch"}</span>}
-        <span className="text-[12px] font-bold text-soft tabular-nums">{s.moves} mv</span>
-        <span className="font-display text-base font-semibold tabular-nums">{clock(s.ms)}</span>
+    <li className={`card rounded-2xl shadow-lift-sm text-ink ${me ? "bg-petal" : "bg-board"}`}>
+      <button onClick={onOpen} disabled={!onOpen} aria-expanded={onOpen ? open : undefined}
+        className="flex w-full min-h-[44px] items-center gap-2.5 px-3 py-[9px] text-left disabled:cursor-default">
+        <Avatar id={s.user_id} name={s.username} size={26} tone={me ? "petal" : undefined} />
+        <span className="min-w-0 flex-1">
+          <b className="block text-[15px] leading-[1.2] truncate"><span className="tabular-nums">{s.position}</span>{" "}{me ? "You" : s.username}</b>
+          <small className={`block text-[12px] font-semibold tabular-nums ${me ? "text-ink" : "text-soft"}`}>{clock(s.ms)} · {s.moves} moves</small>
+        </span>
+        {onOpen && <span className={`shrink-0 text-[12px] font-extrabold underline underline-offset-4 ${me ? "text-ink" : "text-soft"}`}>{open ? "Close" : "Watch"}</span>}
       </button>
-      {children && <div className="px-1 pb-2">{children}</div>}
+      {children && <div className="px-2 pb-2">{children}</div>}
     </li>
-  );
-}
-
-function Stat({ label, value, sub }: { label: string; value: string; sub: string }) {
-  return (
-    <div className="card bg-board px-2 py-2.5">
-      <p className="text-[12px] font-black text-soft">{label}</p>
-      <p className="font-display text-2xl font-semibold leading-none mt-1 tabular-nums">{value}</p>
-      <p className="text-[12px] font-bold text-soft mt-1 truncate">{sub}</p>
-    </div>
   );
 }

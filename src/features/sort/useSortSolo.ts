@@ -159,13 +159,23 @@ export function useSortSolo(level: Level, userId: string | undefined, practice =
     setMe((g) => undo(g, now - (startedAt ?? now)));
   }, [result, finishing, startedAt]);
 
+  /** Start over (#31): every ball back where it began, the clock still running.
+      Each one goes back as a take-back would, so it costs what they cost and
+      the film shows it; a fresh Start would have let you study the board free. */
+  const startOver = useCallback(() => {
+    if (result || finishing || startedAt === null) return;
+    setSelected(null);
+    const now = Date.now();
+    setMe((g) => { let x = g; while (x.history.length) x = undo(x, now - startedAt); return x; });
+  }, [result, finishing, startedAt]);
+
   const shuffle = useCallback(() => setRandomSeed(Date.now()), []);
 
   return {
     day, puzzle, me, selected, refused, startedAt, solvedMs, result, error, finishing,
     board, mine, practice, boardFailed, refreshBoard: loadBoard,
     progress: solvedCount(me.tubes, me.cap),
-    pick, takeBack, again: reset, shuffle,
+    pick, takeBack, startOver, again: reset, shuffle,
     /** Start's count is over: show the tubes and start the clock */
     go: start, counts,
   };

@@ -9,7 +9,7 @@ import { Note, Dealing } from "@/shared/ui/Note";
 import {
   EndMatchLink, MatchOver, useMatchChrome,
 } from "@/features/rooms/matchUi";
-import { Board, TUBES_RATIO } from "./Board";
+import { Board, TUBES_RATIO, TubesCard } from "./Board";
 import { PlayBoard, PlaySurface } from "@/features/play/PlaySurface";
 import { ballGlyph, sortHero } from "./card";
 import { ReplayPlayer } from "./ReplayPlayer";
@@ -126,17 +126,20 @@ export function SortRaceRoom({
       {playing && (() => {
         const me = r.me;
         return (
-          <PlayBoard ratio={TUBES_RATIO} min={0}>
-            {(width) => r.revealed ? (
-              <div className="card bg-board p-3 pt-1" style={{ width }}>
-                <Board tubes={me.tubes} cap={me.cap} selected={r.selected} refused={r.refused}
-                  width={width - 26} onPick={r.pick} disabled={!playing} />
-              </div>
+          // #41's .board: a white card taking the rest of the screen.
+          <TubesCard>
+            {r.revealed ? (
+              <PlayBoard ratio={TUBES_RATIO} min={0}>
+                {(width) => (
+                  <Board tubes={me.tubes} cap={me.cap} selected={r.selected} refused={r.refused}
+                    width={width} onPick={r.pick} disabled={!playing} />
+                )}
+              </PlayBoard>
             ) : (
-              <StartGate width={width} onGo={r.go}
+              <StartGate onGo={r.go}
                 note="Your tubes stay hidden until you start. Your clock runs from the moment they appear." />
             )}
-          </PlayBoard>
+          </TubesCard>
         );
       })()}
 
@@ -169,7 +172,7 @@ export function SortRaceRoom({
       {playing && (
         <div className="shrink-0 grid grid-cols-2 items-center gap-[9px]">
           <button onClick={r.takeBack} disabled={r.me.history.length === 0}
-            className="cut tap cut-board min-h-[44px] font-display text-[17px] disabled:opacity-50">
+            className="cut tap cut-board min-h-[42px] px-3 font-display text-[16px] disabled:opacity-50">
             Take back
           </button>
           <button onClick={() => void r.concede()}
@@ -181,7 +184,7 @@ export function SortRaceRoom({
 
       {r.won && (
         <>
-          {film && <div className="flex-1 min-h-0 overflow-y-auto"><ReplayPlayer replay={film} /></div>}
+          {film && <div className="flex-1 min-h-0 overflow-y-auto"><ReplayPlayer replay={film} premake /></div>}
           <BetweenGames onRematch={() => void r.rematch()} onQuit={() => void r.quit()} onChangeGame={() => void r.changeGame()} />
         </>
       )}
